@@ -1,0 +1,61 @@
+services:
+  mytb-db:
+    restart: always
+    image: ${DB_IMAGE}
+    #build: .
+    container_name: ${DB_CONTAINER_NAME}
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mytb-db-data:${DB_VOLUME_PATH}
+      # - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
+      #- ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mytb:
+    restart: always
+    image: "${MYTB_IMAGE}"
+    container_name: ${MYTB_CONTAINER_NAME}
+    depends_on:
+      mytb-db:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT_MAPPING}"
+      - "${MQTT_PORT_MAPPING}"
+      - "${EDGE_RPC_PORT_MAPPING}"
+      - "${UDP_TO_COAP_AND_LwM2M_PORTS_MAPPING}"
+    environment:
+      LOAD_DEMO: false
+      TB_QUEUE_TYPE: ${QUEUE_TYPE}
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:${DB_TYPE}://${DB_CONTAINER_NAME}:${DB_PORT}/${DB_NAME}
+    
+    volumes:
+      - mytb-data:${DATA_VOLUME_PATH}
+      - mytb-logs:${LOGS_VOLUME_PATH}
+      #- ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
+      
+  # tb-gw-mqtt-broker:
+  #   image: ${BROKER_IMAGE}
+  #   ports:
+  #     - "${BROKER_PORT}:${BROKER_PORT}"
+  #   depends_on:
+  #     mytb-db:
+  #       condition: service_healthy
+
+volumes:
+  mytb-data:
+    name: mytb-data
+  mytb-logs:
+    name: mytb-logs
+  mytb-db-data:
+    name: mytb-db-data
