@@ -1,0 +1,40 @@
+services:
+  # ThingsBoard IoT Gateway Service Configuration
+  tb-gateway:
+    image: ${GATEWAY_IMAGE}
+    container_name: ${GATEWAY_CONTAINER_NAME}
+    restart: always
+
+    # Ports bindings - required by some connectors
+    ports:
+        - "${REST_CONNECTOR_MAPPING}" # Comment if you don't use REST connector and change if you use another port
+        # Uncomment and modify the following ports based on connector usage:
+#        - "1052:1052" # BACnet connector
+#        - "5026:5026" # Modbus TCP connector (Modbus Slave)
+#        - "50000:50000/tcp" # Socket connector with type TCP
+#        - "50000:50000/udp" # Socket connector with type UDP
+
+    # Necessary mapping for Linux
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Environment variables
+    environment:
+      - host=${GATEWAY_HOST_ENV}
+      - port=${GATEWAY_PORT_ENV}
+      - accessToken=${GATEWAY_ACCESSTOKEN_ENV}
+
+    # Volumes bind
+    volumes:
+      - tb-gw-config:${GATEWAY_CONFIG_VOLUME_PATH}
+      - tb-gw-logs:${GATEWAY_LOGS_VOLUME_PATH}
+      - tb-gw-extensions:${GATEWAY_EXTENSIONS_VOLUME_PATH}
+
+# Volumes declaration for configurations, extensions and configuration
+volumes:
+  tb-gw-config:
+    name: tb-gw-config
+  tb-gw-logs:
+    name: tb-gw-logs
+  tb-gw-extensions:
+    name: tb-gw-extensions
