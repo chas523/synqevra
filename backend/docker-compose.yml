@@ -10,9 +10,9 @@ services:
     volumes:
       - mytb-db-data:${DB_VOLUME_PATH}
       # - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
-      #- ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
+      # - ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -28,10 +28,10 @@ services:
       mytb-db:
         condition: service_healthy
     ports:
-      - "${HTTP_PORT_MAPPING}"
-      - "${MQTT_PORT_MAPPING}"
-      - "${EDGE_RPC_PORT_MAPPING}"
-      - "${UDP_TO_COAP_AND_LwM2M_PORTS_MAPPING}"
+      - "8088:9090"
+      - "1883:1883"
+      - "7070:7070"
+      - "5683-5688:5683-5688/udp"
     environment:
       LOAD_DEMO: false
       TB_QUEUE_TYPE: ${QUEUE_TYPE}
@@ -43,6 +43,7 @@ services:
       - mytb-data:${DATA_VOLUME_PATH}
       - mytb-logs:${LOGS_VOLUME_PATH}
       #- ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
+      #- ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
       
   # tb-gw-mqtt-broker:
   #   image: ${BROKER_IMAGE}
