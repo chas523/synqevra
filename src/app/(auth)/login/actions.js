@@ -3,28 +3,36 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const DEMO_EMAIL = "admin@example.com";
-const DEMO_PASSWORD = "admin123";
-
-export async function login(formData) {
+export async function loginAction(formData) {
   const email = formData.get("email")?.trim();
   const password = formData.get("password")?.trim();
   const next = formData.get("next") || "/dashboard";
 
-  const valid = email === DEMO_EMAIL && password === DEMO_PASSWORD;
+  const response = await fetch(`https://demo.thingsboard.io/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: email,
+      password: password
+    }),
+  });
 
-  if (!valid) {
-    redirect(
-      `/login?error=${encodeURIComponent(
-        "Invalid email or password"
-      )}&next=${encodeURIComponent(next)}`
-    );
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Authentication failed");
   }
 
-  cookies().set("session", email, {
+  const { token } = await response.json();
+
+  console.log('token', token);
+
+  const cookieStore = await cookies();
+
+  cookieStore.set('session', token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
@@ -33,6 +41,7 @@ export async function login(formData) {
 }
 
 export async function logout() {
-  cookies().set("session", "", { path: "/", maxAge: 0 });
+  const cookieStore = await cookies();
+  cookieStore.set("session", "", { path: "/", maxAge: 0 });
   redirect("/login");
 }

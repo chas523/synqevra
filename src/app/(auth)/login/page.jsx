@@ -1,39 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const DEMO_EMAIL = "admin@example.com";
-const DEMO_PASSWORD = "admin123";
+import { loginAction} from "@/app/(auth)/login/actions";
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState(searchParams?.get("error") || "");
+  const [isLoading, setIsLoading] = useState(false);
   const next = searchParams?.get("next") || "/dashboard";
 
   async function login(event) {
     event.preventDefault();
+    setIsLoading(true);
+    setError("");
+
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email")?.trim();
-    const password = formData.get("password")?.trim();
 
-    const valid = email === DEMO_EMAIL && password === DEMO_PASSWORD;
+    try {
+      await loginAction(formData)
 
-    if (!valid) {
-      setError("Invalid email or password");
-      return;
+    } catch (error) {
+      setError("Login error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("username", email);
-    }
-
-    router.push(next);
   }
 
   return (
@@ -56,22 +51,28 @@ export default function LoginPage() {
                     type="email"
                     placeholder="you@example.com"
                     required
+                    disabled={isLoading}
                 />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required />
+                <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    disabled={isLoading}
+                />
               </div>
 
-              <Button type="submit" className="w-full cursor-pointer">
-                Login
+              <Button
+                  type="submit"
+                  className="w-full cursor-pointer"
+                  disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Login"}
               </Button>
-
-              <p className="text-xs text-muted-foreground text-center">
-                Demo: <span className="font-medium">admin@example.com</span> /{" "}
-                <span className="font-medium">admin123</span>
-              </p>
             </form>
           </CardContent>
         </Card>
