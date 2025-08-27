@@ -12,7 +12,7 @@ services:
       # - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
       # - ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
     ports:
-      - "5432:5432"
+      - "5434:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -38,13 +38,13 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_DATASOURCE_URL: jdbc:${DB_TYPE}://${DB_CONTAINER_NAME}:${DB_PORT}/${DB_NAME}
-    
+
     volumes:
       - mytb-data:${DATA_VOLUME_PATH}
       - mytb-logs:${LOGS_VOLUME_PATH}
       #- ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
       #- ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
-      
+
   # tb-gw-mqtt-broker:
   #   image: ${BROKER_IMAGE}
   #   ports:
