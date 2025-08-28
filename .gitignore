@@ -24,7 +24,13 @@ target/
 dist/
 
 # JetBrains IDE
+*.iml
+*.ipr
+*.iws
 .idea/
+
+# VS Code
+.vscode/
 
 # Unit test reports
 TEST*.xml
@@ -48,3 +54,6 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Next.js
+.next/
+out/
