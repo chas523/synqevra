@@ -4,7 +4,7 @@ import RowsTable from "@/components/table-rows";
 async function submitForm(data: FormData) {
   "use server";
 
-  const res = await fetch("http://localhost:3001/api/mqtt", {
+  const res = await fetch("http://localhost:3000/api/mqtt", {
     method: "POST",
     body: data,
   });
