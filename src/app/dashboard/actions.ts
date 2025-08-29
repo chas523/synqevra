@@ -2,12 +2,27 @@
 
 import { cookies } from "next/headers";
 
+interface UsageData {
+    [key: string]: any;
+}
+
+interface ErrorResponse {
+    message?: string;
+}
+
+interface FetchResult {
+    success: boolean;
+    data?: UsageData;
+    error?: string;
+}
+
+
 async function getAuthToken() {
     const cookieStore = await cookies();
     return cookieStore.get('session')?.value || null;
 }
 
-export async function fetchUsageData() {
+export async function fetchUsageData(): Promise<FetchResult> {
     try {
         const token = await getAuthToken();
 
@@ -15,7 +30,7 @@ export async function fetchUsageData() {
             throw new Error("Not authenticated");
         }
 
-        const response = await fetch("https://demo.thingsboard.io/api/usage", {
+        const response = await fetch(`${process.env.BASE_URL}/api/usage`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -28,14 +43,19 @@ export async function fetchUsageData() {
                 throw new Error("Authentication failed. Please login again.");
             }
 
-            const errorData = await response.json();
+            let errorData: ErrorResponse;
+            try {
+                errorData = await response.json() as ErrorResponse;
+            } catch {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data: UsageData = await response.json();
         return { success: true, data };
 
-    } catch (error) {
-        console.error("Failed to fetch usage data:", error);
+    } catch (err) {
+        console.error("Failed to fetch usage data:", err);
     }
 }

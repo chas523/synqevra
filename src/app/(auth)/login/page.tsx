@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { loginAction} from "@/app/(auth)/login/actions";
+import { loginAction } from "@/app/(auth)/login/actions";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
-  const [error, setError] = useState(searchParams?.get("error") || "");
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>(searchParams?.get("error") || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const next = searchParams?.get("next") || "/dashboard";
 
-  async function login(event) {
+  async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
     setError("");
@@ -22,8 +22,7 @@ export default function LoginPage() {
     const formData = new FormData(event.currentTarget);
 
     try {
-      await loginAction(formData)
-
+      await loginAction(formData);
     } catch (error) {
       setError("Login error. Please try again.");
     } finally {
