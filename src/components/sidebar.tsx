@@ -15,10 +15,10 @@ export const Sidebar = () => {
                         Dashboard
                     </Link>
                     <Link
-                        href='/alarms'
+                        href='/assets'
                         className='block px-4 py-2 rounded-lg text-primary-foreground font-medium transition-all duration-200 hover:opacity-90 hover:translate-x-1'
                     >
-                        Alarms
+                        Assets
                     </Link>
                     <Link
                         href='/medplum'

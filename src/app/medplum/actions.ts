@@ -26,7 +26,7 @@ async function getAuthToken(): Promise<string | null> {
     return cookieStore.get('session')?.value || null;
 }
 
-export const fetchDevices = async () => {
+export const fetchDevices = async (page: number = 0, pageSize: number = 10) => {
     try {
         const token = await getAuthToken()
         if (!token) throw new Error('Not authenticated');
@@ -36,7 +36,7 @@ export const fetchDevices = async () => {
             throw new Error("BASE_URL environment variable is not set");
         }
 
-        const response = await fetch(`${baseUrl}/api/deviceProfiles?pageSize=10&page=0`, {
+        const response = await fetch(`${baseUrl}/api/deviceProfiles?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -51,7 +51,6 @@ export const fetchDevices = async () => {
         }
 
         const data: DevicesResponse = await response.json();
-        // console.log('✅ Devices fetched:', JSON.stringify(data, null, 2));
 
         return { success: true, data };
     } catch (err) {
@@ -61,7 +60,7 @@ export const fetchDevices = async () => {
     }
 }
 
-export const fetchCustomers = async () => {
+export const fetchCustomers = async (page: number = 0, pageSize: number = 10) => {
     try {
         const token = await getAuthToken()
         if (!token) throw new Error('Not authenticated');
@@ -71,7 +70,7 @@ export const fetchCustomers = async () => {
             throw new Error("BASE_URL environment variable is not set");
         }
 
-        const response = await fetch(`${baseUrl}/api/customers?pageSize=10&page=0`, {
+        const response = await fetch(`${baseUrl}/api/customers?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

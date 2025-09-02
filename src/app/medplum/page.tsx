@@ -1,53 +1,165 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { fetchCustomers, fetchDevices } from "@/app/medplum/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Customer, Device, getPowerConsumptionInfo, getPressureInfo, getTemperatureInfo } from "@/lib/utils";
+import { Customer, Device } from "@/lib/utils";
+import { CustomerTable } from "@/app/medplum/components/customerTable";
+import { DeviceTable } from "@/app/medplum/components/deviceTable";
 
 type TabValue = "devices" | "customers";
 
 export default function MedplumPage() {
     const [loading, setLoading] = useState(false);
     const [devices, setDevices] = useState<Device[]>([]);
+    const [filteredDevices, setFilteredDevices] = useState<Device[]>([]);
+    const [devicesSearchQuery, setDevicesSearchQuery] = useState("");
+
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
+    const [customersSearchQuery, setCustomersSearchQuery] = useState("");
+
     const [activeTab, setActiveTab] = useState<TabValue>("devices");
+    const [sortConfig, setSortConfig] = useState({ key: '', direction: 'ascending' });
+
+    const [devicesPage, setDevicesPage] = useState(0);
+    const [devicesTotalPages, setDevicesTotalPages] = useState(1);
+    const [devicesTotalElements, setDevicesTotalElements] = useState(0);
+
+    const [customersPage, setCustomersPage] = useState(0);
+    const [customersTotalPages, setCustomersTotalPages] = useState(1);
+    const [customersTotalElements, setCustomersTotalElements] = useState(0);
+
+    const handleSort = (key: keyof Customer) => {
+        let direction: 'ascending' | 'descending' = 'ascending';
+
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+
+        setSortConfig({ key, direction });
+
+        const sortedCustomers = [...filteredCustomers].sort((a, b) => {
+            const aValue = a[key] || '';
+            const bValue = b[key] || '';
+
+            if (aValue < bValue) {
+                return direction === 'ascending' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        setFilteredCustomers(sortedCustomers);
+    };
+
+    const loadCustomers = async (page: number = 0) => {
+        try {
+            setLoading(true);
+            const result = await fetchCustomers(page);
+
+            if (result?.success) {
+                const customersData = result.data.data || [];
+                setCustomers(customersData);
+                setFilteredCustomers(customersData);
+                setCustomersTotalPages(result.data.totalPages || 1);
+                setCustomersTotalElements(result.data.totalElements || 0);
+                setCustomersPage(page);
+            }
+        } catch (err) {
+            console.error("Failed to load customers:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadDevices = async () => {
-            try {
-                setLoading(true);
-                const result = await fetchDevices();
+        if(!customersSearchQuery){
+            setFilteredCustomers(customers)
+            return
+        }
 
-                if (result?.success) setDevices(result.data.data || []);
+        const query = customersSearchQuery.toLowerCase();
+        const filtered = customers.filter(customer =>
+            (customer.name && customer.name.toLowerCase().includes(query)) ||
+            (customer.email && customer.email.toLowerCase().includes(query)) ||
+            (customer.country && customer.country.toLowerCase().includes(query)) ||
+            (customer.city && customer.city.toLowerCase().includes(query))
+        );
 
-            } catch (err) {
-                console.error("Failed to load devices:", err);
-            } finally {
-                setLoading(false);
+        setFilteredCustomers(filtered);
+    }, [customersSearchQuery, customers]);
+
+    useEffect(() => {
+        if(!devicesSearchQuery){
+            setFilteredDevices(devices)
+            return
+        }
+
+        const query = devicesSearchQuery.toLowerCase();
+        const filtered = devices.filter(device =>
+            (device.name && device.name.toLowerCase().includes(query)) ||
+            (device.type && device.type.toLowerCase().includes(query)) ||
+            (device.transportType && device.transportType.toLowerCase().includes(query))
+        );
+
+        setFilteredDevices(filtered);
+    }, [devicesSearchQuery, devices]);
+
+    const loadDevices = async (page: number = 0) => {
+        try {
+            setLoading(true);
+            const result = await fetchDevices(page);
+
+            if (result?.success) {
+                const devicesData = result.data.data || [];
+                setDevices(devicesData);
+                setFilteredDevices(devicesData);
+                setDevicesTotalPages(result.data.totalPages || 1);
+                setDevicesTotalElements(result.data.totalElements || 0);
+                setDevicesPage(page);
             }
-        };
-        loadDevices();
+
+        } catch (err) {
+            console.error("Failed to load devices:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadDevices(0);
     }, []);
 
     useEffect(() => {
-        const loadCustomers = async () => {
-            try {
-                setLoading(true);
-                const result = await fetchCustomers();
-
-                if (result?.success) setCustomers(result.data.data || []);
-
-            } catch (err) {
-                console.error("Failed to load customers:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadCustomers();
+        loadCustomers(0);
     }, []);
 
+    const handleDevicesPrevPage = () => {
+        if (devicesPage > 0) {
+            loadDevices(devicesPage - 1);
+        }
+    };
+
+    const handleDevicesNextPage = () => {
+        if (devicesPage < devicesTotalPages - 1) {
+            loadDevices(devicesPage + 1);
+        }
+    };
+
+    const handleCustomersPrevPage = () => {
+        if (customersPage > 0) {
+            loadCustomers(customersPage - 1);
+        }
+    };
+
+    const handleCustomersNextPage = () => {
+        if (customersPage < customersTotalPages - 1) {
+            loadCustomers(customersPage + 1);
+        }
+    };
 
     if (loading) {
         return (
@@ -75,95 +187,33 @@ export default function MedplumPage() {
                 </TabsList>
 
                 <TabsContent value="devices">
-                    <div className="mb-12">
-                        <h2 className="font-bold mb-6 text-xl">Devices Management</h2>
-
-                        {devices.length === 0 ? (
-                            <Card>
-                                <CardContent className="p-8 text-center">
-                                    <p className="text-gray-500 text-lg">No devices found.</p>
-                                    <p className="text-gray-400 mt-2">Add devices to get started</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <Card>
-                                <CardContent className="p-0">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                            <tr className="border-b bg-gray-50">
-                                                <th className="p-4 text-left font-semibold">Name</th>
-                                                <th className="p-4 text-left font-semibold">Type</th>
-                                                <th className="p-4 text-left font-semibold">Transport</th>
-                                                <th className="p-4 text-left font-semibold">Temperature</th>
-                                                <th className="p-4 text-left font-semibold">Pressure</th>
-                                                <th className="p-4 text-left font-semibold">Power Consumption</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {devices.map((device, index) => (
-                                                <tr key={device.id?.id || index} className="border-b hover:bg-gray-50">
-                                                    <td className="p-4">{device.name || "Unnamed Device"}</td>
-                                                    <td className="p-4">{device.type || "No type info"}</td>
-                                                    <td className="p-4">{device.transportType || "Unknown"}</td>
-                                                    <td className="p-4">{getTemperatureInfo(device)}</td>
-                                                    <td className="p-4">{getPressureInfo(device)}</td>
-                                                    <td className="p-4">{getPowerConsumptionInfo(device)}</td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                    <DeviceTable
+                        devices={devices}
+                        filteredDevices={filteredDevices}
+                        searchQuery={devicesSearchQuery}
+                        setSearchQuery={setDevicesSearchQuery}
+                        page={devicesPage}
+                        totalPages={devicesTotalPages}
+                        totalElements={devicesTotalElements}
+                        onPrevPage={handleDevicesPrevPage}
+                        onNextPage={handleDevicesNextPage}
+                    />
                 </TabsContent>
 
                 <TabsContent value="customers">
-                    <div>
-                        <h2 className="font-bold mb-6 text-xl">Customers Management</h2>
-
-                        {customers.length === 0 ? (
-                            <Card>
-                                <CardContent className="p-8 text-center">
-                                    <p className="text-gray-500 text-lg">No customers found.</p>
-                                    <p className="text-gray-400 mt-2">Add customers to get started</p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <Card>
-                                <CardContent className="p-0">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                            <tr className="border-b bg-gray-50">
-                                                <th className="p-4 text-left font-semibold">Name</th>
-                                                <th className="p-4 text-left font-semibold">Email</th>
-                                                <th className="p-4 text-left font-semibold">Country</th>
-                                                <th className="p-4 text-left font-semibold">City</th>
-                                                <th className="p-4 text-left font-semibold">Address</th>
-                                                <th className="p-4 text-left font-semibold">ID</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {customers.map((customer, index) => (
-                                                <tr key={customer.id?.id || index} className="border-b hover:bg-gray-50">
-                                                    <td className="p-4">{customer.name || "Not specified"}</td>
-                                                    <td className="p-4">{customer.email || "Not specified"}</td>
-                                                    <td className="p-4">{customer.country || "Not specified"}</td>
-                                                    <td className="p-4">{customer.city || "Not specified"}</td>
-                                                    <td className="p-4">{customer.address || "Not specified"}</td>
-                                                    <td className="p-4 text-sm text-gray-500">{customer.id?.id || "N/A"}</td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                    <CustomerTable
+                        customers={customers}
+                        filteredCustomers={filteredCustomers}
+                        searchQuery={customersSearchQuery}
+                        setSearchQuery={setCustomersSearchQuery}
+                        page={customersPage}
+                        totalPages={customersTotalPages}
+                        totalElements={customersTotalElements}
+                        onPrevPage={handleCustomersPrevPage}
+                        onNextPage={handleCustomersNextPage}
+                        onSort={handleSort}
+                        sortConfig={sortConfig}
+                    />
                 </TabsContent>
             </Tabs>
         </div>
