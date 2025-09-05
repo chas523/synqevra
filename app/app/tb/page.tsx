@@ -1,9 +1,6 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -35,7 +32,7 @@ export default function Tb() {
             <CardHeader>
               <CardTitle>Device</CardTitle>
               <CardDescription>
-                Create new device in ThingsBoard here
+                Create new device in ThingsBoard
               </CardDescription>
             </CardHeader>
             <DeviceForm />

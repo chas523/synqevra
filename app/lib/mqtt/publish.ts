@@ -22,7 +22,7 @@ export async function publishMqttOnce(
 
   const {
     topic = "data/",
-    qos = 1, // QoS 1 żeby mieć PUBACK zanim zamkniemy połączenie
+    qos = 1, // QoS 1 for PUBACK callback
     retain = false,
     username,
     password,
@@ -36,9 +36,8 @@ export async function publishMqttOnce(
     password,
     clientId,
     keepalive: 60,
-    reconnectPeriod: 0, // nie próbuj sam re-connect po end()
+    reconnectPeriod: 0,
     connectTimeout: connectTimeoutMs,
-    // protocolVersion: 4 // (MQTT 3.1.1) — domyślne w mqtt.js
   };
 
   const url = `${protocol}://${host}:${port}`;
@@ -50,7 +49,6 @@ export async function publishMqttOnce(
     const settle = (err?: unknown) => {
       if (settled) return;
       settled = true;
-      // NIE używamy force=true — pozwalamy dokończyć wysyłkę
       client.end(false, {}, () => {
         if (err) reject(err);
         else resolve({ rc: 0 });
@@ -62,7 +60,6 @@ export async function publishMqttOnce(
         typeof payload === "string" ? payload : JSON.stringify(payload);
       client.publish(topic, message, { qos, retain }, (err) => {
         if (err) return settle(err);
-        // przy QoS 1 callback wywoła się po PUBACK — dopiero teraz zamykamy
         settle();
       });
     };
@@ -74,7 +71,7 @@ export async function publishMqttOnce(
     client.once("connect", onConnect);
     client.once("error", onError);
 
-    // Awaryjny timeout na brak połączenia
+    // Handle no connection
     const t = setTimeout(() => {
       settle(new Error("MQTT connect timeout"));
     }, connectTimeoutMs);
