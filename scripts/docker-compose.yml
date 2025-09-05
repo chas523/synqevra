@@ -1,0 +1,20 @@
+services:
+    tb-client:
+      build: .
+      container_name: tb-client
+      command: tail -f /dev/null
+
+    tb-gw-mqtt-broker:
+      image: thingsboard/tb-gw-mqtt-broker:latest
+      ports:
+        - "1884:1884"
+    
+    # tb-gw-modbus:
+    #   image: thingsboard/tb-gw-modbus-server:latest
+    #   ports:
+    #     - "5021:5021"
+    
+    # tb-gw-opcua:
+    #   image: thingsboard/tb-gw-opcua-server:latest
+    #   ports:
+    #     - "4840:4840"
