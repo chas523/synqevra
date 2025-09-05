@@ -5,10 +5,21 @@ import { fetchUsageData } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import {BarChart3} from "lucide-react";
+import { BarChart3 } from "lucide-react";
+
+interface UsageData {
+    devices?: number;
+    maxDevices?: number;
+    users?: number;
+    maxUsers?: number;
+    assets?: number;
+    maxAssets?: number;
+    alarms?: number;
+    maxAlarms?: number;
+}
 
 export default function DashboardPage() {
-    const [usageData, setUsageData] = useState(null);
+    const [usageData, setUsageData] = useState<UsageData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -65,21 +76,25 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen p-6 bg-gray-50">
+        <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="flex items-center justify-between mb-8">
-                <div>
+                <div className="animate-fade-in">
                     <h1 className="text-3xl font-bold text-gray-900">Medical Monitoring Dashboard</h1>
                     <p className="text-gray-600">Connected to ThingsBoard Platform</p>
                 </div>
                 <form action={logout}>
-                    <Button type="submit" variant="outline" className='cursor-pointer'>
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        className='cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md'
+                    >
                         Logout
                     </Button>
                 </form>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <Card>
+                <Card className="transition-all duration-300 hover:scale-105 hover:shadow-lg animate-card-in">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Devices</CardTitle>
                     </CardHeader>
@@ -89,7 +104,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="transition-all duration-300 hover:scale-105 hover:shadow-lg animate-card-in" style={{ animationDelay: "0.1s" }}>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Users</CardTitle>
                     </CardHeader>
@@ -99,7 +114,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="transition-all duration-300 hover:scale-105 hover:shadow-lg animate-card-in" style={{ animationDelay: "0.2s" }}>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Assets</CardTitle>
                     </CardHeader>
@@ -109,7 +124,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="transition-all duration-300 hover:scale-105 hover:shadow-lg animate-card-in" style={{ animationDelay: "0.3s" }}>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Active Alarms</CardTitle>
                     </CardHeader>
@@ -121,28 +136,28 @@ export default function DashboardPage() {
             </div>
 
             <div className="mt-8 max-w-xl">
-                <Card>
+                <Card className="transition-all duration-300 hover:shadow-xl animate-fade-in">
                     <CardHeader className="flex flex-row items-center gap-2 pb-2">
-                        <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                        <BarChart3 className="h-5 w-5 text-muted-foreground transition-transform duration-300 hover:scale-125" />
                         <CardTitle>Usage</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-col gap-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200">
                                 <h2 className="font-medium">Device Usage</h2>
-                                <p>
+                                <p className="font-semibold">
                                     {usageData ? `${usageData.devices} / ${usageData.maxDevices}` : 0}
                                 </p>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200">
                                 <h2 className="font-medium">User Usage</h2>
-                                <p>
+                                <p className="font-semibold">
                                     {usageData ? `${usageData.users} / ${usageData.maxUsers}` : 0}
                                 </p>
                             </div>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-100 transition-colors duration-200">
                                 <h2 className="font-medium">Asset Usage</h2>
-                                <p>
+                                <p className="font-semibold">
                                     {usageData ? `${usageData.assets} / ${usageData.maxAssets}` : 0}
                                 </p>
                             </div>

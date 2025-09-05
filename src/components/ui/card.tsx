@@ -2,10 +2,14 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
 function Card({
   className,
   ...props
-}) {
+}: CardProps) {
   return (
     <div
       data-slot="card"
@@ -17,10 +21,14 @@ function Card({
   );
 }
 
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
 function CardHeader({
   className,
   ...props
-}) {
+}: CardHeaderProps) {
   return (
     <div
       data-slot="card-header"
@@ -32,10 +40,14 @@ function CardHeader({
   );
 }
 
+interface CardTitleProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
 function CardTitle({
   className,
   ...props
-}) {
+}: CardTitleProps) {
   return (
     <div
       data-slot="card-title"
@@ -71,10 +83,15 @@ function CardAction({
   );
 }
 
+interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  className?: string;
+}
+
+
 function CardContent({
   className,
   ...props
-}) {
+}: CardContentProps) {
   return (<div data-slot="card-content" className={cn("px-6", className)} {...props} />);
 }
 
