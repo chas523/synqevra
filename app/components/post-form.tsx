@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 async function submitForm(data: FormData) {
   "use server";
 
-  const res = await fetch(`${process.env.NEXT_URL}/api/mqtt`, {
+  const res = await fetch(`${process.env.NEXT_URL}/api/http`, {
     method: "POST",
     body: data,
   });
@@ -24,14 +24,14 @@ async function submitForm(data: FormData) {
   console.log(result);
 }
 
-export default function MqttForm() {
+export default function PostForm() {
   return (
     <div>
       <Form action={submitForm}>
         <Card>
           <CardHeader>
-            <CardTitle>MQTT</CardTitle>
-            <CardDescription>Send MQTT message to ThingsBoard</CardDescription>
+            <CardTitle>HTTP</CardTitle>
+            <CardDescription>Send HTTP message to ThingsBoard</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-6">
@@ -53,7 +53,18 @@ export default function MqttForm() {
                   className="form-control"
                   id="portID"
                   name="port"
-                  defaultValue="1884"
+                  defaultValue="8088"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="keyID">Device Key</Label>
+                <Input
+                  type="text"
+                  className="form-control"
+                  id="keyID"
+                  name="key"
+                  defaultValue={process.env.NEXT_PUBLIC_TB_KEY}
                   required
                 />
               </div>

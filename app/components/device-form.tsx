@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, FormEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ export default function DeviceForm() {
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
+
     try {
       const fd = new FormData(e.currentTarget);
       const res = await fetch("/api/thingsboard/device", {
@@ -48,7 +50,7 @@ export default function DeviceForm() {
               id="url"
               name="url"
               type="text"
-              defaultValue={process.env.TB_URL}
+              defaultValue={process.env.NEXT_PUBLIC_TB_URL}
               required
             />
           </div>
@@ -58,7 +60,7 @@ export default function DeviceForm() {
               id="username"
               name="username"
               type="email"
-              defaultValue={process.env.TB_MAIL}
+              defaultValue={process.env.NEXT_PUBLIC_TB_MAIL}
               required
             />
           </div>
@@ -90,7 +92,7 @@ export default function DeviceForm() {
               name="password"
               type="password"
               required
-              defaultValue={process.env.TB_PWD}
+              defaultValue={process.env.NEXT_PUBLIC_TB_PWD}
             />
           </div>
         </div>
