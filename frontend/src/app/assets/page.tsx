@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { AssetProfile, fetchAssets } from "@/app/assets/actions";
+import { AssetProfile, fetchAssets } from './actions';
+import { Card, CardContent } from '../../components/ui/card';
+
 
 export default function AssetsPage() {
     const [loading, setLoading] = useState<boolean>(false);

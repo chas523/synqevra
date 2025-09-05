@@ -1,7 +1,8 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { Customer, Device } from "@/lib/utils";
+import { Customer, Device } from "../../lib/utils";
+
 
 interface DevicesResponse {
     data: Device[];

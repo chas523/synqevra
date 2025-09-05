@@ -1,7 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { EntityId } from "@/lib/utils";
+import { EntityId } from "../../lib/utils";
 
 export interface AssetProfile {
     id?: EntityId;

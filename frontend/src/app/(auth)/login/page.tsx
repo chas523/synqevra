@@ -2,11 +2,12 @@
 
 import { useState, FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { loginAction } from "@/app/(auth)/login/actions";
+import { loginAction } from "./actions";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Label } from "../../../components/ui/label";
+import { Input } from "../../../components/ui/input";
+import { Button } from "../../../components/ui/button";
+
 
 export default function LoginPage() {
   const searchParams = useSearchParams();

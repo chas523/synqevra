@@ -1,14 +1,10 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "../../lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
 }
-function Input({
-  className,
-  type,
-  ...props
-}: InputProps) {
+function Input({ className, type, ...props }: InputProps) {
   return (
     <input
       type={type}
@@ -19,8 +15,9 @@ function Input({
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
-      {...props} />
+      {...props}
+    />
   );
 }
 
-export { Input }
+export { Input };
