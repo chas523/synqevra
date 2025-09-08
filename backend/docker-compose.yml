@@ -1,18 +1,14 @@
 services:
-  mytb-db:
+  tb-postgres:
     restart: always
-    image: ${DB_IMAGE}
-    #build: .
-    container_name: ${DB_CONTAINER_NAME}
+    image: "postgres:16"
+    ports:
+      - "5432"
     environment:
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DB: thingsboard
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - mytb-db-data:${DB_VOLUME_PATH}
-      # - ./backup.sql:/docker-entrypoint-initdb.d/backup.sql
-      # - ./update_sysadmin_email.sql:/docker-entrypoint-initdb.d/update_sysadmin_email.sql
-    ports:
-      - "5434:5432"
+      - tb-postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -20,28 +16,26 @@ services:
       retries: 5
       start_period: 30s
 
-  mytb:
+  thingsboard-ce:
     restart: always
-    image: "${MYTB_IMAGE}"
-    container_name: ${MYTB_CONTAINER_NAME}
+    image: "thingsboard/tb-node:4.2.0"
     depends_on:
-      mytb-db:
+      tb-postgres:
         condition: service_healthy
     ports:
-      - "8088:9090"
+      - "8088:8080"
       - "1883:1883"
       - "7070:7070"
-      - "5683-5688:5683-5688/udp"
+#      - "8883:8883"
+#      - "5683-5688:5683-5688/udp"
     environment:
-      LOAD_DEMO: false
-      TB_QUEUE_TYPE: ${QUEUE_TYPE}
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      TB_SERVICE_ID: tb-ce-node
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_DATASOURCE_URL: jdbc:${DB_TYPE}://${DB_CONTAINER_NAME}:${DB_PORT}/${DB_NAME}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://tb-postgres:5432/thingsboard
 
     volumes:
-      - mytb-data:${DATA_VOLUME_PATH}
-      - mytb-logs:${LOGS_VOLUME_PATH}
+      - tb-data:/data
+      - tb-logs:/var/log/thingsboard
 
   medplum-postgres:
     image: postgres:16
@@ -174,11 +168,11 @@ services:
       retries: 5
 
 volumes:
-  mytb-data:
-    name: mytb-data
-  mytb-logs:
-    name: mytb-logs
-  mytb-db-data:
-    name: mytb-db-data
+  tb-data:
+    name: tb-data
+  tb-logs:
+    name: tb-logs
+  tb-postgres-data:
+    name: tb-postgres-data
   medplum-postgres-data:
     name: medplum-postgres-data
