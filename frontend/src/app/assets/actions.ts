@@ -1,7 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { EntityId } from "../../lib/utils";
+import { EntityId } from "@/lib/utils";
 
 export interface AssetProfile {
     id?: EntityId;
@@ -25,7 +25,7 @@ async function getAuthToken(): Promise<string | null> {
     return cookieStore.get('session')?.value || null;
 }
 
-export const fetchAssets = async  () => {
+export const fetchAssets = async  (page: number = 0, pageSize: number = 10) => {
     try {
         const token = await getAuthToken();
         if (!token) throw new Error('Not authenticated');
@@ -33,7 +33,7 @@ export const fetchAssets = async  () => {
         const baseUrl = process.env.BASE_URL;
         if (!baseUrl) throw new Error('BASE_URL environment variable is not set');
 
-        const response = await fetch(`${baseUrl}/api/assetProfiles?pageSize=10&page=0`, {
+        const response = await fetch(`${baseUrl}/api/assetProfiles?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const fetchAssets = async  () => {
         }
 
         const data: AssetResponse = await response.json();
-        console.log('Asset response:', JSON.stringify(data, null, 2));
+        // console.log('Asset response:', JSON.stringify(data, null, 2));
         return { success: true, data };
 
     } catch (err) {

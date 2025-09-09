@@ -4,9 +4,9 @@
 import { useEffect, useState } from "react";
 import { BarChart3 } from "lucide-react";
 import { fetchUsageData } from "./actions";
-import { Button } from "../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { logout } from "../(auth)/login/actions";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface UsageData {
     devices?: number;

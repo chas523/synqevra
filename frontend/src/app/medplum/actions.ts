@@ -1,7 +1,7 @@
 "use server"
 
 import { cookies } from "next/headers";
-import { Customer, Device } from "../../lib/utils";
+import { Customer, Device } from "@/lib/utils";
 
 
 interface DevicesResponse {
@@ -52,7 +52,7 @@ export const fetchDevices = async (page: number = 0, pageSize: number = 10) => {
         }
 
         const data: DevicesResponse = await response.json();
-
+        // console.log('Devices fetched:', JSON.stringify(data, null, 2));
         return { success: true, data };
     } catch (err) {
         console.error("Failed to fetch devices:", err);
@@ -86,7 +86,7 @@ export const fetchCustomers = async (page: number = 0, pageSize: number = 10) =>
         }
 
         const data: CustomersResponse = await response.json();
-        // console.log('✅ Customers fetched:', JSON.stringify(data, null, 2));
+        // console.log('Customers fetched:', JSON.stringify(data, null, 2));
         return { success: true, data };
     } catch (err) {
         console.error("Failed to fetch customers:", err);
