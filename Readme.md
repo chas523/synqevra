@@ -3,16 +3,31 @@ Implementation of ThingsBoard on docker containers.
 ## Setup
 ### 1. Setting up backend
 Navigate to `fpl_thingsboard/backend` folder  
+For initial running, you **have to** use command  
+`docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=true thingsboard-ce`  
+or    
+`docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=false thingsboard-ce`  
+if you don't want demo data.  
 Run `docker compose up` command and wait till initial configuration is complete  
 Check your ip address using `ipconfig` command (Windows)  
-In browser go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`)  
+In browser go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine  
 Log in as sysadmin@thingsboard.org and change your password (default: sysadmin)  
 You can create or modify other users and their roles. We will use tenant account with Tenant Admin role  
-Log in as tenant@thingsboard.org and change your password (default: tenant)  
+If you loaded demo data, then you can log in as tenant@thingsboard.org and change your password (default: tenant)  
+If you didn't load demo data, create new tenant by navigating to Tenants > `+` in top right corner > add name "Tenant" > 
+Manage tenant admins > `+` in top right corner > add email "tenant@thingsboard.org" and follow the link to set password  
 Go to Dashboard > ThingsBoard IoT Gateways and add new Gateway  (`+` in top right corner)
 You don't have to download generated file, just press settings on newly created gateway and copy `Access Token`
 
-### 2. Setting up gateway
+### 2. Setting up medplum
+Make sure that docker is running. Navigate to `http://localhost:3001/` in your browser.  
+Log in as admin. Default credentials are:
+- Email: `admin@example.com`
+- Password: `medplum_admin`  
+
+You can then create new user here: `http://localhost:3001/User/new`
+
+### 3. Setting up gateway
 Navigate to `fpl_thingsboard/gateway` folder  
 Edit `.env` file and change `GATEWAY_ACCESSTOKEN_ENV` variable to the value copied before in backend (`Access Token`)  
 Run `docker compose up` command and wait till initial configuration is complete  
@@ -22,7 +37,7 @@ Go back and click on Connectors configuration and add new connector (ex. Type: M
 Use Advanced configuration for created connector, go to General section and enable remote logging (make sure to set same log level as in General Configuration)  
 Now go to Configuration section and copy content of `fpl_thingsboard/gateway/default-connector-config.json` file and paste it here  
 
-### 3. Scripts to test configuration
+### 4. Scripts to test configuration
 Navigate to `fpl_thingsboard/scripts` folder  
 If you want to use: 
 1. MQTT  
