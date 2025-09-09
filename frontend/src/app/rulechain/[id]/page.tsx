@@ -34,11 +34,11 @@ const RuleChainDetailsPage = () => {
   const [editing, setEditing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Basic form states
+  //basic form states
   const [basicName, setBasicName] = useState<string>("");
   const [basicDebugMode, setBasicDebugMode] = useState<boolean>(false);
 
-  // Advanced form state
+  //advanced form state
   const [metadataJson, setMetadataJson] = useState<string>("");
 
   useEffect(() => {
@@ -52,7 +52,6 @@ const RuleChainDetailsPage = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch basic rule chain data
       const ruleChainResult = await fetchRuleChainById(ruleChainId);
       if (!ruleChainResult.success) {
         setError(ruleChainResult.error || "Failed to load rule chain");
@@ -63,13 +62,18 @@ const RuleChainDetailsPage = () => {
       setBasicName(ruleChainResult.data.name);
       setBasicDebugMode(ruleChainResult.data.debugMode);
 
-      // Fetch metadata
       const metadataResult = await fetchRuleChainMetadata(ruleChainId);
       if (!metadataResult.success) {
         setError(metadataResult.error || "Failed to load rule chain metadata");
         toast.error("Failed to load rule chain metadata");
         return;
       }
+
+      console.log("loadRuleChainData - Metadata loaded:", {
+        nodesCount: metadataResult.data.nodes.length,
+        firstNodeIndex: metadataResult.data.firstNodeIndex,
+        connectionsCount: metadataResult.data.connections?.length || 0,
+      });
 
       setMetadata(metadataResult.data);
       setMetadataJson(JSON.stringify(metadataResult.data, null, 2));
@@ -92,17 +96,27 @@ const RuleChainDetailsPage = () => {
       setEditing(true);
       setError(null);
 
+      //prepare firstRuleNodeId if there are nodes in metadata
+      const firstRuleNodeId =
+        metadata?.nodes?.length > 0 &&
+        metadata.firstNodeIndex !== null &&
+        metadata.firstNodeIndex >= 0 &&
+        metadata.firstNodeIndex < metadata.nodes.length
+          ? metadata.nodes[metadata.firstNodeIndex].id
+          : undefined;
+
       const updateData = {
         id: ruleChain.id,
         name: basicName,
         debugMode: basicDebugMode,
         additionalInfo: ruleChain.additionalInfo,
+        ...(firstRuleNodeId && { firstRuleNodeId }),
       };
 
       const result = await updateRuleChain(ruleChainId, updateData);
       if (result.success) {
         setRuleChain(result.data);
-        // Reload data to ensure consistency
+        //reload data
         await loadRuleChainData();
         toast.success("Rule chain updated successfully");
       } else {
@@ -125,14 +139,13 @@ const RuleChainDetailsPage = () => {
       setEditing(true);
       setError(null);
 
-      // Parse JSON input
       const parsedMetadata: RuleChainMetadata = JSON.parse(metadataJson);
 
       const result = await updateRuleChainMetadata(parsedMetadata);
       if (result.success) {
         setMetadata(result.data);
         setMetadataJson(JSON.stringify(result.data, null, 2));
-        // Reload basic data as well in case it changed
+        //reload basic data as well in case it changed
         await loadRuleChainData();
         toast.success("Rule chain metadata updated successfully");
       } else {
@@ -159,11 +172,38 @@ const RuleChainDetailsPage = () => {
       setEditing(true);
       setError(null);
 
+      console.log("handleUpdateMetadata - Input metadata:", {
+        nodesCount: updatedMetadata.nodes.length,
+        firstNodeIndex: updatedMetadata.firstNodeIndex,
+        connectionsCount: updatedMetadata.connections.length,
+      });
+
       const result = await updateRuleChainMetadata(updatedMetadata);
       if (result.success) {
-        setMetadata(result.data);
-        setMetadataJson(JSON.stringify(result.data, null, 2));
-        // Reload basic data as well in case it changed
+        console.log("handleUpdateMetadata - API response success:", {
+          responseNodesCount: result.data.nodes.length,
+          responseFirstNodeIndex: result.data.firstNodeIndex,
+        });
+
+        // Validate and fix result data if needed
+        const validatedData = {
+          ...result.data,
+          firstNodeIndex:
+            result.data.nodes.length > 0
+              ? Math.max(
+                  0,
+                  Math.min(
+                    result.data.firstNodeIndex || 0,
+                    result.data.nodes.length - 1
+                  )
+                )
+              : null, // null gdy nie ma węzłów
+        };
+
+        setMetadata(validatedData);
+        setMetadataJson(JSON.stringify(validatedData, null, 2));
+
+        //reload basic data as well in case it changed
         await loadRuleChainData();
         toast.success("Rule chain metadata updated via flow editor");
       } else {

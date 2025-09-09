@@ -9,7 +9,8 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { Label } from "../../../components/ui/label";
-import { FlowNode } from "./NodeTypes";
+import { X, Plus } from "lucide-react";
+import { FlowNode } from "../types/NodeTypes";
 
 interface NodeConfigurationEditorProps {
   node: FlowNode;
@@ -99,7 +100,7 @@ export const NodeConfigurationEditor = ({
     }
 
     if (typeof value === "string") {
-      // Multi-line fields (JavaScript code)
+      //multi-line fields (JavaScript code)
       if (key.includes("Script") || key.includes("script")) {
         return (
           <div key={fieldKey} className="space-y-2">
@@ -121,7 +122,7 @@ export const NodeConfigurationEditor = ({
         );
       }
 
-      // Single-line fields
+      //single-line fields
       return (
         <div key={fieldKey} className="space-y-2">
           <Label htmlFor={fieldKey}>{key}</Label>
@@ -142,6 +143,24 @@ export const NodeConfigurationEditor = ({
     }
 
     if (typeof value === "object" && value !== null) {
+      //special handling for headers
+      if (key === "headers") {
+        return (
+          <HeadersEditor
+            key={fieldKey}
+            headers={value}
+            onChange={(updatedHeaders) => {
+              if (parentKey) {
+                handleNestedConfigChange(parentKey, key, updatedHeaders);
+              } else {
+                handleConfigChange(key, updatedHeaders);
+              }
+            }}
+          />
+        );
+      }
+
+      //regular object handling
       return (
         <div
           key={fieldKey}
@@ -194,5 +213,102 @@ export const NodeConfigurationEditor = ({
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+//component for managing headers as key-value pairs
+const HeadersEditor = ({
+  headers,
+  onChange,
+}: {
+  headers: any;
+  onChange: (headers: any) => void;
+}) => {
+  const [newHeaderKey, setNewHeaderKey] = useState("");
+  const [newHeaderValue, setNewHeaderValue] = useState("");
+
+  const headerEntries = Object.entries(headers || {});
+
+  const addHeader = () => {
+    if (newHeaderKey.trim() && newHeaderValue.trim()) {
+      const updatedHeaders = {
+        ...headers,
+        [newHeaderKey.trim()]: newHeaderValue.trim(),
+      };
+      onChange(updatedHeaders);
+      setNewHeaderKey("");
+      setNewHeaderValue("");
+    }
+  };
+
+  const removeHeader = (key: string) => {
+    const updatedHeaders = { ...headers };
+    delete updatedHeaders[key];
+    onChange(updatedHeaders);
+  };
+
+  const updateHeader = (oldKey: string, newKey: string, value: string) => {
+    const updatedHeaders = { ...headers };
+    if (oldKey !== newKey) {
+      delete updatedHeaders[oldKey];
+    }
+    updatedHeaders[newKey] = value;
+    onChange(updatedHeaders);
+  };
+
+  return (
+    <div className="space-y-4 border-l-4 border-blue-200 pl-4">
+      <h4 className="font-medium text-gray-700">Headers</h4>
+
+      {/* Existing headers */}
+      {headerEntries.map(([key, value]) => (
+        <div key={key} className="flex space-x-2 items-center">
+          <Input
+            value={key}
+            onChange={(e) => updateHeader(key, e.target.value, value as string)}
+            placeholder="Header name"
+            className="flex-1"
+          />
+          <Input
+            value={value as string}
+            onChange={(e) => updateHeader(key, key, e.target.value)}
+            placeholder="Header value"
+            className="flex-1"
+          />
+          <Button
+            onClick={() => removeHeader(key)}
+            variant="outline"
+            size="sm"
+            className="text-red-600 hover:text-red-800"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      ))}
+
+      {/* Add new header */}
+      <div className="flex space-x-2 items-center pt-2 border-t">
+        <Input
+          value={newHeaderKey}
+          onChange={(e) => setNewHeaderKey(e.target.value)}
+          placeholder="Header name (e.g., Authorization)"
+          className="flex-1"
+        />
+        <Input
+          value={newHeaderValue}
+          onChange={(e) => setNewHeaderValue(e.target.value)}
+          placeholder="Header value (e.g., Bearer token)"
+          className="flex-1"
+        />
+        <Button
+          onClick={addHeader}
+          variant="outline"
+          size="sm"
+          disabled={!newHeaderKey.trim() || !newHeaderValue.trim()}
+        >
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
   );
 };

@@ -17,7 +17,7 @@ import {
   getConnectionsBetweenNodes,
   addConnectionType,
   removeConnectionType,
-} from "./NodeTypes";
+} from "../types/NodeTypes";
 import { NodeConfigurationEditor } from "./NodeConfigurationEditor";
 
 interface FlowChartEditorProps {
@@ -39,7 +39,7 @@ export const FlowChartEditor = ({
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Generate temporary ID for new nodes
+  //generate temporary ID for new nodes
   const generateTempId = () =>
     `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -55,11 +55,11 @@ export const FlowChartEditor = ({
 
       setNodes((prev) => [...prev, newNode]);
 
-      // Auto-connect to previous node if exists (only between actual nodes, not from Input)
+      //auto-connect to previous node if exists (only between actual nodes, not from Input)
       if (nodes.length > 0) {
         const newConnection: FlowConnection = {
-          fromIndex: nodes.length - 1, // Previous node index
-          toIndex: nodes.length, // New node index
+          fromIndex: nodes.length - 1, //previous node index
+          toIndex: nodes.length, //new node index
           type: "Success",
         };
         setConnections((prev) => [...prev, newConnection]);
@@ -92,10 +92,10 @@ export const FlowChartEditor = ({
       const nodeIndex = nodes.findIndex((n) => n.id === nodeId);
       if (nodeIndex === -1) return;
 
-      // Remove node
+      //remove node
       setNodes((prev) => prev.filter((n) => n.id !== nodeId));
 
-      // Remove connections involving this node and update indices
+      //rmove connections involving this node and update indices
       setConnections((prev) => {
         return prev
           .filter(
@@ -158,7 +158,6 @@ export const FlowChartEditor = ({
   };
 
   const handleCancel = () => {
-    // Reset state to initial values
     setNodes(initialNodes);
     setConnections(initialConnections);
     setSelectedNode(null);
@@ -239,20 +238,13 @@ export const FlowChartEditor = ({
 
                 {/* Flow Nodes */}
                 {nodes.map((node, index) => {
-                  // Find ALL connections coming INTO this node from ANY other node
+                  //find all connections coming into this node from any other node
                   const incomingConnections = connections.filter(
                     (conn) => conn.toIndex === index
                   );
 
-                  // First connection (from Input) should not have connection types
+                  //first connection (from Input) should not have connection types
                   const isFirstConnection = index === 0;
-
-                  // Debug log for connections
-                  console.log(`Node ${index} (${node.name}):`, {
-                    incomingConnections,
-                    allConnections: connections,
-                    isFirstConnection,
-                  });
 
                   return (
                     <div key={node.id} className="flex items-center space-x-4">
@@ -264,7 +256,7 @@ export const FlowChartEditor = ({
                         {!isFirstConnection && (
                           <div className="flex flex-wrap gap-1 max-w-[120px]">
                             {CONNECTION_TYPES.map((type) => {
-                              // Check if ANY incoming connection has this type
+                              //check if any incoming connection has this type
                               const isActive = incomingConnections.some(
                                 (conn) => conn.type === type
                               );
@@ -272,7 +264,7 @@ export const FlowChartEditor = ({
                                 <button
                                   key={type}
                                   onClick={() => {
-                                    // For simplicity, toggle connection from previous node
+                                    //for simplicity, toggle connection from previous node
                                     const fromIndex = index - 1;
                                     toggleConnectionType(
                                       fromIndex,
@@ -345,7 +337,7 @@ export const FlowChartEditor = ({
 
       {/* Configuration Editor Modal */}
       {selectedNode && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <NodeConfigurationEditor
             node={selectedNode}
             onSave={updateNode}

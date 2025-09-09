@@ -35,8 +35,8 @@ export interface RuleChainConnection {
 export interface RuleChainMetadata {
   ruleChainId: EntityId;
   version: number;
-  firstNodeIndex: number;
-  nodes: RuleNode[];
+  firstNodeIndex: number | null; // Może być null gdy nie ma węzłów
+  nodes: any[]; //change to any to handle 'load default' rulechain (without id)
   connections: RuleChainConnection[];
   ruleChainConnections: any;
 }
@@ -56,6 +56,7 @@ export interface UpdateRuleChainRequest {
   name: string;
   debugMode: boolean;
   additionalInfo?: any;
+  firstRuleNodeId?: EntityId;
 }
 
 interface ErrorResponse {
@@ -191,13 +192,28 @@ export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
     const baseUrl = process.env.BASE_URL;
     if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
 
+    // Validate and fix firstNodeIndex if needed
+    const validatedMetadata = {
+      ...metadata,
+      firstNodeIndex: metadata.nodes.length > 0 
+        ? Math.max(0, Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1))
+        : null // null gdy nie ma węzłów
+    };
+    
+    console.log("updateRuleChainMetadata - Sending to API:", {
+      originalFirstNodeIndex: metadata.firstNodeIndex,
+      nodesLength: metadata.nodes.length,
+      validatedFirstNodeIndex: validatedMetadata.firstNodeIndex,
+      payload: JSON.stringify(validatedMetadata, null, 2)
+    });
+
     const response = await fetch(`${baseUrl}/api/ruleChain/metadata`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(metadata),
+      body: JSON.stringify(validatedMetadata),
     });
 
     if (!response.ok) {

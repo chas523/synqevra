@@ -57,14 +57,13 @@ const RuleChainEditor = () => {
       setCreating(true);
       setError(null);
 
-      // Parse JSON input
+      //parse JSON input
       const ruleChainData: CreateRuleChainRequest = JSON.parse(jsonInput);
 
       const result = await createRuleChain(ruleChainData);
       if (result.success) {
-        // Reload rule chains after successful creation
+        //reload rule chains after successful creation
         await loadRuleChains();
-        // Reset form to default
         setJsonInput(`{
         "name": "New RuleChain",
         "type": "CORE",
