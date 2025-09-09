@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Customer, Device } from "../../lib/utils";
+import { Customer, Device } from "@/lib/utils";
 import { fetchCustomers, fetchDevices } from "./actions";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../components/ui/tabs";
-import { DeviceTable } from "./components/deviceTable";
-import { CustomerTable } from "./components/customerTable";
+} from "@/components/ui/tabs";
+import { DeviceTable } from "./components/device/deviceTable";
+import { CustomerTable } from "./components/customer/customerTable";
 
 type TabValue = "devices" | "customers";
 

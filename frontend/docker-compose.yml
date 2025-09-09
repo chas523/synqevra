@@ -1,43 +1,5 @@
 services:
-  tb-postgres:
-    restart: always
-    image: "postgres:16"
-    ports:
-      - "5432"
-    environment:
-      POSTGRES_DB: thingsboard
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - tb-postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  thingsboard-ce:
-    restart: always
-    image: "thingsboard/tb-node:4.2.0"
-    depends_on:
-      tb-postgres:
-        condition: service_healthy
-    ports:
-      - "8088:8080"
-      - "1883:1883"
-      - "7070:7070"
-#      - "8883:8883"
-#      - "5683-5688:5683-5688/udp"
-    environment:
-      TB_SERVICE_ID: tb-ce-node
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://tb-postgres:5432/thingsboard
-
-    volumes:
-      - tb-data:/data
-      - tb-logs:/var/log/thingsboard
-
-  medplum-postgres:
+  postgres:
     image: postgres:16
     restart: always
     environment:
@@ -45,7 +7,6 @@ services:
       - POSTGRES_PASSWORD=medplum
       - POSTGRES_DB=medplum
     command:
-      # We use command line args instead of a postgres.conf to avoid additional setup out of the box
       - "postgres"
       - "-c"
       - "listen_addresses=*"
@@ -53,25 +14,22 @@ services:
       - "statement_timeout=60000"
       - "-c"
       - "default_transaction_isolation=REPEATABLE READ"
-# Uncomment the following lines to expose Medplum Postgres outside of Docker (not recommended for production)
-#    ports:
-#      - "5432:5432"
-    volumes:
-      - medplum-postgres-data:/var/lib/postgresql/data
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements,auto_explain"
+    ports:
+      - "5432:5432"  # -----------------------------------------------------------
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U medplum" ]
+      test: ["CMD-SHELL", "pg_isready -U medplum"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
 
-  medplum-redis:
+  redis:
     image: redis:7
     restart: always
     command: redis-server --requirepass medplum
-# Uncomment the following lines to expose Redis outside of Docker (not recommended for production)
-#    ports:
-#      - "6379:6379"
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "medplum", "ping"]
       interval: 10s
@@ -82,14 +40,13 @@ services:
     image: medplum/medplum-server:latest
     restart: always
     depends_on:
-      medplum-postgres:
+      postgres:
         condition: service_healthy
-      medplum-redis:
+      redis:
         condition: service_healthy
     ports:
       - "8103:8103"
     volumes:
-      # Conditionally define a volume for a `medplum.config.json` if one is specified by the MEDPLUM_CONFIG_PATH env var
       - ${MEDPLUM_CONFIG_PATH:-./medplum.config.json}:/usr/src/medplum/packages/server/medplum.config.json
     entrypoint: >
       sh -c "
@@ -104,17 +61,16 @@ services:
     environment:
       MEDPLUM_PORT: 8103
       MEDPLUM_BASE_URL: "http://localhost:8103/"
+      MEDPLUM_APP_BASE_URL: "http://localhost:3000/" #-----------------------------------
       MEDPLUM_STORAGE_BASE_URL: "http://localhost:8103/storage/"
-      # Remove the following line once we have a proper frontend build
-      MEDPLUM_APP_BASE_URL: "http://localhost:3001/"
 
-      MEDPLUM_DATABASE_HOST: "medplum-postgres"
+      MEDPLUM_DATABASE_HOST: "postgres"
       MEDPLUM_DATABASE_PORT: 5432
       MEDPLUM_DATABASE_DBNAME: "medplum"
       MEDPLUM_DATABASE_USERNAME: "medplum"
       MEDPLUM_DATABASE_PASSWORD: "medplum"
 
-      MEDPLUM_REDIS_HOST: "medplum-redis"
+      MEDPLUM_REDIS_HOST: "redis"
       MEDPLUM_REDIS_PORT: 6379
       MEDPLUM_REDIS_PASSWORD: "medplum"
 
@@ -140,19 +96,16 @@ services:
 
     healthcheck:
       test:
-        # We use Node's fetch for healthcheck because this image doesn't have a curl or wget installed
         [
           "CMD",
           "node",
           "-e",
           'fetch("http://localhost:8103/healthcheck").then(r => r.json()).then(console.log).catch(() => { process.exit(1); })',
         ]
-      interval: 60s
-      timeout: 15s
+      interval: 30s
+      timeout: 10s
       retries: 5
-      start_period: 180s
 
-  # Will be removed once we have a proper frontend build
   medplum-app:
     image: medplum/medplum-app:latest
     restart: always
@@ -160,7 +113,10 @@ services:
       medplum-server:
         condition: service_healthy
     ports:
-      - "3001:3000"
+      - "3000:3000"  # ------------------------------
+    environment:
+      MEDPLUM_SERVER_BASE_URL: "http://medplum-server:8103"
+      MEDPLUM_APP_BASE_URL: "http://localhost:3000"  # -----------------------------
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 10s
@@ -168,11 +124,5 @@ services:
       retries: 5
 
 volumes:
-  tb-data:
-    name: tb-data
-  tb-logs:
-    name: tb-logs
-  tb-postgres-data:
-    name: tb-postgres-data
-  medplum-postgres-data:
-    name: medplum-postgres-data
+  postgres_data:
+  redis_data:
