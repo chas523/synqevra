@@ -7,7 +7,7 @@ export interface EntityId {
 }
 
 export interface Device {
-  id?: EntityId;
+  id?: { id?: string; resourceType?: string };
   name?: string;
   type?: string;
   transportType?: string;
