@@ -1,4 +1,4 @@
-// Default RuleChain template for medical data processing
+//default RuleChain template for medical data processing
 export const defaultRuleChainTemplate = {
   version: 1,
   firstNodeIndex: 0,
@@ -39,8 +39,57 @@ export const defaultRuleChainTemplate = {
       configurationVersion: 0,
       configuration: {
         scriptLang: "JS",
-        jsScript:
-          'var value = Number(msg.temperature);\n\nvar observation = {\n    resourceType: "Observation",\n    status: "final",\n    code: {\n        text: "Body temperature"\n    },\n    valueQuantity: {\n        value: value,\n        unit: "°C",\n        system: "http://unitsofmeasure.org",\n        code: "Cel"\n    }\n};\n\nreturn {\n    msg: observation,\n    metadata: metadata,\n    msgType: msgType\n};',
+        jsScript: `
+          var value = Number(msg.temperature);
+
+          var observation = {
+            resourceType: "Observation",
+            status: "final",
+            category: [
+              {
+                coding: [
+                  {
+                    system: "http://terminology.hl7.org/CodeSystem/observation-category",
+                    code: "vital-signs",
+                    display: "Vital Signs"
+                  }
+                ]
+              }
+            ],
+            code: {
+              coding: [
+                {
+                  system: "http://loinc.org",
+                  code: "8310-5",
+                  display: "Body temperature"
+                }
+              ],
+              text: "Body Temperature"
+            },
+            subject: {
+              reference: "Patient/9a7abe18-d6e4-4335-b636-6af8533b7367",
+              display: "homer"
+            },
+            effectiveDateTime: "2011-11-11T13:12:12",
+            note: [
+              {
+                text: "aaa note"
+              }
+            ],
+            valueQuantity: {
+              value: value,
+              unit: "°C",
+              system: "http://unitsofmeasure.org",
+              code: "Cel"
+            }
+          };
+
+          return {
+            msg: observation,
+            metadata: metadata,
+            msgType: msgType
+          };
+          `,
         tbelScript: "return {msg: msg, metadata: metadata, msgType: msgType};",
       },
       externalId: null,
@@ -63,7 +112,7 @@ export const defaultRuleChainTemplate = {
       configurationVersion: 3,
       configuration: {
         restEndpointUrlPattern:
-          "https://api.example.com/endpointhttp://host.docker.internal:8103/fhir/R4/Patient/34235d7e-71e8-4dff-bb4c-67f2020101e1",
+          "http://host.docker.internal:8103/fhir/R4/Patient/34235d7e-71e8-4dff-bb4c-67f2020101e1",
         requestMethod: "POST",
         useSimpleClientHttpFactory: false,
         parseToPlainText: false,

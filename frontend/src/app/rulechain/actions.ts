@@ -83,7 +83,6 @@ export const createRuleChain = async (
     const baseUrl = process.env.BASE_URL;
     if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
 
-    // 1. Utwórz nowy RuleChain
     const response = await fetch(`${baseUrl}/api/ruleChain`, {
       method: "POST",
       headers: {
@@ -105,7 +104,6 @@ export const createRuleChain = async (
 
     const newRuleChain: RuleChain = await response.json();
 
-    // 2. Znajdź root RuleChain
     const allRuleChainsResponse = await fetch(
       `${baseUrl}/api/ruleChains?pageSize=999&page=0`,
       {
@@ -130,7 +128,6 @@ export const createRuleChain = async (
       return { success: true, data: newRuleChain };
     }
 
-    // 3. Pobierz metadane root RuleChain
     const rootMetadataResponse = await fetch(
       `${baseUrl}/api/ruleChain/${rootRuleChain.id.id}/metadata`,
       {
@@ -140,17 +137,13 @@ export const createRuleChain = async (
         },
       }
     );
-    // console.log(
-    //   "Root RuleChain Metadata Response:",
-    //   rootMetadataResponse.json()
-    // );
+
     if (!rootMetadataResponse.ok) {
       throw new Error("Failed to fetch root rule chain metadata");
     }
 
     const rootMetadata = await rootMetadataResponse.json();
 
-    // 4. Przygotuj nowy węzeł reprezentujący nowo utworzony RuleChain
     const newNodeIndex = rootMetadata.nodes.length;
     const newNode = {
       createdTime: Date.now(),
@@ -172,19 +165,17 @@ export const createRuleChain = async (
       externalId: null,
       additionalInfo: {
         description: "",
-        layoutX: 200 + newNodeIndex * 200, // Rozmieść węzły horyzontalnie
+        layoutX: 200 + newNodeIndex * 200,
         layoutY: 300,
       },
     };
 
-    // 5. Dodaj nowe połączenie (z węzła 0 do nowego węzła)
     const newConnection = {
       fromIndex: 0,
       toIndex: newNodeIndex,
       type: "Success",
     };
 
-    // 6. Zaktualizuj metadane root RuleChain
     const updatedRootMetadata = {
       ...rootMetadata,
       nodes: [...rootMetadata.nodes, newNode],
