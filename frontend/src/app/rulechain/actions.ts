@@ -83,6 +83,7 @@ export const createRuleChain = async (
     const baseUrl = process.env.BASE_URL;
     if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
 
+    // 1. Utwórz nowy RuleChain
     const response = await fetch(`${baseUrl}/api/ruleChain`, {
       method: "POST",
       headers: {
@@ -91,7 +92,7 @@ export const createRuleChain = async (
       },
       body: JSON.stringify(ruleChainData),
     });
-
+    console.log("created");
     if (!response.ok) {
       if (response.status === 401)
         throw new Error("Authentication failed. Please login again.");
@@ -102,8 +103,111 @@ export const createRuleChain = async (
       );
     }
 
-    const data: RuleChain = await response.json();
-    return { success: true, data };
+    const newRuleChain: RuleChain = await response.json();
+
+    // 2. Znajdź root RuleChain
+    const allRuleChainsResponse = await fetch(
+      `${baseUrl}/api/ruleChains?pageSize=999&page=0`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!allRuleChainsResponse.ok) {
+      throw new Error("Failed to fetch all rule chains");
+    }
+
+    const allRuleChains = await allRuleChainsResponse.json();
+    const rootRuleChain = allRuleChains.data.find(
+      (rc: any) => rc.root === true
+    );
+    console.log("Root RuleChain:", rootRuleChain);
+    if (!rootRuleChain) {
+      console.warn("No root rule chain found, skipping node addition");
+      return { success: true, data: newRuleChain };
+    }
+
+    // 3. Pobierz metadane root RuleChain
+    const rootMetadataResponse = await fetch(
+      `${baseUrl}/api/ruleChain/${rootRuleChain.id.id}/metadata`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    // console.log(
+    //   "Root RuleChain Metadata Response:",
+    //   rootMetadataResponse.json()
+    // );
+    if (!rootMetadataResponse.ok) {
+      throw new Error("Failed to fetch root rule chain metadata");
+    }
+
+    const rootMetadata = await rootMetadataResponse.json();
+
+    // 4. Przygotuj nowy węzeł reprezentujący nowo utworzony RuleChain
+    const newNodeIndex = rootMetadata.nodes.length;
+    const newNode = {
+      createdTime: Date.now(),
+      ruleChainId: rootRuleChain.id,
+      type: "org.thingsboard.rule.engine.flow.TbRuleChainInputNode",
+      name: newRuleChain.name,
+      debugSettings: {
+        failuresEnabled: false,
+        allEnabled: false,
+        allEnabledUntil: 0,
+      },
+      singletonMode: false,
+      queueName: null,
+      configurationVersion: 0,
+      configuration: {
+        forwardMsgToDefaultRuleChain: false,
+        ruleChainId: newRuleChain.id.id,
+      },
+      externalId: null,
+      additionalInfo: {
+        description: "",
+        layoutX: 200 + newNodeIndex * 200, // Rozmieść węzły horyzontalnie
+        layoutY: 300,
+      },
+    };
+
+    // 5. Dodaj nowe połączenie (z węzła 0 do nowego węzła)
+    const newConnection = {
+      fromIndex: 0,
+      toIndex: newNodeIndex,
+      type: "Success",
+    };
+
+    // 6. Zaktualizuj metadane root RuleChain
+    const updatedRootMetadata = {
+      ...rootMetadata,
+      nodes: [...rootMetadata.nodes, newNode],
+      connections: [...rootMetadata.connections, newConnection],
+      version: rootMetadata.version,
+    };
+    console.log("Updated Root Metadata:", updatedRootMetadata);
+    const updateResponse = await fetch(`${baseUrl}/api/ruleChain/metadata`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedRootMetadata),
+    });
+
+    if (!updateResponse.ok) {
+      console.error(
+        "Failed to update root rule chain metadata, but new rule chain was created"
+      );
+    }
+
+    return { success: true, data: newRuleChain };
   } catch (error) {
     console.error("Error creating rule chain:", error);
     return {
