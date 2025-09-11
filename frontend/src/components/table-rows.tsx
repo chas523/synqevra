@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import {useState} from "react";
+import {Input} from "@/components/ui/input";
 
 export default function RowsTable() {
   const [rows, setRows] = useState<number[]>([1]);
@@ -15,8 +15,8 @@ export default function RowsTable() {
       <table className="table" id="userDataTable">
         <thead>
           <tr>
-            <th style={{ width: "50%" }}>Data</th>
-            <th style={{ width: "50%" }}>Value</th>
+            <th >Data</th>
+            <th >Value</th>
             <th style={{ width: 80 }}></th>
           </tr>
         </thead>

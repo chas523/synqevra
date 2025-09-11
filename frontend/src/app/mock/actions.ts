@@ -1,14 +1,13 @@
 "use server"
 
 import {cookies} from "next/headers";
-import mqtt, {IClientOptions} from "mqtt";
-import {redirect} from "next/navigation";
+import mqtt, {IClientOptions, MqttClient} from "mqtt";
 
 interface ErrorResponse {
     message?: string;
 }
 
-export interface Device{
+export interface Device {
     id: { id: string; entityType: string };
     tenantId?: { id: string; entityType: string };
     name: string;
@@ -54,11 +53,11 @@ export const fetchDevices = async (page: number = 0, pageSize: number = 10) => {
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
         const data: DevicesResponse = await response.json();
-        return { success: true, data };
+        return {success: true, data};
     } catch (err) {
         console.error("Failed to fetch devices:", err);
         const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-        return { success: false, error: errorMessage };
+        return {success: false, error: errorMessage};
     }
 }
 
@@ -86,11 +85,11 @@ const getDeviceToken = async (deviceId: string) => {
         }
 
         const data: DeviceKey = await response.json();
-        return { success: true, data };
-    }catch (err) {
+        return {success: true, data};
+    } catch (err) {
         console.error("Failed to fetch devices:", err);
         const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-        return { success: false, error: errorMessage };
+        return {success: false, error: errorMessage};
     }
 }
 
@@ -113,11 +112,11 @@ const publishHttp = async (deviceKey: string, payload: any) => {
             const errorData: ErrorResponse = await response.json();
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-        return { success: true };
-    }catch (err) {
+        return {success: true};
+    } catch (err) {
         console.error("Failed to fetch devices:", err);
         const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
-        return { success: false, error: errorMessage };
+        return {success: false, error: errorMessage};
     }
 }
 
@@ -133,7 +132,7 @@ const DEFAULTS = {
     clientId: process.env.MQTT_CLIENT_ID || undefined,
 };
 
-export const publishMqtt = async (payload: any): Promise<{ rc: 0 }> => {
+const publishMqtt = async (payload: any): Promise<void> => {
     const {
         brokerUrl,
         topic,
@@ -152,28 +151,27 @@ export const publishMqtt = async (payload: any): Promise<{ rc: 0 }> => {
         keepalive,
         reconnectPeriod: 0,
         connectTimeout: connectTimeoutMs,
-        ...(username && { username }),
-        ...(password && { password }),
-        ...(clientId && { clientId }),
+        ...(username && {username}),
+        ...(password && {password}),
+        ...(clientId && {clientId}),
     };
 
-    return new Promise<{ rc: 0 }>((resolve, reject) => {
-        const client = mqtt.connect(brokerUrl, options);
+    return new Promise<void>((resolve, reject) => {
+        const client: MqttClient = mqtt.connect(brokerUrl, options);
 
         let settled = false;
         const settle = (err?: unknown) => {
             if (settled) return;
             settled = true;
             client.end(false, {}, () => {
-                if (err) reject(err);
-                else resolve({ rc: 0 });
-            });
+                err ? reject(err) : resolve();
+            })
         };
 
         const onConnect = () => {
             const message =
                 typeof payload === "string" ? payload : JSON.stringify(payload);
-            client.publish(topic, message, { qos, retain }, (err) => {
+            client.publish(topic, message, {qos, retain}, (err) => {
                 if (err) return settle(err);
                 settle();
             });
@@ -220,5 +218,20 @@ export async function submitPost(formData: FormData): Promise<void> {
 
     } catch (error) {
         console.error("Failed to fetch devices:", error);
+    }
+}
+
+export async function submitMqtt(formData: FormData): Promise<void> {
+    try {
+        const dataList = formData.getAll("data[]").map((v) => String(v));
+        const valueList = formData.getAll("value[]").map((v) => String(v));
+
+        const message = Object.fromEntries(
+            dataList.map((d, i) => [d.toLowerCase(), String(valueList[i] ?? "")]),
+        );
+
+        await publishMqtt(message);
+    } catch (error) {
+        console.error("Failed to publish MQTT message:", error);
     }
 }

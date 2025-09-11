@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import PostForm from "@/components/post-form";
 import MqttForm from "@/components/mqtt-form";
 import {useEffect, useState} from "react";
@@ -42,22 +42,25 @@ export default function MockClient() {
     }
 
     return (
-        <main>
-            <div className="flex w-full max-w-sm flex-col gap-6">
+        <div className="min-h-screen p-6 bg-gray-50">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    Mock Data
+                </h1>
+                <p className="text-gray-600">Mock telemetry data for ThingsBoard devices</p>
+            </div>
                 <Tabs defaultValue="post">
                     <TabsList>
                         <TabsTrigger value="mqtt">MQTT</TabsTrigger>
                         <TabsTrigger value="post">POST</TabsTrigger>
                     </TabsList>
                     <TabsContent value="mqtt">
-                        {/*<MqttForm/>*/}
-                        <p>asd</p>
+                        <MqttForm/>
                     </TabsContent>
                     <TabsContent value="post">
                         <PostForm devices={devices}/>
                     </TabsContent>
                 </Tabs>
-            </div>
-        </main>
+        </div>
     );
 }
