@@ -1,75 +1,62 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { EntityId } from "../../lib/utils";
+import {
+  RuleChainResponse,
+  CreateRuleChainRequest,
+  RuleChain,
+} from "./types/RuleChainTypes";
+import { createApiResponse, createErrorResponse } from "./utils";
 
-export interface RuleChain {
-  id?: EntityId;
-  name?: string;
-  type?: string;
-  debugMode?: boolean;
-  createdTime?: number;
-  additionalInfo?: any;
-}
-
-export interface RuleChainResponse {
-  data: RuleChain[];
-  totalPages: number;
-  totalElements: number;
-  hasNext: boolean;
-}
-
-export interface CreateRuleChainRequest {
-  name: string;
-  type: string;
-  debugMode: boolean;
-}
-
-interface ErrorResponse {
-  message?: string;
-}
-
-async function getAuthToken(): Promise<string | null> {
+// Helper function for ThingsBoard API requests in server actions
+async function thingsboardApiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
   const cookieStore = await cookies();
-  return cookieStore.get("session")?.value || null;
+  const token = cookieStore.get("session")?.value;
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const baseUrl = process.env.BASE_URL;
+  if (!baseUrl) {
+    throw new Error("BASE_URL environment variable is not set");
+  }
+
+  const response = await fetch(`${baseUrl}${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP error! status: ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      // If we can't parse JSON, use the default message
+    }
+    throw new Error(errorMessage);
+  }
+
+  return await response.json();
 }
 
 export const fetchRuleChains = async () => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    const response = await fetch(
-      `${baseUrl}/api/ruleChains?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+    const data = await thingsboardApiRequest<RuleChainResponse>(
+      "/api/ruleChains?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC"
     );
-
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const data: RuleChainResponse = await response.json();
-    return { success: true, data };
+    return createApiResponse(data);
   } catch (error) {
     console.error("Error fetching rule chains:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };
 
@@ -77,72 +64,35 @@ export const createRuleChain = async (
   ruleChainData: CreateRuleChainRequest
 ) => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    const response = await fetch(`${baseUrl}/api/ruleChain`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(ruleChainData),
-    });
-    console.log("created");
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const newRuleChain: RuleChain = await response.json();
-
-    const allRuleChainsResponse = await fetch(
-      `${baseUrl}/api/ruleChains?pageSize=999&page=0`,
+    const newRuleChain = await thingsboardApiRequest<RuleChain>(
+      "/api/ruleChain",
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        method: "POST",
+        body: JSON.stringify(ruleChainData),
       }
     );
 
-    if (!allRuleChainsResponse.ok) {
-      throw new Error("Failed to fetch all rule chains");
-    }
+    console.log("created");
 
-    const allRuleChains = await allRuleChainsResponse.json();
+    // Fetch all rule chains to find the root one
+    const allRuleChains = await thingsboardApiRequest<RuleChainResponse>(
+      "/api/ruleChains?pageSize=999&page=0"
+    );
+
     const rootRuleChain = allRuleChains.data.find(
       (rc: any) => rc.root === true
     );
     console.log("Root RuleChain:", rootRuleChain);
+
     if (!rootRuleChain) {
       console.warn("No root rule chain found, skipping node addition");
-      return { success: true, data: newRuleChain };
+      return createApiResponse(newRuleChain);
     }
 
-    const rootMetadataResponse = await fetch(
-      `${baseUrl}/api/ruleChain/${rootRuleChain.id.id}/metadata`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+    // Fetch root metadata and add new node
+    const rootMetadata = await thingsboardApiRequest<any>(
+      `/api/ruleChain/${rootRuleChain.id.id}/metadata`
     );
-
-    if (!rootMetadataResponse.ok) {
-      throw new Error("Failed to fetch root rule chain metadata");
-    }
-
-    const rootMetadata = await rootMetadataResponse.json();
 
     const newNodeIndex = rootMetadata.nodes.length;
     const newNode = {
@@ -182,28 +132,23 @@ export const createRuleChain = async (
       connections: [...rootMetadata.connections, newConnection],
       version: rootMetadata.version,
     };
-    console.log("Updated Root Metadata:", updatedRootMetadata);
-    const updateResponse = await fetch(`${baseUrl}/api/ruleChain/metadata`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedRootMetadata),
-    });
 
-    if (!updateResponse.ok) {
+    console.log("Updated Root Metadata:", updatedRootMetadata);
+
+    try {
+      await thingsboardApiRequest("/api/ruleChain/metadata", {
+        method: "POST",
+        body: JSON.stringify(updatedRootMetadata),
+      });
+    } catch (error) {
       console.error(
         "Failed to update root rule chain metadata, but new rule chain was created"
       );
     }
 
-    return { success: true, data: newRuleChain };
+    return createApiResponse(newRuleChain);
   } catch (error) {
     console.error("Error creating rule chain:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };

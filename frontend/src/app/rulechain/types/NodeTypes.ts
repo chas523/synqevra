@@ -85,25 +85,9 @@ export const NODE_TYPES: NodeTemplate[] = [
       proxyPassword: null,
       readTimeoutMs: null,
       maxParallelRequestsCount: null,
-      headers: (() => {
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
-        if (typeof window !== "undefined") {
-          try {
-            const auth = localStorage.getItem("activeLogin");
-            if (auth) {
-              const parsed = JSON.parse(auth);
-              if (parsed.accessToken) {
-                headers["Authorization"] = `Bearer ${parsed.accessToken}`;
-              }
-            }
-          } catch (e) {
-            //ignore JSON parse errors
-          }
-        }
-        return headers;
-      })(),
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: {
         type: "anonymous",
       },

@@ -4,10 +4,16 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { toast } from "sonner";
-import { RuleNode, RuleChainMetadata } from "../[id]/actions";
 import { FlowChartEditor } from "./FlowChartEditor";
 import { FlowNode, FlowConnection } from "../types/NodeTypes";
-import { defaultRuleChainTemplate } from "./defaultRuleChainTemplate";
+import { getDefaultRuleChainTemplate } from "./defaultRuleChainTemplate";
+import {
+  convertToFlowNodes,
+  convertToFlowConnections,
+  convertFromFlowNodes,
+  createUpdatedMetadata,
+} from "../utils";
+import { RuleNode, RuleChainMetadata } from "../types/RuleChainTypes";
 
 interface NodesListProps {
   nodes: RuleNode[];
@@ -22,97 +28,28 @@ export const NodesList = ({
 }: NodesListProps) => {
   const [metadataVersion, setMetadataVersion] = useState(metadata.version);
 
-  //convert RuleChain nodes to Flow nodes
-  const convertToFlowNodes = (ruleNodes: RuleNode[]): FlowNode[] => {
-    return ruleNodes.map((node, index) => ({
-      id: node.id.id,
-      type: node.type,
-      name: node.name,
-      configuration: node.configuration,
-      position: index,
-    }));
-  };
-
-  //convert RuleChain connections to Flow connections
-  const convertToFlowConnections = (connections: any[]): FlowConnection[] => {
-    return connections.map((conn) => ({
-      fromIndex: conn.fromIndex,
-      toIndex: conn.toIndex,
-      type: conn.type,
-    }));
-  };
-
-  //convert Flow nodes back to RuleChain format
-  const convertFromFlowNodes = (flowNodes: FlowNode[]): any[] => {
-    return flowNodes.map((node, index) => {
-      const baseNode = {
-        createdTime: Date.now(), //will be set by backend
-        ruleChainId: metadata.ruleChainId,
-        type: node.type,
-        name: node.name,
-        debugSettings: {
-          failuresEnabled: false,
-          allEnabled: false,
-          allEnabledUntil: 0,
-        },
-        singletonMode: false,
-        queueName: "Main",
-        configurationVersion: 0,
-        configuration: node.configuration,
-        externalId: null,
-        additionalInfo: {
-          description: null,
-          layoutX: index * 200 + 100,
-          layoutY: 200,
-        },
-      };
-
-      //only include id for existing nodes (not temporary ones)
-      if (!node.id.startsWith("temp_")) {
-        return {
-          ...baseNode,
-          id: { entityType: "RULE_NODE", id: node.id },
-        };
-      }
-
-      return baseNode;
-    });
-  };
-
   const handleSave = async (
     flowNodes: FlowNode[],
     flowConnections: FlowConnection[]
   ) => {
     try {
-      const updatedNodes = convertFromFlowNodes(flowNodes);
-
-      const updatedConnections = flowConnections.map((conn) => ({
-        fromIndex: conn.fromIndex,
-        toIndex: conn.toIndex,
-        type: conn.type,
-      }));
-
-      //set firstNodeIndex to 0 if there are nodes, otherwise null
-      const firstNodeIndex = updatedNodes.length > 0 ? 0 : null;
-
-      //validate connections when no nodes exist
-      const validConnections =
-        updatedNodes.length > 0 ? updatedConnections : [];
-
-      const updatedMetadata: RuleChainMetadata = {
-        ...metadata,
-        nodes: updatedNodes,
-        connections: validConnections,
-        firstNodeIndex, //always set to first node
-        version: metadataVersion, //use the version from state
-      };
+      const updatedNodes = convertFromFlowNodes(
+        flowNodes,
+        metadata.ruleChainId
+      );
+      const updatedMetadata = createUpdatedMetadata(
+        metadata,
+        updatedNodes,
+        flowConnections,
+        metadataVersion
+      );
 
       await onUpdateMetadata(updatedMetadata);
       toast.success("Rule chain metadata updated successfully");
     } catch (error) {
       toast.error("Failed to update rule chain metadata");
       console.error("Error updating metadata:", error);
-      throw error; //re-throw to be handled by FlowChartEditor
+      throw error;
     }
   };
 
@@ -122,15 +59,13 @@ export const NodesList = ({
 
   const handleLoadDefaultTemplate = async () => {
     try {
-      //create metadata with default template
-      const defaultMetadata: RuleChainMetadata = {
-        ...metadata,
-        nodes: defaultRuleChainTemplate.nodes as any[], //api is gonna generate IDs
-        connections: defaultRuleChainTemplate.connections,
-        firstNodeIndex: defaultRuleChainTemplate.firstNodeIndex,
-        version: metadataVersion,
-      };
-      console.log(defaultMetadata);
+      const template = getDefaultRuleChainTemplate();
+      const defaultMetadata = createUpdatedMetadata(
+        metadata,
+        template.nodes as any[],
+        template.connections as FlowConnection[],
+        metadataVersion
+      );
 
       await onUpdateMetadata(defaultMetadata);
       setMetadataVersion(metadataVersion + 1);
