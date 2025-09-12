@@ -1,9 +1,14 @@
 "use client";
 
-import {useState} from "react";
-import {Input} from "@/components/ui/input";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export default function RowsTable() {
+interface RowsTableProps {
+  required?: boolean;
+}
+
+export default function RowsTable({ required = true }: RowsTableProps) {
   const [rows, setRows] = useState<number[]>([1]);
 
   const addRow = () => {
@@ -15,8 +20,8 @@ export default function RowsTable() {
       <table className="table" id="userDataTable">
         <thead>
           <tr>
-            <th >Data</th>
-            <th >Value</th>
+            <th>Data Topic</th>
+            <th>Value</th>
             <th style={{ width: 80 }}></th>
           </tr>
         </thead>
@@ -24,21 +29,29 @@ export default function RowsTable() {
           {rows.map((id) => (
             <tr key={id}>
               <td>
-                <Input type="text" className="w-full" name="data[]" required />
+                <Input
+                  type="text"
+                  className="w-full"
+                  name="data[]"
+                  required={required}
+                />
               </td>
               <td>
-                <Input type="text" className="w-full" name="value[]" required />
+                <Input
+                  type="text"
+                  className="w-full"
+                  name="value[]"
+                  required={required}
+                />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      <div className="d-flex flex-row-reverse">
-        <button type="button" className="btn btn-primary" onClick={addRow}>
-          +
-        </button>
-      </div>
+      <Button type="button" className="btn btn-primary" onClick={addRow}>
+        +
+      </Button>
+      <div className="d-flex flex-row-reverse"></div>
     </div>
   );
 }
