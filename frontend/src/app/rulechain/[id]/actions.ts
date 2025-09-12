@@ -2,144 +2,74 @@
 
 import { cookies } from "next/headers";
 import { EntityId } from "../../../lib/utils";
+import {
+  RuleChainDetails,
+  RuleChainMetadata,
+  UpdateRuleChainRequest,
+} from "../types/RuleChainTypes";
+import { createApiResponse, createErrorResponse } from "../utils";
 
-export interface RuleNode {
-  id: EntityId;
-  createdTime: number;
-  ruleChainId: EntityId;
-  type: string;
-  name: string;
-  debugSettings: {
-    failuresEnabled: boolean;
-    allEnabled: boolean;
-    allEnabledUntil: number;
-  };
-  singletonMode: boolean;
-  queueName: string | null;
-  configurationVersion: number;
-  configuration: any;
-  externalId: string | null;
-  additionalInfo: {
-    description: string | null;
-    layoutX: number;
-    layoutY: number;
-  };
-}
-
-export interface RuleChainConnection {
-  fromIndex: number;
-  toIndex: number;
-  type: string;
-}
-
-export interface RuleChainMetadata {
-  ruleChainId: EntityId;
-  version: number;
-  firstNodeIndex: number | null; // Może być null gdy nie ma węzłów
-  nodes: any[]; //change to any to handle 'load default' rulechain (without id)
-  connections: RuleChainConnection[];
-  ruleChainConnections: any;
-}
-
-export interface RuleChainDetails {
-  id: EntityId;
-  name: string;
-  type: string;
-  debugMode: boolean;
-  createdTime: number;
-  additionalInfo?: any;
-  firstRuleNodeId?: EntityId;
-  root?: boolean;
-}
-
-export interface UpdateRuleChainRequest {
-  name: string;
-  debugMode: boolean;
-  additionalInfo?: any;
-  firstRuleNodeId?: EntityId;
-}
-
-interface ErrorResponse {
-  message?: string;
-}
-
-async function getAuthToken(): Promise<string | null> {
+// Helper function for ThingsBoard API requests in server actions
+async function thingsboardApiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
   const cookieStore = await cookies();
-  return cookieStore.get("session")?.value || null;
+  const token = cookieStore.get("session")?.value;
+
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+
+  const baseUrl = process.env.BASE_URL;
+  if (!baseUrl) {
+    throw new Error("BASE_URL environment variable is not set");
+  }
+
+  const response = await fetch(`${baseUrl}${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `HTTP error! status: ${response.status}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      // If we can't parse JSON, use the default message
+    }
+    throw new Error(errorMessage);
+  }
+
+  return await response.json();
 }
 
 export const fetchRuleChainById = async (ruleChainId: string) => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    const response = await fetch(`${baseUrl}/api/ruleChain/${ruleChainId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const data: RuleChainDetails = await response.json();
-    return { success: true, data };
+    const data = await thingsboardApiRequest<RuleChainDetails>(
+      `/api/ruleChain/${ruleChainId}`
+    );
+    return createApiResponse(data);
   } catch (error) {
     console.error("Error fetching rule chain:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };
 
 export const fetchRuleChainMetadata = async (ruleChainId: string) => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    const response = await fetch(
-      `${baseUrl}/api/ruleChain/${ruleChainId}/metadata`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
+    const data = await thingsboardApiRequest<RuleChainMetadata>(
+      `/api/ruleChain/${ruleChainId}/metadata`
     );
-
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const data: RuleChainMetadata = await response.json();
-    return { success: true, data };
+    return createApiResponse(data);
   } catch (error) {
     console.error("Error fetching rule chain metadata:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };
 
@@ -148,51 +78,22 @@ export const updateRuleChain = async (
   updateData: UpdateRuleChainRequest & { id: EntityId }
 ) => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    const response = await fetch(`${baseUrl}/api/ruleChain`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updateData),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const data: RuleChainDetails = await response.json();
-    return { success: true, data };
+    const data = await thingsboardApiRequest<RuleChainDetails>(
+      "/api/ruleChain",
+      {
+        method: "POST",
+        body: JSON.stringify(updateData),
+      }
+    );
+    return createApiResponse(data);
   } catch (error) {
     console.error("Error updating rule chain:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };
 
 export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
   try {
-    const token = await getAuthToken();
-    if (!token) throw new Error("Not authenticated");
-
-    const baseUrl = process.env.BASE_URL;
-    if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
-
-    //validate and fix firstNodeIndex if needed
     const validatedMetadata = {
       ...metadata,
       firstNodeIndex:
@@ -201,35 +102,19 @@ export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
               0,
               Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1)
             )
-          : null, // null gdy nie ma węzłów
+          : null,
     };
 
-    const response = await fetch(`${baseUrl}/api/ruleChain/metadata`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(validatedMetadata),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401)
-        throw new Error("Authentication failed. Please login again.");
-
-      const errorData: ErrorResponse = await response.json();
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    const data: RuleChainMetadata = await response.json();
-    return { success: true, data };
+    const data = await thingsboardApiRequest<RuleChainMetadata>(
+      "/api/ruleChain/metadata",
+      {
+        method: "POST",
+        body: JSON.stringify(validatedMetadata),
+      }
+    );
+    return createApiResponse(data);
   } catch (error) {
     console.error("Error updating rule chain metadata:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred",
-    };
+    return createErrorResponse(error);
   }
 };
