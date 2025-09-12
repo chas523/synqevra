@@ -95,8 +95,9 @@ export const NodesList = ({
       //set firstNodeIndex to 0 if there are nodes, otherwise null
       const firstNodeIndex = updatedNodes.length > 0 ? 0 : null;
 
-      // Validate connections when no nodes exist
-      const validConnections = updatedNodes.length > 0 ? updatedConnections : [];
+      //validate connections when no nodes exist
+      const validConnections =
+        updatedNodes.length > 0 ? updatedConnections : [];
 
       const updatedMetadata: RuleChainMetadata = {
         ...metadata,

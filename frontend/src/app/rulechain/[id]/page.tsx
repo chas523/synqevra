@@ -69,12 +69,6 @@ const RuleChainDetailsPage = () => {
         return;
       }
 
-      console.log("loadRuleChainData - Metadata loaded:", {
-        nodesCount: metadataResult.data.nodes.length,
-        firstNodeIndex: metadataResult.data.firstNodeIndex,
-        connectionsCount: metadataResult.data.connections?.length || 0,
-      });
-
       setMetadata(metadataResult.data);
       setMetadataJson(JSON.stringify(metadataResult.data, null, 2));
 
@@ -98,12 +92,7 @@ const RuleChainDetailsPage = () => {
 
       //prepare firstRuleNodeId if there are nodes in metadata
       const firstRuleNodeId =
-        metadata?.nodes?.length > 0 &&
-        metadata.firstNodeIndex !== null &&
-        metadata.firstNodeIndex >= 0 &&
-        metadata.firstNodeIndex < metadata.nodes.length
-          ? metadata.nodes[metadata.firstNodeIndex].id
-          : undefined;
+        metadata?.nodes?.length > 0 ? metadata.nodes[0].id : undefined;
 
       const updateData = {
         id: ruleChain.id,
@@ -171,13 +160,7 @@ const RuleChainDetailsPage = () => {
     try {
       setEditing(true);
       setError(null);
-
-      console.log("handleUpdateMetadata - Input metadata:", {
-        nodesCount: updatedMetadata.nodes.length,
-        firstNodeIndex: updatedMetadata.firstNodeIndex,
-        connectionsCount: updatedMetadata.connections.length,
-      });
-
+      console.log(updatedMetadata);
       const result = await updateRuleChainMetadata(updatedMetadata);
       if (result.success) {
         console.log("handleUpdateMetadata - API response success:", {
@@ -185,7 +168,7 @@ const RuleChainDetailsPage = () => {
           responseFirstNodeIndex: result.data.firstNodeIndex,
         });
 
-        // Validate and fix result data if needed
+        //validate and fix result data if needed
         const validatedData = {
           ...result.data,
           firstNodeIndex:

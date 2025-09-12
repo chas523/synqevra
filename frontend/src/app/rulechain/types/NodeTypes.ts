@@ -1,4 +1,4 @@
-// Types for different node configurations
+//types for different node configurations
 export interface JsFilterConfiguration {
   scriptLang: "JS";
   jsScript: string;
@@ -39,7 +39,7 @@ export interface LogConfiguration {
   tbelScript: string;
 }
 
-// Node type definitions
+//node type definitions
 export interface NodeTemplate {
   type: string;
   name: string;
@@ -52,7 +52,7 @@ export interface NodeTemplate {
     | LogConfiguration;
 }
 
-// Available node types
+//available node types
 export const NODE_TYPES: NodeTemplate[] = [
   {
     type: "org.thingsboard.rule.engine.filter.TbJsFilterNode",
@@ -85,9 +85,25 @@ export const NODE_TYPES: NodeTemplate[] = [
       proxyPassword: null,
       readTimeoutMs: null,
       maxParallelRequestsCount: null,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: (() => {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+        if (typeof window !== "undefined") {
+          try {
+            const auth = localStorage.getItem("activeLogin");
+            if (auth) {
+              const parsed = JSON.parse(auth);
+              if (parsed.accessToken) {
+                headers["Authorization"] = `Bearer ${parsed.accessToken}`;
+              }
+            }
+          } catch (e) {
+            //ignore JSON parse errors
+          }
+        }
+        return headers;
+      })(),
       credentials: {
         type: "anonymous",
       },
@@ -101,7 +117,57 @@ export const NODE_TYPES: NodeTemplate[] = [
     description: "Transform message using JavaScript",
     defaultConfiguration: {
       scriptLang: "JS",
-      jsScript: "return {msg: msg, metadata: metadata, msgType: msgType};",
+      jsScript: `
+var value = Number(msg.temperature);
+
+var observation = {
+  resourceType: "Observation",
+  status: "final",
+  category: [
+    {
+      coding: [
+        {
+          system: "http://terminology.hl7.org/CodeSystem/observation-category",
+          code: "vital-signs",
+          display: "Vital Signs"
+        }
+      ]
+    }
+  ],
+  code: {
+    coding: [
+      {
+        system: "http://loinc.org",
+        code: "8310-5",
+        display: "Body temperature"
+      }
+    ],
+    text: "Body Temperature"
+  },
+  subject: {
+    reference: "Patient/9a7abe18-d6e4-4335-b636-6af8533b7367",
+    display: "homer"
+  },
+  effectiveDateTime: "2011-11-11T13:12:12",
+  note: [
+    {
+      text: "aaa note"
+    }
+  ],
+  valueQuantity: {
+    value: value,
+    unit: "°C",
+    system: "http://unitsofmeasure.org",
+    code: "Cel"
+  }
+};
+
+return {
+  msg: observation,
+  metadata: metadata,
+  msgType: msgType
+};
+          `,
       tbelScript: "return {msg: msg, metadata: metadata, msgType: msgType};",
     },
   },
@@ -118,7 +184,7 @@ export const NODE_TYPES: NodeTemplate[] = [
   },
 ];
 
-// Connection types
+//connection types
 export const CONNECTION_TYPES = [
   "Success",
   "True",
@@ -127,7 +193,7 @@ export const CONNECTION_TYPES = [
 ] as const;
 export type ConnectionType = (typeof CONNECTION_TYPES)[number];
 
-// Flow chart node interface
+//flow chart node interface
 export interface FlowNode {
   id: string; // temporary ID for UI, backend will generate real ID
   type: string;
@@ -136,14 +202,14 @@ export interface FlowNode {
   position: number; // position in the flow
 }
 
-// Connection interface - updated to handle multiple connections between same nodes
+//connection interface - updated to handle multiple connections between same nodes
 export interface FlowConnection {
   fromIndex: number;
   toIndex: number;
   type: ConnectionType;
 }
 
-// Helper function to get all connections between two nodes
+//helper function to get all connections between two nodes
 export const getConnectionsBetweenNodes = (
   fromIndex: number,
   toIndex: number,
@@ -154,14 +220,14 @@ export const getConnectionsBetweenNodes = (
   );
 };
 
-// Helper function to add a connection type
+//helper function to add a connection type
 export const addConnectionType = (
   fromIndex: number,
   toIndex: number,
   type: ConnectionType,
   connections: FlowConnection[]
 ): FlowConnection[] => {
-  // Check if this exact connection already exists
+  //check if this exact connection already exists
   const exists = connections.some(
     (conn) =>
       conn.fromIndex === fromIndex &&
@@ -174,7 +240,7 @@ export const addConnectionType = (
   return [...connections, { fromIndex, toIndex, type }];
 };
 
-// Helper function to remove a connection type
+//helper function to remove a connection type
 export const removeConnectionType = (
   fromIndex: number,
   toIndex: number,

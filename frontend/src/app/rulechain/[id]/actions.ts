@@ -192,20 +192,17 @@ export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
     const baseUrl = process.env.BASE_URL;
     if (!baseUrl) throw new Error("BASE_URL environment variable is not set");
 
-    // Validate and fix firstNodeIndex if needed
+    //validate and fix firstNodeIndex if needed
     const validatedMetadata = {
       ...metadata,
-      firstNodeIndex: metadata.nodes.length > 0 
-        ? Math.max(0, Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1))
-        : null // null gdy nie ma węzłów
+      firstNodeIndex:
+        metadata.nodes.length > 0
+          ? Math.max(
+              0,
+              Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1)
+            )
+          : null, // null gdy nie ma węzłów
     };
-    
-    console.log("updateRuleChainMetadata - Sending to API:", {
-      originalFirstNodeIndex: metadata.firstNodeIndex,
-      nodesLength: metadata.nodes.length,
-      validatedFirstNodeIndex: validatedMetadata.firstNodeIndex,
-      payload: JSON.stringify(validatedMetadata, null, 2)
-    });
 
     const response = await fetch(`${baseUrl}/api/ruleChain/metadata`, {
       method: "POST",
