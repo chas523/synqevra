@@ -117,8 +117,7 @@ export const sendDeviceTemperatureData = async (device: Device) => {
             ]
         };
 
-        await medplum.createResource(observationData);
-
+        const result = await medplum.createResource(observationData);
         return {
             success: true,
             message: `Temperature data (${calculatedTemperature}°C) sent to Medplum for ${device.name}`

@@ -1,15 +1,7 @@
 import { MedplumClient } from "@medplum/core";
 
 export const medplum = new MedplumClient({
-    baseUrl: process.env.MEDPLUM_BASE_URL,
+    clientId: process.env.NEXT_PUBLIC_MEDPLUM_CLIENT_ID,
+    clientSecret: process.env.NEXT_PUBLIC_MEDPLUM_CLIENT_SECRET,
+    baseUrl: process.env.NEXT_PUBLIC_MEDPLUM_BASE_URL,
 });
-
- const authenticateMedplum = async () => {
-    try {
-        await medplum.signInWithRedirect({ clientId: process.env.MEDPLUM_CLIENT_ID });
-    } catch (error) {
-        console.error('Error:', error);
-    }
-};
-
- export default authenticateMedplum;

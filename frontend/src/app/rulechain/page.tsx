@@ -52,7 +52,7 @@ const RuleChainEditor = () => {
     }
   };
 
-  const handleCreateRuleChain = async () => {
+  const  = async () => {
     try {
       setCreating(true);
       setError(null);
