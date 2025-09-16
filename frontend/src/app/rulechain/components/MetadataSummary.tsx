@@ -1,5 +1,5 @@
 import { Card, CardContent } from "../../../components/ui/card";
-import { RuleChainMetadata } from "../types/RuleChainTypes";
+import type { RuleChainMetadata } from "../types/RuleChainTypes";
 
 interface MetadataSummaryProps {
   metadata: RuleChainMetadata;

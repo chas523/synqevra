@@ -32,14 +32,14 @@ export async function loginAction(formData: FormData): Promise<void> {
     },
     body: JSON.stringify({
       username: email,
-      password: password
+      password: password,
     }),
   });
 
   if (!response.ok) {
     let errorData: ErrorResponse;
     try {
-      errorData = await response.json() as ErrorResponse;
+      errorData = (await response.json()) as ErrorResponse;
     } catch {
       throw new Error(`Authentication failed with status: ${response.status}`);
     }
@@ -48,7 +48,7 @@ export async function loginAction(formData: FormData): Promise<void> {
 
   let data: LoginResponse;
   try {
-    data = await response.json() as LoginResponse;
+    data = (await response.json()) as LoginResponse;
   } catch {
     throw new Error("Invalid response from server");
   }
@@ -57,7 +57,7 @@ export async function loginAction(formData: FormData): Promise<void> {
 
   const cookieStore = await cookies();
 
-  cookieStore.set('session', token, {
+  cookieStore.set("session", token, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",

@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
 
 export interface EntityId {
   id?: string;
@@ -39,9 +39,10 @@ export const getPowerConsumptionInfo = (device: Device) => {
   if (!device.profileData?.alarms) return "N/A";
 
   const powerAlarm = device.profileData.alarms.find(
-      alarm => alarm.alarmType?.toLowerCase().includes("power") ||
-          alarm.alarmType?.toLowerCase().includes("consumption") ||
-          alarm.alarmType?.toLowerCase().includes("energy")
+    (alarm) =>
+      alarm.alarmType?.toLowerCase().includes("power") ||
+      alarm.alarmType?.toLowerCase().includes("consumption") ||
+      alarm.alarmType?.toLowerCase().includes("energy"),
   );
 
   if (!powerAlarm) return "N/A";
@@ -50,9 +51,10 @@ export const getPowerConsumptionInfo = (device: Device) => {
     if (!rule?.condition?.condition) return null;
 
     const powerCondition = rule.condition.condition.find(
-        cond => cond.key?.key === "powerConsumption" ||
-            cond.key?.key === "energyConsumption" ||
-            cond.key?.key === "power"
+      (cond) =>
+        cond.key?.key === "powerConsumption" ||
+        cond.key?.key === "energyConsumption" ||
+        cond.key?.key === "power",
     );
 
     if (!powerCondition?.predicate) return null;
@@ -63,28 +65,34 @@ export const getPowerConsumptionInfo = (device: Device) => {
 
       const processPredicate = (predicate) => {
         if (predicate.type === "NUMERIC") {
-          if (predicate.operation === "GREATER_OR_EQUAL" ||
-              predicate.operation === "GREATER") {
+          if (
+            predicate.operation === "GREATER_OR_EQUAL" ||
+            predicate.operation === "GREATER"
+          ) {
             minThreshold = predicate.value?.defaultValue;
-          } else if (predicate.operation === "LESS_OR_EQUAL" ||
-              predicate.operation === "LESS") {
+          } else if (
+            predicate.operation === "LESS_OR_EQUAL" ||
+            predicate.operation === "LESS"
+          ) {
             maxThreshold = predicate.value?.defaultValue;
           }
-        }
-        else if (predicate.type === "COMPLEX" && predicate.predicates) {
+        } else if (predicate.type === "COMPLEX" && predicate.predicates) {
           predicate.predicates.forEach(processPredicate);
         }
       };
 
       processPredicate(powerCondition.predicate);
       return { min: minThreshold, max: maxThreshold };
-    }
-    else if (powerCondition.predicate.type === "NUMERIC") {
-      if (powerCondition.predicate.operation === "GREATER_OR_EQUAL" ||
-          powerCondition.predicate.operation === "GREATER") {
+    } else if (powerCondition.predicate.type === "NUMERIC") {
+      if (
+        powerCondition.predicate.operation === "GREATER_OR_EQUAL" ||
+        powerCondition.predicate.operation === "GREATER"
+      ) {
         return { min: powerCondition.predicate.value?.defaultValue, max: null };
-      } else if (powerCondition.predicate.operation === "LESS_OR_EQUAL" ||
-          powerCondition.predicate.operation === "LESS") {
+      } else if (
+        powerCondition.predicate.operation === "LESS_OR_EQUAL" ||
+        powerCondition.predicate.operation === "LESS"
+      ) {
         return { min: null, max: powerCondition.predicate.value?.defaultValue };
       }
     }
@@ -126,8 +134,8 @@ export const getPowerConsumptionInfo = (device: Device) => {
 export const getTemperatureInfo = (device: Device) => {
   if (!device.profileData?.alarms) return "N/A";
 
-  const temperatureAlarm = device.profileData.alarms.find(
-      alarm => alarm.alarmType?.toLowerCase().includes("temperature")
+  const temperatureAlarm = device.profileData.alarms.find((alarm) =>
+    alarm.alarmType?.toLowerCase().includes("temperature"),
   );
 
   if (!temperatureAlarm) return "N/A";
@@ -136,9 +144,10 @@ export const getTemperatureInfo = (device: Device) => {
     if (!rule?.condition?.condition) return null;
 
     const tempCondition = rule.condition.condition.find(
-        cond => cond.key?.key === "temperature" ||
-            cond.key?.key === "compressorTemperature" ||
-            cond.key?.key === "temp"
+      (cond) =>
+        cond.key?.key === "temperature" ||
+        cond.key?.key === "compressorTemperature" ||
+        cond.key?.key === "temp",
     );
 
     if (!tempCondition?.predicate) return null;
@@ -149,28 +158,34 @@ export const getTemperatureInfo = (device: Device) => {
 
       const processPredicate = (predicate) => {
         if (predicate.type === "NUMERIC") {
-          if (predicate.operation === "GREATER_OR_EQUAL" ||
-              predicate.operation === "GREATER") {
+          if (
+            predicate.operation === "GREATER_OR_EQUAL" ||
+            predicate.operation === "GREATER"
+          ) {
             minThreshold = predicate.value?.defaultValue;
-          } else if (predicate.operation === "LESS_OR_EQUAL" ||
-              predicate.operation === "LESS") {
+          } else if (
+            predicate.operation === "LESS_OR_EQUAL" ||
+            predicate.operation === "LESS"
+          ) {
             maxThreshold = predicate.value?.defaultValue;
           }
-        }
-        else if (predicate.type === "COMPLEX" && predicate.predicates) {
+        } else if (predicate.type === "COMPLEX" && predicate.predicates) {
           predicate.predicates.forEach(processPredicate);
         }
       };
 
       processPredicate(tempCondition.predicate);
       return { min: minThreshold, max: maxThreshold };
-    }
-    else if (tempCondition.predicate.type === "NUMERIC") {
-      if (tempCondition.predicate.operation === "GREATER_OR_EQUAL" ||
-          tempCondition.predicate.operation === "GREATER") {
+    } else if (tempCondition.predicate.type === "NUMERIC") {
+      if (
+        tempCondition.predicate.operation === "GREATER_OR_EQUAL" ||
+        tempCondition.predicate.operation === "GREATER"
+      ) {
         return { min: tempCondition.predicate.value?.defaultValue, max: null };
-      } else if (tempCondition.predicate.operation === "LESS_OR_EQUAL" ||
-          tempCondition.predicate.operation === "LESS") {
+      } else if (
+        tempCondition.predicate.operation === "LESS_OR_EQUAL" ||
+        tempCondition.predicate.operation === "LESS"
+      ) {
         return { min: null, max: tempCondition.predicate.value?.defaultValue };
       }
     }
@@ -212,8 +227,8 @@ export const getTemperatureInfo = (device: Device) => {
 export const getPressureInfo = (device: Device) => {
   if (!device.profileData?.alarms) return "N/A";
 
-  const pressureAlarm = device.profileData.alarms.find(
-      alarm => alarm.alarmType?.toLowerCase().includes("pressure")
+  const pressureAlarm = device.profileData.alarms.find((alarm) =>
+    alarm.alarmType?.toLowerCase().includes("pressure"),
   );
 
   if (!pressureAlarm) return "N/A";
@@ -222,22 +237,24 @@ export const getPressureInfo = (device: Device) => {
     if (!rule?.condition?.condition) return null;
 
     const pressureCondition = rule.condition.condition.find(
-        cond => cond.key?.key === "pressure" || cond.key?.key === "refrigerantPressure"
+      (cond) =>
+        cond.key?.key === "pressure" || cond.key?.key === "refrigerantPressure",
     );
 
     if (!pressureCondition?.predicate) return null;
 
-    if (pressureCondition.predicate.type === "COMPLEX" &&
-        pressureCondition.predicate.operation === "OR") {
-
+    if (
+      pressureCondition.predicate.type === "COMPLEX" &&
+      pressureCondition.predicate.operation === "OR"
+    ) {
       const predicates = pressureCondition.predicate.predicates || [];
       let minThreshold = null;
       let maxThreshold = null;
 
-      predicates.forEach(predicate => {
+      predicates.forEach((predicate) => {
         if (predicate.type === "COMPLEX" && predicate.operation === "AND") {
           const andPredicates = predicate.predicates || [];
-          andPredicates.forEach(andPred => {
+          andPredicates.forEach((andPred) => {
             if (andPred.type === "NUMERIC") {
               if (andPred.operation === "GREATER_OR_EQUAL") {
                 minThreshold = andPred.value?.defaultValue;
@@ -246,9 +263,10 @@ export const getPressureInfo = (device: Device) => {
               }
             }
           });
-        }
-        else if (predicate.type === "NUMERIC" &&
-            predicate.operation === "GREATER_OR_EQUAL") {
+        } else if (
+          predicate.type === "NUMERIC" &&
+          predicate.operation === "GREATER_OR_EQUAL"
+        ) {
           minThreshold = predicate.value?.defaultValue;
         }
       });

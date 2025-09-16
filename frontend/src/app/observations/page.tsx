@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { medplum } from "@/lib/medplum";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { medplum } from "@/lib/medplum";
 
 interface Observation {
   id: string;
@@ -220,8 +220,8 @@ export default function ObservationsPage() {
                             observation.status === "final"
                               ? "bg-green-100 text-green-800"
                               : observation.status === "preliminary"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {observation.status || "unknown"}

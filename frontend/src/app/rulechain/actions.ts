@@ -1,17 +1,17 @@
 "use server";
 
 import { cookies } from "next/headers";
-import {
-  RuleChainResponse,
+import type {
   CreateRuleChainRequest,
   RuleChain,
+  RuleChainResponse,
 } from "./types/RuleChainTypes";
 import { createApiResponse, createErrorResponse } from "./utils";
 
 // Helper function for ThingsBoard API requests in server actions
 async function thingsboardApiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -51,7 +51,7 @@ async function thingsboardApiRequest<T>(
 export const fetchRuleChains = async () => {
   try {
     const data = await thingsboardApiRequest<RuleChainResponse>(
-      "/api/ruleChains?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC"
+      "/api/ruleChains?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC",
     );
     return createApiResponse(data);
   } catch (error) {
@@ -61,7 +61,7 @@ export const fetchRuleChains = async () => {
 };
 
 export const createRuleChain = async (
-  ruleChainData: CreateRuleChainRequest
+  ruleChainData: CreateRuleChainRequest,
 ) => {
   try {
     const newRuleChain = await thingsboardApiRequest<RuleChain>(
@@ -69,18 +69,18 @@ export const createRuleChain = async (
       {
         method: "POST",
         body: JSON.stringify(ruleChainData),
-      }
+      },
     );
 
     console.log("created");
 
     // Fetch all rule chains to find the root one
     const allRuleChains = await thingsboardApiRequest<RuleChainResponse>(
-      "/api/ruleChains?pageSize=999&page=0"
+      "/api/ruleChains?pageSize=999&page=0",
     );
 
     const rootRuleChain = allRuleChains.data.find(
-      (rc: any) => rc.root === true
+      (rc: any) => rc.root === true,
     );
     console.log("Root RuleChain:", rootRuleChain);
 
@@ -91,7 +91,7 @@ export const createRuleChain = async (
 
     // Fetch root metadata and add new node
     const rootMetadata = await thingsboardApiRequest<any>(
-      `/api/ruleChain/${rootRuleChain.id.id}/metadata`
+      `/api/ruleChain/${rootRuleChain.id.id}/metadata`,
     );
 
     const newNodeIndex = rootMetadata.nodes.length;
@@ -142,7 +142,7 @@ export const createRuleChain = async (
       });
     } catch (error) {
       console.error(
-        "Failed to update root rule chain metadata, but new rule chain was created"
+        "Failed to update root rule chain metadata, but new rule chain was created",
       );
     }
 

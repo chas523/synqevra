@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { Check, ChevronDown } from "lucide-react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface ComboboxItem {
@@ -29,7 +29,7 @@ export function Combobox({
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const filteredItems = items.filter((item) =>
-    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+    item.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const selectedItem = items.find((item) => item.value === value);
@@ -87,13 +87,13 @@ export function Combobox({
               onClick={() => handleSelect(null)}
               className={cn(
                 "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                value === "" ? "bg-accent text-accent-foreground" : ""
+                value === "" ? "bg-accent text-accent-foreground" : "",
               )}
             >
               <Check
                 className={cn(
                   "mr-2 h-4 w-4",
-                  value === "" ? "opacity-100" : "opacity-0"
+                  value === "" ? "opacity-100" : "opacity-0",
                 )}
               />
               <span className="text-muted-foreground">No selection</span>
@@ -112,7 +112,7 @@ export function Combobox({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === item.value ? "opacity-100" : "opacity-0"
+                      value === item.value ? "opacity-100" : "opacity-0",
                     )}
                   />
                   {item.label}

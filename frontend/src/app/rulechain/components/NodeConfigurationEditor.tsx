@@ -1,16 +1,16 @@
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
 import { Label } from "../../../components/ui/label";
-import { X, Plus } from "lucide-react";
-import { FlowNode } from "../types/NodeTypes";
+import { Textarea } from "../../../components/ui/textarea";
+import type { FlowNode } from "../types/NodeTypes";
 
 interface NodeConfigurationEditorProps {
   node: FlowNode;
@@ -36,7 +36,7 @@ export const NodeConfigurationEditor = ({
   const handleNestedConfigChange = (
     parentKey: string,
     key: string,
-    value: any
+    value: any,
   ) => {
     setConfig((prev: any) => ({
       ...prev,
@@ -168,7 +168,7 @@ export const NodeConfigurationEditor = ({
         >
           <h4 className="font-medium text-gray-700">{key}</h4>
           {Object.entries(value).map(([subKey, subValue]) =>
-            renderConfigField(subKey, subValue, key)
+            renderConfigField(subKey, subValue, key),
           )}
         </div>
       );
@@ -198,7 +198,7 @@ export const NodeConfigurationEditor = ({
         <div className="space-y-4 max-h-96 overflow-y-auto">
           <h3 className="text-lg font-semibold">Configuration</h3>
           {Object.entries(config).map(([key, value]) =>
-            renderConfigField(key, value)
+            renderConfigField(key, value),
           )}
         </div>
 

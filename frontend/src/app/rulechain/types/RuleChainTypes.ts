@@ -1,4 +1,4 @@
-import { EntityId } from "@/lib/utils";
+import type { EntityId } from "@/lib/utils";
 
 export interface RuleNode {
   id: EntityId;

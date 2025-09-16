@@ -197,10 +197,10 @@ export interface FlowConnection {
 export const getConnectionsBetweenNodes = (
   fromIndex: number,
   toIndex: number,
-  connections: FlowConnection[]
+  connections: FlowConnection[],
 ): FlowConnection[] => {
   return connections.filter(
-    (conn) => conn.fromIndex === fromIndex && conn.toIndex === toIndex
+    (conn) => conn.fromIndex === fromIndex && conn.toIndex === toIndex,
   );
 };
 
@@ -209,14 +209,14 @@ export const addConnectionType = (
   fromIndex: number,
   toIndex: number,
   type: ConnectionType,
-  connections: FlowConnection[]
+  connections: FlowConnection[],
 ): FlowConnection[] => {
   //check if this exact connection already exists
   const exists = connections.some(
     (conn) =>
       conn.fromIndex === fromIndex &&
       conn.toIndex === toIndex &&
-      conn.type === type
+      conn.type === type,
   );
 
   if (exists) return connections;
@@ -229,7 +229,7 @@ export const removeConnectionType = (
   fromIndex: number,
   toIndex: number,
   type: ConnectionType,
-  connections: FlowConnection[]
+  connections: FlowConnection[],
 ): FlowConnection[] => {
   return connections.filter(
     (conn) =>
@@ -237,6 +237,6 @@ export const removeConnectionType = (
         conn.fromIndex === fromIndex &&
         conn.toIndex === toIndex &&
         conn.type === type
-      )
+      ),
   );
 };

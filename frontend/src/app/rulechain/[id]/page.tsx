@@ -1,26 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "../../../components/ui/button";
+import { Card, CardContent } from "../../../components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../components/ui/tabs";
+import { RuleChainAdvancedView } from "../components/RuleChainAdvancedView";
+import { RuleChainBasicView } from "../components/RuleChainBasicView";
+import { RuleChainHeader } from "../components/RuleChainHeader";
+import type {
+  RuleChainDetails,
+  RuleChainMetadata,
+} from "../types/RuleChainTypes";
 import {
   fetchRuleChainById,
   fetchRuleChainMetadata,
   updateRuleChain,
   updateRuleChainMetadata,
 } from "./actions";
-import { Card, CardContent } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "../../../components/ui/tabs";
-import { RuleChainHeader } from "../components/RuleChainHeader";
-import { RuleChainBasicView } from "../components/RuleChainBasicView";
-import { RuleChainAdvancedView } from "../components/RuleChainAdvancedView";
-import { RuleChainDetails, RuleChainMetadata } from "../types/RuleChainTypes";
 
 const RuleChainDetailsPage = () => {
   const params = useParams();
@@ -69,7 +72,7 @@ const RuleChainDetailsPage = () => {
       if (!metadataResult.success) {
         if ("error" in metadataResult) {
           setError(
-            metadataResult.error || "Failed to load rule chain metadata"
+            metadataResult.error || "Failed to load rule chain metadata",
           );
           toast.error("Failed to load rule chain metadata");
         }
@@ -190,8 +193,8 @@ const RuleChainDetailsPage = () => {
                     0,
                     Math.min(
                       result.data.firstNodeIndex || 0,
-                      result.data.nodes.length - 1
-                    )
+                      result.data.nodes.length - 1,
+                    ),
                   )
                 : null,
           };

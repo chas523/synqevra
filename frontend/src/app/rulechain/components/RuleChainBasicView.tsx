@@ -1,15 +1,18 @@
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import type {
+  RuleChainDetails,
+  RuleChainMetadata,
+} from "../types/RuleChainTypes";
 import { MetadataSummary } from "./MetadataSummary";
 import { NodesList } from "./NodesList";
-import { RuleChainDetails, RuleChainMetadata } from "../types/RuleChainTypes";
 
 interface RuleChainBasicViewProps {
   ruleChain: RuleChainDetails;

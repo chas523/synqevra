@@ -1,17 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Customer, Device } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { Customer, Device } from "@/lib/utils";
 import { fetchCustomers, fetchDevices } from "./actions";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { DeviceTable } from "./components/device/deviceTable";
 import { CustomerTable } from "./components/customer/customerTable";
-
+import { DeviceTable } from "./components/device/deviceTable";
 
 type TabValue = "devices" | "customers";
 
@@ -96,7 +90,7 @@ export default function MedplumPage() {
         (customer.name && customer.name.toLowerCase().includes(query)) ||
         (customer.email && customer.email.toLowerCase().includes(query)) ||
         (customer.country && customer.country.toLowerCase().includes(query)) ||
-        (customer.city && customer.city.toLowerCase().includes(query))
+        (customer.city && customer.city.toLowerCase().includes(query)),
     );
 
     setFilteredCustomers(filtered);
@@ -114,7 +108,7 @@ export default function MedplumPage() {
         (device.name && device.name.toLowerCase().includes(query)) ||
         (device.type && device.type.toLowerCase().includes(query)) ||
         (device.transportType &&
-          device.transportType.toLowerCase().includes(query))
+          device.transportType.toLowerCase().includes(query)),
     );
 
     setFilteredDevices(filtered);

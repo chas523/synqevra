@@ -1,5 +1,5 @@
-import { FlowNode, FlowConnection } from "../types/NodeTypes";
-import { RuleNode, RuleChainMetadata } from "../types/RuleChainTypes";
+import type { FlowConnection, FlowNode } from "../types/NodeTypes";
+import type { RuleChainMetadata, RuleNode } from "../types/RuleChainTypes";
 /**
  * Format success response
  */
@@ -45,7 +45,7 @@ export const convertToFlowNodes = (ruleNodes: RuleNode[]): FlowNode[] => {
  * Convert RuleChain connections to Flow connections for UI
  */
 export const convertToFlowConnections = (
-  connections: any[]
+  connections: any[],
 ): FlowConnection[] => {
   return connections.map((conn) => ({
     fromIndex: conn.fromIndex,
@@ -59,7 +59,7 @@ export const convertToFlowConnections = (
  */
 export const convertFromFlowNodes = (
   flowNodes: FlowNode[],
-  ruleChainId: any
+  ruleChainId: any,
 ): any[] => {
   return flowNodes.map((node, index) => {
     const baseNode = {
@@ -103,7 +103,7 @@ export const createUpdatedMetadata = (
   metadata: RuleChainMetadata,
   nodes: any[],
   connections: FlowConnection[],
-  version: number
+  version: number,
 ): RuleChainMetadata => {
   const firstNodeIndex = nodes.length > 0 ? 0 : null;
   const validConnections = nodes.length > 0 ? connections : [];

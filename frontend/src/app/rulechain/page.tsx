@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "../../components/ui/card";
-import { fetchRuleChains, createRuleChain } from "./actions";
-import { useAuth } from "./hooks/useAuth";
+import { createRuleChain, fetchRuleChains } from "./actions";
 import { AuthenticationSection } from "./components/AuthenticationSection";
-import { RuleChainList } from "./components/RuleChainList";
 import { CreateRuleChainSection } from "./components/CreateRuleChainSection";
-import { RuleChain, CreateRuleChainRequest } from "./types/RuleChainTypes";
+import { RuleChainList } from "./components/RuleChainList";
+import { useAuth } from "./hooks/useAuth";
+import type { CreateRuleChainRequest, RuleChain } from "./types/RuleChainTypes";
 
 const RuleChainEditor = () => {
   const router = useRouter();
@@ -53,7 +53,7 @@ const RuleChainEditor = () => {
   };
 
   const handleCreateRuleChain = async (
-    ruleChainData: CreateRuleChainRequest
+    ruleChainData: CreateRuleChainRequest,
   ) => {
     try {
       setCreating(true);
@@ -69,7 +69,7 @@ const RuleChainEditor = () => {
     } catch (err) {
       console.error("Failed to create rule chain:", err);
       setError(
-        err instanceof Error ? err.message : "Failed to create rule chain"
+        err instanceof Error ? err.message : "Failed to create rule chain",
       );
     } finally {
       setCreating(false);

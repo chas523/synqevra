@@ -1,8 +1,8 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { EntityId } from "../../../lib/utils";
-import {
+import type { EntityId } from "../../../lib/utils";
+import type {
   RuleChainDetails,
   RuleChainMetadata,
   UpdateRuleChainRequest,
@@ -12,7 +12,7 @@ import { createApiResponse, createErrorResponse } from "../utils";
 // Helper function for ThingsBoard API requests in server actions
 async function thingsboardApiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -52,7 +52,7 @@ async function thingsboardApiRequest<T>(
 export const fetchRuleChainById = async (ruleChainId: string) => {
   try {
     const data = await thingsboardApiRequest<RuleChainDetails>(
-      `/api/ruleChain/${ruleChainId}`
+      `/api/ruleChain/${ruleChainId}`,
     );
     return createApiResponse(data);
   } catch (error) {
@@ -64,7 +64,7 @@ export const fetchRuleChainById = async (ruleChainId: string) => {
 export const fetchRuleChainMetadata = async (ruleChainId: string) => {
   try {
     const data = await thingsboardApiRequest<RuleChainMetadata>(
-      `/api/ruleChain/${ruleChainId}/metadata`
+      `/api/ruleChain/${ruleChainId}/metadata`,
     );
     return createApiResponse(data);
   } catch (error) {
@@ -75,7 +75,7 @@ export const fetchRuleChainMetadata = async (ruleChainId: string) => {
 
 export const updateRuleChain = async (
   ruleChainId: string,
-  updateData: UpdateRuleChainRequest & { id: EntityId }
+  updateData: UpdateRuleChainRequest & { id: EntityId },
 ) => {
   try {
     const data = await thingsboardApiRequest<RuleChainDetails>(
@@ -83,7 +83,7 @@ export const updateRuleChain = async (
       {
         method: "POST",
         body: JSON.stringify(updateData),
-      }
+      },
     );
     return createApiResponse(data);
   } catch (error) {
@@ -100,7 +100,7 @@ export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
         metadata.nodes.length > 0
           ? Math.max(
               0,
-              Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1)
+              Math.min(metadata.firstNodeIndex || 0, metadata.nodes.length - 1),
             )
           : null,
     };
@@ -110,7 +110,7 @@ export const updateRuleChainMetadata = async (metadata: RuleChainMetadata) => {
       {
         method: "POST",
         body: JSON.stringify(validatedMetadata),
-      }
+      },
     );
     return createApiResponse(data);
   } catch (error) {

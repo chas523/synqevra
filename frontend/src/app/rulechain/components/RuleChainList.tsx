@@ -1,5 +1,5 @@
 import { Card, CardContent } from "../../../components/ui/card";
-import { RuleChain } from "../types/RuleChainTypes";
+import type { RuleChain } from "../types/RuleChainTypes";
 
 interface RuleChainListProps {
   ruleChains: RuleChain[];

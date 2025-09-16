@@ -1,5 +1,5 @@
+import type { ConnectionType } from "../types/NodeTypes";
 import { getBearerTokenFromLocalStorage } from "../utils";
-import { ConnectionType } from "../types/NodeTypes";
 
 // Default RuleChain template for medical data processing
 export const getDefaultRuleChainTemplate = () => {

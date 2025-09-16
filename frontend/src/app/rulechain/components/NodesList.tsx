@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { Card, CardContent } from "../../../components/ui/card";
+import { toast } from "sonner";
 import { Button } from "../../../components/ui/button";
+import { Card, CardContent } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import { toast } from "sonner";
-import { FlowChartEditor } from "./FlowChartEditor";
-import { FlowNode, FlowConnection } from "../types/NodeTypes";
-import { getDefaultRuleChainTemplate } from "./defaultRuleChainTemplate";
+import type { FlowConnection, FlowNode } from "../types/NodeTypes";
+import type { RuleChainMetadata, RuleNode } from "../types/RuleChainTypes";
 import {
-  convertToFlowNodes,
-  convertToFlowConnections,
   convertFromFlowNodes,
+  convertToFlowConnections,
+  convertToFlowNodes,
   createUpdatedMetadata,
 } from "../utils";
-import { RuleNode, RuleChainMetadata } from "../types/RuleChainTypes";
+import { getDefaultRuleChainTemplate } from "./defaultRuleChainTemplate";
+import { FlowChartEditor } from "./FlowChartEditor";
 
 interface NodesListProps {
   nodes: RuleNode[];
@@ -30,18 +30,18 @@ export const NodesList = ({
 
   const handleSave = async (
     flowNodes: FlowNode[],
-    flowConnections: FlowConnection[]
+    flowConnections: FlowConnection[],
   ) => {
     try {
       const updatedNodes = convertFromFlowNodes(
         flowNodes,
-        metadata.ruleChainId
+        metadata.ruleChainId,
       );
       const updatedMetadata = createUpdatedMetadata(
         metadata,
         updatedNodes,
         flowConnections,
-        metadataVersion
+        metadataVersion,
       );
 
       await onUpdateMetadata(updatedMetadata);
@@ -64,7 +64,7 @@ export const NodesList = ({
         metadata,
         template.nodes as any[],
         template.connections as FlowConnection[],
-        metadataVersion
+        metadataVersion,
       );
 
       await onUpdateMetadata(defaultMetadata);

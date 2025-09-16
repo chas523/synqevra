@@ -1,32 +1,32 @@
-import { useState, useEffect } from "react";
+import { ArrowRight, Check, Play, Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { medplum } from "@/lib/medplum";
+import { Button } from "../../../components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../../components/ui/card";
-import { Button } from "../../../components/ui/button";
-import { ArrowRight, Plus, X, Check, Play } from "lucide-react";
-import { toast } from "sonner";
+import { Combobox, type ComboboxItem } from "../../../components/ui/combobox";
 import {
-  NODE_TYPES,
-  FlowNode,
-  FlowConnection,
-  CONNECTION_TYPES,
-  ConnectionType,
-  getConnectionsBetweenNodes,
   addConnectionType,
+  CONNECTION_TYPES,
+  type ConnectionType,
+  type FlowConnection,
+  type FlowNode,
+  getConnectionsBetweenNodes,
+  NODE_TYPES,
   removeConnectionType,
 } from "../types/NodeTypes";
-import { NodeConfigurationEditor } from "./NodeConfigurationEditor";
-import { medplum } from "@/lib/medplum";
-import { Combobox, ComboboxItem } from "../../../components/ui/combobox";
 import {
   generateTempId,
   getBearerTokenFromLocalStorage,
   getPatientDisplayName,
-  Patient,
+  type Patient,
 } from "../utils";
+import { NodeConfigurationEditor } from "./NodeConfigurationEditor";
 
 interface FlowChartEditorProps {
   initialNodes?: FlowNode[];
@@ -66,14 +66,14 @@ export const FlowChartEditor = ({
     } catch (error) {
       console.error(
         "Error checking authentication or loading patients:",
-        error
+        error,
       );
     }
   };
 
   const addNode = (nodeTemplate: any) => {
     try {
-      let configuration = { ...nodeTemplate.defaultConfiguration };
+      const configuration = { ...nodeTemplate.defaultConfiguration };
 
       // Add auth header if Rest API Call node
       if (
@@ -99,7 +99,7 @@ export const FlowChartEditor = ({
           `subject: {
     reference: "Patient/${selectedPatient.id}",
     display: "${getPatientDisplayName(selectedPatient)}"
-  }`
+  }`,
         );
       }
 
@@ -134,8 +134,8 @@ export const FlowChartEditor = ({
     try {
       setNodes((prev) =>
         prev.map((node) =>
-          node.id === nodeId ? { ...node, configuration, name } : node
-        )
+          node.id === nodeId ? { ...node, configuration, name } : node,
+        ),
       );
       setSelectedNode(null);
       toast.success("Node configuration updated");
@@ -157,7 +157,8 @@ export const FlowChartEditor = ({
       setConnections((prev) => {
         return prev
           .filter(
-            (conn) => conn.fromIndex !== nodeIndex && conn.toIndex !== nodeIndex
+            (conn) =>
+              conn.fromIndex !== nodeIndex && conn.toIndex !== nodeIndex,
           )
           .map((conn) => ({
             ...conn,
@@ -177,23 +178,23 @@ export const FlowChartEditor = ({
   const toggleConnectionType = (
     fromIndex: number,
     toIndex: number,
-    type: ConnectionType
+    type: ConnectionType,
   ) => {
     try {
       const existingConnections = getConnectionsBetweenNodes(
         fromIndex,
         toIndex,
-        connections
+        connections,
       );
       const hasType = existingConnections.some((conn) => conn.type === type);
 
       if (hasType) {
         setConnections((prev) =>
-          removeConnectionType(fromIndex, toIndex, type, prev)
+          removeConnectionType(fromIndex, toIndex, type, prev),
         );
       } else {
         setConnections((prev) =>
-          addConnectionType(fromIndex, toIndex, type, prev)
+          addConnectionType(fromIndex, toIndex, type, prev),
         );
       }
     } catch (error) {
@@ -296,7 +297,7 @@ export const FlowChartEditor = ({
                     (patient): ComboboxItem => ({
                       value: patient.id,
                       label: getPatientDisplayName(patient),
-                    })
+                    }),
                   )}
                   value={selectedPatient?.id || ""}
                   onValueChange={(value) => {
@@ -340,7 +341,7 @@ export const FlowChartEditor = ({
                 {nodes.map((node, index) => {
                   //find all connections coming into this node from any other node
                   const incomingConnections = connections.filter(
-                    (conn) => conn.toIndex === index
+                    (conn) => conn.toIndex === index,
                   );
 
                   //first connection (from Input) should not have connection types
@@ -358,7 +359,7 @@ export const FlowChartEditor = ({
                             {CONNECTION_TYPES.map((type) => {
                               //check if any incoming connection has this type
                               const isActive = incomingConnections.some(
-                                (conn) => conn.type === type
+                                (conn) => conn.type === type,
                               );
                               return (
                                 <button
@@ -369,7 +370,7 @@ export const FlowChartEditor = ({
                                     toggleConnectionType(
                                       fromIndex,
                                       index,
-                                      type
+                                      type,
                                     );
                                   }}
                                   className={`text-xs px-2 py-1 rounded border transition-colors ${
