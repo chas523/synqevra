@@ -7,9 +7,9 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
-import { RuleChainDetails, RuleChainMetadata } from "../[id]/actions";
 import { MetadataSummary } from "./MetadataSummary";
 import { NodesList } from "./NodesList";
+import { RuleChainDetails, RuleChainMetadata } from "../types/RuleChainTypes";
 
 interface RuleChainBasicViewProps {
   ruleChain: RuleChainDetails;

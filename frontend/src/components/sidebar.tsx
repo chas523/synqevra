@@ -27,10 +27,22 @@ export const Sidebar = () => {
             Medplum
           </Link>
           <Link
+            href="/observations"
+            className="block px-4 py-2 rounded-lg text-primary-foreground font-medium transition-all duration-200 hover:opacity-90 hover:translate-x-1"
+          >
+            Observations
+          </Link>
+          <Link
             href="/rulechain"
             className="block px-4 py-2 rounded-lg text-primary-foreground font-medium transition-all duration-200 hover:opacity-90 hover:translate-x-1"
           >
             Rule Chain
+          </Link>
+          <Link
+            href="/mock"
+            className="block px-4 py-2 rounded-lg text-primary-foreground font-medium transition-all duration-200 hover:opacity-90 hover:translate-x-1"
+          >
+            Simulate Data
           </Link>
         </nav>
       </div>

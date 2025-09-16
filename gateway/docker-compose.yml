@@ -1,11 +1,7 @@
 services:
-  # ThingsBoard IoT Gateway Service Configuration
   tb-gateway:
-    image: ${GATEWAY_IMAGE}
-    container_name: ${GATEWAY_CONTAINER_NAME}
+    image: thingsboard/tb-gateway:3.7-stable
     restart: always
-
-    # Ports bindings - required by some connectors
     ports:
       - "5000:5000" # Comment if you don't use REST connector and change if you use another port
       # Uncomment and modify the following ports based on connector usage:
@@ -16,23 +12,15 @@ services:
     # Necessary mapping for Linux
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-    # Environment variables
     environment:
       - host=host.docker.internal
       - port=1883
       - accessToken=${GATEWAY_ACCESSTOKEN_ENV}
 
-    # Volumes bind
     volumes:
       - tb-gw-config:/thingsboard_gateway/config
       - tb-gw-logs:/thingsboard_gateway/logs
       - tb-gw-extensions:/thingsboard_gateway/extensions
-
-  # tb-gw-mqtt-broker:
-  #   image: ${BROKER_IMAGE}
-  #   ports:
-  #     - "1884:1884"
 
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -46,16 +34,6 @@ services:
       - ./mosquitto/log:/mosquitto/log
     restart: unless-stopped
 
-  # mosquitto-client:
-  #   build: .
-  #   container_name: mosquitto-client
-  #   ports:
-  #     - "1884:1884"
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   command: tail -f /dev/null
-
-# Volumes declaration for configurations, extensions and configuration
 volumes:
   tb-gw-config:
     name: tb-gw-config

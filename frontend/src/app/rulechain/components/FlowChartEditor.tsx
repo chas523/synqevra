@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,14 @@ import {
   removeConnectionType,
 } from "../types/NodeTypes";
 import { NodeConfigurationEditor } from "./NodeConfigurationEditor";
+import { medplum } from "@/lib/medplum";
+import { Combobox, ComboboxItem } from "../../../components/ui/combobox";
+import {
+  generateTempId,
+  getBearerTokenFromLocalStorage,
+  getPatientDisplayName,
+  Patient,
+} from "../utils";
 
 interface FlowChartEditorProps {
   initialNodes?: FlowNode[];
@@ -38,28 +46,78 @@ export const FlowChartEditor = ({
     useState<FlowConnection[]>(initialConnections);
   const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null);
   const [saving, setSaving] = useState(false);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  //generate temporary ID for new nodes
-  const generateTempId = () =>
-    `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  useEffect(() => {
+    checkAuthenticationAndLoadPatients();
+  }, []);
+
+  const checkAuthenticationAndLoadPatients = async () => {
+    try {
+      const authenticated = await medplum.isAuthenticated();
+      setIsAuthenticated(authenticated);
+
+      if (authenticated) {
+        const patientBundle = await medplum.searchResources("Patient");
+        setPatients(patientBundle);
+      }
+    } catch (error) {
+      console.error(
+        "Error checking authentication or loading patients:",
+        error
+      );
+    }
+  };
 
   const addNode = (nodeTemplate: any) => {
     try {
+      let configuration = { ...nodeTemplate.defaultConfiguration };
+
+      // Add auth header if Rest API Call node
+      if (
+        nodeTemplate.type ===
+        "org.thingsboard.rule.engine.rest.TbRestApiCallNode"
+      ) {
+        const headers = { ...configuration.headers };
+        const token = getBearerTokenFromLocalStorage();
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        configuration.headers = headers;
+      }
+
+      // If patient exists and Transform Message node, prefill subject
+      if (
+        selectedPatient &&
+        configuration.jsScript &&
+        typeof configuration.jsScript === "string"
+      ) {
+        configuration.jsScript = configuration.jsScript.replace(
+          /subject:\s*{[^}]*}/,
+          `subject: {
+    reference: "Patient/${selectedPatient.id}",
+    display: "${getPatientDisplayName(selectedPatient)}"
+  }`
+        );
+      }
+
       const newNode: FlowNode = {
         id: generateTempId(),
         type: nodeTemplate.type,
         name: `${nodeTemplate.name} ${nodes.length + 1}`,
-        configuration: { ...nodeTemplate.defaultConfiguration },
+        configuration,
         position: nodes.length,
       };
 
       setNodes((prev) => [...prev, newNode]);
 
-      //auto-connect to previous node if exists (only between actual nodes, not from Input)
+      // Auto-connect to previous node if exists
       if (nodes.length > 0) {
         const newConnection: FlowConnection = {
-          fromIndex: nodes.length - 1, //previous node index
-          toIndex: nodes.length, //new node index
+          fromIndex: nodes.length - 1,
+          toIndex: nodes.length,
           type: "Success",
         };
         setConnections((prev) => [...prev, newConnection]);
@@ -220,6 +278,48 @@ export const FlowChartEditor = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Patient Selection */}
+      {isAuthenticated && patients.length > 0 && (
+        <div className="mb-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-base">
+                <span>Patient Selection</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-medium">Select Patient:</label>
+                <Combobox
+                  items={patients.map(
+                    (patient): ComboboxItem => ({
+                      value: patient.id,
+                      label: getPatientDisplayName(patient),
+                    })
+                  )}
+                  value={selectedPatient?.id || ""}
+                  onValueChange={(value) => {
+                    const patient = patients.find((p) => p.id === value);
+                    setSelectedPatient(patient || null);
+                  }}
+                  placeholder="No patient selected"
+                  className="w-[300px]"
+                />
+                {selectedPatient && (
+                  <span className="text-xs text-gray-500">
+                    ID: {selectedPatient.id}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Selected patient will be included in "Transform Message" node in
+                "subject" field.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Flow Chart Area */}
       <div className="w-full">

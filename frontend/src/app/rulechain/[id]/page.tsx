@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  RuleChainDetails,
-  RuleChainMetadata,
   fetchRuleChainById,
   fetchRuleChainMetadata,
   updateRuleChain,
@@ -22,6 +20,7 @@ import {
 import { RuleChainHeader } from "../components/RuleChainHeader";
 import { RuleChainBasicView } from "../components/RuleChainBasicView";
 import { RuleChainAdvancedView } from "../components/RuleChainAdvancedView";
+import { RuleChainDetails, RuleChainMetadata } from "../types/RuleChainTypes";
 
 const RuleChainDetailsPage = () => {
   const params = useParams();
@@ -54,29 +53,33 @@ const RuleChainDetailsPage = () => {
 
       const ruleChainResult = await fetchRuleChainById(ruleChainId);
       if (!ruleChainResult.success) {
-        setError(ruleChainResult.error || "Failed to load rule chain");
+        if ("error" in ruleChainResult) {
+          setError(ruleChainResult.error || "Failed to load rule chain");
+        }
         return;
       }
 
-      setRuleChain(ruleChainResult.data);
-      setBasicName(ruleChainResult.data.name);
-      setBasicDebugMode(ruleChainResult.data.debugMode);
+      if ("data" in ruleChainResult) {
+        setRuleChain(ruleChainResult.data);
+        setBasicName(ruleChainResult.data.name);
+        setBasicDebugMode(ruleChainResult.data.debugMode);
+      }
 
       const metadataResult = await fetchRuleChainMetadata(ruleChainId);
       if (!metadataResult.success) {
-        setError(metadataResult.error || "Failed to load rule chain metadata");
-        toast.error("Failed to load rule chain metadata");
+        if ("error" in metadataResult) {
+          setError(
+            metadataResult.error || "Failed to load rule chain metadata"
+          );
+          toast.error("Failed to load rule chain metadata");
+        }
         return;
       }
 
-      console.log("loadRuleChainData - Metadata loaded:", {
-        nodesCount: metadataResult.data.nodes.length,
-        firstNodeIndex: metadataResult.data.firstNodeIndex,
-        connectionsCount: metadataResult.data.connections?.length || 0,
-      });
-
-      setMetadata(metadataResult.data);
-      setMetadataJson(JSON.stringify(metadataResult.data, null, 2));
+      if ("data" in metadataResult) {
+        setMetadata(metadataResult.data);
+        setMetadataJson(JSON.stringify(metadataResult.data, null, 2));
+      }
 
       toast.success("Rule chain data loaded successfully");
     } catch (err) {
@@ -98,12 +101,7 @@ const RuleChainDetailsPage = () => {
 
       //prepare firstRuleNodeId if there are nodes in metadata
       const firstRuleNodeId =
-        metadata?.nodes?.length > 0 &&
-        metadata.firstNodeIndex !== null &&
-        metadata.firstNodeIndex >= 0 &&
-        metadata.firstNodeIndex < metadata.nodes.length
-          ? metadata.nodes[metadata.firstNodeIndex].id
-          : undefined;
+        metadata?.nodes?.length > 0 ? metadata.nodes[0].id : undefined;
 
       const updateData = {
         id: ruleChain.id,
@@ -115,14 +113,18 @@ const RuleChainDetailsPage = () => {
 
       const result = await updateRuleChain(ruleChainId, updateData);
       if (result.success) {
-        setRuleChain(result.data);
-        //reload data
-        await loadRuleChainData();
-        toast.success("Rule chain updated successfully");
+        if ("data" in result) {
+          setRuleChain(result.data);
+          //reload data
+          await loadRuleChainData();
+          toast.success("Rule chain updated successfully");
+        }
       } else {
-        const errorMessage = result.error || "Failed to update rule chain";
-        setError(errorMessage);
-        toast.error(errorMessage);
+        if ("error" in result) {
+          const errorMessage = result.error || "Failed to update rule chain";
+          setError(errorMessage);
+          toast.error(errorMessage);
+        }
       }
     } catch (err) {
       console.error("Failed to update rule chain:", err);
@@ -143,16 +145,20 @@ const RuleChainDetailsPage = () => {
 
       const result = await updateRuleChainMetadata(parsedMetadata);
       if (result.success) {
-        setMetadata(result.data);
-        setMetadataJson(JSON.stringify(result.data, null, 2));
-        //reload basic data as well in case it changed
-        await loadRuleChainData();
-        toast.success("Rule chain metadata updated successfully");
+        if ("data" in result) {
+          setMetadata(result.data);
+          setMetadataJson(JSON.stringify(result.data, null, 2));
+          //reload basic data as well in case it changed
+          await loadRuleChainData();
+          toast.success("Rule chain metadata updated successfully");
+        }
       } else {
-        const errorMessage =
-          result.error || "Failed to update rule chain metadata";
-        setError(errorMessage);
-        toast.error(errorMessage);
+        if ("error" in result) {
+          const errorMessage =
+            result.error || "Failed to update rule chain metadata";
+          setError(errorMessage);
+          toast.error(errorMessage);
+        }
       }
     } catch (err) {
       console.error("Failed to update rule chain metadata:", err);
@@ -171,47 +177,40 @@ const RuleChainDetailsPage = () => {
     try {
       setEditing(true);
       setError(null);
-
-      console.log("handleUpdateMetadata - Input metadata:", {
-        nodesCount: updatedMetadata.nodes.length,
-        firstNodeIndex: updatedMetadata.firstNodeIndex,
-        connectionsCount: updatedMetadata.connections.length,
-      });
-
+      console.log(updatedMetadata);
       const result = await updateRuleChainMetadata(updatedMetadata);
       if (result.success) {
-        console.log("handleUpdateMetadata - API response success:", {
-          responseNodesCount: result.data.nodes.length,
-          responseFirstNodeIndex: result.data.firstNodeIndex,
-        });
-
-        // Validate and fix result data if needed
-        const validatedData = {
-          ...result.data,
-          firstNodeIndex:
-            result.data.nodes.length > 0
-              ? Math.max(
-                  0,
-                  Math.min(
-                    result.data.firstNodeIndex || 0,
-                    result.data.nodes.length - 1
+        if ("data" in result) {
+          //validate and fix result data if needed
+          const validatedData = {
+            ...result.data,
+            firstNodeIndex:
+              result.data.nodes.length > 0
+                ? Math.max(
+                    0,
+                    Math.min(
+                      result.data.firstNodeIndex || 0,
+                      result.data.nodes.length - 1
+                    )
                   )
-                )
-              : null, // null gdy nie ma węzłów
-        };
+                : null,
+          };
 
-        setMetadata(validatedData);
-        setMetadataJson(JSON.stringify(validatedData, null, 2));
+          setMetadata(validatedData);
+          setMetadataJson(JSON.stringify(validatedData, null, 2));
 
-        //reload basic data as well in case it changed
-        await loadRuleChainData();
-        toast.success("Rule chain metadata updated via flow editor");
+          //reload basic data as well in case it changed
+          await loadRuleChainData();
+          toast.success("Rule chain metadata updated via flow editor");
+        }
       } else {
-        const errorMessage =
-          result.error || "Failed to update rule chain metadata";
-        setError(errorMessage);
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
+        if ("error" in result) {
+          const errorMessage =
+            result.error || "Failed to update rule chain metadata";
+          setError(errorMessage);
+          toast.error(errorMessage);
+          throw new Error(errorMessage);
+        }
       }
     } catch (err) {
       console.error("Failed to update rule chain metadata:", err);
@@ -222,11 +221,6 @@ const RuleChainDetailsPage = () => {
     } finally {
       setEditing(false);
     }
-  };
-
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    return new Date(timestamp).toLocaleString();
   };
 
   if (loading) {
