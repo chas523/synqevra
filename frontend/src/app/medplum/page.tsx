@@ -12,6 +12,7 @@ import {
 import { DeviceTable } from "./components/device/deviceTable";
 import { CustomerTable } from "./components/customer/customerTable";
 
+
 type TabValue = "devices" | "customers";
 
 export default function MedplumPage() {

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 
 export default function LoginPage() {
@@ -49,7 +50,7 @@ export default function LoginPage() {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="email@example.com"
                     required
                     disabled={isLoading}
                 />
@@ -61,6 +62,7 @@ export default function LoginPage() {
                     id="password"
                     name="password"
                     type="password"
+                    placeholder='Password'
                     required
                     disabled={isLoading}
                 />
@@ -74,6 +76,15 @@ export default function LoginPage() {
                 {isLoading ? "Signing in..." : "Login"}
               </Button>
             </form>
+            <div className="mt-4 text-center text-sm">
+              Not registered yet?{" "}
+              <Link
+                  href="/registration"
+                  className="text-primary underline hover:text-primary/80"
+              >
+                Sign up
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
