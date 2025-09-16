@@ -1,10 +1,10 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PostForm from "@/components/post-form";
-import MqttForm from "@/components/mqtt-form";
 import { useEffect, useState } from "react";
-import { Device, fetchDevices } from "@/app/mock/actions";
+import { type Device, fetchDevices } from "@/app/mock/actions";
+import MqttForm from "@/components/mqtt-form";
+import PostForm from "@/components/post-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function MockClient() {
   const [loading, setLoading] = useState(false);
