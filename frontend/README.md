@@ -92,7 +92,14 @@ export  const  medplum  =  new  MedplumClient({
 	baseUrl:  process.env.NEXT_PUBLIC_MEDPLUM_BASE_URL,
 });
 ```
-Which converts the necessity to call an api manually. It's used to log user in, and fetch observations directly from Medplum. 
+Which converts the necessity to call an api manually. It's used to log user in:
+```js
+	//saves tokens inside localStorage using medplum credentials
+	medplum.startLogin(...)
+	medplum.processCode(...)
+```
+and fetch observations directly from Medplum.
+ 
 **It's not** meant to be used in thingsboard rulechains (described below). Rule chain 'REST Api Call' nodes have to be configured manually - so it's impossible to use SDK there.  
 ## Rule Engine
 
@@ -110,6 +117,12 @@ We've used the same idea (endpoints from swagger):
 
 Left side - Thingsboard editor, right side - our editor
 ![RuleChain view](https://i.imgur.com/3NRlwDw.png)
+The implementation consists of four node types (the nodes we've been using). If needed the node base should be extended. 
+Current node types: 
+- org.thingsboard.rule.engine.filter.TbJsFilterNode
+- org.thingsboard.rule.engine.transform.TbTransformMsgNode
+- org.thingsboard.rule.engine.rest.TbRestApiCallNode
+- org.thingsboard.rule.engine.action.TbLogNode
 
 The idea was to present an use case as follows:
 1. Send telemetry data from example device with POST /api/v1/{deviceToken}/telemetry
@@ -149,15 +162,20 @@ In the [Example body](#api-rulechain-metadata-example-body)  below you'll see th
 - After selecting Rest Api Call Node (and logging into Medplum via medplum auth form present in /ruleChain tab) - Authorization Property in Request Headers would be filled with Medplum Access Token. 
  
 3. Validate the metadata - track```firstNodeIndex``` value - responsible for 1st connection - it gets removed every update, so we're updating it manually to '0'.
+Validate the ```firstRuleNodeId``` in RuleChain info ```GET api/ruleChain/{ruleChainId}``` - could be removed and set to 'null'.
 5. Increment ```version``` property. Without incrementing ```version` we may expect 409 Error.
 6.  Click ACCEPT button - triggers```POST /api/ruleChain/metadata```
 7. Rule Chain metadata is saved.
 
+In order for Rule Chain to post data to Medplum it's required for 'Rest API Call' node to have valid Medplum Access Token. You can paste it manually or just use Medplum Log In Form inside Rule Chain tab. As described above - if logged in with Medplum Form - the token will be added automatically. 
+
+On the other hand - if the Medplum Log In form is not used, then Authorization Header won't be automatically included into new Rest API Call nodes.
+There won't be possibility to preview /Observation tab as well - without token - data won't be fetched.
 ### Test the Rule Chain
 
 You can check how it got created inside thingsboard UI at http://localhost:8088/ruleChains 
 
-To test the RuleChain go to http://localhost:3000/mock and send telemetry data (like a temperature) that'd match your rule chain settings. 
+To test the RuleChain go to http://localhost:3000/mock (described below) and send telemetry data (like a temperature) that'd match your rule chain settings. 
 
 After sending data go to http://localhost:3000/observations and preview new observation. 
 The detailed screen of observations tab is not present. For this please visit http://localhost:3001/Observation - which is Medplum UI.
@@ -168,10 +186,33 @@ There's an option to debug the dataflow in thingsboard UI.
 2. Open the Rest Api Call (or other) node.
 3. Click on Debug button ("Disabled").
 4. Enable "All messages for 15 min" and Apply on Node.
-5. Apply on RuleChain editor view
+5. Apply on RuleChain editor view (bottom right).
 6. POST telemetry. Go to previously selected node, to "Events" tab. Preview the error messages.
+### Mock tab
+Here: [http://localhost:3000/mock](http://localhost:3000/mock) you can send example telemetry data to Thingsboard Backend. It's to simulate example IoT device.
+It uses: ```/api/v1/{deviceToken}/telemetry``` thingsboard endpoint. ```deviceToken``` will be inserted after picking device from devices list. 
 
+There's also an option to send data in loop every second for specific amount of seconds and specify range of random values that'd be sent.
+
+![enter image description here](https://i.imgur.com/kT4XdYk.png)
+
+There's also a possibility to post data using MQTT Protocol - requires setting up of ThingsBoard Gateway.
+## Short Medplum Tutorial
+
+You can log in with:
+- email: admin@example.com
+- password: medplum_admin
+
+Which is an super admin account that manages all Medplum Projects.
+Medplum Project is like a Healthcare Company Unit - has it's own set of patients.
+
+Medplum Project can be created by registering new user and creating new project (within registration form - http://localhost:3001/register). New user is set to be an admin of the project.
+After logging in as new user go to "Project" tab -> Patients -> Invite new Patient.
+You can preview/add Observations by typing "Observation" in search bar.
+
+## Endpoints
 #### Api Rulechain Create example body
+Minimal body to create Rule Chain. Id will be created inside Thingsboard.
 ```sh
 {
 "name": "Temperature Medplum RuleChain",
@@ -180,6 +221,19 @@ There's an option to debug the dataflow in thingsboard UI.
 }
 ```
 #### Api Rulechain Metadata example body
+1. Each next ```version``` of Rule Chain metadata should be incremented. 
+If the ```version``` property is not incremented you'll experience:
+_409 Error: Rule  chain  was  already  changed  by  someone  else_
+
+2. After modifying Rule Chain metadata - track```firstNodeIndex``` value - responsible for 1st connection - sometimes it gets removed. The same thing may happen to  ```firstRuleNodeId``` in RuleChain info ( ```GET api/ruleChain/{ruleChainId}``` ) - could be removed and set to 'null' if not handled manually.
+
+	~~"firstRuleNodeId": null~~ - could only appear if the Rule Chain has no nodes.
+	
+	 "firstRuleNodeId": {
+	    "entityType": "RULE_NODE",
+	    "id": "729b38f0-92d5-11f0-aeaf-11b8ee400834"
+	  }
+
 
 ```sh
 {
