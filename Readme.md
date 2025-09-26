@@ -1,4 +1,4 @@
-# Deployment ThingsBoard and Medplum for Docker
+# Deployment ThingsBoard and Medplum
 Implementation of ThingsBoard and Medplum on docker containers.
 
 ## Setup
@@ -55,7 +55,12 @@ If you're using our prepared Docker setup, you can use instructions for Option A
 3. Use Advanced configuration for created connector, go to General section and enable remote logging (make sure to set same log level as in General Configuration)  
 4. Now go to Configuration section and copy content of `fpl_thingsboard/gateway/default-connector-config.json` file and paste it here  
 
-### ~~4. Scripts to test configuration~~ Deprecated!
+### 4. Frontend app
+1. Navigate to the `fpl_thingsboard/frontend` folder
+2. If you didn't change anything in docker configuration for backend, you don't need to adjust .env, otherwise please make update specific values
+3. To run the app for development, just use `npm run dev` command. Remember to use biome to format your code before committing
+
+### ~~5. Scripts to test configuration~~ Deprecated!
 **NOTE: This part is deprecated, you can still use it to test your configuration, but it's no longer maintained and is not required for ThingsBoard and Medplum to work. Be wary of potential bugs or not up-to-date information!**
 
 Navigate to `fpl_thingsboard/scripts` folder  
