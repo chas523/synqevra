@@ -76,7 +76,7 @@ const UNIT_MAP: Record<string, QuantityUnit> = {
 @Injectable()
 export class ProxyService {
   constructor(private readonly medplum: MedplumService) {}
-  //moze byc tablica
+
   private async getDeviceProfile(
     deviceId: string,
   ): Promise<{ deviceId: string; patientRef: string } | null> {
@@ -102,49 +102,70 @@ export class ProxyService {
     }
   }
 
+  private createObservation(
+    coding: Coding,
+    patientRef: string,
+    deviceId: string,
+    value: number,
+    unit: QuantityUnit,
+    timestamp?: string,
+  ): Observation {
+    return {
+      resourceType: 'Observation',
+      status: 'final',
+      category: [
+        {
+          coding: [
+            {
+              system:
+                'http://terminology.hl7.org/CodeSystem/observation-category',
+              code: 'vital-signs',
+              display: 'Vital Signs',
+            },
+          ],
+        },
+      ],
+      code: { coding: [coding], text: coding.display },
+      subject: { reference: patientRef },
+      device: { reference: `Device/${deviceId}` },
+      effectiveDateTime: timestamp ?? new Date().toISOString(),
+      valueQuantity: {
+        value: value,
+        unit: unit.unit,
+        system: unit.system,
+        code: unit.code,
+      },
+    };
+  }
+
   async postTelemetry(body: TelemetryDto) {
     try {
       const data = await this.getDeviceProfile(body.deviceId);
+      const client: MedplumClient = await this.medplum.initMedplum();
       console.log(data);
+
+      const observations: Observation[] = [];
+
       if (data) {
-        const [key, value] = Object.entries(body.data)[0];
-        const coding: Coding = CODING_MAP[key];
-        const unit: QuantityUnit = UNIT_MAP[key];
+        for (const entry of Object.entries(body.data)) {
+          const [key, value] = entry;
+          const coding: Coding = CODING_MAP[key];
+          const unit: QuantityUnit = UNIT_MAP[key];
+          const { deviceId, patientRef } = data;
 
-        const { deviceId, patientRef } = data;
-        const observation: Observation = {
-          resourceType: 'Observation',
-          status: 'final',
-          category: [
-            {
-              coding: [
-                {
-                  system:
-                    'http://terminology.hl7.org/CodeSystem/observation-category',
-                  code: 'vital-signs',
-                  display: 'Vital Signs',
-                },
-              ],
-            },
-          ],
-          code: { coding: [coding], text: coding.display },
-          subject: { reference: patientRef },
-          device: { reference: `Device/${deviceId}` },
-          effectiveDateTime: body.timestamp ?? new Date().toISOString(),
-          valueQuantity: {
-            value: value,
-            unit: unit.unit,
-            system: unit.system,
-            code: unit.code,
-          },
-        };
-        const client: MedplumClient = await this.medplum.initMedplum();
+          const observation: Observation = this.createObservation(
+            coding,
+            patientRef,
+            deviceId,
+            value,
+            unit,
+            body.timestamp,
+          );
 
-        const created = await client.createResource(observation);
-        if (created) {
-          return created;
+          const created = await client.createResource(observation);
+          if (created) observations.push(created);
         }
-        return null;
+        return observations;
       } else return null;
     } catch (error) {
       throw new Error(`Error posting telemetry: ${error}`);
