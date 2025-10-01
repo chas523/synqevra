@@ -1,94 +1,153 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { plainToInstance } from 'class-transformer';
-import { firstValueFrom } from 'rxjs';
 import * as process from 'node:process';
-import { RefreshResponseDto } from './dtos/refreshResponse.dto';
-import { RefreshErrorDto } from './dtos/refreshErrorDto';
-import { webcrypto } from 'crypto';
+import { TelemetryDto } from './dtos/telemetryDto';
+import { MedplumService } from '../medplum/medplum.service';
+import { Bundle, Device, Observation } from '@medplum/fhirtypes';
+import { MedplumClient } from '@medplum/core';
+
+interface Coding {
+  system: string;
+  code: string;
+  display: string;
+}
+
+interface QuantityUnit {
+  unit: string;
+  system: string;
+  code: string;
+}
+
+const CODING_MAP: Record<string, Coding> = {
+  temperature: {
+    system: 'http://loinc.org',
+    code: '8310-5',
+    display: 'Body temperature',
+  },
+  heart_rate: {
+    system: 'http://loinc.org',
+    code: '8867-4',
+    display: 'Heart rate',
+  },
+  respiratory_rate: {
+    system: 'http://loinc.org',
+    code: '9279-1',
+    display: 'Respiratory rate',
+  },
+  blood_pressure_systolic: {
+    system: 'http://loinc.org',
+    code: '8480-6',
+    display: 'Systolic blood pressure',
+  },
+  blood_pressure_diastolic: {
+    system: 'http://loinc.org',
+    code: '8462-4',
+    display: 'Diastolic blood pressure',
+  },
+};
+
+const UNIT_MAP: Record<string, QuantityUnit> = {
+  temperature: {
+    unit: '°C',
+    system: 'http://unitsofmeasure.org',
+    code: 'Cel',
+  },
+  heart_rate: {
+    unit: 'beats/minute',
+    system: 'http://unitsofmeasure.org',
+    code: '/min',
+  },
+  respiratory_rate: {
+    unit: 'breaths/minute',
+    system: 'http://unitsofmeasure.org',
+    code: '/min',
+  },
+  blood_pressure_systolic: {
+    unit: 'mmHg',
+    system: 'http://unitsofmeasure.org',
+    code: 'mm[Hg]',
+  },
+  blood_pressure_diastolic: {
+    unit: 'mmHg',
+    system: 'http://unitsofmeasure.org',
+    code: 'mm[Hg]',
+  },
+};
 
 @Injectable()
 export class ProxyService {
-  constructor(private readonly http: HttpService) {}
-  private readonly medplumUrl: string =
-    process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103';
-
-  private async decode(token: string): Promise<string> {
-    const subtle = webcrypto.subtle;
-    const keyB64 = process.env.SYNC_KEY;
-    if (!keyB64) throw new Error('SYNC_KEY is missing');
-
-    const keyRaw = Buffer.from(keyB64, 'base64');
-    if (keyRaw.length !== 32)
-      throw new Error('SYNC_KEY must be 32 bytes (base64 of 32B)');
-
-    const cryptoKey = await subtle.importKey('raw', keyRaw, 'AES-GCM', false, [
-      'decrypt',
-    ]);
-
-    const data = Buffer.from(token, 'base64');
-    const iv = data.subarray(0, 12);
-    const ct = data.subarray(12);
-
-    const ptBuf = await subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ct);
-    return new TextDecoder().decode(ptBuf);
-  }
-
-  async forwardObservation(
-    payload: any,
-    incomingHeaders: Record<string, string | string[] | undefined>,
-  ) {
+  constructor(private readonly medplum: MedplumService) {}
+  //moze byc tablica
+  private async getDeviceProfile(
+    deviceId: string,
+  ): Promise<{ deviceId: string; patientRef: string } | null> {
     try {
-      const body = new URLSearchParams(payload);
-      console.log(body.toString());
+      const client: MedplumClient = await this.medplum.initMedplum();
+      const tbUrl = process.env.TB_URL as string;
 
-      const res = await firstValueFrom(
-        this.http.post(
-          `${this.medplumUrl}/fhir/R4/Observation`,
-          body.toString(),
-          {
-            headers: incomingHeaders,
-          },
-        ),
-      );
-      console.log(res.data)
-      console.log("asdasdasd");
-      return { status: res.status, data: res.data };
+      const bundle = (await client.search('Device', {
+        identifier: `${tbUrl}|${deviceId}`,
+      })) as Bundle;
+
+      const device = bundle.entry?.[0]?.resource as Device;
+
+      if (device) {
+        return {
+          deviceId: device.id as string,
+          patientRef: device.patient?.reference as string,
+        };
+      }
+      return null;
     } catch (error) {
-      return { status: 400, data: error };
+      throw new Error(`Error fetching device profile : ${error}`);
     }
   }
 
-  async refreshToken(
-    refreshToken: string,
-  ): Promise<RefreshResponseDto | RefreshErrorDto> {
+  async postTelemetry(body: TelemetryDto) {
     try {
-      // const decodedToken = await this.decode(refreshToken);
-      const decodedToken = refreshToken
+      const data = await this.getDeviceProfile(body.deviceId);
+      console.log(data);
+      if (data) {
+        const [key, value] = Object.entries(body.data)[0];
+        const coding: Coding = CODING_MAP[key];
+        const unit: QuantityUnit = UNIT_MAP[key];
 
-      const body = new URLSearchParams({
-        grant_type: 'refresh_token',
-        // client_id: process.env.MEDPLUM_CLIENT_ID,
-        // client_secret: process.env.MEDPLUM_CLIENT_SECRET,
-        refresh_token: decodedToken,
-      });
-
-      const res = await firstValueFrom(
-        this.http.post(`${this.medplumUrl}/oauth2/token`, body.toString(), {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Accept: 'application/json',
+        const { deviceId, patientRef } = data;
+        const observation: Observation = {
+          resourceType: 'Observation',
+          status: 'final',
+          category: [
+            {
+              coding: [
+                {
+                  system:
+                    'http://terminology.hl7.org/CodeSystem/observation-category',
+                  code: 'vital-signs',
+                  display: 'Vital Signs',
+                },
+              ],
+            },
+          ],
+          code: { coding: [coding], text: coding.display },
+          subject: { reference: patientRef },
+          device: { reference: `Device/${deviceId}` },
+          effectiveDateTime: body.timestamp ?? new Date().toISOString(),
+          valueQuantity: {
+            value: value,
+            unit: unit.unit,
+            system: unit.system,
+            code: unit.code,
           },
-        }),
-      );
+        };
+        const client: MedplumClient = await this.medplum.initMedplum();
 
-      return plainToInstance(RefreshResponseDto, res.data, {
-        excludeExtraneousValues: true,
-      });
+        const created = await client.createResource(observation);
+        if (created) {
+          return created;
+        }
+        return null;
+      } else return null;
     } catch (error) {
-      return plainToInstance(RefreshErrorDto, error, {
-        excludeExtraneousValues: true,
-      });
+      throw new Error(`Error posting telemetry: ${error}`);
     }
   }
 }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ProxyService } from './proxy.service';
 import { ProxyController } from './proxy.controller';
 import { HttpModule } from '@nestjs/axios';
+import { MedplumService } from '../medplum/medplum.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { HttpModule } from '@nestjs/axios';
     }),
   ],
   controllers: [ProxyController],
-  providers: [ProxyService],
+  providers: [ProxyService, MedplumService],
 })
 export class ProxyModule {}
