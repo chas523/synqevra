@@ -1,77 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as process from 'node:process';
 import { TelemetryDto } from './dtos/telemetryDto';
 import { MedplumService } from '../medplum/medplum.service';
-import { Bundle, Device, Observation } from '@medplum/fhirtypes';
-import { MedplumClient } from '@medplum/core';
-
-interface Coding {
-  system: string;
-  code: string;
-  display: string;
-}
-
-interface QuantityUnit {
-  unit: string;
-  system: string;
-  code: string;
-}
-
-const CODING_MAP: Record<string, Coding> = {
-  temperature: {
-    system: 'http://loinc.org',
-    code: '8310-5',
-    display: 'Body temperature',
-  },
-  heart_rate: {
-    system: 'http://loinc.org',
-    code: '8867-4',
-    display: 'Heart rate',
-  },
-  respiratory_rate: {
-    system: 'http://loinc.org',
-    code: '9279-1',
-    display: 'Respiratory rate',
-  },
-  blood_pressure_systolic: {
-    system: 'http://loinc.org',
-    code: '8480-6',
-    display: 'Systolic blood pressure',
-  },
-  blood_pressure_diastolic: {
-    system: 'http://loinc.org',
-    code: '8462-4',
-    display: 'Diastolic blood pressure',
-  },
-};
-
-const UNIT_MAP: Record<string, QuantityUnit> = {
-  temperature: {
-    unit: '°C',
-    system: 'http://unitsofmeasure.org',
-    code: 'Cel',
-  },
-  heart_rate: {
-    unit: 'beats/minute',
-    system: 'http://unitsofmeasure.org',
-    code: '/min',
-  },
-  respiratory_rate: {
-    unit: 'breaths/minute',
-    system: 'http://unitsofmeasure.org',
-    code: '/min',
-  },
-  blood_pressure_systolic: {
-    unit: 'mmHg',
-    system: 'http://unitsofmeasure.org',
-    code: 'mm[Hg]',
-  },
-  blood_pressure_diastolic: {
-    unit: 'mmHg',
-    system: 'http://unitsofmeasure.org',
-    code: 'mm[Hg]',
-  },
-};
+import { Bundle, Device, Observation, Coding } from '@medplum/fhirtypes';
+import { MedplumClient, QuantityUnit } from '@medplum/core';
+import {
+  CODING_MAP,
+  UNIT_MAP,
+} from '../telemetry/constants/measurement-definitions';
+import { PostSummaryDto } from './dtos/postSummaryDto';
 
 @Injectable()
 export class ProxyService {
@@ -79,27 +16,23 @@ export class ProxyService {
 
   private async getDeviceProfile(
     deviceId: string,
-  ): Promise<{ deviceId: string; patientRef: string } | null> {
-    try {
-      const client: MedplumClient = await this.medplum.initMedplum();
-      const tbUrl = process.env.TB_URL as string;
+  ): Promise<{ deviceId: string; patientRef: string }> {
+    const client: MedplumClient = await this.medplum.initMedplum();
+    const tbUrl = process.env.TB_URL as string;
 
-      const bundle = (await client.search('Device', {
-        identifier: `${tbUrl}|${deviceId}`,
-      })) as Bundle;
+    const bundle = (await client.search('Device', {
+      identifier: `${tbUrl}|${deviceId}`,
+    })) as Bundle;
 
-      const device = bundle.entry?.[0]?.resource as Device;
+    const device = bundle.entry?.[0]?.resource as Device;
 
-      if (device) {
-        return {
-          deviceId: device.id as string,
-          patientRef: device.patient?.reference as string,
-        };
-      }
-      return null;
-    } catch (error) {
-      throw new Error(`Error fetching device profile : ${error}`);
-    }
+    if (!device)
+      throw new NotFoundException(`Device with ID ${deviceId} not found`);
+
+    return {
+      deviceId: device.id as string,
+      patientRef: device.patient?.reference as string,
+    };
   }
 
   private createObservation(
@@ -139,36 +72,63 @@ export class ProxyService {
   }
 
   async postTelemetry(body: TelemetryDto) {
-    try {
-      const data = await this.getDeviceProfile(body.deviceId);
-      const client: MedplumClient = await this.medplum.initMedplum();
-      console.log(data);
+    const client: MedplumClient = await this.medplum.initMedplum();
+    const data = await this.getDeviceProfile(body.deviceId);
+    const { deviceId, patientRef } = data;
 
-      const observations: Observation[] = [];
+    const totalCount = Object.keys(body.data).length;
+    if (totalCount === 0)
+      throw new NotFoundException('No telemetry data provided');
+    let savedCount = 0;
+    let failedCount = 0;
 
-      if (data) {
-        for (const entry of Object.entries(body.data)) {
-          const [key, value] = entry;
-          const coding: Coding = CODING_MAP[key];
-          const unit: QuantityUnit = UNIT_MAP[key];
-          const { deviceId, patientRef } = data;
+    for (const entry of Object.entries(body.data)) {
+      const [key, value] = entry;
+      const coding: Coding = CODING_MAP[key];
+      const unit: QuantityUnit = UNIT_MAP[key];
 
-          const observation: Observation = this.createObservation(
-            coding,
-            patientRef,
-            deviceId,
-            value,
-            unit,
-            body.timestamp,
-          );
+      if (!coding || !unit) {
+        failedCount++;
+        continue;
+      }
 
-          const created = await client.createResource(observation);
-          if (created) observations.push(created);
+      const observation: Observation = this.createObservation(
+        coding,
+        patientRef,
+        deviceId,
+        value,
+        unit,
+        body.timestamp,
+      );
+
+      try {
+        const created = await client.createResource(observation);
+        if (created) {
+          savedCount++;
+        } else {
+          failedCount++;
         }
-        return observations;
-      } else return null;
-    } catch (error) {
-      throw new Error(`Error posting telemetry: ${error}`);
+      } catch {
+        failedCount++;
+      }
     }
+
+    let status: 'SUCCESS' | 'PARTIAL' | 'FAIL';
+    if (savedCount === 0) status = 'FAIL';
+    else if (savedCount < totalCount) status = 'PARTIAL';
+    else status = 'SUCCESS';
+
+    const result: PostSummaryDto = {
+      status: status,
+      deviceId: deviceId,
+      patientRef: patientRef,
+      counts: {
+        total: Object.keys(body.data).length,
+        saved: savedCount,
+        failed: failedCount,
+      },
+    };
+
+    return result;
   }
 }
