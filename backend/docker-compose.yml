@@ -2,11 +2,11 @@ services:
   tb-postgres:
     restart: always
     image: "postgres:16"
-    ports:
+    expose:
       - "5432"
     environment:
       POSTGRES_DB: thingsboard
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${TB_DB_PASSWORD}
     volumes:
       - tb-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -25,12 +25,13 @@ services:
     ports:
       - "8088:8080"
       - "1883:1883"
-      - "7070:7070"
 #      - "8883:8883"
 #      - "5683-5688:5683-5688/udp"
+    expose:
+      - "7070"
     environment:
       TB_SERVICE_ID: tb-ce-node
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATASOURCE_PASSWORD: ${TB_DB_PASSWORD}
       SPRING_DATASOURCE_URL: jdbc:postgresql://tb-postgres:5432/thingsboard
 
     volumes:
@@ -38,12 +39,14 @@ services:
       - tb-logs:/var/log/thingsboard
 
   medplum-postgres:
-    image: postgres:16
     restart: always
+    image: postgres:16
+    expose:
+      - "5432"
     environment:
-      - POSTGRES_USER=medplum
-      - POSTGRES_PASSWORD=medplum
-      - POSTGRES_DB=medplum
+      POSTGRES_USER: ${MEDPLUM_DB_USER}
+      POSTGRES_PASSWORD: ${MEDPLUM_DB_PASSWORD}
+      POSTGRES_DB: medplum
     command:
       # We use command line args instead of a postgres.conf to avoid additional setup out of the box
       - "postgres"
@@ -53,9 +56,6 @@ services:
       - "statement_timeout=60000"
       - "-c"
       - "default_transaction_isolation=REPEATABLE READ"
-# Uncomment the following lines to expose Medplum Postgres outside of Docker (not recommended for production)
-#    ports:
-#      - "5432:5432"
     volumes:
       - medplum-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -111,8 +111,8 @@ services:
       MEDPLUM_DATABASE_HOST: "medplum-postgres"
       MEDPLUM_DATABASE_PORT: 5432
       MEDPLUM_DATABASE_DBNAME: "medplum"
-      MEDPLUM_DATABASE_USERNAME: "medplum"
-      MEDPLUM_DATABASE_PASSWORD: "medplum"
+      MEDPLUM_DATABASE_USERNAME: ${MEDPLUM_DB_USER}
+      MEDPLUM_DATABASE_PASSWORD: ${MEDPLUM_DB_PASSWORD}
 
       MEDPLUM_REDIS_HOST: "medplum-redis"
       MEDPLUM_REDIS_PORT: 6379

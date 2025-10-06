@@ -75,15 +75,6 @@ export default function LoginPage() {
               {isLoading ? "Signing in..." : "Login"}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
-            Not registered yet?{" "}
-            <Link
-              href="/registration"
-              className="text-primary underline hover:text-primary/80"
-            >
-              Sign up
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
