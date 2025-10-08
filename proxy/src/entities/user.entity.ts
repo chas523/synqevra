@@ -1,5 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Connection } from './connection.entity';
+import { Role } from '../auth/enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -17,6 +18,13 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @OneToOne(() => Connection, (connection) => connection.user)
   connection: Connection;
