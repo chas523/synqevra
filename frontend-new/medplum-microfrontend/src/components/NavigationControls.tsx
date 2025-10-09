@@ -1,7 +1,7 @@
-import { useNavigate } from '@modern-js/runtime/router';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from "@modern-js/runtime/router";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export const NavigationControls = () => {
+const NavigationControls = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -17,7 +17,6 @@ export const NavigationControls = () => {
       <div className="flex items-center gap-2">
         {/* Back Button */}
         <button
-          type="button"
           onClick={handleBack}
           className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors duration-200"
           title="Go Back"
@@ -27,7 +26,6 @@ export const NavigationControls = () => {
 
         {/* Forward Button */}
         <button
-          type="button"
           onClick={handleForward}
           className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-gray-100 transition-colors duration-200"
           title="Go Forward"
@@ -38,3 +36,4 @@ export const NavigationControls = () => {
     </div>
   );
 };
+export default NavigationControls;
