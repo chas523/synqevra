@@ -16,8 +16,7 @@ export class UsersService {
     const salt = await bcrypt.genSalt(10);
     dto.password = await bcrypt.hash(dto.password, salt);
     const user = this.userRepository.create(dto);
-    await this.userRepository.save(user);
-    return user;
+    return await this.userRepository.save(user);
   }
 
   async getUserByEmail(email: string): Promise<User | null> {

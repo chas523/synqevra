@@ -15,6 +15,7 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @Get('getAll')
   getAllUsers() {
+    // console.log(req.cookies);
     return this.usersService.getAllUsers();
   }
 }
