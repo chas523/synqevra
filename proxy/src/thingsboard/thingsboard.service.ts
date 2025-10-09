@@ -3,7 +3,6 @@ import {
   Logger,
   BadRequestException,
   InternalServerErrorException,
-  HttpException,
 } from '@nestjs/common';
 import {
   TenantFieldsDto,
@@ -14,42 +13,36 @@ import { firstValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import { AxiosError } from 'axios';
 import { getErrorStatus, getErrorMessage } from './../utils/error.utils';
-
-interface ThingsboardLoginResponse {
-  token: string;
-  refreshToken: string;
-}
-interface ThingsboardDefaultTenantProfileResponse {
-  id: {
-    entityType: string;
-    id: string;
-  };
-  name: string;
-}
-
-interface EntityId {
-  entityType: string;
-  id: string;
-}
-
-interface JwtPayload {
-  customerId: string;
-  tenantId: string;
-  userId: string;
-}
-interface EntityId {
-  entityType: string;
-  id: string;
-}
+import { ConfigService } from '@nestjs/config';
+import {
+  EntityId,
+  JwtPayload,
+  ThingsboardDefaultTenantProfileResponse,
+  ThingsboardLoginResponse,
+} from './thingsboard.types';
 @Injectable()
 export class ThingsboardService {
   private readonly logger = new Logger(ThingsboardService.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  private readonly THINGSBOARD_SYSADMIN_EMAIL = 'sysadmin@thingsboard.org';
-  private readonly THINGSBOARD_SYSADMIN_PASSWORD = 'sysadmin';
-  private readonly THINGSBOARD_API_URL = 'http://localhost:8088/api';
+  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
+    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
+  }
+
+  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
+    return this.configService.getOrThrow<string>(
+      'THINGSBOARD_SYSADMIN_PASSWORD',
+    );
+  }
+  private get THINGSBOARD_API_URL(): string {
+    return (
+      this.configService.getOrThrow<string>('THINGSBOARD_API_URL') + '/api'
+    );
+  }
 
   public async connectRegisterToThingsboard(
     formData: ThingsboardConnectionFormDto,
@@ -348,11 +341,7 @@ export class ThingsboardService {
       this.logger.warn(
         `Failed to parse activation URL: ${activationLink} - ${error}`,
       );
-      //   if (!activationLink.includes('http')) {
-      //     activateToken = activationLink;
-      //   } else {
       throw new BadRequestException('Invalid activation link format');
-      //   }
     }
 
     const body = {
