@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ProxyModule } from './proxy/proxy.module';
 import { MedplumModule } from './medplum/medplum.module';
 import { ConfigModule } from '@nestjs/config';
+import { ThingsboardModule } from './thingsboard/thingsboard.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThingsboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
