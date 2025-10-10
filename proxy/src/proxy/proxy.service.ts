@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as process from 'node:process';
 import { TelemetryDto } from './dtos/telemetryDto';
-import { MedplumService } from '../medplum/medplum.service';
 import { Bundle, Device, Observation, Coding } from '@medplum/fhirtypes';
 import { MedplumClient, QuantityUnit } from '@medplum/core';
 import {
@@ -9,10 +8,11 @@ import {
   UNIT_MAP,
 } from '../telemetry/constants/measurement-definitions';
 import { PostSummaryDto } from './dtos/postSummaryDto';
+import { Proxy } from './proxy';
 
 @Injectable()
 export class ProxyService {
-  constructor(private readonly medplum: MedplumService) {}
+  constructor(private readonly medplum: Proxy) {}
 
   private async getDeviceProfile(
     deviceId: string,
