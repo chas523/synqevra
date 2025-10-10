@@ -8,6 +8,7 @@ export default createModuleFederationConfig({
   filename: 'static/remoteEntry.js',
   exposes: {
     './App': './src/components/MedplumApp.tsx',
+    //"./NavigationControls": "./src/components/NavigationControls.tsx"
   },
   shared: {
     react: { singleton: true },

@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from './connection/connection.module';
 import { UsersModule } from './users/users.module';
 import dbConfig from './config/db.config';
+import { ThingsboardModule } from './thingsboard/thingsboard.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import dbConfig from './config/db.config';
     TypeOrmModule.forRootAsync({ useFactory: dbConfig }),
     ConnectionModule,
     UsersModule,
+    ThingsboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

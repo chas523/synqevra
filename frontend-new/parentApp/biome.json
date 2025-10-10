@@ -25,6 +25,9 @@
       "suspicious": {
         "noDuplicateFontNames": "off",
         "noUnknownAtRules": "off"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off"
       }
     }
   },
