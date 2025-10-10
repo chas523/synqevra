@@ -26,10 +26,12 @@ export class UsersService {
   }
 
   async getUserById(id: number): Promise<User | null> {
-    return await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { id },
-      // select: ['email'],
+      select: ['id', 'email', 'firstName', 'lastName', 'role'],
     });
+    console.log('user', user);
+    return user;
   }
 
   async getAllUsers(): Promise<User[]> {
