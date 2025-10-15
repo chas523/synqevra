@@ -3,6 +3,9 @@ import {
   Logger,
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import {
   TenantFieldsDto,
@@ -20,13 +23,21 @@ import {
   ThingsboardDefaultTenantProfileResponse,
   ThingsboardLoginResponse,
 } from './thingsboard.types';
+import { ConnectionService } from 'src/connection/connection.service';
+import { Thingsboard } from 'src/entities/thingsboard.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class ThingsboardService {
   private readonly logger = new Logger(ThingsboardService.name);
 
   constructor(
+    @InjectRepository(Thingsboard)
+    private readonly thingsboardRepository: Repository<Thingsboard>,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => ConnectionService))
+    private readonly connectionService: ConnectionService,
   ) {}
 
   private get THINGSBOARD_SYSADMIN_EMAIL(): string {
@@ -44,8 +55,38 @@ export class ThingsboardService {
     );
   }
 
+  async createThingsboardConnection(
+    userId: number,
+    projectName: string,
+    thingsboardRepo?: Repository<Thingsboard>,
+    connectionRepo?: Repository<any>,
+  ) {
+    // Używamy custom repozytoriów jeśli są przekazane (transakcja), w przeciwnym razie domyślne
+    const thingsboardRepository = thingsboardRepo || this.thingsboardRepository;
+    const connection = await this.connectionService.getOrCreateUserConnection(
+      userId,
+      connectionRepo,
+    );
+    if (!connection) {
+      throw new NotFoundException('User connection not found');
+    }
+    if (connection.thingsboard) {
+      throw new BadRequestException(
+        'Thingsboard connection already exists for this user',
+      );
+    }
+    const thingsboardEntity = thingsboardRepository.create({
+      project: projectName,
+      connection: connection,
+    });
+    return await thingsboardRepository.save(thingsboardEntity);
+  }
+
   public async connectRegisterToThingsboard(
     formData: ThingsboardConnectionFormDto,
+    userId: number,
+    thingsboardRepo?: Repository<Thingsboard>,
+    connectionRepo?: Repository<any>,
   ) {
     this.logger.log('Starting ThingsBoard tenant registration process');
 
@@ -57,9 +98,18 @@ export class ThingsboardService {
 
     let sysAdminAccessToken: string | undefined = undefined;
     let tenantId: EntityId | null = null;
-    const userId: string | null = null;
+    const thingsboardUserId: string | null = null;
 
     try {
+      //create thingsboard connection inside our database
+      this.logger.log('Step 0: Create thingsboard entity inside our database');
+      await this.createThingsboardConnection(
+        userId,
+        tenantFields.title,
+        thingsboardRepo,
+        connectionRepo,
+      );
+
       //sysadmin login (get his access token)
       this.logger.log('Step 1: Authenticating sysadmin');
       sysAdminAccessToken = await this.loginToThingsboardWithSysadminAccount();
@@ -98,12 +148,22 @@ export class ThingsboardService {
         accessToken: result.token,
         refreshToken: result.refreshToken,
         message: 'Tenant and admin user created successfully',
+        // Rollback data for external use
+        rollbackData: {
+          tenantId: tenantId,
+          userId: thingsboardUserId,
+          sysAdminAccessToken: sysAdminAccessToken,
+        },
       };
     } catch (error: unknown) {
       this.logger.error('Error during tenant registration:', error);
 
       //in case of error we're deleting the tenant (and all its content)
-      await this.rollbackChanges(tenantId, userId, sysAdminAccessToken);
+      await this.rollbackChanges(
+        tenantId,
+        thingsboardUserId,
+        sysAdminAccessToken,
+      );
 
       const status = getErrorStatus(error);
 
@@ -166,6 +226,15 @@ export class ThingsboardService {
     } catch (rollbackError) {
       this.logger.error('Failed to rollback changes:', rollbackError);
     }
+  }
+
+  // Public method to allow external rollback calls
+  public async performRollback(
+    tenantId: EntityId | null,
+    userId: string | null,
+    sysAdminAccessToken?: string,
+  ) {
+    return await this.rollbackChanges(tenantId, userId, sysAdminAccessToken);
   }
 
   private async deleteTenant(tenantId: string, sysAdminAccessToken: string) {

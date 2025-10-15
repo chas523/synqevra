@@ -6,10 +6,11 @@ import { ThingsboardService } from './thingsboard.service';
 export class ThingsboardController {
   constructor(private readonly thingsboardService: ThingsboardService) {}
 
-  @Post('/connect/register')
-  async connectRegisterToThingsboard(
-    @Body() formData: ThingsboardConnectionFormDto,
-  ) {
-    return await this.thingsboardService.connectRegisterToThingsboard(formData);
-  }
+  //not used since we're using thingsboardService.connectRegisterToThingsboard in another function
+  // @Post('/connect/register')
+  // async connectRegisterToThingsboard(
+  //   @Body() formData: ThingsboardConnectionFormDto,
+  // ) {
+  //   return await this.thingsboardService.connectRegisterToThingsboard(formData);
+  // }
 }

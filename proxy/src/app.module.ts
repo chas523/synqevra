@@ -10,7 +10,8 @@ import { ConnectionModule } from './connection/connection.module';
 import { UsersModule } from './users/users.module';
 import dbConfig from './config/db.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
-
+import { MailerModule } from './mailer/mailer.module';
+import { PendingUserModule } from './pending-user/pending-user.module';
 @Module({
   imports: [
     ProxyModule,
@@ -24,6 +25,8 @@ import { ThingsboardModule } from './thingsboard/thingsboard.module';
     ConnectionModule,
     UsersModule,
     ThingsboardModule,
+    MailerModule,
+    PendingUserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
