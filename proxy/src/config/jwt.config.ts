@@ -3,7 +3,9 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('jwt', (): JwtModuleOptions => {
   const expiresIn = process.env.JWT_EXPIRES_IN
-    ? parseInt(process.env.JWT_EXPIRES_IN, 10)
+    ? Number.isNaN(parseInt(process.env.JWT_EXPIRES_IN, 10))
+      ? 3600
+      : parseInt(process.env.JWT_EXPIRES_IN, 10)
     : 3600;
 
   return {

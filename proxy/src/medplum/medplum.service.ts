@@ -28,8 +28,7 @@ export class MedplumService {
   ) {}
 
   private async registerAndGetClientApp(dto: CreateProjectDto) {
-    // const storage = new InMemoryStorage();
-
+    // Polyfills for Node.js environment
     if (typeof globalThis.crypto === 'undefined') {
       globalThis.crypto = webcrypto as any;
     }
@@ -51,43 +50,36 @@ export class MedplumService {
       storage,
     });
 
-    try {
-      console.log('Connection to Medplum');
-      const registration = await medplum.startNewUser({
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        email: dto.email,
-        password: dto.password,
-        recaptchaToken: '',
+    console.info('Connection to Medplum');
+    const registration = await medplum.startNewUser({
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      email: dto.email,
+      password: dto.password,
+      recaptchaToken: '',
+    });
+
+    console.info('Registration', registration);
+
+    if (registration.code) {
+      await medplum.processCode(registration.code);
+    }
+
+    // If it fails after this point, something went wrong that should not go wrong
+
+    const projectResponse: LoginAuthenticationResponse =
+      await medplum.startNewProject({
+        login: registration.login,
+        projectName: dto.project,
       });
 
-      console.log('Registration', registration);
+    console.info('Project', projectResponse);
 
-      if (registration.code) {
-        await medplum.processCode(registration.code);
-      }
-
-      const projectResponse: LoginAuthenticationResponse =
-        await medplum.startNewProject({
-          login: registration.login,
-          projectName: dto.project,
-        });
-      console.log('Project', projectResponse);
-
-      if (projectResponse.code) {
-        await medplum.processCode(projectResponse.code, {
-          redirectUri: medplum.getBaseUrl(),
-        });
-        console.log(
-          'Active login after processCode:',
-          medplum.getActiveLogin(),
-        );
-      }
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException(
-        'Failed to register user or create project',
-      );
+    if (projectResponse.code) {
+      await medplum.processCode(projectResponse.code, {
+        redirectUri: medplum.getBaseUrl(),
+      });
+      console.info('Active login after processCode:', medplum.getActiveLogin());
     }
 
     const loginState = medplum.getActiveLogin();
@@ -108,6 +100,13 @@ export class MedplumService {
 
     console.log('Search result', search);
     const clientApp = search[0];
+
+    if (!clientApp.secret) {
+      throw new InternalServerErrorException(
+        'Client application secret is null',
+      );
+    }
+
     return { clientId: clientApp.id, clientSecret: clientApp.secret };
   }
 
