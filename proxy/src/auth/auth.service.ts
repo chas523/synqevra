@@ -9,11 +9,14 @@ import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from '../config/refresh-jwt.config';
-import * as config from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { CurrentUser } from './types/current-user';
 import type { Response } from 'express';
 import jwtConfig from '../config/jwt.config';
 import { CreateUserDto } from '../users/dtos/createUserDto';
+import { DUMMY_BCRYPT_HASH } from '../users/constants/user-utils';
+import { Role } from './enums/role.enum';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -22,22 +25,20 @@ export class AuthService {
     private readonly jwtService: JwtService,
 
     @Inject(jwtConfig.KEY)
-    private readonly jwtTokenConfig: config.ConfigType<typeof jwtConfig>,
+    private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
 
     @Inject(refreshJwtConfig.KEY)
-    private readonly refreshTokenConfig: config.ConfigType<
-      typeof refreshJwtConfig
-    >,
+    private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  private async generateTokens(userId: number) {
+  private async generateAccessToken(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
+    return await this.jwtService.signAsync(payload);
+  }
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload),
-      this.jwtService.signAsync(payload, this.refreshTokenConfig),
-    ]);
-    return { accessToken, refreshToken };
+  private async generateRefreshToken(userId: number) {
+    const payload: AuthJwtPayload = { sub: userId };
+    return await this.jwtService.signAsync(payload, this.refreshTokenConfig);
   }
 
   private setAccessTokenCookie(response: Response, accessToken: string) {
@@ -73,24 +74,39 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.getUserByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException('User does not exist');
+
+    const hashToCompare = user?.password ?? DUMMY_BCRYPT_HASH;
+    const isPasswordValid = await compare(password, hashToCompare);
+
+    if (!user || !isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    return { id: user.id };
+    return { id: user.id, role: user.role };
   }
 
   async validateJwtUser(userId: number) {
     const user = await this.usersService.getUserById(userId);
-    if (!user) throw new UnauthorizedException('User does not exist');
+    if (!user) throw new UnauthorizedException('User not found');
     const currentUser: CurrentUser = { id: user.id, role: user.role };
 
     return currentUser;
+  }
+
+  async validateRefreshToken(userId: number, refreshToken: string) {
+    const user = await this.usersService.getUserById(userId);
+
+    if (!user || !user.hashedRt) {
+      throw new UnauthorizedException('Access Denied');
+    }
+
+    const refreshTokenMatches: boolean = await argon2.verify(
+      user.hashedRt,
+      refreshToken,
+    );
+    if (!refreshTokenMatches) throw new UnauthorizedException('Access Denied');
+
+    return { id: user.id };
   }
 
   async register(createUserDto: CreateUserDto, response: Response) {
@@ -102,8 +118,8 @@ export class AuthService {
     }
 
     const newUser = await this.usersService.createUser(createUserDto);
-
-    const { accessToken, refreshToken } = await this.generateTokens(newUser.id);
+    const accessToken = await this.generateAccessToken(newUser.id);
+    const refreshToken = await this.generateRefreshToken(newUser.id);
 
     this.setTokenCookies(response, accessToken, refreshToken);
 
@@ -115,24 +131,33 @@ export class AuthService {
     };
   }
 
-  async login(userId: number, response: Response) {
-    const { accessToken, refreshToken } = await this.generateTokens(userId);
+  async login(userId: number, role: Role, response: Response) {
+    const accessToken = await this.generateAccessToken(userId);
+    const refreshToken = await this.generateRefreshToken(userId);
+    const hashedRt = await argon2.hash(refreshToken);
+
+    await this.usersService.updateHashedRt(userId, hashedRt);
 
     this.setTokenCookies(response, accessToken, refreshToken);
-    return { id: userId, success: true };
+    return { id: userId, role: role, success: true };
   }
 
-  logout(response: Response) {
+  async logout(userId: number, response: Response) {
+    await this.usersService.updateHashedRt(userId, null);
+
     response.clearCookie('access_token');
     response.clearCookie('refresh_token', { path: '/api/auth/refresh' });
     return { success: true, message: 'Logged out successfully' };
   }
 
-  refresh(userId: number, response: Response) {
-    const payload: AuthJwtPayload = { sub: userId };
-    const accessToken = this.jwtService.sign(payload);
+  async refresh(userId: number, response: Response) {
+    const accessToken = await this.generateAccessToken(userId);
+    const refreshToken = await this.generateRefreshToken(userId);
+    const hashedRt = await argon2.hash(refreshToken);
 
-    this.setAccessTokenCookie(response, accessToken);
+    await this.usersService.updateHashedRt(userId, hashedRt);
+
+    this.setTokenCookies(response, accessToken, refreshToken);
     return { id: userId, success: true };
   }
 }
