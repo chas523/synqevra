@@ -19,10 +19,9 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  await app.listen(process.env.PORT ?? 3003, () => {
-    console.log(`Proxy listening on port ${process.env.PORT ?? 3003}`);
-  });
+  await app.listen(process.env.PORT ?? 3003);
 }
+
 bootstrap().catch((err) => {
   console.error('Bootstrap failed:', err);
   process.exit(1);

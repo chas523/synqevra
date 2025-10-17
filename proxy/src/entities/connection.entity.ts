@@ -1,6 +1,5 @@
 import {
   Entity,
-  Index,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,7 +11,6 @@ import { Medplum } from './medplum.entity';
 
 @Entity('connections')
 @Unique(['user'])
-@Index(['user'])
 export class Connection {
   @PrimaryGeneratedColumn()
   id: number;

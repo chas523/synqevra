@@ -1,6 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import * as config from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import jwtConfig from '../../config/jwt.config';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthJwtPayload } from '../types/auth-jwtPayload';
@@ -11,7 +11,7 @@ import type { Request } from 'express';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: config.ConfigType<typeof jwtConfig>,
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly authService: AuthService,
   ) {
     if (!jwtConfiguration.secret) {
@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate(payload: AuthJwtPayload) {
-    console.log('JWT payload:', payload);
+    console.info('JWT payload:', payload);
     const userId = payload.sub;
     return this.authService.validateJwtUser(userId);
   }

@@ -39,8 +39,7 @@ export class MedplumService {
     then we don't have anything to rollback here. if something goes wrong in our function - then that's explained above.
  */
   private async registerAndGetClientApp(dto: CreateProjectDto) {
-    // const storage = new InMemoryStorage();
-
+    // Polyfills for Node.js environment
     if (typeof globalThis.crypto === 'undefined') {
       globalThis.crypto = webcrypto as any;
     }
@@ -62,9 +61,6 @@ export class MedplumService {
       storage,
     });
 
-    let registrationLogin: string | undefined;
-    let projectId: string | undefined;
-
     try {
       console.log('Connection to Medplum');
       const registration = await medplum.startNewUser({
@@ -75,19 +71,21 @@ export class MedplumService {
         recaptchaToken: '',
       });
 
-      console.log('Registration', registration);
-      registrationLogin = registration.login;
+      console.info('Registration', registration);
 
       if (registration.code) {
         await medplum.processCode(registration.code);
       }
+
+      // If it fails after this point, something went wrong that should not go wrong
 
       const projectResponse: LoginAuthenticationResponse =
         await medplum.startNewProject({
           login: registration.login,
           projectName: dto.project,
         });
-      console.log('Project', projectResponse);
+
+      console.info('Project', projectResponse);
 
       if (projectResponse.code) {
         await medplum.processCode(projectResponse.code, {
@@ -109,7 +107,7 @@ export class MedplumService {
       if (!projectReference) {
         throw new InternalServerErrorException('Project reference is null');
       }
-      projectId = projectReference.split('/')[1];
+      const projectId = projectReference.split('/')[1];
 
       const search = await medplum.searchResources('ClientApplication', {
         _project: projectId,
@@ -117,6 +115,13 @@ export class MedplumService {
 
       console.log('Search result', search);
       const clientApp = search[0];
+
+      if (!clientApp.secret) {
+        throw new InternalServerErrorException(
+          'Client application secret is null',
+        );
+      }
+
       return { clientId: clientApp.id, clientSecret: clientApp.secret };
     } catch (error) {
       console.error('Error during Medplum registration:', error);

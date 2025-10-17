@@ -4,6 +4,7 @@ import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/createUserDto';
 import * as bcrypt from 'bcrypt';
+import { BCRYPT_ROUNDS } from './constants/user-utils';
 
 @Injectable()
 export class UsersService {
@@ -20,9 +21,13 @@ export class UsersService {
     if (existingUser) {
       throw new BadRequestException('User with this email already exists');
     }
-    const salt = await bcrypt.genSalt(10);
-    dto.password = await bcrypt.hash(dto.password, salt);
-    const user = repository.create(dto);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(dto.password, salt);
+    const user = repository.create({
+      ...dto,
+      password: hashedPassword,
+    });
+
     return await repository.save(user);
   }
 
@@ -35,6 +40,15 @@ export class UsersService {
   async getUserById(id: number): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: { id },
+      select: ['id', 'email', 'firstName', 'lastName', 'role', 'hashedRt'],
+    });
+    console.log('user', user);
+    return user;
+  }
+
+  async getUserByIdNoToken(id: number): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { id },
       select: ['id', 'email', 'firstName', 'lastName', 'role'],
     });
     console.log('user', user);
@@ -42,6 +56,14 @@ export class UsersService {
   }
 
   async getAllUsers(): Promise<User[]> {
+    console.log(await bcrypt.hash('x', 10));
     return await this.userRepository.find();
+  }
+
+  async updateHashedRt(userId: number, hashedRt: string | null) {
+    return await this.userRepository.update(
+      { id: userId },
+      { hashedRt: hashedRt },
+    );
   }
 }

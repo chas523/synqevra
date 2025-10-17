@@ -12,6 +12,9 @@ import dbConfig from './config/db.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
 import { MailerModule } from './mailer/mailer.module';
 import { PendingUserModule } from './pending-user/pending-user.module';
+import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+
 @Module({
   imports: [
     ProxyModule,
@@ -22,6 +25,10 @@ import { PendingUserModule } from './pending-user/pending-user.module';
       load: [dbConfig],
     }),
     TypeOrmModule.forRootAsync({ useFactory: dbConfig }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ limit: 4, ttl: seconds(10) }],
+      errorMessage: 'Too many requests, please try again later.',
+    }),
     ConnectionModule,
     UsersModule,
     ThingsboardModule,
@@ -29,6 +36,12 @@ import { PendingUserModule } from './pending-user/pending-user.module';
     PendingUserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

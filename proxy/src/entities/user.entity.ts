@@ -22,6 +22,13 @@ export class User {
   password: string;
 
   @Column({
+    type: 'text',
+    nullable: true,
+    default: null,
+  })
+  hashedRt: string | null;
+
+  @Column({
     type: 'enum',
     enum: Role,
     default: Role.USER,

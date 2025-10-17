@@ -11,9 +11,11 @@ import {
 import { AuthService } from './auth.service';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { Public } from './decorators/public.decorator';
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { CreateUserDto } from '../users/dtos/createUserDto';
+import { CurrentUser } from './types/current-user';
+import { seconds, Throttle } from '@nestjs/throttler';
 
 @Controller('api/auth')
 export class AuthController {
@@ -33,20 +35,30 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    return this.authService.login(req.user.id, res);
+  @Throttle({ default: { ttl: seconds(30), limit: 5 } })
+  async login(
+    @Req() req: Request & { user: CurrentUser },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.login(req.user.id, req.user.role, res);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    return this.authService.logout(res);
+  logout(
+    @Req() req: Request & { user: CurrentUser },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.logout(req.user.id, res);
   }
 
   @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
-  refresh(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  refresh(
+    @Req() req: Request & { user: CurrentUser },
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.refresh(req.user.id, res);
   }
 }
