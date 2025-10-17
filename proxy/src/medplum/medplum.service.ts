@@ -135,6 +135,15 @@ export class MedplumService {
       ) {
         throw new BadRequestException('Password found in breach database');
       }
+      if (
+        error instanceof Error &&
+        error.message &&
+        error.message.includes('Password must be between 8 and 72 characters')
+      ) {
+        throw new BadRequestException(
+          'Password must be between 8 and 72 characters',
+        );
+      }
 
       throw new InternalServerErrorException(
         'Failed to register user or create project',
