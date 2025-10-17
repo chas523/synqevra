@@ -5,7 +5,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import type { Request } from 'express';
 import { CurrentUser } from '../auth/types/current-user';
 
-@Controller('api/users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
