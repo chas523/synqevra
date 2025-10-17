@@ -17,7 +17,7 @@ import { CreateUserDto } from '../users/dtos/createUserDto';
 import { CurrentUser } from './types/current-user';
 import { seconds, Throttle } from '@nestjs/throttler';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

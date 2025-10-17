@@ -3,6 +3,8 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Medplum } from '../entities/medplum.entity';
@@ -15,7 +17,6 @@ import {
   ClientStorage,
 } from '@medplum/core';
 import process from 'node:process';
-import { CurrentUser } from '../auth/types/current-user';
 import { ConnectionService } from '../connection/connection.service';
 import { webcrypto } from 'node:crypto';
 
@@ -24,9 +25,19 @@ export class MedplumService {
   constructor(
     @InjectRepository(Medplum)
     private readonly medplumRepository: Repository<Medplum>,
+    @Inject(forwardRef(() => ConnectionService))
     private readonly connectionService: ConnectionService,
   ) {}
 
+  /**
+    here, the rollback mechanism is not needed. the only way for the function to throw an error
+    is *const registration = await medplum.startNewUser({* after specifying used Email, or password that
+    exists in breach database. so if the error appears, we haven't created anything yet. so there's nothing to rollback
+    if there's no error there, then there will be no error at all
+    this gets used in 'connectionService.buildInitialConnection'. it's needed to call this function
+    at the very end of buildInitialConnection function - if something goes wrong BEFORE we call this function there
+    then we don't have anything to rollback here. if something goes wrong in our function - then that's explained above.
+ */
   private async registerAndGetClientApp(dto: CreateProjectDto) {
     // Polyfills for Node.js environment
     if (typeof globalThis.crypto === 'undefined') {
@@ -50,70 +61,111 @@ export class MedplumService {
       storage,
     });
 
-    console.info('Connection to Medplum');
-    const registration = await medplum.startNewUser({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      email: dto.email,
-      password: dto.password,
-      recaptchaToken: '',
-    });
-
-    console.info('Registration', registration);
-
-    if (registration.code) {
-      await medplum.processCode(registration.code);
-    }
-
-    // If it fails after this point, something went wrong that should not go wrong
-
-    const projectResponse: LoginAuthenticationResponse =
-      await medplum.startNewProject({
-        login: registration.login,
-        projectName: dto.project,
+    try {
+      console.log('Connection to Medplum');
+      const registration = await medplum.startNewUser({
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        email: dto.email,
+        password: dto.password,
+        recaptchaToken: '',
       });
 
-    console.info('Project', projectResponse);
+      console.info('Registration', registration);
 
-    if (projectResponse.code) {
-      await medplum.processCode(projectResponse.code, {
-        redirectUri: medplum.getBaseUrl(),
+      if (registration.code) {
+        await medplum.processCode(registration.code);
+      }
+
+      // If it fails after this point, something went wrong that should not go wrong
+
+      const projectResponse: LoginAuthenticationResponse =
+        await medplum.startNewProject({
+          login: registration.login,
+          projectName: dto.project,
+        });
+
+      console.info('Project', projectResponse);
+
+      if (projectResponse.code) {
+        await medplum.processCode(projectResponse.code, {
+          redirectUri: medplum.getBaseUrl(),
+        });
+        console.log(
+          'Active login after processCode:',
+          medplum.getActiveLogin(),
+        );
+      }
+
+      const loginState = medplum.getActiveLogin();
+      if (!loginState) {
+        throw new InternalServerErrorException('Medplum login state is null');
+      }
+      console.log('Login state', loginState);
+
+      const projectReference = loginState.project?.reference;
+      if (!projectReference) {
+        throw new InternalServerErrorException('Project reference is null');
+      }
+      const projectId = projectReference.split('/')[1];
+
+      const search = await medplum.searchResources('ClientApplication', {
+        _project: projectId,
       });
-      console.info('Active login after processCode:', medplum.getActiveLogin());
-    }
 
-    const loginState = medplum.getActiveLogin();
-    if (!loginState) {
-      throw new InternalServerErrorException('Medplum login state is null');
-    }
-    console.log('Login state', loginState);
+      console.log('Search result', search);
+      const clientApp = search[0];
 
-    const projectReference = loginState.project?.reference;
-    if (!projectReference) {
-      throw new InternalServerErrorException('Project reference is null');
-    }
-    const projectId = projectReference.split('/')[1];
+      if (!clientApp.secret) {
+        throw new InternalServerErrorException(
+          'Client application secret is null',
+        );
+      }
 
-    const search = await medplum.searchResources('ClientApplication', {
-      _project: projectId,
-    });
+      return { clientId: clientApp.id, clientSecret: clientApp.secret };
+    } catch (error) {
+      console.error('Error during Medplum registration:', error);
 
-    console.log('Search result', search);
-    const clientApp = search[0];
+      if (
+        error instanceof Error &&
+        error.message &&
+        error.message.includes('Email already registered')
+      ) {
+        throw new BadRequestException('Email already registered');
+      }
+      if (
+        error instanceof Error &&
+        error.message &&
+        error.message.includes('Password found in breach database (password)')
+      ) {
+        throw new BadRequestException('Password found in breach database');
+      }
+      if (
+        error instanceof Error &&
+        error.message &&
+        error.message.includes('Password must be between 8 and 72 characters')
+      ) {
+        throw new BadRequestException(
+          'Password must be between 8 and 72 characters',
+        );
+      }
 
-    if (!clientApp.secret) {
       throw new InternalServerErrorException(
-        'Client application secret is null',
+        'Failed to register user or create project',
       );
     }
-
-    return { clientId: clientApp.id, clientSecret: clientApp.secret };
   }
 
-  async create(dto: CreateProjectDto, user: CurrentUser) {
-    const userId: number = user.id;
-    const connection =
-      await this.connectionService.getOrCreateUserConnection(userId);
+  async create(
+    dto: CreateProjectDto,
+    userId: number,
+    medplumRepo?: Repository<Medplum>,
+    connectionRepo?: Repository<any>,
+  ) {
+    const connection = await this.connectionService.getOrCreateUserConnection(
+      userId,
+      connectionRepo,
+    );
     if (!connection) {
       throw new NotFoundException('User connection not found');
     }
@@ -126,12 +178,13 @@ export class MedplumService {
 
     const { clientId, clientSecret } = await this.registerAndGetClientApp(dto);
 
-    const medplumEntity = this.medplumRepository.create({
+    const medplumRepository = medplumRepo || this.medplumRepository;
+    const medplumEntity = medplumRepository.create({
       client_id: clientId,
       client_secret: clientSecret,
       connection: connection,
     });
 
-    return await this.medplumRepository.save(medplumEntity);
+    return await medplumRepository.save(medplumEntity);
   }
 }

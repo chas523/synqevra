@@ -10,6 +10,8 @@ import { ConnectionModule } from './connection/connection.module';
 import { UsersModule } from './users/users.module';
 import dbConfig from './config/db.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
+import { MailerModule } from './mailer/mailer.module';
+import { PendingUserModule } from './pending-user/pending-user.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -30,6 +32,8 @@ import { APP_GUARD } from '@nestjs/core';
     ConnectionModule,
     UsersModule,
     ThingsboardModule,
+    MailerModule,
+    PendingUserModule,
   ],
   controllers: [AppController],
   providers: [
