@@ -22,11 +22,17 @@ import {
   JwtPayload,
   ThingsboardDefaultTenantProfileResponse,
   ThingsboardLoginResponse,
+  CreateRuleChainRequest,
+  RuleChainMetadata,
+  RuleChain,
+  DeviceProfile,
 } from './thingsboard.types';
 import { ConnectionService } from 'src/connection/connection.service';
 import { Thingsboard } from 'src/entities/thingsboard.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 @Injectable()
 export class ThingsboardService {
   private readonly logger = new Logger(ThingsboardService.name);
@@ -141,6 +147,19 @@ export class ThingsboardService {
         password,
       );
 
+      //create base rule chain
+      this.logger.log('Step 6: Creating base rule chain');
+      const newRuleChainId = await this.createBaseRuleChain(result.token);
+
+      //set rule chain as default for device profile
+      this.logger.log(
+        'Step 7: Setting rule chain as default for device profile',
+      );
+      await this.setRuleChainAsDefaultForDeviceProfile(
+        result.token,
+        newRuleChainId,
+      );
+
       this.logger.log('ThingsBoard tenant registration completed successfully');
       return {
         success: true,
@@ -235,6 +254,123 @@ export class ThingsboardService {
     sysAdminAccessToken?: string,
   ) {
     return await this.rollbackChanges(tenantId, userId, sysAdminAccessToken);
+  }
+
+  private async createBaseRuleChain(accessToken: string) {
+    try {
+      //load base rule chain configuration
+      const baseRuleChainPath = path.join(
+        process.cwd(),
+        'src',
+        'thingsboard',
+        'base_rule_chain.json',
+      );
+      console.log('Bserulechain:', baseRuleChainPath);
+      const baseRuleChainData = JSON.parse(
+        fs.readFileSync(baseRuleChainPath, 'utf8'),
+      ) as RuleChain;
+      //create rule chain
+      const createRuleChainRequest: CreateRuleChainRequest = {
+        name: baseRuleChainData.ruleChain.name,
+        type: baseRuleChainData.ruleChain.type,
+        debugMode: baseRuleChainData.ruleChain.debugMode,
+      };
+
+      const createRuleChainUrl = `${this.THINGSBOARD_API_URL}/ruleChain`;
+      const ruleChainResponse = await firstValueFrom(
+        this.httpService.post<{ id: EntityId }>(
+          createRuleChainUrl,
+          createRuleChainRequest,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+
+      const ruleChainId = ruleChainResponse.data.id;
+      this.logger.log(`Created rule chain with ID: ${ruleChainId.id}`);
+
+      //update rule chain metadata
+      const ruleChainMetadata: RuleChainMetadata = {
+        ruleChainId: ruleChainId,
+        firstNodeIndex: baseRuleChainData.metadata.firstNodeIndex,
+        nodes: baseRuleChainData.metadata.nodes,
+        connections: baseRuleChainData.metadata.connections,
+        ruleChainConnections: baseRuleChainData.metadata.ruleChainConnections,
+      };
+
+      const updateMetadataUrl = `${this.THINGSBOARD_API_URL}/ruleChain/metadata`;
+      await firstValueFrom(
+        this.httpService.post(updateMetadataUrl, ruleChainMetadata, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      this.logger.log('Successfully updated rule chain metadata');
+      return ruleChainId;
+    } catch (error) {
+      this.logger.error('Failed to create base rule chain:', error);
+      throw new InternalServerErrorException(
+        'Failed to create base rule chain',
+      );
+    }
+  }
+
+  private async setRuleChainAsDefaultForDeviceProfile(
+    accessToken: string,
+    ruleChainId: EntityId,
+  ) {
+    try {
+      //get default device profile info
+      const deviceProfileInfoUrl = `${this.THINGSBOARD_API_URL}/deviceProfileInfo/default`;
+      const deviceProfileInfoResponse = await firstValueFrom(
+        this.httpService.get<{ id: EntityId }>(deviceProfileInfoUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const deviceProfileId = deviceProfileInfoResponse.data.id;
+      this.logger.log(`Got default device profile ID: ${deviceProfileId.id}`);
+
+      //get full device profile data
+      const deviceProfileUrl = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId.id}`;
+      const deviceProfileResponse = await firstValueFrom(
+        this.httpService.get<DeviceProfile>(deviceProfileUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const deviceProfile = deviceProfileResponse.data;
+      this.logger.log('Retrieved device profile data');
+
+      //update device profile with default rule chain
+      const updatedDeviceProfile: DeviceProfile = {
+        ...deviceProfile,
+        defaultRuleChainId: {
+          entityType: 'RULE_CHAIN',
+          id: ruleChainId.id,
+        },
+      };
+
+      const updateDeviceProfileUrl = `${this.THINGSBOARD_API_URL}/deviceProfile`;
+      await firstValueFrom(
+        this.httpService.post(updateDeviceProfileUrl, updatedDeviceProfile, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      this.logger.log(
+        'Successfully set rule chain as default for device profile',
+      );
+    } catch (error) {
+      this.logger.error(
+        'Failed to set rule chain as default for device profile:',
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Failed to set rule chain as default for device profile',
+      );
+    }
   }
 
   private async deleteTenant(tenantId: string, sysAdminAccessToken: string) {

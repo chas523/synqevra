@@ -1,0 +1,154 @@
+{
+  "ruleChain": {
+    "name": "Base Rule Chain",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": true,
+    "configuration": null,
+    "additionalInfo": {
+      "description": ""
+    }
+  },
+  "metadata": {
+    "firstNodeIndex": 3,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.rest.TbRestApiCallNode",
+        "name": "POST abnormal data to proxy",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 1759493538718
+        },
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 3,
+        "configuration": {
+          "restEndpointUrlPattern": "http://host.docker.internal:8103/fhir/R4/Observation",
+          "requestMethod": "POST",
+          "useSimpleClientHttpFactory": false,
+          "parseToPlainText": false,
+          "ignoreRequestBody": false,
+          "enableProxy": null,
+          "useSystemProxyProperties": null,
+          "proxyScheme": null,
+          "proxyHost": null,
+          "proxyPort": null,
+          "proxyUser": null,
+          "proxyPassword": null,
+          "readTimeoutMs": null,
+          "maxParallelRequestsCount": null,
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6Ijg2YTg0YTJmLWIwNDEtNDcxOS1hZDc2LTM3MWQ3Y2I4NDA0ZCIsInR5cCI6IkpXVCJ9.eyJsb2dpbl9pZCI6ImVmZmI0MjU3LWE4MjktNDkyMy04MjljLWY4MzE5MDIzOTMxMCIsInN1YiI6ImEzNzM5M2JlLTUzNWYtNDdjMy05Y2Y4LWY1NmY3YzhlMjIwNiIsInVzZXJuYW1lIjoiYTM3MzkzYmUtNTM1Zi00N2MzLTljZjgtZjU2ZjdjOGUyMjA2Iiwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MiLCJwcm9maWxlIjoiUHJhY3RpdGlvbmVyLzdhZWM5YmUzLWY1OGEtNDFiYy1iMTg1LWU2NDIzMDMzZmQ3ZiIsImlhdCI6MTc1OTIzODMyNCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MTAzLyIsImV4cCI6MTc1OTI0MTkyNH0.qDElD5vfcLqm_Tub397WmNRtOn4pLgWdSrbNIf8HpbEuICFMDMS2efOfsNtASxKtL88gSIWBWMUmGBkYMyXVsw"
+          },
+          "credentials": {
+            "type": "anonymous"
+          },
+          "maxInMemoryBufferSizeInKb": 256
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 50,
+          "layoutY": 491
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "get device shared attributes",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 1759492948133
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "tellFailureIfAbsent": true,
+          "fetchTo": "METADATA",
+          "clientAttributeNames": [],
+          "sharedAttributeNames": ["limits", "telemetry_keys"],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": [],
+          "getLatestValueWithTs": false
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 49,
+          "layoutY": 308
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "dynamically filter data with device attributes",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 1759492837946
+        },
+        "singletonMode": false,
+        "queueName": "Main",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var limits = JSON.parse(metadata.shared_limits);\r\nvar telemetry_keys = JSON.parse(metadata.shared_telemetry_keys);\r\n\r\nif (Object.keys(limits).length != telemetry_keys.length) {\r\n    throw Error(\"Not enough data.\");\r\n}\r\nfor (var key in limits) {\r\n    if (!msg.hasOwnProperty(key)) {\r\n        throw Error(\"Missing telemetry for key: \" + key);\r\n    }\r\n}\r\n\r\nvar outOfLimit = {};\r\n\r\nfunction arrayIncludes(arr, val) {\r\n    if (!arr) return false;\r\n    if (Array.isArray(arr)) {\r\n        for (var i = 0; i < arr.length; i++) {\r\n            if (arr[i] === val) return true;\r\n        }\r\n        return false;\r\n    } else if (typeof arr === \"object\") {\r\n        for (var k in arr) {\r\n            if (arr.hasOwnProperty(k) && arr[k] === val) return true;\r\n        }\r\n        return false;\r\n    }\r\n    return false;\r\n}\r\n\r\ntelemetry_keys.forEach(function(key) {\r\n    var rule = limits[key];\r\n    var value = msg[key];\r\n\r\n    if (value == null || rule == null) return;\r\n\r\n    var violated = false;\r\n\r\n    if (rule.minimum != null && typeof value === \"number\" && value < rule.minimum) {\r\n        violated = true;\r\n    }\r\n    if (rule.maximum != null && typeof value === \"number\" && value > rule.maximum) {\r\n        violated = true;\r\n    }\r\n    if (rule.equal != null && !arrayIncludes(rule.equal, value)) {\r\n        violated = true;\r\n    }\r\n    if (rule.not_equal != null && arrayIncludes(rule.not_equal, value)) {\r\n        violated = true;\r\n    }\r\n\r\n    if (violated) {\r\n        outOfLimit[key] = value;\r\n    }\r\n});\r\n\r\nif (Object.keys(outOfLimit).length === 0) {\r\n    throw new Error(\"No telemetry values out of limit.\");\r\n}\r\n\r\n\r\nvar returnObject = {\r\n    deviceId: metadata.originatorId,\r\n    data: outOfLimit\r\n};\r\n\r\nreturn {\r\n    msg: returnObject,\r\n    metadata: metadata,\r\n    msgType: msgType\r\n};\r\n",
+          "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 53,
+          "layoutY": 396
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetOriginatorFieldsNode",
+        "name": "get device id",
+        "debugSettings": {
+          "failuresEnabled": false,
+          "allEnabled": false,
+          "allEnabledUntil": 1759492948133
+        },
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "dataMapping": {
+            "id": "originatorId"
+          },
+          "ignoreNullStrings": false,
+          "fetchTo": "METADATA"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 52,
+          "layoutY": 218
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Failure"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 1,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
