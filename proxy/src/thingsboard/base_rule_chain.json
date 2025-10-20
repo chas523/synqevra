@@ -25,7 +25,7 @@
         "queueName": "Main",
         "configurationVersion": 3,
         "configuration": {
-          "restEndpointUrlPattern": "http://host.docker.internal:8103/fhir/R4/Observation",
+          "restEndpointUrlPattern": "http://localhost:3003/api/telemetry",
           "requestMethod": "POST",
           "useSimpleClientHttpFactory": false,
           "parseToPlainText": false,
@@ -40,8 +40,7 @@
           "readTimeoutMs": null,
           "maxParallelRequestsCount": null,
           "headers": {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer eyJhbGciOiJFUzI1NiIsImtpZCI6Ijg2YTg0YTJmLWIwNDEtNDcxOS1hZDc2LTM3MWQ3Y2I4NDA0ZCIsInR5cCI6IkpXVCJ9.eyJsb2dpbl9pZCI6ImVmZmI0MjU3LWE4MjktNDkyMy04MjljLWY4MzE5MDIzOTMxMCIsInN1YiI6ImEzNzM5M2JlLTUzNWYtNDdjMy05Y2Y4LWY1NmY3YzhlMjIwNiIsInVzZXJuYW1lIjoiYTM3MzkzYmUtNTM1Zi00N2MzLTljZjgtZjU2ZjdjOGUyMjA2Iiwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MiLCJwcm9maWxlIjoiUHJhY3RpdGlvbmVyLzdhZWM5YmUzLWY1OGEtNDFiYy1iMTg1LWU2NDIzMDMzZmQ3ZiIsImlhdCI6MTc1OTIzODMyNCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MTAzLyIsImV4cCI6MTc1OTI0MTkyNH0.qDElD5vfcLqm_Tub397WmNRtOn4pLgWdSrbNIf8HpbEuICFMDMS2efOfsNtASxKtL88gSIWBWMUmGBkYMyXVsw"
+            "Content-Type": "application/json"
           },
           "credentials": {
             "type": "anonymous"
