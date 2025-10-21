@@ -631,7 +631,6 @@ export class ThingsboardService {
         (error as Error)?.message || 'Unknown error',
       );
 
-      // Handle specific error cases
       if (error instanceof AxiosError) {
         const status = error.response?.status;
         const errorMessage = error.response?.data?.message || error.message;
@@ -649,16 +648,13 @@ export class ThingsboardService {
     }
   }
   public async getTokens(userId: number) {
-    console.log('UserID:', userId);
-    const returnval = await this.thingsboardRepository
+    return await this.thingsboardRepository
       .createQueryBuilder('thingsboard')
       .innerJoin('thingsboard.connection', 'connection')
       .innerJoin('connection.user', 'user')
       .where('user.id = :userId', { userId })
       .select(['thingsboard.accessToken', 'thingsboard.refreshToken'])
       .getOne();
-    console.log('Returval', returnval);
-    return returnval;
   }
 
   public refresh(userId: number) {
@@ -674,7 +670,7 @@ export class ThingsboardService {
             refreshToken: tokens.refreshToken,
           }),
         );
-        // Optionally update tokens in DB
+
         await this.saveTokensToDatabase(
           userId,
           response.data.token,
@@ -687,9 +683,8 @@ export class ThingsboardService {
       } catch (error) {
         this.logger.error(
           'Failed to refresh token:',
-          (error as any)?.message || 'Unknown error',
+          error?.message || 'Unknown error',
         );
-        // Check if refresh token expired (ThingsBoard returns 401 or 400)
         if (
           error instanceof AxiosError &&
           (error.response?.status === 401 || error.response?.status === 400)
@@ -699,6 +694,67 @@ export class ThingsboardService {
         throw new BadRequestException('Failed to refresh token');
       }
     });
+  }
+
+  public async thingsboardLogin(
+    userId: number,
+    username: string,
+    password: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/auth/login`;
+      const body = {
+        username: username,
+        password: password,
+      };
+
+      const response = await firstValueFrom(
+        this.httpService.post<ThingsboardLoginResponse>(url, body),
+      );
+
+      const { token: accessToken, refreshToken } = response.data;
+
+      await this.loginWithTokens(userId, accessToken, refreshToken);
+
+      this.logger.log(`ThingsBoard login successful for user ${userId}`);
+
+      return {
+        accessToken,
+        refreshToken,
+      };
+    } catch (error) {
+      this.logger.error('Failed to login to ThingsBoard:', error);
+
+      if (error instanceof AxiosError) {
+        const status = error.response?.status;
+        let errorMessage = 'Unknown error';
+
+        if (
+          error.response?.data &&
+          typeof error.response.data === 'object' &&
+          'message' in error.response.data
+        ) {
+          errorMessage = String(
+            (error.response.data as { message: unknown }).message,
+          );
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        if (status === 401) {
+          throw new UnauthorizedException('Invalid ThingsBoard credentials');
+        }
+        if (status === 400) {
+          throw new BadRequestException(
+            errorMessage || 'Bad request to ThingsBoard',
+          );
+        }
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to authenticate with ThingsBoard',
+      );
+    }
   }
 
   public async loginWithTokens(

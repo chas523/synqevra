@@ -17,12 +17,14 @@ import { CreateUserDto } from '../users/dtos/createUserDto';
 import { DUMMY_BCRYPT_HASH } from '../users/constants/user-utils';
 import { Role } from './enums/role.enum';
 import * as argon2 from 'argon2';
+import { ThingsboardService } from '../thingsboard/thingsboard.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly thingsboardService: ThingsboardService,
 
     @Inject(jwtConfig.KEY)
     private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
@@ -80,6 +82,16 @@ export class AuthService {
 
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+    console.log('cred ok');
+    // Próba logowania do ThingsBoard podczas walidacji
+    try {
+      console.log('cred ok2');
+      await this.thingsboardService.thingsboardLogin(user.id, email, password);
+      console.log('cred ok3');
+    } catch (error) {
+      // Logowanie do ThingsBoard nieudane, ale nie przerywa procesu logowania
+      console.warn('ThingsBoard login failed during validation:', error);
     }
 
     return { id: user.id, role: user.role };
