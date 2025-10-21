@@ -6,6 +6,7 @@ import {
   NotFoundException,
   forwardRef,
   Inject,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   TenantFieldsDto,
@@ -158,6 +159,15 @@ export class ThingsboardService {
       await this.setRuleChainAsDefaultForDeviceProfile(
         result.token,
         newRuleChainId,
+      );
+
+      //save tokens to database
+      this.logger.log('Step 8: Saving tokens to database');
+      await this.saveTokensToDatabase(
+        userId,
+        result.token,
+        result.refreshToken,
+        thingsboardRepo,
       );
 
       this.logger.log('ThingsBoard tenant registration completed successfully');
@@ -571,5 +581,131 @@ export class ThingsboardService {
         'Failed to activate tenant admin account',
       );
     }
+  }
+
+  private async saveTokensToDatabase(
+    userId: number,
+    accessToken: string,
+    refreshToken: string,
+    thingsboardRepo?: Repository<Thingsboard>,
+  ): Promise<void> {
+    const repository = thingsboardRepo || this.thingsboardRepository;
+
+    const thingsboardEntity = await repository.findOne({
+      where: { connection: { user: { id: userId } } },
+      relations: ['connection', 'connection.user'],
+    });
+
+    if (!thingsboardEntity) {
+      throw new NotFoundException(
+        `ThingsBoard entity not found for user ${userId}`,
+      );
+    }
+
+    await repository.update(thingsboardEntity.id, {
+      accessToken,
+      refreshToken,
+    });
+
+    this.logger.log(`Tokens saved for user ${userId}`);
+  }
+
+  public async getUser(accessToken?: string): Promise<any> {
+    try {
+      if (!accessToken) {
+        throw new BadRequestException('Access token is required');
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/auth/user`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user:',
+        (error as Error)?.message || 'Unknown error',
+      );
+
+      // Handle specific error cases
+      if (error instanceof AxiosError) {
+        const status = error.response?.status;
+        const errorMessage = error.response?.data?.message || error.message;
+        if (status === 401) {
+          throw new UnauthorizedException(
+            errorMessage || 'Invalid or expired access token',
+          );
+        }
+        if (status === 403) {
+          throw new BadRequestException(errorMessage || 'Access forbidden');
+        }
+      }
+
+      throw error;
+    }
+  }
+  public async getTokens(userId: number) {
+    console.log('UserID:', userId);
+    const returnval = await this.thingsboardRepository
+      .createQueryBuilder('thingsboard')
+      .innerJoin('thingsboard.connection', 'connection')
+      .innerJoin('connection.user', 'user')
+      .where('user.id = :userId', { userId })
+      .select(['thingsboard.accessToken', 'thingsboard.refreshToken'])
+      .getOne();
+    console.log('Returval', returnval);
+    return returnval;
+  }
+
+  public refresh(userId: number) {
+    this.logger.log('REFRESHING!!!!!!');
+    return this.getTokens(userId).then(async (tokens) => {
+      if (!tokens?.refreshToken) {
+        throw new BadRequestException('No refresh token found for user');
+      }
+      const url = `${this.THINGSBOARD_API_URL}/auth/token`;
+      try {
+        const response = await firstValueFrom(
+          this.httpService.post<{ token: string; refreshToken: string }>(url, {
+            refreshToken: tokens.refreshToken,
+          }),
+        );
+        // Optionally update tokens in DB
+        await this.saveTokensToDatabase(
+          userId,
+          response.data.token,
+          response.data.refreshToken,
+        );
+        return {
+          accessToken: response.data.token,
+          refreshToken: response.data.refreshToken,
+        };
+      } catch (error) {
+        this.logger.error(
+          'Failed to refresh token:',
+          (error as any)?.message || 'Unknown error',
+        );
+        // Check if refresh token expired (ThingsBoard returns 401 or 400)
+        if (
+          error instanceof AxiosError &&
+          (error.response?.status === 401 || error.response?.status === 400)
+        ) {
+          throw new BadRequestException('Refresh token expired or invalid');
+        }
+        throw new BadRequestException('Failed to refresh token');
+      }
+    });
+  }
+
+  public async loginWithTokens(
+    userId: number,
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<void> {
+    await this.saveTokensToDatabase(userId, accessToken, refreshToken);
   }
 }
