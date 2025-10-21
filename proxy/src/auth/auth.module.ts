@@ -14,6 +14,7 @@ import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
+import { ThingsboardModule } from 'src/thingsboard/thingsboard.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RolesGuard } from './guards/roles/roles.guard';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    ThingsboardModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -42,7 +42,7 @@ export class UsersService {
       where: { id },
       select: ['id', 'email', 'firstName', 'lastName', 'role', 'hashedRt'],
     });
-    console.log('user', user);
+
     return user;
   }
 
@@ -51,7 +51,7 @@ export class UsersService {
       where: { id },
       select: ['id', 'email', 'firstName', 'lastName', 'role'],
     });
-    console.log('user', user);
+
     return user;
   }
 
