@@ -9,6 +9,12 @@ export class Thingsboard {
   @Column()
   project: string;
 
+  @Column({ nullable: true })
+  accessToken?: string;
+
+  @Column({ nullable: true })
+  refreshToken?: string;
+
   @OneToOne(() => Connection, (connection) => connection.thingsboard)
   connection: Connection;
 }

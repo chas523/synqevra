@@ -23,3 +23,71 @@ export interface ThingsboardRollbackData {
   userId: string | null;
   sysAdminAccessToken: string;
 }
+
+export interface CreateRuleChainRequest {
+  name: string;
+  type: string;
+  debugMode: boolean;
+}
+
+export interface RuleChainConnection {
+  fromIndex: number;
+  toIndex: number;
+  type: string;
+}
+
+export interface RuleChainMetadata {
+  ruleChainId: EntityId;
+  firstNodeIndex: number | null;
+  nodes: any[];
+  connections: RuleChainConnection[];
+  //no knowledge what could be inside ruleChainConnections
+  ruleChainConnections: null;
+}
+export interface RuleChain {
+  ruleChain: CreateRuleChainRequest;
+  metadata: RuleChainMetadata;
+}
+
+export interface DeviceProfile {
+  id: {
+    entityType: 'DEVICE_PROFILE';
+    id: string;
+  };
+  createdTime: number;
+  tenantId: {
+    entityType: 'TENANT';
+    id: string;
+  };
+  name: string;
+  description: string;
+  image: string | null;
+  type: string;
+  transportType: string;
+  provisionType: string;
+  defaultRuleChainId: {
+    entityType: 'RULE_CHAIN';
+    id: string;
+  } | null;
+  defaultDashboardId: any;
+  defaultQueueName: string | null;
+  provisionDeviceKey: string | null;
+  firmwareId: any;
+  softwareId: any;
+  defaultEdgeRuleChainId: any;
+  externalId: any;
+  default: boolean;
+  profileData: {
+    configuration: {
+      type: string;
+    };
+    transportConfiguration: {
+      type: string;
+    };
+    provisionConfiguration: {
+      type: string;
+      provisionDeviceSecret: string | null;
+    };
+    alarms: any;
+  };
+}

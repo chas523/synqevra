@@ -6,6 +6,7 @@ import {
   NotFoundException,
   forwardRef,
   Inject,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   TenantFieldsDto,
@@ -22,11 +23,17 @@ import {
   JwtPayload,
   ThingsboardDefaultTenantProfileResponse,
   ThingsboardLoginResponse,
+  CreateRuleChainRequest,
+  RuleChainMetadata,
+  RuleChain,
+  DeviceProfile,
 } from './thingsboard.types';
 import { ConnectionService } from 'src/connection/connection.service';
 import { Thingsboard } from 'src/entities/thingsboard.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 @Injectable()
 export class ThingsboardService {
   private readonly logger = new Logger(ThingsboardService.name);
@@ -141,6 +148,28 @@ export class ThingsboardService {
         password,
       );
 
+      //create base rule chain
+      this.logger.log('Step 6: Creating base rule chain');
+      const newRuleChainId = await this.createBaseRuleChain(result.token);
+
+      //set rule chain as default for device profile
+      this.logger.log(
+        'Step 7: Setting rule chain as default for device profile',
+      );
+      await this.setRuleChainAsDefaultForDeviceProfile(
+        result.token,
+        newRuleChainId,
+      );
+
+      //save tokens to database
+      this.logger.log('Step 8: Saving tokens to database');
+      await this.saveTokensToDatabase(
+        userId,
+        result.token,
+        result.refreshToken,
+        thingsboardRepo,
+      );
+
       this.logger.log('ThingsBoard tenant registration completed successfully');
       return {
         success: true,
@@ -235,6 +264,123 @@ export class ThingsboardService {
     sysAdminAccessToken?: string,
   ) {
     return await this.rollbackChanges(tenantId, userId, sysAdminAccessToken);
+  }
+
+  private async createBaseRuleChain(accessToken: string) {
+    try {
+      //load base rule chain configuration
+      const baseRuleChainPath = path.join(
+        process.cwd(),
+        'src',
+        'thingsboard',
+        'base_rule_chain.json',
+      );
+      console.log('Bserulechain:', baseRuleChainPath);
+      const baseRuleChainData = JSON.parse(
+        fs.readFileSync(baseRuleChainPath, 'utf8'),
+      ) as RuleChain;
+      //create rule chain
+      const createRuleChainRequest: CreateRuleChainRequest = {
+        name: baseRuleChainData.ruleChain.name,
+        type: baseRuleChainData.ruleChain.type,
+        debugMode: baseRuleChainData.ruleChain.debugMode,
+      };
+
+      const createRuleChainUrl = `${this.THINGSBOARD_API_URL}/ruleChain`;
+      const ruleChainResponse = await firstValueFrom(
+        this.httpService.post<{ id: EntityId }>(
+          createRuleChainUrl,
+          createRuleChainRequest,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+
+      const ruleChainId = ruleChainResponse.data.id;
+      this.logger.log(`Created rule chain with ID: ${ruleChainId.id}`);
+
+      //update rule chain metadata
+      const ruleChainMetadata: RuleChainMetadata = {
+        ruleChainId: ruleChainId,
+        firstNodeIndex: baseRuleChainData.metadata.firstNodeIndex,
+        nodes: baseRuleChainData.metadata.nodes,
+        connections: baseRuleChainData.metadata.connections,
+        ruleChainConnections: baseRuleChainData.metadata.ruleChainConnections,
+      };
+
+      const updateMetadataUrl = `${this.THINGSBOARD_API_URL}/ruleChain/metadata`;
+      await firstValueFrom(
+        this.httpService.post(updateMetadataUrl, ruleChainMetadata, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      this.logger.log('Successfully updated rule chain metadata');
+      return ruleChainId;
+    } catch (error) {
+      this.logger.error('Failed to create base rule chain:', error);
+      throw new InternalServerErrorException(
+        'Failed to create base rule chain',
+      );
+    }
+  }
+
+  private async setRuleChainAsDefaultForDeviceProfile(
+    accessToken: string,
+    ruleChainId: EntityId,
+  ) {
+    try {
+      //get default device profile info
+      const deviceProfileInfoUrl = `${this.THINGSBOARD_API_URL}/deviceProfileInfo/default`;
+      const deviceProfileInfoResponse = await firstValueFrom(
+        this.httpService.get<{ id: EntityId }>(deviceProfileInfoUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const deviceProfileId = deviceProfileInfoResponse.data.id;
+      this.logger.log(`Got default device profile ID: ${deviceProfileId.id}`);
+
+      //get full device profile data
+      const deviceProfileUrl = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId.id}`;
+      const deviceProfileResponse = await firstValueFrom(
+        this.httpService.get<DeviceProfile>(deviceProfileUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const deviceProfile = deviceProfileResponse.data;
+      this.logger.log('Retrieved device profile data');
+
+      //update device profile with default rule chain
+      const updatedDeviceProfile: DeviceProfile = {
+        ...deviceProfile,
+        defaultRuleChainId: {
+          entityType: 'RULE_CHAIN',
+          id: ruleChainId.id,
+        },
+      };
+
+      const updateDeviceProfileUrl = `${this.THINGSBOARD_API_URL}/deviceProfile`;
+      await firstValueFrom(
+        this.httpService.post(updateDeviceProfileUrl, updatedDeviceProfile, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      this.logger.log(
+        'Successfully set rule chain as default for device profile',
+      );
+    } catch (error) {
+      this.logger.error(
+        'Failed to set rule chain as default for device profile:',
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Failed to set rule chain as default for device profile',
+      );
+    }
   }
 
   private async deleteTenant(tenantId: string, sysAdminAccessToken: string) {
@@ -435,5 +581,131 @@ export class ThingsboardService {
         'Failed to activate tenant admin account',
       );
     }
+  }
+
+  private async saveTokensToDatabase(
+    userId: number,
+    accessToken: string,
+    refreshToken: string,
+    thingsboardRepo?: Repository<Thingsboard>,
+  ): Promise<void> {
+    const repository = thingsboardRepo || this.thingsboardRepository;
+
+    const thingsboardEntity = await repository.findOne({
+      where: { connection: { user: { id: userId } } },
+      relations: ['connection', 'connection.user'],
+    });
+
+    if (!thingsboardEntity) {
+      throw new NotFoundException(
+        `ThingsBoard entity not found for user ${userId}`,
+      );
+    }
+
+    await repository.update(thingsboardEntity.id, {
+      accessToken,
+      refreshToken,
+    });
+
+    this.logger.log(`Tokens saved for user ${userId}`);
+  }
+
+  public async getUser(accessToken?: string): Promise<any> {
+    try {
+      if (!accessToken) {
+        throw new BadRequestException('Access token is required');
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/auth/user`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        'Failed to fetch user:',
+        (error as Error)?.message || 'Unknown error',
+      );
+
+      // Handle specific error cases
+      if (error instanceof AxiosError) {
+        const status = error.response?.status;
+        const errorMessage = error.response?.data?.message || error.message;
+        if (status === 401) {
+          throw new UnauthorizedException(
+            errorMessage || 'Invalid or expired access token',
+          );
+        }
+        if (status === 403) {
+          throw new BadRequestException(errorMessage || 'Access forbidden');
+        }
+      }
+
+      throw error;
+    }
+  }
+  public async getTokens(userId: number) {
+    console.log('UserID:', userId);
+    const returnval = await this.thingsboardRepository
+      .createQueryBuilder('thingsboard')
+      .innerJoin('thingsboard.connection', 'connection')
+      .innerJoin('connection.user', 'user')
+      .where('user.id = :userId', { userId })
+      .select(['thingsboard.accessToken', 'thingsboard.refreshToken'])
+      .getOne();
+    console.log('Returval', returnval);
+    return returnval;
+  }
+
+  public refresh(userId: number) {
+    this.logger.log('REFRESHING!!!!!!');
+    return this.getTokens(userId).then(async (tokens) => {
+      if (!tokens?.refreshToken) {
+        throw new BadRequestException('No refresh token found for user');
+      }
+      const url = `${this.THINGSBOARD_API_URL}/auth/token`;
+      try {
+        const response = await firstValueFrom(
+          this.httpService.post<{ token: string; refreshToken: string }>(url, {
+            refreshToken: tokens.refreshToken,
+          }),
+        );
+        // Optionally update tokens in DB
+        await this.saveTokensToDatabase(
+          userId,
+          response.data.token,
+          response.data.refreshToken,
+        );
+        return {
+          accessToken: response.data.token,
+          refreshToken: response.data.refreshToken,
+        };
+      } catch (error) {
+        this.logger.error(
+          'Failed to refresh token:',
+          (error as any)?.message || 'Unknown error',
+        );
+        // Check if refresh token expired (ThingsBoard returns 401 or 400)
+        if (
+          error instanceof AxiosError &&
+          (error.response?.status === 401 || error.response?.status === 400)
+        ) {
+          throw new BadRequestException('Refresh token expired or invalid');
+        }
+        throw new BadRequestException('Failed to refresh token');
+      }
+    });
+  }
+
+  public async loginWithTokens(
+    userId: number,
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<void> {
+    await this.saveTokensToDatabase(userId, accessToken, refreshToken);
   }
 }
