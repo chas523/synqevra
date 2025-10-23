@@ -7,7 +7,12 @@ import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'http://localhost:3000',
+    //frontend url, super-admin url, thingsboard url (for rulechain to post)
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3002',
+      'http://localhost:8088',
+    ],
     credentials: true,
   });
   const config = new DocumentBuilder()

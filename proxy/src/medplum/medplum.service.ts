@@ -8,17 +8,20 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Medplum } from '../entities/medplum.entity';
-import { Repository } from 'typeorm';
+import { Repository, WithId } from 'typeorm';
 import { CreateProjectDto } from './dtos/createProjectDto';
 import {
   LoginAuthenticationResponse,
   MedplumClient,
   MemoryStorage,
   ClientStorage,
+  ResourceArray,
 } from '@medplum/core';
 import process from 'node:process';
 import { ConnectionService } from '../connection/connection.service';
 import { webcrypto } from 'node:crypto';
+import { Device, Patient } from '@medplum/fhirtypes';
+import { Proxy } from 'src/proxy/proxy';
 
 @Injectable()
 export class MedplumService {
@@ -27,6 +30,7 @@ export class MedplumService {
     private readonly medplumRepository: Repository<Medplum>,
     @Inject(forwardRef(() => ConnectionService))
     private readonly connectionService: ConnectionService,
+    private readonly medplum: Proxy,
   ) {}
 
   /**
@@ -186,5 +190,92 @@ export class MedplumService {
     });
 
     return await medplumRepository.save(medplumEntity);
+  }
+  async createDevice(deviceDto: { identifier: string }) {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+
+    const device: Device = {
+      resourceType: 'Device',
+      id: deviceDto.identifier,
+      identifier: [
+        {
+          system: 'http://localhost:8088/entities/devices/',
+          value: deviceDto.identifier,
+        },
+      ],
+    };
+
+    try {
+      const created = await medplum.createResource(device);
+      return created;
+    } catch (error: any) {
+      if (error?.status === 400) {
+        throw new BadRequestException(error.message || 'Bad Request');
+      }
+      if (error?.status === 401) {
+        throw new BadRequestException('Unauthorized');
+      }
+      throw new InternalServerErrorException(
+        error.message || 'Internal Server Error',
+      );
+    }
+  }
+
+  async getPatientList() {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+
+    const patients = await medplum.searchResources('Patient');
+
+    return patients;
+  }
+  async assignPatientToDevice(patientId: string, deviceId: string) {
+    const client: MedplumClient = await this.medplum.initMedplum();
+
+    const device = await this.getDevice(deviceId);
+
+    const patient = await client.readResource('Patient', patientId);
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+
+    const deviceWithPatient: Device = {
+      ...device,
+      patient: {
+        reference: `Patient/${patient.id}`,
+        display:
+          patient.name && patient.name[0]
+            ? `${patient.name[0].given?.join(' ') ?? ''} ${patient.name[0].family ?? ''}`.trim()
+            : '',
+      },
+    };
+
+    try {
+      const updatedDevice = await client.updateResource(deviceWithPatient);
+      return updatedDevice;
+    } catch (error: any) {
+      if (error?.status === 400) {
+        throw new BadRequestException(error.message || 'Bad Request');
+      }
+      if (error?.status === 401) {
+        throw new BadRequestException('Unauthorized');
+      }
+      throw new InternalServerErrorException(
+        error.message || 'Internal Server Error',
+      );
+    }
+  }
+
+  async getDevice(deviceId: string) {
+    const client: MedplumClient = await this.medplum.initMedplum();
+    const tbUrl = process.env.TB_URL as string;
+
+    const device = (await client.searchOne('Device', {
+      identifier: `${tbUrl}|${deviceId}`,
+    })) as Device | null;
+
+    if (!device) {
+      throw new NotFoundException('Device not found');
+    }
+    return device;
   }
 }

@@ -153,10 +153,10 @@ export class ConnectionService {
       const pendingUserRepository =
         queryRunner.manager.getRepository(PendingUser);
       //uncomment if you're done with testing
-      // await this.pendingUserService.deletePendingUserById(
-      //   Number(pendingUserId),
-      //   pendingUserRepository,
-      // );
+      await this.pendingUserService.deletePendingUserById(
+        Number(pendingUserId),
+        pendingUserRepository,
+      );
 
       //create user
       const newUserDto: CreateUserDto = {

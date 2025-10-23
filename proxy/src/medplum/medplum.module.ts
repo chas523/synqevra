@@ -6,12 +6,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from '../entities/connection.entity';
 import { UsersModule } from '../users/users.module';
 import { ConnectionModule } from 'src/connection/connection.module';
+import { ProxyModule } from 'src/proxy/proxy.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Medplum, Connection]),
     UsersModule,
     forwardRef(() => ConnectionModule),
+    ProxyModule,
   ],
   controllers: [MedplumController],
   providers: [MedplumService],

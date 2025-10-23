@@ -83,14 +83,10 @@ export class AuthService {
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
-    console.log('cred ok');
-    // Próba logowania do ThingsBoard podczas walidacji
+
     try {
-      console.log('cred ok2');
       await this.thingsboardService.thingsboardLogin(user.id, email, password);
-      console.log('cred ok3');
     } catch (error) {
-      // Logowanie do ThingsBoard nieudane, ale nie przerywa procesu logowania
       console.warn('ThingsBoard login failed during validation:', error);
     }
 
@@ -155,6 +151,7 @@ export class AuthService {
   }
 
   async logout(userId: number, response: Response) {
+    console.log('logout triggered');
     await this.usersService.updateHashedRt(userId, null);
 
     response.clearCookie('access_token');
