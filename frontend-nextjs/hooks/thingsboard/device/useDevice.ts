@@ -22,10 +22,7 @@ export function useDevice(deviceId: string | undefined): UseDeviceResult {
     mutate: refreshDevice,
   } = useSWR<DeviceDetails>(
     deviceId ? `device-${deviceId}` : null,
-    deviceId ? () => {
-      console.log('📱 DEVICE FETCH CALLED for:', deviceId);
-      return DeviceService.fetchDevice(deviceId);
-    } : null,
+    deviceId ? () => DeviceService.fetchDevice(deviceId) : null,
   );
 
   //device attributes
@@ -36,10 +33,7 @@ export function useDevice(deviceId: string | undefined): UseDeviceResult {
     mutate: refreshAttributes,
   } = useSWR<DeviceAttributes>(
     deviceId ? `device-attributes-${deviceId}` : null,
-    deviceId ? () => {
-      console.log('🔧 DEVICE ATTRIBUTES FETCH CALLED for:', deviceId);
-      return DeviceService.fetchDeviceSharedAttributes(deviceId);
-    } : null,
+    deviceId ? () => DeviceService.fetchDeviceSharedAttributes(deviceId) : null,
   );
 
   const error = deviceError || attributesError;
