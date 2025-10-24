@@ -3,7 +3,7 @@ import { PendingUserStatus } from 'src/entities/pending-user.entity';
 export interface RequestedAccessUsersRequestOptions {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  status: PendingUserStatus;
+  status?: PendingUserStatus;
   limit?: number;
   afterRef?: string;
   beforeRef?: string;
