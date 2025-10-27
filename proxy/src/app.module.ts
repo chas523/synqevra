@@ -26,7 +26,8 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     TypeOrmModule.forRootAsync({ useFactory: dbConfig }),
     ThrottlerModule.forRoot({
-      throttlers: [{ limit: 4, ttl: seconds(10) }],
+      //modify later, for dev purposes it's set to 10
+      throttlers: [{ limit: 10, ttl: seconds(10) }],
       errorMessage: 'Too many requests, please try again later.',
     }),
     ConnectionModule,
