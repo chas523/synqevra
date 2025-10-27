@@ -1,0 +1,102 @@
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useLogin } from "@/hooks/auth/useAuth";
+import type { LoginFormData } from "@/types/authTypes";
+import { LoadingButton } from "../atoms";
+import { ErrorMessage, FormField } from "../molecules";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+
+const LoginForm = () => {
+  const router = useRouter();
+  const { login, isLoading, error, success } = useLogin();
+
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  });
+  // Handle successful registration
+  useEffect(() => {
+    if (success) {
+      router.push("/devices");
+    }
+  }, [success, router]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev: LoginFormData) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      return;
+    }
+
+    if (!formData.email.includes("@")) {
+      return;
+    }
+
+    await login(formData);
+  };
+
+  return (
+    <div className="max-w-sm w-full mx-auto">
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <Card className="py-4">
+          <CardHeader className="relative text-center pb-3">
+            <CardTitle className="text-xl">Log in to account</CardTitle>
+            <CardDescription className="text-sm">
+              Enter your credentials to log in to this app
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="flex flex-col pt-0 gap-2">
+            <FormField
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="email@domain.com"
+              required
+            />
+            <FormField
+              label="Password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="•••••"
+              type="password"
+              required
+            />
+          </CardContent>
+          {error && <ErrorMessage message={error} />}
+
+          <CardFooter>
+            <LoadingButton
+              type="submit"
+              className="w-full h-9"
+              isLoading={isLoading}
+              textBeforeClick="Log in"
+              textAfterClick="Logging in..."
+            />
+          </CardFooter>
+        </Card>
+      </form>
+    </div>
+  );
+};
+
+export default LoginForm;
