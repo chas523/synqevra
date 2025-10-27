@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { extractErrorMessage } from "@/lib/utils";
+import { PatientShort } from "@/types/patientTypes";
 import Label from "../atoms/Label";
 import LoadingButton from "../atoms/LoadingButton";
 import ErrorMessage from "../molecules/ErrorMessage";
@@ -21,13 +22,13 @@ const AssignTbDeviceToMedplumPatient = (
   } = medplumPatientDeviceHook;
 
   const patientOptions: SelectOption[] = patientList
-    ? patientList.map((patient) => ({
+    ? patientList.map((patient: PatientShort) => ({
         value: patient.id,
-        label: `${(patient.given ?? []).join(" ")} ${patient.family}`,
+        label: `${(patient.name[0].given ?? []).join(" ")} ${patient.name[0].family}`,
         description: `ID: ${patient.id}`,
       }))
     : [];
-
+  console.log(patientList);
   const handleAssignClick = async () => {
     if (selectedPatientId && onAssignPatient) {
       try {

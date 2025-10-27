@@ -1,13 +1,11 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import useSWR from "swr";
-import {
-  PatientNames,
-  PatientService,
-} from "@/lib/services/medplumService/patientService";
+import { PatientService } from "@/lib/services/medplumService/patientService";
 import { DeviceService } from "@/lib/services/thingsboardServices/deviceService";
+import { PatientName, PatientShort } from "@/types/patientTypes";
 
 export interface UseMedplumPatientDeviceResult {
-  patientList: PatientNames | null;
+  patientList: PatientShort[] | null;
   isLoadingPatients: boolean;
   patientsError: Error | null;
   refreshPatients: () => void;

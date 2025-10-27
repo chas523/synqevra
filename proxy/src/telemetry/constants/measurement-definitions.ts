@@ -27,6 +27,11 @@ export const CODING_MAP: Record<string, Coding> = {
     code: '8462-4',
     display: 'Diastolic blood pressure',
   },
+  oxygen_saturation: {
+    system: 'http://loinc.org',
+    code: '59408-5',
+    display: 'Oxygen saturation in Arterial blood by Pulse oximetry',
+  },
 };
 
 export const UNIT_MAP: Record<string, QuantityUnit> = {
@@ -50,5 +55,10 @@ export const UNIT_MAP: Record<string, QuantityUnit> = {
     unit: 'mmHg',
     system: 'http://unitsofmeasure.org',
     code: 'mm[Hg]',
+  },
+  oxygen_saturation: {
+    unit: '%',
+    system: 'http://unitsofmeasure.org',
+    code: '%',
   },
 };
