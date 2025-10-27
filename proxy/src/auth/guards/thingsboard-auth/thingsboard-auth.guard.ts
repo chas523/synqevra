@@ -35,8 +35,12 @@ export class ThingsboardAuthGuard implements CanActivate {
     //check expiration time (coded with jwt)
     const decoded: any = accessToken ? jwt.decode(accessToken) : null;
     const needRefresh = !decoded || this.isExpiredOrNear(decoded?.exp);
-
+    console.log(
+      'Token exp:',
+      decoded?.exp ? new Date(decoded.exp * 1000).toISOString() : 'N/A',
+    );
     if (needRefresh) {
+      console.log('needRefresh');
       //refresh
       try {
         const refreshedTokens = await this.thingsboardService.refresh(user.id);
