@@ -1,3 +1,4 @@
+import { Patient } from "@medplum/fhirtypes";
 import { proxyApi } from "@/lib/api/api";
 import { PatientName, PatientShort } from "@/types/patientTypes";
 import type {} from "@/types/thingsboardDeviceTypes";
@@ -10,10 +11,10 @@ import type {} from "@/types/thingsboardDeviceTypes";
 // }
 
 export class PatientService {
-  public static async fetchPatients(): Promise<PatientShort[]> {
+  public static async fetchPatients(): Promise<Patient[]> {
     const { data } = await proxyApi.get(`/medplum/patient`);
     return Array.isArray(data)
-      ? data.map((p: PatientShort) => ({
+      ? data.map((p: Patient) => ({
           ...p,
           name: p.name ?? [
             { family: "UnknownLastName", given: ["UnknownName"] },
@@ -27,6 +28,10 @@ export class PatientService {
     deviceId: string,
   ): Promise<void> {
     await proxyApi.post(`/medplum/patient/${patientId}/device/${deviceId}`);
+  }
+
+  public static async createPatient(patientData: Patient): Promise<void> {
+    await proxyApi.post(`/medplum/patient`, patientData);
   }
 }
 const mocked = [

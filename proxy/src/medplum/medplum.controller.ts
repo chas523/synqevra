@@ -3,6 +3,7 @@ import { MedplumService } from './medplum.service';
 import { CreateProjectDto } from './dtos/createProjectDto';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import type { CurrentUser } from '../auth/types/current-user';
+import type { Patient } from '@medplum/fhirtypes';
 
 @Controller('medplum')
 export class MedplumController {
@@ -30,6 +31,11 @@ export class MedplumController {
   @Get('patient')
   async getPatientList() {
     return this.medplumService.getPatientList();
+  }
+
+  @Post('patient')
+  async createPatient(@Body() patientDto: Patient) {
+    return this.medplumService.createPatient(patientDto);
   }
 
   @Post('patient/:patientId/device/:deviceId')

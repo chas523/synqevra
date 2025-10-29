@@ -5,7 +5,7 @@ import { extractErrorMessage } from "@/lib/utils";
 import { EmptyState } from "../atoms";
 import { ErrorMessage } from "../molecules";
 import LoadingOverlayInformation from "../molecules/LoadingOverlayInformation";
-import PatientsTable from "../organisms/PatientsTable";
+import PatientsGrid from "../organisms/PatientsGrid";
 
 const PatientsTemplate = (medplumPatients: UseMedplumPatientResult) => {
   const { patientList, isLoadingPatients, patientsError } = medplumPatients;
@@ -31,6 +31,6 @@ const PatientsTemplate = (medplumPatients: UseMedplumPatientResult) => {
       />
     );
   }
-  return <PatientsTable patients={patientList} />;
+  return <PatientsGrid patients={patientList} />;
 };
 export default PatientsTemplate;

@@ -22,6 +22,7 @@ import { ConnectionService } from '../connection/connection.service';
 import { webcrypto } from 'node:crypto';
 import { Device, Patient } from '@medplum/fhirtypes';
 import { Proxy } from 'src/proxy/proxy';
+import { getErrorMessage } from 'src/utils/error.utils';
 
 @Injectable()
 export class MedplumService {
@@ -277,5 +278,24 @@ export class MedplumService {
       throw new NotFoundException('Device not found');
     }
     return device;
+  }
+
+  async createPatient(patientDto: Patient) {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+
+    try {
+      const created = await medplum.createResource(patientDto);
+      return created;
+    } catch (error: any) {
+      if (error?.status === 400) {
+        throw new BadRequestException(getErrorMessage(error) || 'Bad Request');
+      }
+      if (error?.status === 401) {
+        throw new BadRequestException('Unauthorized');
+      }
+      throw new InternalServerErrorException(
+        error.message || 'Internal Server Error',
+      );
+    }
   }
 }

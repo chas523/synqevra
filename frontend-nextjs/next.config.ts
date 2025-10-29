@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["localhost"],
   },
+  experimental: {
+    optimizePackageImports: ["@mantine/core", "@mantine/hooks"],
+  },
 };
 
 export default nextConfig;
