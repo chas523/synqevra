@@ -7,7 +7,7 @@ import { DeviceService } from "@/lib/services/thingsboardServices/deviceService"
 import { PatientName, PatientShort } from "@/types/patientTypes";
 
 export interface UseMedplumPatientResult {
-  patientList: PatientShort[] | null;
+  patientList: Patient[] | null;
   isLoadingPatients: boolean;
   patientsError: Error | null;
   refreshPatients: () => void;
