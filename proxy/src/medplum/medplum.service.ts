@@ -8,29 +8,30 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Medplum } from '../entities/medplum.entity';
-import { Repository, WithId } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProjectDto } from './dtos/createProjectDto';
 import {
   LoginAuthenticationResponse,
   MedplumClient,
   MemoryStorage,
   ClientStorage,
-  ResourceArray,
 } from '@medplum/core';
 import process from 'node:process';
 import { ConnectionService } from '../connection/connection.service';
 import { webcrypto } from 'node:crypto';
-import { Device, Patient } from '@medplum/fhirtypes';
-import { Proxy } from 'src/proxy/proxy';
+import { Device } from '@medplum/fhirtypes';
+import { MedplumConnectionService } from '../connection/medplum-connection.service';
 
 @Injectable()
 export class MedplumService {
   constructor(
     @InjectRepository(Medplum)
     private readonly medplumRepository: Repository<Medplum>,
+
     @Inject(forwardRef(() => ConnectionService))
     private readonly connectionService: ConnectionService,
-    private readonly medplum: Proxy,
+
+    private readonly medplum: MedplumConnectionService,
   ) {}
 
   /**
@@ -191,8 +192,8 @@ export class MedplumService {
 
     return await medplumRepository.save(medplumEntity);
   }
-  async createDevice(deviceDto: { identifier: string }) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async createDevice(deviceDto: { identifier: string }, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
 
     const device: Device = {
       resourceType: 'Device',
@@ -221,17 +222,20 @@ export class MedplumService {
     }
   }
 
-  async getPatientList() {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
-
+  async getPatientList(userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
     const patients = await medplum.searchResources('Patient');
 
     return patients;
   }
-  async assignPatientToDevice(patientId: string, deviceId: string) {
-    const client: MedplumClient = await this.medplum.initMedplum();
+  async assignPatientToDevice(
+    patientId: string,
+    deviceId: string,
+    userId: number,
+  ) {
+    const client: MedplumClient = await this.medplum.initMedplum(userId);
 
-    const device = await this.getDevice(deviceId);
+    const device = await this.getDevice(deviceId, client);
 
     const patient = await client.readResource('Patient', patientId);
     if (!patient) {
@@ -265,8 +269,7 @@ export class MedplumService {
     }
   }
 
-  async getDevice(deviceId: string) {
-    const client: MedplumClient = await this.medplum.initMedplum();
+  async getDevice(deviceId: string, client: MedplumClient) {
     const tbUrl = process.env.TB_URL as string;
 
     const device = (await client.searchOne('Device', {

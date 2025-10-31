@@ -8,16 +8,16 @@ import {
   UNIT_MAP,
 } from '../telemetry/constants/measurement-definitions';
 import { PostSummaryDto } from './dtos/postSummaryDto';
-import { Proxy } from './proxy';
+import { MedplumConnectionService } from '../connection/medplum-connection.service';
 
 @Injectable()
 export class ProxyService {
-  constructor(private readonly medplum: Proxy) {}
+  constructor(private readonly medplum: MedplumConnectionService) {}
 
   private async getDeviceProfile(
     deviceId: string,
   ): Promise<{ deviceId: string; patientRef: string }> {
-    const client: MedplumClient = await this.medplum.initMedplum();
+    const client: MedplumClient = await this.medplum.initMedplum(1);
     const tbUrl = process.env.TB_URL as string;
 
     const bundle = (await client.search('Device', {
@@ -72,7 +72,7 @@ export class ProxyService {
   }
 
   async postTelemetry(body: TelemetryDto) {
-    const client: MedplumClient = await this.medplum.initMedplum();
+    const client: MedplumClient = await this.medplum.initMedplum(1);
     const data = await this.getDeviceProfile(body.deviceId);
     const { deviceId, patientRef } = data;
 

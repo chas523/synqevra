@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Thingsboard } from 'src/entities/thingsboard.entity';
-import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -27,7 +26,6 @@ export class ThingsboardDeviceService {
 
   constructor(
     @InjectRepository(Thingsboard)
-    private readonly thingsboardRepository: Repository<Thingsboard>,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly medplumService: MedplumService,
@@ -44,7 +42,7 @@ export class ThingsboardDeviceService {
 
     if (error instanceof AxiosError) {
       const status = error.response?.status;
-      let errorMessage = 'Unknown error';
+      let errorMessage: string;
 
       if (
         error.response?.data &&
@@ -54,7 +52,7 @@ export class ThingsboardDeviceService {
         errorMessage = String(
           (error.response.data as { message: unknown }).message,
         );
-      } else if (error instanceof Error) {
+      } else {
         errorMessage = error.message;
       }
 
@@ -110,6 +108,7 @@ export class ThingsboardDeviceService {
   async createDevice(
     accessToken: string,
     payload: CreateDeviceRequest,
+    userId: number,
   ): Promise<Device> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/device`;
@@ -119,9 +118,12 @@ export class ThingsboardDeviceService {
         }),
       );
       try {
-        await this.medplumService.createDevice({
-          identifier: response.data.id.id,
-        });
+        await this.medplumService.createDevice(
+          {
+            identifier: response.data.id.id,
+          },
+          userId,
+        );
       } catch (medplumError) {
         //if medplum fails - we're rollbacking creation of thingsboard device
         await this.deleteDevice(accessToken, response.data.id.id);

@@ -14,7 +14,6 @@ import { Thingsboard } from '../entities/thingsboard.entity';
 import { Medplum } from '../entities/medplum.entity';
 import { PendingUser } from '../entities/pending-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
 import * as crypto from 'crypto';
 import { PendingUserService } from 'src/pending-user/pending-user.service';
 import { PendingUserStatus } from 'src/entities/pending-user.entity';
@@ -30,13 +29,16 @@ export class ConnectionService {
   constructor(
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
+
     private readonly usersService: UsersService,
     private readonly pendingUserService: PendingUserService,
-    @Inject(forwardRef(() => ThingsboardService))
-    private readonly thingsboardService: ThingsboardService,
+
     @Inject(forwardRef(() => MedplumService))
     private readonly medplumService: MedplumService,
-    private readonly dataSource: DataSource, // <--- INJECTED HERE
+    @Inject(forwardRef(() => ThingsboardService))
+    private readonly thingsboardService: ThingsboardService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async createConnection(

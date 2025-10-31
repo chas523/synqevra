@@ -11,10 +11,10 @@ import { MedplumModule } from 'src/medplum/medplum.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Thingsboard]),
     HttpModule,
     forwardRef(() => ConnectionModule),
-    TypeOrmModule.forFeature([Thingsboard]),
-    forwardRef(() => MedplumModule),
+    MedplumModule,
   ],
   providers: [ThingsboardService, ThingsboardDeviceService],
   controllers: [ThingsboardController],

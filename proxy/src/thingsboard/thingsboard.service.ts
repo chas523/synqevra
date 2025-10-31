@@ -16,7 +16,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as jwt from 'jsonwebtoken';
 import { AxiosError } from 'axios';
-import { getErrorStatus, getErrorMessage } from './../utils/error.utils';
+import { getErrorStatus, getErrorMessage } from '../utils/error.utils';
 import { ConfigService } from '@nestjs/config';
 import {
   EntityId,
@@ -41,8 +41,10 @@ export class ThingsboardService {
   constructor(
     @InjectRepository(Thingsboard)
     private readonly thingsboardRepository: Repository<Thingsboard>,
+
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+
     @Inject(forwardRef(() => ConnectionService))
     private readonly connectionService: ConnectionService,
   ) {}
