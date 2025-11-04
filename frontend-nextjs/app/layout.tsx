@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { createTheme, MantineProvider } from "@mantine/core";
-import { MedplumClient } from "@medplum/core";
-import { MedplumProvider } from "@medplum/react";
+import { MantineProvider } from "@mantine/core";
 import SidebarLayout from "@/components/organisms/SidebarLayout";
 import MedplumProviderWrapper from "@/lib/config/MedplumProviderWrapper";
 

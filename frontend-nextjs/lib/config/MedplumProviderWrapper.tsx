@@ -3,6 +3,7 @@
 import { MedplumClient } from "@medplum/core";
 import { MedplumProvider } from "@medplum/react";
 
+//adjust backend endpoint if needed
 const medplum = new MedplumClient({
   baseUrl: "http://localhost:3003/fhir",
 });

@@ -4,9 +4,13 @@ import { PatientContactItem } from "../molecules/PatientContactItem";
 
 interface PatientContactInfoProps {
   patient: Patient;
+  variant?: "compact" | "default" | "detailed";
 }
 
-const PatientContactInfo = ({ patient }: PatientContactInfoProps) => {
+const PatientContactInfo = ({
+  patient,
+  variant = "compact",
+}: PatientContactInfoProps) => {
   const phoneContact = patient.telecom?.find((t) => t.system === "phone");
   const emailContact = patient.telecom?.find((t) => t.system === "email");
 
@@ -29,6 +33,7 @@ const PatientContactInfo = ({ patient }: PatientContactInfoProps) => {
           value={phoneContact.value}
           iconBgColor="bg-green-100"
           iconColor="text-green-600"
+          variant={variant}
         />
       )}
 
@@ -39,6 +44,7 @@ const PatientContactInfo = ({ patient }: PatientContactInfoProps) => {
           value={emailContact.value}
           iconBgColor="bg-blue-100"
           iconColor="text-blue-600"
+          variant={variant}
         />
       )}
 
@@ -49,6 +55,7 @@ const PatientContactInfo = ({ patient }: PatientContactInfoProps) => {
           value={addressText}
           iconBgColor="bg-orange-100"
           iconColor="text-orange-600"
+          variant={variant}
         />
       )}
     </div>

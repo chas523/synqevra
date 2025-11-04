@@ -24,3 +24,5 @@ export type { ProgressMessageProps } from "./ProgressMessage";
 export { default as ProgressMessage } from "./ProgressMessage";
 export type { StatusIconProps } from "./StatusIcon";
 export { default as StatusIcon } from "./StatusIcon";
+export { default as PatientHealthcareProviders } from "./PatientHealthcareProviders";
+export { default as PatientCommunicationPreferences } from "./PatientCommunicationPreferences";

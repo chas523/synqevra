@@ -41,6 +41,7 @@ export function PatientAvatarCarousel({
           <AvatarImage
             src={currentPhoto?.url || currentPhoto?.data}
             alt={fullName}
+            className="object-cover w-full h-full"
           />
           <AvatarFallback className="bg-gradient-to-br from-cyan-100 to-blue-100 text-2xl font-bold text-cyan-700">
             {initials || <User className="h-10 w-10" />}

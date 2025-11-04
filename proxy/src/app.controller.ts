@@ -11,6 +11,12 @@ export class AppController {
     private readonly proxy: Proxy,
   ) {}
 
+  private readonly allowedPatterns = [
+    /^\/R4\/StructureDefinition\/\$[\w-]+$/, // /R4/StructureDefinition/$expand-profile
+    /^\/R4\/StructureDefinition\/[a-zA-Z0-9.-]+$/, // /R4/StructureDefinition/some-profile-id
+    /^\/R4\/StructureDefinition$/, // /R4/StructureDefinition (GET collection)
+  ];
+
   @Get('hello')
   getHello(): string {
     console.log('hello');
@@ -22,9 +28,21 @@ export class AppController {
     const medplum = await this.proxy.initMedplum();
     const accessToken = medplum.getAccessToken();
 
+    const cleanPath = req.url.replace(/^(\/fhir)+/, '').split('?')[0];
     const targetUrl = `${process.env.MEDPLUM_URL}${req.url.replace(/^\/fhir/, '')}`;
     const method = req.method;
 
+    //validate allowed patterns
+    const isAllowed = this.allowedPatterns.some((pattern) =>
+      pattern.test(cleanPath),
+    );
+    if (!isAllowed) {
+      return res.status(403).send({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: 'The requested URL is not allowed.',
+      });
+    }
     //we need to differentiate between application/json and image/png
     const contentType = req.headers['content-type'] || '';
     const isJson = contentType.includes('application/json');

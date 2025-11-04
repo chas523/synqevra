@@ -4,9 +4,13 @@ import { PatientInfoItem } from "../molecules/PatientInfoItem";
 
 interface PatientPersonalInfoProps {
   patient: Patient;
+  variant?: "compact" | "default" | "detailed";
 }
 
-const PatientPersonalInfo = ({ patient }: PatientPersonalInfoProps) => {
+const PatientPersonalInfo = ({
+  patient,
+  variant = "compact",
+}: PatientPersonalInfoProps) => {
   const age = patient.birthDate
     ? new Date().getFullYear() - new Date(patient.birthDate).getFullYear()
     : null;
@@ -24,10 +28,18 @@ const PatientPersonalInfo = ({ patient }: PatientPersonalInfoProps) => {
   return hasPersonalInfo ? (
     <div className="space-y-0.1">
       {age !== null && (
-        <PatientInfoItem label="Age" value={`${age} years old`} />
+        <PatientInfoItem
+          label="Age"
+          value={`${age} years old`}
+          variant={variant}
+        />
       )}
       {genderDisplay && (
-        <PatientInfoItem label="Gender" value={genderDisplay} />
+        <PatientInfoItem
+          label="Gender"
+          value={genderDisplay}
+          variant={variant}
+        />
       )}
       {patient.birthDate && (
         <PatientInfoItem
@@ -38,6 +50,7 @@ const PatientPersonalInfo = ({ patient }: PatientPersonalInfoProps) => {
             year: "numeric",
           })}
           icon={Calendar}
+          variant={variant}
         />
       )}
       {maritalStatus && (
@@ -45,6 +58,7 @@ const PatientPersonalInfo = ({ patient }: PatientPersonalInfoProps) => {
           label="Marital Status"
           value={maritalStatus}
           icon={Heart}
+          variant={variant}
         />
       )}
     </div>

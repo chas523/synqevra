@@ -229,6 +229,29 @@ export class MedplumService {
 
     return patients;
   }
+
+  async getPatientById(id: string) {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+
+    const patient = await medplum.readResource('Patient', id);
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+    return patient;
+  }
+
+  async updatePatient(id: string, patientDto: Patient) {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+
+    const patient = await medplum.readResource('Patient', id);
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+    const updatedPatient = await medplum.updateResource(patientDto);
+
+    return updatedPatient;
+  }
+
   async assignPatientToDevice(patientId: string, deviceId: string) {
     const client: MedplumClient = await this.medplum.initMedplum();
 
@@ -297,5 +320,16 @@ export class MedplumService {
         error.message || 'Internal Server Error',
       );
     }
+  }
+
+  async getPatientObservations(id: string, count: number = 20) {
+    const medplum: MedplumClient = await this.medplum.initMedplum();
+    const observations = await medplum.searchResources('Observation', {
+      _count: count,
+      _sort: '-_lastUpdated',
+      _total: 'accurate',
+      subject: `Patient/${id}`,
+    });
+    return observations;
   }
 }

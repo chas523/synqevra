@@ -76,7 +76,7 @@ const PatientCard = ({ patient }: PatientCardProps) => {
           className="cursor-pointer w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white transition-all duration-300 shadow-md hover:shadow-lg font-semibold text-sm flex-shrink-0"
           size="sm"
           onClick={() => {
-            router.push(`/patient/${patient.id}`);
+            router.push(`/patients/${patient.id}`);
           }}
         >
           View Full Profile

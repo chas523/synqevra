@@ -8,15 +8,13 @@ import type { DeviceParameterLimits } from "@/types/deviceParameterTypes";
 
 export const useDeviceDetail = (deviceId: string) => {
   const router = useRouter();
-  
+
   const deviceHook = useDevice(deviceId);
   const updateHook = useUpdateDeviceAttributes(deviceId);
   const medplumPatientDeviceHook = useMedplumPatientDevice(deviceId);
   const medplumDeviceHook = useMedplumDevice(deviceId);
 
-
   const [limits, setLimits] = useState<DeviceParameterLimits>({});
-
 
   const currentLimits = useMemo(() => {
     return (
@@ -28,11 +26,9 @@ export const useDeviceDetail = (deviceId: string) => {
   const isLoading = deviceHook.isLoading || medplumDeviceHook.isLoadingDevice;
   const hasParameters = Object.keys(limits).length > 0;
 
-
   useEffect(() => {
     setLimits(currentLimits);
   }, [currentLimits]);
-
 
   const handleBackToList = useCallback(() => {
     router.push("/devices");
@@ -45,62 +41,61 @@ export const useDeviceDetail = (deviceId: string) => {
     });
   }, []);
 
-  const handleRemoveSpecificThreshold = useCallback((
-    parameterKey: string,
-    thresholdType: string,
-  ) => {
-    setLimits((prev) => {
-      if (!prev[parameterKey]) return prev;
+  const handleRemoveSpecificThreshold = useCallback(
+    (parameterKey: string, thresholdType: string) => {
+      setLimits((prev) => {
+        if (!prev[parameterKey]) return prev;
 
-      const { [thresholdType]: _, ...updatedParameter } = prev[parameterKey];
+        const { [thresholdType]: _, ...updatedParameter } = prev[parameterKey];
 
-      if (Object.keys(updatedParameter).length === 0) {
-        const { [parameterKey]: __, ...newLimits } = prev;
-        return newLimits;
-      } else {
-        return {
-          ...prev,
-          [parameterKey]: updatedParameter,
-        };
-      }
-    });
-  }, []);
+        if (Object.keys(updatedParameter).length === 0) {
+          const { [parameterKey]: __, ...newLimits } = prev;
+          return newLimits;
+        } else {
+          return {
+            ...prev,
+            [parameterKey]: updatedParameter,
+          };
+        }
+      });
+    },
+    [],
+  );
 
-  const handleAddParameter = useCallback((
-    parameterKey: string,
-    thresholdType: string,
-    value: string,
-  ) => {
-    const numValue = parseFloat(value);
+  const handleAddParameter = useCallback(
+    (parameterKey: string, thresholdType: string, value: string) => {
+      const numValue = parseFloat(value);
 
-    setLimits((prev) => {
-      const existingParam = prev?.[parameterKey] ?? {};
+      setLimits((prev) => {
+        const existingParam = prev?.[parameterKey] ?? {};
 
-      if (!Number.isNaN(numValue)) {
-        return {
-          ...prev,
-          [parameterKey]: {
-            ...existingParam,
-            [thresholdType]: numValue,
-          },
-        };
-      } else {
-        const existingValues = Array.isArray(existingParam[thresholdType])
-          ? existingParam[thresholdType]
-          : existingParam[thresholdType] !== undefined
-            ? [String(existingParam[thresholdType])]
-            : [];
+        if (!Number.isNaN(numValue)) {
+          return {
+            ...prev,
+            [parameterKey]: {
+              ...existingParam,
+              [thresholdType]: numValue,
+            },
+          };
+        } else {
+          const existingValues = Array.isArray(existingParam[thresholdType])
+            ? existingParam[thresholdType]
+            : existingParam[thresholdType] !== undefined
+              ? [String(existingParam[thresholdType])]
+              : [];
 
-        return {
-          ...prev,
-          [parameterKey]: {
-            ...existingParam,
-            [thresholdType]: [...existingValues, value],
-          },
-        };
-      }
-    });
-  }, []);
+          return {
+            ...prev,
+            [parameterKey]: {
+              ...existingParam,
+              [thresholdType]: [...existingValues, value],
+            },
+          };
+        }
+      });
+    },
+    [],
+  );
 
   const handleSaveChanges = useCallback(async () => {
     try {
@@ -112,35 +107,35 @@ export const useDeviceDetail = (deviceId: string) => {
     }
   }, [limits, updateHook, deviceHook]);
 
-  const handleAssignPatient = useCallback(async (selectedPatientId: string) => {
-    try {
-      await medplumPatientDeviceHook.assignPatientToDevice(
-        selectedPatientId,
-        deviceId,
-      );
-      medplumDeviceHook.refreshDevice();
-    } catch (error) {
-      console.error("Error assigning patient:", error);
-      throw error;
-    }
-  }, [medplumPatientDeviceHook, deviceId, medplumDeviceHook]);
+  const handleAssignPatient = useCallback(
+    async (selectedPatientId: string) => {
+      try {
+        await medplumPatientDeviceHook.assignPatientToDevice(
+          selectedPatientId,
+          deviceId,
+        );
+        medplumDeviceHook.refreshDevice();
+      } catch (error) {
+        console.error("Error assigning patient:", error);
+        throw error;
+      }
+    },
+    [medplumPatientDeviceHook, deviceId, medplumDeviceHook],
+  );
 
   return {
-
     device: deviceHook.device,
     limits,
     isLoading,
     error: deviceHook.error,
     updating: updateHook.loading,
     hasParameters,
-    
 
     medplumDeviceHook,
     medplumPatientDeviceHook: {
       ...medplumPatientDeviceHook,
       onAssignPatient: handleAssignPatient,
     },
-    
 
     onBackToList: handleBackToList,
     onRefresh: deviceHook.refresh,

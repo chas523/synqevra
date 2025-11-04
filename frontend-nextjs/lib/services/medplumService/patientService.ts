@@ -1,6 +1,5 @@
-import { Patient } from "@medplum/fhirtypes";
+import type { Patient } from "@medplum/fhirtypes";
 import { proxyApi } from "@/lib/api/api";
-import { PatientName, PatientShort } from "@/types/patientTypes";
 import type {} from "@/types/thingsboardDeviceTypes";
 
 // export interface DevicesResponse {
@@ -12,7 +11,7 @@ import type {} from "@/types/thingsboardDeviceTypes";
 
 export class PatientService {
   public static async fetchPatients(): Promise<Patient[]> {
-    const { data } = await proxyApi.get(`/medplum/patient`);
+    const { data } = await proxyApi.get<Patient[]>(`/medplum/patient`);
     return Array.isArray(data)
       ? data.map((p: Patient) => ({
           ...p,
@@ -22,6 +21,31 @@ export class PatientService {
         }))
       : [];
   }
+  public static async fetchPatientById(id: string): Promise<Patient> {
+    const { data } = await proxyApi.get<Patient>(`/medplum/patient/${id}`);
+    return {
+      ...data,
+      name: data.name ?? [
+        { family: "UnknownLastName", given: ["UnknownName"] },
+      ],
+    };
+  }
+
+  public static async updatePatientById(
+    patientData: Patient,
+    id: string,
+  ): Promise<Patient> {
+    const { data } = await proxyApi.put<Patient>(
+      `/medplum/patient/${id}`,
+      patientData,
+    );
+    return {
+      ...data,
+      name: data.name ?? [
+        { family: "UnknownLastName", given: ["UnknownName"] },
+      ],
+    };
+  }
 
   public static async assignPatientToDevice(
     patientId: string,
@@ -30,57 +54,16 @@ export class PatientService {
     await proxyApi.post(`/medplum/patient/${patientId}/device/${deviceId}`);
   }
 
-  public static async createPatient(patientData: Patient): Promise<void> {
-    await proxyApi.post(`/medplum/patient`, patientData);
+  public static async createPatient(patientData: Patient): Promise<Patient> {
+    const { data } = await proxyApi.post<Patient>(
+      `/medplum/patient`,
+      patientData,
+    );
+    return {
+      ...data,
+      name: data.name ?? [
+        { family: "UnknownLastName", given: ["UnknownName"] },
+      ],
+    };
   }
 }
-const mocked = [
-  {
-    id: "1",
-    name: [{ family: "Smith", given: ["John"] }],
-    gender: "male",
-    birthDate: "1980-01-01",
-  },
-  {
-    id: "2",
-    name: [{ family: "Doe", given: ["Jane"] }],
-    gender: "female",
-    birthDate: "1985-02-02",
-  },
-  {
-    id: "3",
-    name: [{ family: "Brown", given: ["Charlie"] }],
-    gender: "male",
-    birthDate: "1990-03-03",
-  },
-  {
-    id: "4",
-    name: [{ family: "Johnson", given: ["Emily"] }],
-    gender: "female",
-    birthDate: "1992-04-04",
-  },
-  {
-    id: "5",
-    name: [{ family: "Williams", given: ["David"] }],
-    gender: "male",
-    birthDate: "1975-05-05",
-  },
-  {
-    id: "6",
-    name: [{ family: "Jones", given: ["Sophia"] }],
-    gender: "female",
-    birthDate: "1988-06-06",
-  },
-  {
-    id: "7",
-    name: [{ family: "Garcia", given: ["Miguel"] }],
-    gender: "male",
-    birthDate: "1995-07-07",
-  },
-  {
-    id: "8",
-    name: [{ family: "Martinez", given: ["Isabella"] }],
-    gender: "female",
-    birthDate: "2000-08-08",
-  },
-];

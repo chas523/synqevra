@@ -32,6 +32,11 @@ export const CODING_MAP: Record<string, Coding> = {
     code: '59408-5',
     display: 'Oxygen saturation in Arterial blood by Pulse oximetry',
   },
+  is_awake: {
+    system: 'http://loinc.org',
+    code: '80358-2',
+    display: 'Awake status',
+  },
 };
 
 export const UNIT_MAP: Record<string, QuantityUnit> = {

@@ -11,6 +11,7 @@ export { default as HeroSection } from "./HeroSection";
 export { default as PatientBasicInfo } from "./PatientBasicInfo";
 export { default as PatientContactInfo } from "./PatientContactInfo";
 export { default as PatientHeader } from "./PatientHeader";
+export { default as PatientObservationList } from "./PatientObservationList";
 export { default as PatientPersonalInfo } from "./PatientPersonalInfo";
 export type { ProgressContentProps } from "./ProgressContent";
 export { default as ProgressContent } from "./ProgressContent";

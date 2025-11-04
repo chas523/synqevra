@@ -12,7 +12,7 @@ proxyApi.interceptors.response.use(
     const originalRequest = error.config;
 
     // we avoid refreshing tokens on /auth endpoints ie. on login form (which also throws 401)
-    // const isAuthEndpoint = originalRequest?.url?.includes("/auth/");
+    const isAuthEndpoint = originalRequest?.url?.includes("/auth/");
 
     //check if tb refresh token is expired (by message)
     if (
@@ -31,7 +31,8 @@ proxyApi.interceptors.response.use(
     //handle our refresh token expiration (user's refresh token)
     else if (
       error.response?.status === 401 &&
-      !originalRequest._retry //&& !isAuthEndpoint
+      !originalRequest._retry &&
+      !isAuthEndpoint
     ) {
       originalRequest._retry = true;
 
