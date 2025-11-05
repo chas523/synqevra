@@ -15,6 +15,8 @@ export class AppController {
     /^\/R4\/StructureDefinition\/\$[\w-]+$/, // /R4/StructureDefinition/$expand-profile
     /^\/R4\/StructureDefinition\/[a-zA-Z0-9.-]+$/, // /R4/StructureDefinition/some-profile-id
     /^\/R4\/StructureDefinition$/, // /R4/StructureDefinition (GET collection)
+    /^\/R4\/Binary$/, // /R4/Binary (POST new binary resource)
+    /^\/R4\/Binary\/[a-zA-Z0-9-]+$/, // /R4/Binary/{id} (GET/PUT specific binary)
   ];
 
   @Get('hello')
