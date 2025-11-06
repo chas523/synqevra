@@ -77,16 +77,16 @@ export class MedplumConnectionService {
     return loginPromise;
   }
 
-  async initMedplumWithProjectId(projectId: string): Promise<MedplumClient> {
-    if (this.proxyCache.has(projectId)) {
-      return this.proxyCache.get(projectId)!;
+  async initMedplumWithProjectId(tenantId: string): Promise<MedplumClient> {
+    if (this.proxyCache.has(tenantId)) {
+      return this.proxyCache.get(tenantId)!;
     }
 
     const connection = await this.connectionRepository
       .createQueryBuilder('cm')
       .innerJoin('cm.thingsboard', 'tb')
       .leftJoinAndSelect('cm.medplum', 'medplum')
-      .where('tb.project = :projectId', { projectId })
+      .where('tb.tenantId = :tenantId', { tenantId })
       .select(['cm.id', 'medplum'])
       .getOne();
 
@@ -115,7 +115,7 @@ export class MedplumConnectionService {
       .startClientLogin(client_id, client_secret)
       .then(() => client)
       .catch((err) => {
-        this.proxyCache.delete(projectId);
+        this.proxyCache.delete(tenantId);
 
         throw new ServiceUnavailableException({
           statusCode: 503,
@@ -130,7 +130,7 @@ export class MedplumConnectionService {
         });
       });
 
-    this.proxyCache.set(projectId, loginPromise);
+    this.proxyCache.set(tenantId, loginPromise);
     return loginPromise;
   }
 }

@@ -107,6 +107,7 @@ describe('ThingsboardService', () => {
 
   describe('createThingsboardConnection', () => {
     const userId = 1;
+    const tenantId = '123-abc-456-def';
     const projectName = 'Test Project';
 
     const userData = {
@@ -127,6 +128,7 @@ describe('ThingsboardService', () => {
     const mockThingsboard = {
       project: projectName,
       connection: mockConnection,
+      tenantId: tenantId,
     };
 
     it('should throw BadRequestException if Thingsboard connection exists', async () => {
@@ -140,7 +142,7 @@ describe('ThingsboardService', () => {
         .mockResolvedValue(mockConnectionWithThingsboard);
 
       await expect(
-        service.createThingsboardConnection(userId, projectName),
+        service.createThingsboardConnection(userId, tenantId, projectName),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -151,13 +153,15 @@ describe('ThingsboardService', () => {
       jest
         .spyOn(repository, 'create')
         .mockReturnValue(mockThingsboard as Thingsboard);
-      jest
-        .spyOn(repository, 'save')
-        .mockResolvedValue({ id: 1, ...mockThingsboard } as Thingsboard);
+      jest.spyOn(repository, 'save').mockResolvedValue({
+        id: 1,
+        ...mockThingsboard,
+      } as Thingsboard);
 
       // Main function call
       const result = await service.createThingsboardConnection(
         userId,
+        tenantId,
         projectName,
       );
 
@@ -167,6 +171,7 @@ describe('ThingsboardService', () => {
       );
       expect(repository.create).toHaveBeenCalledWith({
         project: projectName,
+        tenantId: tenantId,
         connection: mockConnection,
       });
       expect(repository.save).toHaveBeenCalledWith(
@@ -178,7 +183,7 @@ describe('ThingsboardService', () => {
 
   describe('connectRegisterToThingsboard', () => {
     const userId = 1;
-
+    const tenantId = '123-abc-456-def';
     const mockUserData = {
       id: userId,
       firstName: 'John',
@@ -196,6 +201,7 @@ describe('ThingsboardService', () => {
 
     const mockThingsboard = {
       id: 1,
+      tenantId: tenantId,
       project: 'Test Project',
       connection: mockConnection,
     };
@@ -272,15 +278,17 @@ describe('ThingsboardService', () => {
     });
 
     describe('Registration data flow', () => {
+      const tenantId = '123-abc-456-def';
+
       const tenantEntity = {
         entityType: 'TENANT',
-        id: 'tenantId',
+        id: tenantId,
       } as EntityId;
       const newUserId = 'newTenantId';
       const sysAdminToken = 'sysAdminToken';
       const activationLink = 'activationLink';
       const createTenantAdminResponse = {
-        tenantId: 'tenantId',
+        tenantId: tenantId,
         token: 'token',
         refreshToken: 'refreshToken',
       };
@@ -322,10 +330,13 @@ describe('ThingsboardService', () => {
       });
 
       it('should try to create Thingsboard connection in database', async () => {
+        const tenantId = '123-abc-456-def';
+
         await service.connectRegisterToThingsboard(tenantFormData, userId);
 
         expect(service.createThingsboardConnection).toHaveBeenCalledWith(
           userId,
+          tenantId,
           tenantFormFields.title,
           undefined,
           undefined,
@@ -421,14 +432,14 @@ describe('ThingsboardService', () => {
 
         expect(result).toEqual({
           success: true,
-          tenantId: 'tenantId',
+          tenantId: tenantId,
           accessToken: 'token',
           refreshToken: 'refreshToken',
           message: 'Tenant and admin user created successfully',
           rollbackData: {
             tenantId: {
               entityType: 'TENANT',
-              id: 'tenantId',
+              id: tenantId,
             } as EntityId,
             userId: null,
             sysAdminAccessToken: 'sysAdminToken',
@@ -551,6 +562,7 @@ describe('ThingsboardService', () => {
 
   describe('refresh', () => {
     const userId = 1;
+    const tenantId = '123-abc-456-def';
     const mockUser = { id: userId } as User;
     const mockConnection = {
       id: 1,
@@ -560,6 +572,7 @@ describe('ThingsboardService', () => {
     } as Connection;
     const mockThingsboard: Thingsboard = {
       id: 1,
+      tenantId: tenantId,
       project: 'Test Project',
       accessToken: 'oldAccessToken',
       refreshToken: 'oldRefreshToken',

@@ -16,8 +16,10 @@ export class ProxyService {
 
   private async getDeviceProfile(
     deviceId: string,
+    tenantId: string,
   ): Promise<{ deviceId: string; patientRef: string }> {
-    const client: MedplumClient = await this.medplum.initMedplum(1);
+    const client: MedplumClient =
+      await this.medplum.initMedplumWithProjectId(tenantId);
     const tbUrl = process.env.TB_URL as string;
 
     const bundle = (await client.search('Device', {
@@ -83,8 +85,10 @@ export class ProxyService {
   }
 
   async postTelemetry(body: TelemetryDto) {
-    const client: MedplumClient = await this.medplum.initMedplum(1);
-    const data = await this.getDeviceProfile(body.deviceId);
+    const client: MedplumClient = await this.medplum.initMedplumWithProjectId(
+      body.tenantId,
+    );
+    const data = await this.getDeviceProfile(body.deviceId, body.tenantId);
     const { deviceId, patientRef } = data;
 
     const totalCount = Object.keys(body.data).length;
@@ -96,7 +100,7 @@ export class ProxyService {
       const [key, value] = entry;
       const coding: Coding = CODING_MAP[key];
       const unit: QuantityUnit = UNIT_MAP[key];
- 
+
       console.log(!coding || !unit);
       //unit is optional, so we only check coding here
       if (!coding) {

@@ -13,6 +13,16 @@ export class TelemetryDto {
   deviceId: string;
 
   @ApiProperty({
+    description: 'ThingsBoard Tenant ID',
+    required: true,
+    type: String,
+    example: 'a1b2c3d4e5f6g7h8',
+  })
+  @IsString()
+  @IsNotEmpty()
+  tenantId: string;
+
+  @ApiProperty({
     description: 'Observation timestamp in ISO 8601 format',
     required: false,
     type: String,

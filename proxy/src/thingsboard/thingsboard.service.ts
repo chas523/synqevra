@@ -67,6 +67,7 @@ export class ThingsboardService {
 
   async createThingsboardConnection(
     userId: number,
+    tenantId: string,
     projectName: string,
     thingsboardRepo?: Repository<Thingsboard>,
     connectionRepo?: Repository<any>,
@@ -88,6 +89,7 @@ export class ThingsboardService {
     const thingsboardEntity = thingsboardRepository.create({
       project: projectName,
       connection: connection,
+      tenantId: tenantId,
     });
     return await thingsboardRepository.save(thingsboardEntity);
   }
@@ -111,29 +113,30 @@ export class ThingsboardService {
     const thingsboardUserId: string | null = null;
 
     try {
-      //create thingsboard connection inside our database
-      this.logger.log('Step 0: Create thingsboard entity inside our database');
-      await this.createThingsboardConnection(
-        userId,
-        tenantFields.title,
-        thingsboardRepo,
-        connectionRepo,
-      );
-
       //sysadmin login (get his access token)
-      this.logger.log('Step 1: Authenticating sysadmin');
+      this.logger.log('Step 0: Authenticating sysadmin');
       sysAdminAccessToken = await this.loginToThingsboardWithSysadminAccount();
 
       //create tenant (eg. hospital)
-      this.logger.log('Step 2: Creating tenant');
+      this.logger.log('Step 1: Creating tenant');
       tenantId = await this.addTenant(tenantFields, sysAdminAccessToken);
 
       //create tenant admin
-      this.logger.log('Step 3: Creating tenant admin');
+      this.logger.log('Step 2: Creating tenant admin');
       const newUserId = await this.addTenantAdmin(
         userData,
         tenantId,
         sysAdminAccessToken,
+      );
+
+      //create thingsboard connection inside our database
+      this.logger.log('Step 3: Create thingsboard entity inside our database');
+      await this.createThingsboardConnection(
+        userId,
+        tenantId.id,
+        tenantFields.title,
+        thingsboardRepo,
+        connectionRepo,
       );
 
       //get new user activation link

@@ -12,13 +12,6 @@ export class MedplumController {
     private readonly medplumConnectionService: MedplumConnectionService,
   ) {}
 
-  //not used since we're using medplumService.create in another function
-  // @Post('connect')
-  // async connect(
-  //   @Body() dto: CreateProjectDto,
-  //   @ActiveUser() user: CurrentUser,
-  // ) {
-  //   return this.medplumService.create(dto, user);
   @Get('device/:deviceId')
   async getDevice(
     @Param('deviceId') deviceId: string,
@@ -42,18 +35,25 @@ export class MedplumController {
   }
 
   @Get('patient/:id')
-  async getPatient(@Param('id') id: string) {
-    return this.medplumService.getPatientById(id);
+  async getPatient(@Param('id') id: string, @ActiveUser() user: CurrentUser) {
+    return this.medplumService.getPatientById(id, user.id);
   }
 
   @Put('patient/:id')
-  async updatePatient(@Param('id') id: string, @Body() patientDto: Patient) {
-    return this.medplumService.updatePatient(id, patientDto);
+  async updatePatient(
+    @Param('id') id: string,
+    @Body() patientDto: Patient,
+    @ActiveUser() user: CurrentUser,
+  ) {
+    return this.medplumService.updatePatient(id, patientDto, user.id);
   }
 
   @Post('patient')
-  async createPatient(@Body() patientDto: Patient) {
-    return this.medplumService.createPatient(patientDto);
+  async createPatient(
+    @Body() patientDto: Patient,
+    @ActiveUser() user: CurrentUser,
+  ) {
+    return this.medplumService.createPatient(patientDto, user.id);
   }
 
   @Post('patient/:patientId/device/:deviceId')
@@ -71,9 +71,10 @@ export class MedplumController {
 
   @Get('patient/:id/observations')
   async getPatientObservations(
+    @ActiveUser() user: CurrentUser,
     @Param('id') id: string,
     @Query('count') count?: number,
   ): Promise<Observation[]> {
-    return this.medplumService.getPatientObservations(id, count);
+    return this.medplumService.getPatientObservations(id, count, user.id);
   }
 }
