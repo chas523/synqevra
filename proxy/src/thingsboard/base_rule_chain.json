@@ -6,21 +6,14 @@
     "root": false,
     "debugMode": true,
     "configuration": null,
-    "additionalInfo": {
-      "description": ""
-    }
+    "additionalInfo": null
   },
   "metadata": {
-    "firstNodeIndex": 3,
+    "firstNodeIndex": 4,
     "nodes": [
       {
         "type": "org.thingsboard.rule.engine.rest.TbRestApiCallNode",
         "name": "POST abnormal data to proxy",
-        "debugSettings": {
-          "failuresEnabled": false,
-          "allEnabled": false,
-          "allEnabledUntil": 1759493538718
-        },
         "singletonMode": false,
         "queueName": "Main",
         "configurationVersion": 3,
@@ -49,18 +42,13 @@
         },
         "additionalInfo": {
           "description": null,
-          "layoutX": 50,
-          "layoutY": 491
+          "layoutX": 51,
+          "layoutY": 542
         }
       },
       {
         "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
         "name": "get device shared attributes",
-        "debugSettings": {
-          "failuresEnabled": false,
-          "allEnabled": false,
-          "allEnabledUntil": 1759492948133
-        },
         "singletonMode": false,
         "queueName": null,
         "configurationVersion": 1,
@@ -68,47 +56,40 @@
           "tellFailureIfAbsent": true,
           "fetchTo": "METADATA",
           "clientAttributeNames": [],
-          "sharedAttributeNames": ["limits", "telemetry_keys"],
+          "sharedAttributeNames": [
+            "limits",
+            "telemetry_keys"
+          ],
           "serverAttributeNames": [],
           "latestTsKeyNames": [],
           "getLatestValueWithTs": false
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 49,
-          "layoutY": 308
+          "layoutX": 50,
+          "layoutY": 359
         }
       },
       {
         "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
         "name": "dynamically filter data with device attributes",
-        "debugSettings": {
-          "failuresEnabled": false,
-          "allEnabled": false,
-          "allEnabledUntil": 1759492837946
-        },
         "singletonMode": false,
         "queueName": "Main",
         "configurationVersion": 0,
         "configuration": {
           "scriptLang": "JS",
-          "jsScript": "var limits = JSON.parse(metadata.shared_limits);\r\nvar telemetry_keys = JSON.parse(metadata.shared_telemetry_keys);\r\n\r\nif (Object.keys(limits).length != telemetry_keys.length) {\r\n    throw Error(\"Not enough data.\");\r\n}\r\nfor (var key in limits) {\r\n    if (!msg.hasOwnProperty(key)) {\r\n        throw Error(\"Missing telemetry for key: \" + key);\r\n    }\r\n}\r\n\r\nvar outOfLimit = {};\r\n\r\nfunction arrayIncludes(arr, val) {\r\n    if (!arr) return false;\r\n    if (Array.isArray(arr)) {\r\n        for (var i = 0; i < arr.length; i++) {\r\n            if (arr[i] === val) return true;\r\n        }\r\n        return false;\r\n    } else if (typeof arr === \"object\") {\r\n        for (var k in arr) {\r\n            if (arr.hasOwnProperty(k) && arr[k] === val) return true;\r\n        }\r\n        return false;\r\n    }\r\n    return false;\r\n}\r\n\r\ntelemetry_keys.forEach(function(key) {\r\n    var rule = limits[key];\r\n    var value = msg[key];\r\n\r\n    if (value == null || rule == null) return;\r\n\r\n    var violated = false;\r\n\r\n    if (rule.minimum != null && typeof value === \"number\" && value < rule.minimum) {\r\n        violated = true;\r\n    }\r\n    if (rule.maximum != null && typeof value === \"number\" && value > rule.maximum) {\r\n        violated = true;\r\n    }\r\n    if (rule.equal != null && !arrayIncludes(rule.equal, value)) {\r\n        violated = true;\r\n    }\r\n    if (rule.not_equal != null && arrayIncludes(rule.not_equal, value)) {\r\n        violated = true;\r\n    }\r\n\r\n    if (violated) {\r\n        outOfLimit[key] = value;\r\n    }\r\n});\r\n\r\nif (Object.keys(outOfLimit).length === 0) {\r\n    throw new Error(\"No telemetry values out of limit.\");\r\n}\r\n\r\n\r\nvar returnObject = {\r\n    deviceId: metadata.originatorId,\r\n    data: outOfLimit\r\n};\r\n\r\nreturn {\r\n    msg: returnObject,\r\n    metadata: metadata,\r\n    msgType: msgType\r\n};\r\n",
+          "jsScript": "var limits = JSON.parse(metadata.shared_limits);\r\nvar telemetry_keys = JSON.parse(metadata\r\n    .shared_telemetry_keys);\r\n\r\nif (Object.keys(limits).length != telemetry_keys.length) {\r\n    throw Error(\"Not enough data.\");\r\n}\r\nfor (var key in limits) {\r\n    if (!msg.hasOwnProperty(key)) {\r\n        throw Error(\"Missing telemetry for key: \" + key);\r\n    }\r\n}\r\n\r\nvar outOfLimit = {};\r\n\r\nfunction arrayIncludes(arr, val) {\r\n    if (!arr) return false;\r\n    if (Array.isArray(arr)) {\r\n        for (var i = 0; i < arr.length; i++) {\r\n            if (arr[i].toLowerCase() === val.toLowerCase())\r\n                return true;\r\n        }\r\n        return false;\r\n    } else if (typeof arr === \"object\") {\r\n        for (var k in arr) {\r\n            if (\r\n                arr.hasOwnProperty(k) &&\r\n                arr[k].toLowerCase() === val.toLowerCase()\r\n            ) return true;\r\n        }\r\n        return false;\r\n    }\r\n    return false;\r\n}\r\n\r\ntelemetry_keys.forEach(function(key) {\r\n    var rule = limits[key];\r\n    var value = msg[key];\r\n\r\n    if (value == null || rule == null) return;\r\n\r\n    var violated = false;\r\n\r\n    if (rule.minimum != null && typeof value ===\r\n        \"number\" && value < rule.minimum) {\r\n        violated = true;\r\n    }\r\n    if (rule.maximum != null && typeof value ===\r\n        \"number\" && value > rule.maximum) {\r\n        violated = true;\r\n    }\r\n    if (rule.equal != null && !arrayIncludes(rule\r\n            .equal, value)) {\r\n        violated = true;\r\n    }\r\n    if (rule.not_equal != null && arrayIncludes(rule\r\n            .not_equal, value)) {\r\n        violated = true;\r\n    }\r\n\r\n    if (violated) {\r\n        outOfLimit[key] = value;\r\n    }\r\n});\r\n\r\nif (Object.keys(outOfLimit).length === 0) {\r\n    throw new Error(\"No telemetry values out of limit.\");\r\n}\r\n\r\n\r\nvar returnObject = {\r\n    tenantId: metadata.tenant_id,\r\n    deviceId: metadata.originatorId,\r\n    data: outOfLimit\r\n};\r\n\r\nreturn {\r\n    msg: returnObject,\r\n    metadata: metadata,\r\n    msgType: msgType\r\n};",
           "tbelScript": "return {msg: msg, metadata: metadata, msgType: msgType};"
         },
         "additionalInfo": {
           "description": null,
-          "layoutX": 53,
-          "layoutY": 396
+          "layoutX": 54,
+          "layoutY": 447
         }
       },
       {
         "type": "org.thingsboard.rule.engine.metadata.TbGetOriginatorFieldsNode",
         "name": "get device id",
-        "debugSettings": {
-          "failuresEnabled": false,
-          "allEnabled": false,
-          "allEnabledUntil": 1759492948133
-        },
         "singletonMode": false,
         "queueName": null,
         "configurationVersion": 1,
@@ -121,8 +102,26 @@
         },
         "additionalInfo": {
           "description": "",
-          "layoutX": 52,
-          "layoutY": 218
+          "layoutX": 53,
+          "layoutY": 269
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetTenantDetailsNode",
+        "name": "get tenant id",
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "detailsList": [
+            "ID"
+          ],
+          "fetchTo": "METADATA"
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 53,
+          "layoutY": 203
         }
       }
     ],
@@ -145,6 +144,11 @@
       {
         "fromIndex": 3,
         "toIndex": 1,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 3,
         "type": "Success"
       }
     ],

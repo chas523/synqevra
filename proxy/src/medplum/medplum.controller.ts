@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { MedplumService } from './medplum.service';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import type { CurrentUser } from '../auth/types/current-user';
 import { MedplumConnectionService } from '../connection/medplum-connection.service';
+import type { Observation, Patient } from '@medplum/fhirtypes';
 
 @Controller('medplum')
 export class MedplumController {
@@ -40,6 +41,21 @@ export class MedplumController {
     return this.medplumService.getPatientList(user.id);
   }
 
+  @Get('patient/:id')
+  async getPatient(@Param('id') id: string) {
+    return this.medplumService.getPatientById(id);
+  }
+
+  @Put('patient/:id')
+  async updatePatient(@Param('id') id: string, @Body() patientDto: Patient) {
+    return this.medplumService.updatePatient(id, patientDto);
+  }
+
+  @Post('patient')
+  async createPatient(@Body() patientDto: Patient) {
+    return this.medplumService.createPatient(patientDto);
+  }
+
   @Post('patient/:patientId/device/:deviceId')
   async assignPatientToDevice(
     @Param('patientId') patientId: string,
@@ -51,5 +67,13 @@ export class MedplumController {
       deviceId,
       user.id,
     );
+  }
+
+  @Get('patient/:id/observations')
+  async getPatientObservations(
+    @Param('id') id: string,
+    @Query('count') count?: number,
+  ): Promise<Observation[]> {
+    return this.medplumService.getPatientObservations(id, count);
   }
 }

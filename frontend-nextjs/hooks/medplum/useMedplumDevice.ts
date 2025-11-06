@@ -17,14 +17,10 @@ export const useMedplumDevice = (deviceId?: string): UseMedplumDeviceResult => {
     error: deviceError,
     isLoading: isLoadingDevice,
     mutate: refreshDevice,
-  } = useSWR(
-    deviceId ? `medplum-device-${deviceId}` : null,
-    () => {
-      return deviceId ? MedplumDeviceService.fetchMedplumDevice(deviceId) : null;
-    },
+  } = useSWR(deviceId ? `medplum-device-${deviceId}` : null, () => {
+    return deviceId ? MedplumDeviceService.fetchMedplumDevice(deviceId) : null;
+  });
 
-  );
-    
   return {
     medplumDevice: medplumDevice || null,
     isLoadingDevice,

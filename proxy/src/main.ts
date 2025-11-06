@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 
@@ -25,7 +26,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: [
+      { path: 'swagger', method: RequestMethod.ALL },
+      { path: 'fhir', method: RequestMethod.ALL },
+      { path: 'fhir/*path', method: RequestMethod.ALL },
+    ],
+  });
   app.useGlobalFilters(new SimpleExceptionFilter());
   await app.listen(process.env.PORT ?? 3003);
 }

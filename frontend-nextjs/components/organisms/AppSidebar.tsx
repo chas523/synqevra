@@ -1,4 +1,4 @@
-import { Home, Settings } from "lucide-react";
+import { Home, PersonStanding, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +31,14 @@ export default function AppSidebar() {
                   <a href="/devices">
                     <Settings />
                     <span>Devices</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/patients">
+                    <PersonStanding />
+                    <span>Patients</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>

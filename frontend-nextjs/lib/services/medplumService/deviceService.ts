@@ -9,12 +9,12 @@ export class MedplumDeviceService {
     const { data } = await proxyApi.get<MedplumDevice>(
       `/medplum/device/${deviceId}`,
     );
-    
+
     const result = {
       id: data.id,
       patient: data.patient ? { display: data.patient.display } : null,
     };
-  
+
     return result;
   }
 }

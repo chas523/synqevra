@@ -81,11 +81,13 @@ export const userFields: FieldConfig[] = [
   {
     name: "firstName",
     label: "First Name",
+    required: true,
     placeholder: "John",
   },
   {
     name: "lastName",
     label: "Last Name",
+    required: true,
     placeholder: "Doe",
   },
   {

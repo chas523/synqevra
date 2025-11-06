@@ -86,3 +86,14 @@ export const formatParameterValue = (value: unknown): string => {
   }
   return String(value);
 };
+
+export const formatDate = (dateString?: string) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
