@@ -5,8 +5,6 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Thingsboard } from 'src/entities/thingsboard.entity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -18,14 +16,13 @@ import {
   Device,
   DeviceAttributes,
 } from '../thingsboard.types';
-import { MedplumService } from 'src/medplum/medplum.service';
+import { MedplumService } from '../../medplum/medplum.service';
 
 @Injectable()
 export class ThingsboardDeviceService {
   private readonly logger = new Logger(ThingsboardDeviceService.name);
 
   constructor(
-    @InjectRepository(Thingsboard)
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly medplumService: MedplumService,

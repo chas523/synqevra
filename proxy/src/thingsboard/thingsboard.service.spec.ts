@@ -16,11 +16,27 @@ import { EntityId, ThingsboardLoginResponse } from './thingsboard.types';
 import { AxiosResponse } from 'axios';
 import { of, firstValueFrom } from 'rxjs';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   firstValueFrom: jest.fn(),
 }));
+
+//silence logger
+jest.mock('@nestjs/common', () => {
+  return {
+    ...jest.requireActual('@nestjs/common'),
+    Logger: class MockLogger {
+      error = jest.fn();
+      log = jest.fn();
+      debug = jest.fn();
+
+      static overrideLogger = jest.fn();
+      static log = jest.fn();
+      static error = jest.fn();
+      static debug = jest.fn();
+    },
+  };
+});
 
 describe('ThingsboardService', () => {
   let service: ThingsboardService;

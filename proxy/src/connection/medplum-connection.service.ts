@@ -17,12 +17,13 @@ export class MedplumConnectionService {
   ) {}
 
   private readonly clientCache = new Map<number, Promise<MedplumClient>>();
+  private readonly proxyCache = new Map<string, Promise<MedplumClient>>();
 
   async initMedplum(userId: number): Promise<MedplumClient> {
     if (this.clientCache.has(userId)) {
       return this.clientCache.get(userId)!;
     }
-    // tenant id
+
     const connection = await this.connectionRepository
       .createQueryBuilder('cm')
       .leftJoinAndSelect('cm.medplum', 'medplum')
@@ -73,6 +74,63 @@ export class MedplumConnectionService {
       });
 
     this.clientCache.set(userId, loginPromise);
+    return loginPromise;
+  }
+
+  async initMedplumWithProjectId(projectId: string): Promise<MedplumClient> {
+    if (this.proxyCache.has(projectId)) {
+      return this.proxyCache.get(projectId)!;
+    }
+
+    const connection = await this.connectionRepository
+      .createQueryBuilder('cm')
+      .innerJoin('cm.thingsboard', 'tb')
+      .leftJoinAndSelect('cm.medplum', 'medplum')
+      .where('tb.project = :projectId', { projectId })
+      .select(['cm.id', 'medplum'])
+      .getOne();
+
+    if (!connection || !connection.medplum) {
+      throw new InternalServerErrorException({
+        statusCode: 500,
+        error: 'ConnectionNotFound',
+        message: 'Connection or Medplum config not found for this project.',
+      });
+    }
+
+    const { client_id, client_secret } = connection.medplum;
+    if (!client_id || !client_secret) {
+      throw new InternalServerErrorException({
+        statusCode: 500,
+        error: 'MedplumConfigMissing',
+        message: 'Missing Medplum client credentials in database.',
+      });
+    }
+
+    const client = new MedplumClient({
+      baseUrl: process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103',
+    });
+
+    const loginPromise = client
+      .startClientLogin(client_id, client_secret)
+      .then(() => client)
+      .catch((err) => {
+        this.proxyCache.delete(projectId);
+
+        throw new ServiceUnavailableException({
+          statusCode: 503,
+          error: 'MedplumAuthFailed',
+          message: `Failed to authenticate with Medplum for connection ${connection.id}`,
+          reason:
+            process.env.NODE_ENV !== 'production'
+              ? err instanceof Error
+                ? err.message
+                : String(err)
+              : undefined,
+        });
+      });
+
+    this.proxyCache.set(projectId, loginPromise);
     return loginPromise;
   }
 }
