@@ -83,6 +83,7 @@ export class AuthService {
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    console.log('validating');
 
     try {
       await this.thingsboardService.thingsboardLogin(user.id, email, password);

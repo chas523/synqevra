@@ -1,6 +1,5 @@
-import { UseMedplumDeviceResult } from "@/hooks/medplum/useMedplumDevice";
-import { UseMedplumPatientDeviceResult } from "@/hooks/medplum/useMedplumPatientDevice";
-import { PatientNames } from "@/lib/services/medplumService/patientService";
+import type { UseMedplumDeviceResult } from "@/hooks/medplum/useMedplumDevice";
+import type { UseMedplumPatientDeviceResult } from "@/hooks/medplum/useMedplumPatientDevice";
 import type {
   DeviceParameterLimits,
   MedicalParameter,

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { MantineProvider } from "@mantine/core";
 import SidebarLayout from "@/components/organisms/SidebarLayout";
+import MedplumProviderWrapper from "@/lib/config/MedplumProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +30,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SidebarLayout>{children}</SidebarLayout>
+        <MedplumProviderWrapper>
+          <MantineProvider>
+            <SidebarLayout>{children}</SidebarLayout>
+          </MantineProvider>
+        </MedplumProviderWrapper>
       </body>
     </html>
   );
