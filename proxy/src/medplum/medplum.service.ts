@@ -1,37 +1,38 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  forwardRef,
-  Inject,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Medplum } from '../entities/medplum.entity';
-import { Repository, WithId } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProjectDto } from './dtos/createProjectDto';
 import {
+  ClientStorage,
   LoginAuthenticationResponse,
   MedplumClient,
   MemoryStorage,
-  ClientStorage,
-  ResourceArray,
 } from '@medplum/core';
 import process from 'node:process';
 import { ConnectionService } from '../connection/connection.service';
 import { webcrypto } from 'node:crypto';
+import { MedplumConnectionService } from '../connection/medplum-connection.service';
 import { Device, Patient } from '@medplum/fhirtypes';
-import { Proxy } from 'src/proxy/proxy';
-import { getErrorMessage } from 'src/utils/error.utils';
+import { getErrorMessage } from '../utils/error.utils';
 
 @Injectable()
 export class MedplumService {
   constructor(
     @InjectRepository(Medplum)
     private readonly medplumRepository: Repository<Medplum>,
+
     @Inject(forwardRef(() => ConnectionService))
     private readonly connectionService: ConnectionService,
-    private readonly medplum: Proxy,
+
+    private readonly medplum: MedplumConnectionService,
   ) {}
 
   /**
@@ -192,8 +193,8 @@ export class MedplumService {
 
     return await medplumRepository.save(medplumEntity);
   }
-  async createDevice(deviceDto: { identifier: string }) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async createDevice(deviceDto: { identifier: string }, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
 
     const device: Device = {
       resourceType: 'Device',
@@ -207,8 +208,7 @@ export class MedplumService {
     };
 
     try {
-      const created = await medplum.createResource(device);
-      return created;
+      return await medplum.createResource(device);
     } catch (error: any) {
       if (error?.status === 400) {
         throw new BadRequestException(error.message || 'Bad Request');
@@ -222,16 +222,15 @@ export class MedplumService {
     }
   }
 
-  async getPatientList() {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
-
+  async getPatientList(userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
     const patients = await medplum.searchResources('Patient');
 
     return patients;
   }
 
-  async getPatientById(id: string) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async getPatientById(id: string, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
 
     const patient = await medplum.readResource('Patient', id);
     if (!patient) {
@@ -240,22 +239,24 @@ export class MedplumService {
     return patient;
   }
 
-  async updatePatient(id: string, patientDto: Patient) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async updatePatient(id: string, patientDto: Patient, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
 
     const patient = await medplum.readResource('Patient', id);
     if (!patient) {
       throw new NotFoundException('Patient not found');
     }
-    const updatedPatient = await medplum.updateResource(patientDto);
-
-    return updatedPatient;
+    return await medplum.updateResource(patientDto);
   }
 
-  async assignPatientToDevice(patientId: string, deviceId: string) {
-    const client: MedplumClient = await this.medplum.initMedplum();
+  async assignPatientToDevice(
+    patientId: string,
+    deviceId: string,
+    userId: number,
+  ) {
+    const client: MedplumClient = await this.medplum.initMedplum(userId);
 
-    const device = await this.getDevice(deviceId);
+    const device = await this.getDevice(deviceId, client);
 
     const patient = await client.readResource('Patient', patientId);
     if (!patient) {
@@ -289,8 +290,7 @@ export class MedplumService {
     }
   }
 
-  async getDevice(deviceId: string) {
-    const client: MedplumClient = await this.medplum.initMedplum();
+  async getDevice(deviceId: string, client: MedplumClient) {
     const tbUrl = process.env.TB_URL as string;
 
     const device = (await client.searchOne('Device', {
@@ -303,12 +303,11 @@ export class MedplumService {
     return device;
   }
 
-  async createPatient(patientDto: Patient) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async createPatient(patientDto: Patient, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
 
     try {
-      const created = await medplum.createResource(patientDto);
-      return created;
+      return await medplum.createResource(patientDto);
     } catch (error: any) {
       if (error?.status === 400) {
         throw new BadRequestException(getErrorMessage(error) || 'Bad Request');
@@ -322,8 +321,8 @@ export class MedplumService {
     }
   }
 
-  async getPatientObservations(id: string, count: number = 20) {
-    const medplum: MedplumClient = await this.medplum.initMedplum();
+  async getPatientObservations(id: string, count: number = 20, userId: number) {
+    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
     const observations = await medplum.searchResources('Observation', {
       _count: count,
       _sort: '-_lastUpdated',

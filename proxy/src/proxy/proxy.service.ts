@@ -8,16 +8,18 @@ import {
   UNIT_MAP,
 } from '../telemetry/constants/measurement-definitions';
 import { PostSummaryDto } from './dtos/postSummaryDto';
-import { Proxy } from './proxy';
+import { MedplumConnectionService } from '../connection/medplum-connection.service';
 
 @Injectable()
 export class ProxyService {
-  constructor(private readonly medplum: Proxy) {}
+  constructor(private readonly medplum: MedplumConnectionService) {}
 
   private async getDeviceProfile(
     deviceId: string,
+    tenantId: string,
   ): Promise<{ deviceId: string; patientRef: string }> {
-    const client: MedplumClient = await this.medplum.initMedplum();
+    const client: MedplumClient =
+      await this.medplum.initMedplumWithProjectId(tenantId);
     const tbUrl = process.env.TB_URL as string;
 
     const bundle = (await client.search('Device', {
@@ -83,8 +85,10 @@ export class ProxyService {
   }
 
   async postTelemetry(body: TelemetryDto) {
-    const client: MedplumClient = await this.medplum.initMedplum();
-    const data = await this.getDeviceProfile(body.deviceId);
+    const client: MedplumClient = await this.medplum.initMedplumWithProjectId(
+      body.tenantId,
+    );
+    const data = await this.getDeviceProfile(body.deviceId, body.tenantId);
     const { deviceId, patientRef } = data;
 
     const totalCount = Object.keys(body.data).length;
@@ -96,7 +100,7 @@ export class ProxyService {
       const [key, value] = entry;
       const coding: Coding = CODING_MAP[key];
       const unit: QuantityUnit = UNIT_MAP[key];
- 
+
       console.log(!coding || !unit);
       //unit is optional, so we only check coding here
       if (!coding) {

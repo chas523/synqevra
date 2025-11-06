@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PendingUser } from 'src/entities/pending-user.entity';
+import { PendingUser } from '../entities/pending-user.entity';
 import { Repository } from 'typeorm';
 import { CreatePendingUserDto } from './dtos/create-pending-user.dto';
 import { PaginatedResponse } from './dtos/paginated-response.dto';

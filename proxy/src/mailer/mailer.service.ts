@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
-import * as crypto from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -22,7 +21,7 @@ export class MailerService {
     private readonly pendingUserRepo: Repository<PendingUser>,
   ) {}
   mailTransport() {
-    const transporter = nodemailer.createTransport({
+    return nodemailer.createTransport({
       host: this.configService.get<string>('MAIL_HOST'),
       port: this.configService.get<number>('MAIL_PORT'),
       secure: false,
@@ -31,7 +30,6 @@ export class MailerService {
         pass: this.configService.get<string>('MAIL_PASSWORD'),
       },
     });
-    return transporter;
   }
 
   //generate activation link with user id
@@ -94,8 +92,7 @@ export class MailerService {
   }
 
   async sendEmail(emailDto: SendEmailDto) {
-    const { from, recipients, subject, html, placeholderReplacements } =
-      emailDto;
+    const { from, recipients, subject, html } = emailDto;
 
     const transport = this.mailTransport();
     const options: Mail.Options = {
@@ -105,8 +102,7 @@ export class MailerService {
       html,
     };
     try {
-      const result = transport.sendMail(options);
-      return result;
+      return transport.sendMail(options);
     } catch (error) {
       console.log('Error: ', error);
     }

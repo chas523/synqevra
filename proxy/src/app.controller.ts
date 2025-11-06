@@ -1,15 +1,12 @@
-import { All, Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AppService } from './app.service';
-import { Proxy } from './proxy/proxy';
-
+import { All, Controller, Get, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { MedplumConnectionService } from './connection/medplum-connection.service';
+import { ActiveUser } from './auth/decorators/active-user.decorator';
+import type { CurrentUser } from './auth/types/current-user';
 
 @Controller('fhir')
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly proxy: Proxy,
-  ) {}
+  constructor(private readonly proxy: MedplumConnectionService) {}
 
   private readonly allowedPatterns = [
     /^\/R4\/StructureDefinition\/\$[\w-]+$/, // /R4/StructureDefinition/$expand-profile
@@ -26,8 +23,12 @@ export class AppController {
   }
 
   @All('*')
-  async handleFhirRequests(@Req() req: Request, @Res() res: Response) {
-    const medplum = await this.proxy.initMedplum();
+  async handleFhirRequests(
+    @Req() req: Request,
+    @Res() res: Response,
+    @ActiveUser() user: CurrentUser,
+  ) {
+    const medplum = await this.proxy.initMedplum(user.id);
     const accessToken = medplum.getAccessToken();
 
     const cleanPath = req.url.replace(/^(\/fhir)+/, '').split('?')[0];

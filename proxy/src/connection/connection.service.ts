@@ -14,29 +14,31 @@ import { Thingsboard } from '../entities/thingsboard.entity';
 import { Medplum } from '../entities/medplum.entity';
 import { PendingUser } from '../entities/pending-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-
 import * as crypto from 'crypto';
-import { PendingUserService } from 'src/pending-user/pending-user.service';
-import { PendingUserStatus } from 'src/entities/pending-user.entity';
+import { PendingUserService } from '../pending-user/pending-user.service';
+import { PendingUserStatus } from '../entities/pending-user.entity';
 import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
-import { MedplumService } from 'src/medplum/medplum.service';
-import { ThingsboardService } from 'src/thingsboard/thingsboard.service';
-import { CreateUserDto } from 'src/users/dtos/createUserDto';
-import { CreateProjectDto } from 'src/medplum/dtos/createProjectDto';
-import { ThingsboardRollbackData } from 'src/thingsboard/thingsboard.types';
+import { MedplumService } from '../medplum/medplum.service';
+import { ThingsboardService } from '../thingsboard/thingsboard.service';
+import { CreateUserDto } from '../users/dtos/createUserDto';
+import { CreateProjectDto } from '../medplum/dtos/createProjectDto';
+import { ThingsboardRollbackData } from '../thingsboard/thingsboard.types';
 
 @Injectable()
 export class ConnectionService {
   constructor(
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,
+
     private readonly usersService: UsersService,
     private readonly pendingUserService: PendingUserService,
-    @Inject(forwardRef(() => ThingsboardService))
-    private readonly thingsboardService: ThingsboardService,
+
     @Inject(forwardRef(() => MedplumService))
     private readonly medplumService: MedplumService,
-    private readonly dataSource: DataSource, // <--- INJECTED HERE
+    @Inject(forwardRef(() => ThingsboardService))
+    private readonly thingsboardService: ThingsboardService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async createConnection(

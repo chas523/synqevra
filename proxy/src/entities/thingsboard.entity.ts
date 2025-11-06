@@ -9,6 +9,11 @@ export class Thingsboard {
   @Column()
   project: string;
 
+  @Column({
+    unique: true,
+  })
+  tenantId: string;
+
   @Column({ nullable: true })
   accessToken?: string;
 

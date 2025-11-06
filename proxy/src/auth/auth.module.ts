@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UsersService } from '../users/users.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { User } from '../entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
 import { ThingsboardModule } from 'src/thingsboard/thingsboard.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -22,12 +22,12 @@ import { ThingsboardModule } from 'src/thingsboard/thingsboard.module';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    UsersModule,
     ThingsboardModule,
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
-    UsersService,
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
