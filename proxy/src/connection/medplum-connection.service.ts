@@ -22,7 +22,7 @@ export class MedplumConnectionService {
     if (this.clientCache.has(userId)) {
       return this.clientCache.get(userId)!;
     }
-
+    // tenant id
     const connection = await this.connectionRepository
       .createQueryBuilder('cm')
       .leftJoinAndSelect('cm.medplum', 'medplum')

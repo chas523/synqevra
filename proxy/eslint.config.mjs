@@ -23,8 +23,6 @@ const config = [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -37,6 +35,13 @@ const config = [
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },
-]
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    },
+  },
+];
 
 export default tseslint.config(...config);

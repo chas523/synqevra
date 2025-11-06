@@ -28,12 +28,13 @@ import {
   RuleChain,
   DeviceProfile,
 } from './thingsboard.types';
-import { ConnectionService } from 'src/connection/connection.service';
-import { Thingsboard } from 'src/entities/thingsboard.entity';
+import { ConnectionService } from '../connection/connection.service';
+import { Thingsboard } from '../entities/thingsboard.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
+
 @Injectable()
 export class ThingsboardService {
   private readonly logger = new Logger(ThingsboardService.name);
@@ -103,7 +104,7 @@ export class ThingsboardService {
     this.validateInput(formData);
 
     const { userFields, tenantFields } = formData;
-    const { password, ...userData } = userFields;
+    const { password, confirmPassword, ...userData } = userFields;
 
     let sysAdminAccessToken: string | undefined = undefined;
     let tenantId: EntityId | null = null;
@@ -649,6 +650,7 @@ export class ThingsboardService {
       throw error;
     }
   }
+
   public async getTokens(userId: number) {
     return await this.thingsboardRepository
       .createQueryBuilder('thingsboard')
@@ -659,7 +661,7 @@ export class ThingsboardService {
       .getOne();
   }
 
-  public refresh(userId: number) {
+  public async refresh(userId: number) {
     this.logger.log('REFRESHING!!!!!!');
     return this.getTokens(userId).then(async (tokens) => {
       if (!tokens?.refreshToken) {
