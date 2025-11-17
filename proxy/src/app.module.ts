@@ -14,6 +14,7 @@ import { MailerModule } from './mailer/mailer.module';
 import { PendingUserModule } from './pending-user/pending-user.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { Hl7MapperModule } from './hl7-mapper/hl7-mapper.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { APP_GUARD } from '@nestjs/core';
     ThingsboardModule,
     MailerModule,
     PendingUserModule,
+    Hl7MapperModule,
   ],
   controllers: [AppController],
   providers: [
