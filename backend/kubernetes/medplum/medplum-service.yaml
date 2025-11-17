@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: medplum-server
+spec:
+  selector:
+    app: medplum-server
+  ports:
+    - protocol: TCP
+      port: 8103
+      targetPort: 8103
+  type: ClusterIP  # LoadBalancer/NodePort for external access

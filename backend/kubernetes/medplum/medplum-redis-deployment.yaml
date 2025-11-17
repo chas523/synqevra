@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medplum-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medplum-redis
+  template:
+    metadata:
+      labels:
+        app: medplum-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7
+        command:
+          - redis-server
+          - --requirepass
+          - medplum
+        ports:
+        - containerPort: 6379
+        livenessProbe:
+          exec:
+            command:
+              - redis-cli
+              - -a
+              - medplum
+              - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        readinessProbe:
+          exec:
+            command:
+              - redis-cli
+              - -a
+              - medplum
+              - ping
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+      restartPolicy: Always
