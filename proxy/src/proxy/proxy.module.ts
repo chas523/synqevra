@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ProxyService } from './proxy.service';
-import { ProxyController } from './proxy.controller';
+import { PostTelemetryUseCase } from './application/use-cases/post-telemetry.use-case';
+import { ProxyController } from './interface/rest/proxy.controller';
 import { HttpModule } from '@nestjs/axios';
 import { ConnectionModule } from '../connection/connection.module';
 
@@ -13,7 +13,6 @@ import { ConnectionModule } from '../connection/connection.module';
     ConnectionModule,
   ],
   controllers: [ProxyController],
-  providers: [ProxyService],
-  exports: [],
+  providers: [PostTelemetryUseCase],
 })
 export class ProxyModule {}

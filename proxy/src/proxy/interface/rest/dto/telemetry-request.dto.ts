@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 
-export class TelemetryDto {
+export class TelemetryRequestDto {
   @ApiProperty({
     description: 'ThingsBoard Device ID',
     required: true,

@@ -63,6 +63,7 @@ export class MedplumConnectionService {
         throw new ServiceUnavailableException({
           statusCode: 503,
           error: 'MedplumAuthFailed',
+          //remove id in prod
           message: `Failed to authenticate with Medplum for connection ${connection.id}`,
           reason:
             process.env.NODE_ENV !== 'production'
@@ -120,6 +121,7 @@ export class MedplumConnectionService {
         throw new ServiceUnavailableException({
           statusCode: 503,
           error: 'MedplumAuthFailed',
+          //remove id in prod
           message: `Failed to authenticate with Medplum for connection ${connection.id}`,
           reason:
             process.env.NODE_ENV !== 'production'
