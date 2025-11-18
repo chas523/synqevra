@@ -42,7 +42,7 @@ services:
     restart: always
     image: postgres:16
     expose:
-      - "5432"
+      - "5438:5432"
     environment:
       POSTGRES_USER: ${MEDPLUM_DB_USER}
       POSTGRES_PASSWORD: ${MEDPLUM_DB_PASSWORD}
