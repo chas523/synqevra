@@ -1,4 +1,5 @@
 import { Hl7Message } from '@medplum/core';
+import { HL7_CONTROL_CHARS, HL7_ACK_CODES } from '../constants/hl7.constants';
 
 export type AckCode = 'AA' | 'AE' | 'AR' | 'CA' | 'CE' | 'CR';
 
@@ -13,9 +14,7 @@ export function buildAck(
   ackCode: AckCode,
   errorDetails?: ErrorDetails,
 ): string {
-  const SB = '\x0b';
-  const EB = '\x1c';
-  const CR = '\r';
+  const { START_BLOCK, END_BLOCK, CARRIAGE_RETURN } = HL7_CONTROL_CHARS;
 
   try {
     const ack = hl7Message.buildAck({ ackCode });
@@ -23,16 +22,16 @@ export function buildAck(
 
     if (errorDetails && ackCode !== 'AA' && ackCode !== 'CA') {
       const errSegment = `ERR|^${errorDetails.code}^HL70357^${errorDetails.text}|${errorDetails.message || 'Unknown error'}|E|${errorDetails.code}^${errorDetails.text}^HL70357`;
-      const ackWithErr = ackString + CR + errSegment;
-      return `${SB}${ackWithErr}${EB}${CR}`;
+      const ackWithErr = ackString + CARRIAGE_RETURN + errSegment;
+      return `${START_BLOCK}${ackWithErr}${END_BLOCK}${CARRIAGE_RETURN}`;
     }
 
-    return `${SB}${ackString}${EB}${CR}`;
+    return `${START_BLOCK}${ackString}${END_BLOCK}${CARRIAGE_RETURN}`;
   } catch {
     const controlId =
       hl7Message.getSegment('MSH')?.getField(10)?.toString() || '1';
-    const fallbackAck = `MSH|^~\\&|||||||ACK||P|2.5${CR}MSA|${ackCode}|${controlId}`;
-    return `${SB}${fallbackAck}${EB}${CR}`;
+    const fallbackAck = `MSH|^~\\&|||||||ACK||P|2.5${CARRIAGE_RETURN}MSA|${ackCode}|${controlId}`;
+    return `${START_BLOCK}${fallbackAck}${END_BLOCK}${CARRIAGE_RETURN}`;
   }
 }
 
@@ -49,7 +48,7 @@ export function determineErrorDetails(error: Error): {
   ackCode: AckCode;
   errorDetails: ErrorDetails;
 } {
-  let ackCode: AckCode = 'AE';
+  let ackCode: AckCode = HL7_ACK_CODES.AE as AckCode;
   let errorCode = '207';
   let errorText = 'Application internal error';
 
@@ -64,21 +63,21 @@ export function determineErrorDetails(error: Error): {
     errorMessage.includes('unsupported') ||
     errorMessage.includes('parsing')
   ) {
-    ackCode = 'AR';
+    ackCode = HL7_ACK_CODES.AR as AckCode;
     errorCode = '204';
     errorText = 'Invalid message format or validation error';
   } else if (
     errorMessage.includes('timeout') ||
     errorMessage.includes('network')
   ) {
-    ackCode = 'CR';
+    ackCode = HL7_ACK_CODES.CR as AckCode;
     errorCode = '203';
     errorText = 'System error or network timeout';
   } else if (
     errorMessage.includes('not found') ||
     errorMessage.includes('missing')
   ) {
-    ackCode = 'AE';
+    ackCode = HL7_ACK_CODES.AE as AckCode;
     errorCode = '205';
     errorText = 'Required data missing';
   }

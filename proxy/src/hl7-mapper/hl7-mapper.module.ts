@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
-import { Hl7MapperService } from './hl7-mapper.service';
-import { BullModule } from '@nestjs/bullmq';
+// import { Hl7MapperService } from './hl7-mapper.service';
 import { ConfigModule } from '@nestjs/config';
 import { ConnectionModule } from 'src/connection/connection.module';
+import { QueueModule } from '../queue/queue.module';
+import { HL7ToFHIRPipe } from './pipes/hl7-to-fhir-pipe';
+import { MedplumModule } from '../medplum/medplum.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT || '6379', 10),
-        //password: process.env.REDIS_PASSWORD || undefined,
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'hl7-processing',
-    }),
-    ConnectionModule,
-  ],
-  providers: [Hl7MapperService],
-  exports: [BullModule, Hl7MapperService],
+  imports: [ConfigModule, QueueModule, ConnectionModule, MedplumModule],
+  providers: [HL7ToFHIRPipe],
+  exports: [HL7ToFHIRPipe],
 })
 export class Hl7MapperModule {}

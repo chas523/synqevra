@@ -15,6 +15,10 @@ import { PendingUserModule } from './pending-user/pending-user.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { Hl7MapperModule } from './hl7-mapper/hl7-mapper.module';
+import { BullModule } from '@nestjs/bullmq';
+import { CacheModule } from '@nestjs/cache-manager';
+import { QueueModule } from './queue/queue.module';
+import { PublicApiModule } from './public-api/public-api.module';
 
 @Module({
   imports: [
@@ -31,12 +35,18 @@ import { Hl7MapperModule } from './hl7-mapper/hl7-mapper.module';
       throttlers: [{ limit: 10, ttl: seconds(10) }],
       errorMessage: 'Too many requests, please try again later.',
     }),
+    CacheModule.register({
+      isGlobal: true,
+    }),
+
+    QueueModule,
     ConnectionModule,
     UsersModule,
     ThingsboardModule,
     MailerModule,
     PendingUserModule,
     Hl7MapperModule,
+    PublicApiModule,
   ],
   controllers: [AppController],
   providers: [

@@ -31,6 +31,7 @@ async function bootstrap() {
       { path: 'swagger', method: RequestMethod.ALL },
       { path: 'fhir', method: RequestMethod.ALL },
       { path: 'fhir/*path', method: RequestMethod.ALL },
+      { path: 'public-api/*path', method: RequestMethod.ALL },
     ],
   });
   app.useGlobalFilters(new SimpleExceptionFilter());

@@ -1,3 +1,4 @@
+import { Hl7Message } from '@medplum/core';
 export const SUPPORTED_ADT_TYPES = [
   'A01',
   'A02',
@@ -177,6 +178,18 @@ export function mapADTTypeToEncounterStatus(
 
     default:
       return 'unknown';
+  }
+}
+
+export function getMessageType(message: Hl7Message): string {
+  try {
+    const messageTypeField = message.getSegment('MSH')?.getField(9);
+    if (!messageTypeField) {
+      return '';
+    }
+    return messageTypeField.getComponent(2) || '';
+  } catch {
+    return '';
   }
 }
 
