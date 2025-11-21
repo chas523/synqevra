@@ -1,28 +1,21 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { AuthJwtPayload } from './types/auth-jwtPayload';
-import refreshJwtConfig from '../config/refresh-jwt.config';
+import { AuthJwtPayload } from '../../../auth/types/auth-jwtPayload';
+import refreshJwtConfig from '../../../config/refresh-jwt.config';
 import type { ConfigType } from '@nestjs/config';
-import { CurrentUser } from './types/current-user';
+import { CurrentUser } from '../../../auth/types/current-user';
 import type { Response } from 'express';
-import jwtConfig from '../config/jwt.config';
-import { CreateUserDto } from '../users/dtos/createUserDto';
-import { DUMMY_BCRYPT_HASH } from '../users/constants/user-utils';
-import { Role } from './enums/role.enum';
+import jwtConfig from '../../../config/jwt.config';
+import { DUMMY_BCRYPT_HASH } from '../../infrastructure/constants/user-utils';
 import * as argon2 from 'argon2';
-import { ThingsboardService } from '../thingsboard/thingsboard.service';
+import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
+import { UserRepository } from '../../domain/repositories/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersService: UserRepository,
     private readonly jwtService: JwtService,
     private readonly thingsboardService: ThingsboardService,
 
@@ -33,12 +26,12 @@ export class AuthService {
     private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  private async generateAccessToken(userId: number) {
+  async generateAccessToken(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
     return await this.jwtService.signAsync(payload);
   }
 
-  private async generateRefreshToken(userId: number) {
+  async generateRefreshToken(userId: number) {
     const payload: AuthJwtPayload = { sub: userId };
     return await this.jwtService.signAsync(payload, this.refreshTokenConfig);
   }
@@ -55,7 +48,7 @@ export class AuthService {
     });
   }
 
-  private setTokenCookies(
+  setTokenCookies(
     response: Response,
     accessToken: string,
     refreshToken: string,
@@ -80,7 +73,7 @@ export class AuthService {
     const hashToCompare = user?.password ?? DUMMY_BCRYPT_HASH;
     const isPasswordValid = await compare(password, hashToCompare);
 
-    if (!user || !isPasswordValid) {
+    if (!user || !user.id || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
     console.log('validating');
@@ -96,7 +89,8 @@ export class AuthService {
 
   async validateJwtUser(userId: number) {
     const user = await this.usersService.getUserById(userId);
-    if (!user) throw new UnauthorizedException('User not found');
+    if (!user || !user.id || !user.role)
+      throw new UnauthorizedException('User not found');
     const currentUser: CurrentUser = { id: user.id, role: user.role };
 
     return currentUser;
@@ -118,56 +112,8 @@ export class AuthService {
     return { id: user.id };
   }
 
-  async register(createUserDto: CreateUserDto, response: Response) {
-    const existingUser = await this.usersService.getUserByEmail(
-      createUserDto.email,
-    );
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
-    }
-
-    const newUser = await this.usersService.createUser(createUserDto);
-    const accessToken = await this.generateAccessToken(newUser.id);
-    const refreshToken = await this.generateRefreshToken(newUser.id);
-
-    this.setTokenCookies(response, accessToken, refreshToken);
-
-    return {
-      id: newUser.id,
-      email: newUser.email,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-    };
-  }
-
-  async login(userId: number, role: Role, response: Response) {
-    const accessToken = await this.generateAccessToken(userId);
-    const refreshToken = await this.generateRefreshToken(userId);
-    const hashedRt = await argon2.hash(refreshToken);
-
-    await this.usersService.updateHashedRt(userId, hashedRt);
-
-    this.setTokenCookies(response, accessToken, refreshToken);
-    return { id: userId, role: role, success: true };
-  }
-
-  async logout(userId: number, response: Response) {
-    console.log('logout triggered');
-    await this.usersService.updateHashedRt(userId, null);
-
+  clearAuthCookies(response: Response): void {
     response.clearCookie('access_token');
     response.clearCookie('refresh_token', { path: '/api/auth/refresh' });
-    return { success: true, message: 'Logged out successfully' };
-  }
-
-  async refresh(userId: number, response: Response) {
-    const accessToken = await this.generateAccessToken(userId);
-    const refreshToken = await this.generateRefreshToken(userId);
-    const hashedRt = await argon2.hash(refreshToken);
-
-    await this.usersService.updateHashedRt(userId, hashedRt);
-
-    this.setTokenCookies(response, accessToken, refreshToken);
-    return { id: userId, success: true };
   }
 }

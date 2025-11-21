@@ -111,7 +111,6 @@ export class MedplumConnectionService {
     const client = new MedplumClient({
       baseUrl: process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103',
     });
-
     const loginPromise = client
       .startClientLogin(client_id, client_secret)
       .then(() => client)

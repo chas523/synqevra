@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from './connection/connection.module';
-import { UsersModule } from './users/users.module';
+import { IamModule } from './iam/iam.module';
 import dbConfig from './config/db.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
 import { MailerModule } from './mailer/mailer.module';
@@ -31,7 +31,7 @@ import { APP_GUARD } from '@nestjs/core';
       errorMessage: 'Too many requests, please try again later.',
     }),
     ConnectionModule,
-    UsersModule,
+    IamModule,
     ThingsboardModule,
     MailerModule,
     PendingUserModule,

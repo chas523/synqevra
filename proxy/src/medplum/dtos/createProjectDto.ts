@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CreateUserDto } from '../../users/dtos/createUserDto';
+import { CreateUserDto } from '../../iam/interface/rest/dto/createUserDto';
 
 export class CreateProjectDto extends CreateUserDto {
   @ApiProperty({

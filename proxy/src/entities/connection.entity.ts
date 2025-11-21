@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../iam/infrastructure/persistance/user.entity';
 import { Thingsboard } from './thingsboard.entity';
 import { Medplum } from './medplum.entity';
 

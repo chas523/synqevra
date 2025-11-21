@@ -1,13 +1,13 @@
 import { ConnectionService } from './connection.service';
 import { Connection } from '../entities/connection.entity';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../iam/application/users/users.service';
 import { PendingUserService } from '../pending-user/pending-user.service';
 import { MedplumService } from '../medplum/medplum.service';
 import { ThingsboardService } from '../thingsboard/thingsboard.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '../entities/user.entity';
+import { User } from '../iam/infrastructure/persistance/user.entity';
 import {
   GoneException,
   NotFoundException,
@@ -19,7 +19,7 @@ import {
   PendingUserStatus,
 } from '../entities/pending-user.entity';
 import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
-import { CreateUserDto } from '../users/dtos/createUserDto';
+import { CreateUserDto } from '../iam/interface/rest/dto/createUserDto';
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -358,7 +358,7 @@ describe('ConnectionService', () => {
         .spyOn(dataSource, 'createQueryRunner')
         .mockReturnValue(mockQueryRunner);
       jest.spyOn(userService, 'createUser').mockResolvedValueOnce(mockUser);
-      jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection)
+      jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection);
     });
 
     it('should build initial connection', async () => {

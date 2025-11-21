@@ -1,6 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Connection } from './connection.entity';
-import { Role } from '../auth/enums/role.enum';
+import { Connection } from '../../../entities/connection.entity';
+import { Role } from '../../domain/enums/role.enum';
 
 @Entity('users')
 export class User {

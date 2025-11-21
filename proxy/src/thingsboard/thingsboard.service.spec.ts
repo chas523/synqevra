@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ThingsboardService } from './thingsboard.service';
 import { Thingsboard } from '../entities/thingsboard.entity';
-import { User } from '../entities/user.entity';
+import { User } from '../iam/infrastructure/persistance/user.entity';
 import { ConnectionService } from '../connection/connection.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';

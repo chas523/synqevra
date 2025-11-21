@@ -6,7 +6,7 @@ import { Connection } from '../entities/connection.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PendingUserModule } from 'src/pending-user/pending-user.module';
 import { MedplumConnectionService } from './medplum-connection.service';
-import { UsersModule } from '../users/users.module';
+import { IamModule } from '../iam/iam.module';
 import { MedplumModule } from '../medplum/medplum.module';
 import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 
@@ -15,7 +15,7 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
     TypeOrmModule.forFeature([Connection]),
     HttpModule,
     PendingUserModule,
-    UsersModule,
+    IamModule,
     forwardRef(() => MedplumModule),
     forwardRef(() => ThingsboardModule),
   ],

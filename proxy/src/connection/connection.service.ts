@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { Connection } from '../entities/connection.entity';
-import { UsersService } from '../users/users.service';
-import { User } from '../entities/user.entity';
+import { UsersService } from '../iam/application/users/users.service';
+import { User } from '../iam/infrastructure/persistance/user.entity';
 import { Thingsboard } from '../entities/thingsboard.entity';
 import { Medplum } from '../entities/medplum.entity';
 import { PendingUser } from '../entities/pending-user.entity';
@@ -20,7 +20,7 @@ import { PendingUserStatus } from '../entities/pending-user.entity';
 import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
 import { MedplumService } from '../medplum/medplum.service';
 import { ThingsboardService } from '../thingsboard/thingsboard.service';
-import { CreateUserDto } from '../users/dtos/createUserDto';
+import { CreateUserDto } from '../iam/interface/rest/dto/createUserDto';
 import { CreateProjectDto } from '../medplum/dtos/createProjectDto';
 import { ThingsboardRollbackData } from '../thingsboard/thingsboard.types';
 
