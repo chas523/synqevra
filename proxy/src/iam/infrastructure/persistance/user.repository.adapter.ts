@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { UserMapper } from './user.mapper';
 import { UserModel } from '../../domain/entities/user.model';
 
@@ -13,6 +13,11 @@ export class UserRepositoryAdapter extends UserRepository {
     private readonly repository: Repository<User>,
   ) {
     super();
+  }
+
+  withManager(manager: EntityManager): UserRepositoryAdapter {
+    const repository = manager.getRepository(User);
+    return new UserRepositoryAdapter(repository);
   }
 
   async getUserByEmail(email: string): Promise<UserModel | null> {

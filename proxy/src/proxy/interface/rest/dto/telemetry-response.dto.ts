@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { OperationStatus } from '../../../application/enums/operation-status.enum';
 
 export class TelemetryResponseDto {
   @ApiProperty({
     description: 'Request status',
-    enum: ['SUCCESS', 'PARTIAL', 'FAIL'],
+    enum: OperationStatus,
   })
-  status: 'SUCCESS' | 'PARTIAL' | 'FAIL';
+  status: OperationStatus;
 
   @ApiProperty({
     description: 'ThingsBoard Device ID',

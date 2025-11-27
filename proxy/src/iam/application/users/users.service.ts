@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '../../infrastructure/constants/user-utils';
 
 // Service should be deleted after creating DDD for connection
+// use-cases should use UserRepository instead
 @Injectable()
 export class UsersService {
   constructor(

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Connection } from '../../../entities/connection.entity';
+import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
 import { Role } from '../../domain/enums/role.enum';
 
 @Entity('users')

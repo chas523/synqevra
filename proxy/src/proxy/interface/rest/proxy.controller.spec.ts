@@ -4,6 +4,7 @@ import { ProxyController } from './proxy.controller';
 import { TelemetryRequestDto } from './dto/telemetry-request.dto';
 import { PostTelemetryCommand } from '../../application/dto/post-telemetry.command';
 import { TelemetryResponseDto } from './dto/telemetry-response.dto';
+import { OperationStatus } from '../../application/enums/operation-status.enum';
 
 describe('ProxyController', () => {
   let controller: ProxyController;
@@ -32,7 +33,7 @@ describe('ProxyController', () => {
   describe('postTelemetry', () => {
     it('should map request dto to PostTelemetryCommand and return result', async () => {
       useCase.execute.mockResolvedValue({
-        status: 'SUCCESS',
+        status: OperationStatus.SUCCESS,
         deviceId: 'dev-123',
         patientRef: 'Patient/1',
         counts: { total: 1, saved: 1, failed: 0 },

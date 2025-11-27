@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { MedplumConnectionService } from '../../../connection/medplum-connection.service';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { MedplumConnectionService } from '../../../connection/application/medplum-connection.service';
 import { MedplumClient, QuantityUnit } from '@medplum/core';
 import process from 'node:process';
 import { Bundle, Coding, Device, Observation } from '@medplum/fhirtypes';
@@ -10,10 +10,13 @@ import {
 import { TelemetryObservationFactory } from '../../domain/telemetry/telemetry-aggregate';
 import { PostTelemetryCommand } from '../dto/post-telemetry.command';
 import { PostTelemetryResult } from '../dto/post-telemetry.result';
+import { OperationStatus } from '../enums/operation-status.enum';
 
 @Injectable()
 export class PostTelemetryUseCase {
   constructor(private readonly medplum: MedplumConnectionService) {}
+
+  private readonly logger = new Logger(PostTelemetryUseCase.name);
 
   private async getDeviceProfile(
     deviceId: string,
@@ -75,7 +78,7 @@ export class PostTelemetryUseCase {
           timestamp: body.timestamp,
         });
       } catch (error) {
-        console.error(error);
+        this.logger.error('Error while creating Observation', error);
         failedCount++;
         continue;
       }
@@ -89,15 +92,15 @@ export class PostTelemetryUseCase {
           failedCount++;
         }
       } catch {
-        console.error('Error creating resource');
+        this.logger.error('Error while creating resource');
         failedCount++;
       }
     }
 
-    let status: 'SUCCESS' | 'PARTIAL' | 'FAIL';
-    if (savedCount === 0) status = 'FAIL';
-    else if (savedCount < totalCount) status = 'PARTIAL';
-    else status = 'SUCCESS';
+    let status: OperationStatus;
+    if (savedCount === 0) status = OperationStatus.FAIL;
+    else if (savedCount < totalCount) status = OperationStatus.PARTIAL;
+    else status = OperationStatus.SUCCESS;
 
     return {
       status,

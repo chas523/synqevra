@@ -38,6 +38,11 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
     UserRepositoryAdapter,
     { provide: UserRepository, useClass: UserRepositoryAdapter },
   ],
-  exports: [UsersService, AuthService],
+  exports: [
+    UsersService,
+    AuthService,
+    CreateUserUseCase,
+    UserRepositoryAdapter,
+  ],
 })
 export class IamModule {}

@@ -28,4 +28,27 @@ export class CreateUserUseCase {
 
     return await this.userRepository.save(model);
   }
+
+  async executeWithRepo(
+    command: CreateUserCommand,
+    repo: UserRepository,
+  ): Promise<UserModel> {
+    const { email, password } = command;
+
+    const existingUser = await repo.getUserByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException(`User with email already exists`);
+    }
+
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const model: UserModel = {
+      ...command,
+      password: hashedPassword,
+      hashedRt: null,
+    };
+
+    return await repo.save(model);
+  }
 }

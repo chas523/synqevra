@@ -1,5 +1,7 @@
+import { OperationStatus } from '../enums/operation-status.enum';
+
 export interface PostTelemetryResult {
-  status: 'SUCCESS' | 'PARTIAL' | 'FAIL';
+  status: OperationStatus;
   deviceId: string;
   patientRef: string;
   counts: {
