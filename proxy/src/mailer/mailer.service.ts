@@ -10,7 +10,7 @@ import {
 } from '../entities/pending-user.entity';
 import { SendEmailDto } from './dtos/send-email.dto';
 import { MailRecipient } from './dtos/mail-recipient.dto';
-import { ConnectionService } from 'src/connection/connection.service';
+import { ConnectionService } from 'src/connection/application/connection.service';
 
 @Injectable()
 export class MailerService {

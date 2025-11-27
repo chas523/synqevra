@@ -4,13 +4,14 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection } from '../entities/connection.entity';
+import { Connection } from '../infrastructure/persistance/connection.entity';
 import { Repository } from 'typeorm';
 import { MedplumClient } from '@medplum/core';
 import process from 'node:process';
 
 @Injectable()
 export class MedplumConnectionService {
+  //to be moved to MedplumService later
   constructor(
     @InjectRepository(Connection)
     private readonly connectionRepository: Repository<Connection>,

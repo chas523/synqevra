@@ -67,7 +67,7 @@ export class TenantFieldsDto {
   tenantEmail?: string;
 }
 
-class UserFieldsDto {
+export class UserFieldsDto {
   @ApiProperty({ description: 'User email', example: 'user@example.com' })
   @IsEmail({}, { message: 'Invalid email format' })
   @IsNotEmpty()

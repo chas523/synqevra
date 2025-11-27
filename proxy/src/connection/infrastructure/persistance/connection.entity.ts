@@ -5,9 +5,9 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { User } from '../iam/infrastructure/persistance/user.entity';
-import { Thingsboard } from './thingsboard.entity';
-import { Medplum } from './medplum.entity';
+import { User } from '../../../iam/infrastructure/persistance/user.entity';
+import { Thingsboard } from '../../../entities/thingsboard.entity';
+import { Medplum } from '../../../entities/medplum.entity';
 
 @Entity('connections')
 @Unique(['user'])

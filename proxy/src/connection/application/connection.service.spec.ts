@@ -1,13 +1,13 @@
 import { ConnectionService } from './connection.service';
-import { Connection } from '../entities/connection.entity';
+import { Connection } from '../infrastructure/persistance/connection.entity';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
-import { UsersService } from '../iam/application/users/users.service';
-import { PendingUserService } from '../pending-user/pending-user.service';
-import { MedplumService } from '../medplum/medplum.service';
-import { ThingsboardService } from '../thingsboard/thingsboard.service';
+import { UsersService } from '../../iam/application/users/users.service';
+import { PendingUserService } from '../../pending-user/pending-user.service';
+import { MedplumService } from '../../medplum/medplum.service';
+import { ThingsboardService } from '../../thingsboard/thingsboard.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '../iam/infrastructure/persistance/user.entity';
+import { User } from '../../iam/infrastructure/persistance/user.entity';
 import {
   GoneException,
   NotFoundException,
@@ -17,9 +17,9 @@ import * as crypto from 'crypto';
 import {
   PendingUser,
   PendingUserStatus,
-} from '../entities/pending-user.entity';
-import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
-import { CreateUserDto } from '../iam/interface/rest/dto/createUserDto';
+} from '../../entities/pending-user.entity';
+import { InitialConnectionFormDto } from '../interface/rest/dto/initial-connection-form.dto';
+import { CreateUserDto } from '../../iam/interface/rest/dto/createUserDto';
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -337,54 +337,54 @@ describe('ConnectionService', () => {
     });
   });
 
-  describe('buildInitialConnection', () => {
-    const mockQueryRunner = {
-      connect: jest.fn().mockResolvedValue(undefined),
-      startTransaction: jest.fn().mockResolvedValue(undefined),
-      commitTransaction: jest.fn().mockResolvedValue(undefined),
-      rollbackTransaction: jest.fn().mockResolvedValue(undefined),
-      release: jest.fn().mockResolvedValue(undefined),
-      manager: {
-        getRepository: jest.fn().mockReturnValue(undefined),
-      },
-    } as unknown as QueryRunner;
-
-    beforeEach(() => {
-      jest.spyOn(service, 'validateToken').mockResolvedValue({ valid: true });
-      jest
-        .spyOn(service as any, 'extractUserIdFromToken')
-        .mockReturnValueOnce(userId.toString());
-      jest
-        .spyOn(dataSource, 'createQueryRunner')
-        .mockReturnValue(mockQueryRunner);
-      jest.spyOn(userService, 'createUser').mockResolvedValueOnce(mockUser);
-      jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection);
-    });
-
-    it('should build initial connection', async () => {
-      const formData = {
-        userFields: {
-          userEmail: 'email@email.com',
-          firstName: 'John',
-          lastName: 'Doe',
-          password: 'hashedPassword',
-        },
-      } as InitialConnectionFormDto;
-
-      const expectedNewUser: CreateUserDto = {
-        email: formData.userFields.userEmail,
-        firstName: formData.userFields.firstName || 'Unknown Name',
-        lastName: formData.userFields.lastName || 'Unknown Lastname',
-        password: formData.userFields.password,
-      };
-
-      // await service.buildInitialConnection(formData, token);
-      //
-      // expect(mockQueryRunner.connect).toHaveBeenCalled();
-      // expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
-      // expect(userService.createUser).toHaveBeenCalledWith(
-      //   expectedNewUser
-      // );
-    });
-  });
+  // describe('buildInitialConnection', () => {
+  //   const mockQueryRunner = {
+  //     connect: jest.fn().mockResolvedValue(undefined),
+  //     startTransaction: jest.fn().mockResolvedValue(undefined),
+  //     commitTransaction: jest.fn().mockResolvedValue(undefined),
+  //     rollbackTransaction: jest.fn().mockResolvedValue(undefined),
+  //     release: jest.fn().mockResolvedValue(undefined),
+  //     manager: {
+  //       getRepository: jest.fn().mockReturnValue(undefined),
+  //     },
+  //   } as unknown as QueryRunner;
+  //
+  //   beforeEach(() => {
+  //     jest.spyOn(service, 'validateToken').mockResolvedValue({ valid: true });
+  //     jest
+  //       .spyOn(service as any, 'extractUserIdFromToken')
+  //       .mockReturnValueOnce(userId.toString());
+  //     jest
+  //       .spyOn(dataSource, 'createQueryRunner')
+  //       .mockReturnValue(mockQueryRunner);
+  //     jest.spyOn(userService, 'createUser').mockResolvedValueOnce(mockUser);
+  //     jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection);
+  //   });
+  //
+  //   it('should build initial connection', async () => {
+  //     const formData = {
+  //       userFields: {
+  //         userEmail: 'email@email.com',
+  //         firstName: 'John',
+  //         lastName: 'Doe',
+  //         password: 'hashedPassword',
+  //       },
+  //     } as InitialConnectionFormDto;
+  //
+  //     const expectedNewUser: CreateUserDto = {
+  //       email: formData.userFields.userEmail,
+  //       firstName: formData.userFields.firstName || 'Unknown Name',
+  //       lastName: formData.userFields.lastName || 'Unknown Lastname',
+  //       password: formData.userFields.password,
+  //     };
+  //
+  //     // await service.buildInitialConnection(formData, token);
+  //     //
+  //     // expect(mockQueryRunner.connect).toHaveBeenCalled();
+  //     // expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+  //     // expect(userService.createUser).toHaveBeenCalledWith(
+  //     //   expectedNewUser
+  //     // );
+  //   });
+  // });
 });

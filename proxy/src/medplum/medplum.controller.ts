@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { MedplumService } from './medplum.service';
 import { ActiveUser } from '../auth/decorators/active-user.decorator';
 import type { CurrentUser } from '../auth/types/current-user';
-import { MedplumConnectionService } from '../connection/medplum-connection.service';
+import { MedplumConnectionService } from '../connection/application/medplum-connection.service';
 import type { Observation, Patient } from '@medplum/fhirtypes';
 
 @Controller('medplum')

@@ -17,9 +17,9 @@ import {
   MemoryStorage,
 } from '@medplum/core';
 import process from 'node:process';
-import { ConnectionService } from '../connection/connection.service';
+import { ConnectionService } from '../connection/application/connection.service';
 import { webcrypto } from 'node:crypto';
-import { MedplumConnectionService } from '../connection/medplum-connection.service';
+import { MedplumConnectionService } from '../connection/application/medplum-connection.service';
 import { Device, Patient } from '@medplum/fhirtypes';
 import { getErrorMessage } from '../utils/error.utils';
 
