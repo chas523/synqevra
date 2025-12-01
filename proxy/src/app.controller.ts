@@ -1,4 +1,5 @@
 import { All, Controller, Get, Req, Res } from '@nestjs/common';
+
 import type { Request, Response } from 'express';
 import { MedplumConnectionService } from './connection/application/medplum-connection.service';
 import { ActiveUser } from './auth/decorators/active-user.decorator';
@@ -18,7 +19,6 @@ export class AppController {
 
   @Get('hello')
   getHello(): string {
-    console.log('hello');
     return 'Hello World!';
   }
 

@@ -1,13 +1,12 @@
 import { proxyApi } from "@/lib/api/api";
 import type {} from "@/types/thingsboardDeviceTypes";
-import { PatientName } from "./patientService";
 
 export class MedplumDeviceService {
   public static async fetchMedplumDevice(
-    deviceId: string,
+    deviceId: string
   ): Promise<MedplumDevice> {
     const { data } = await proxyApi.get<MedplumDevice>(
-      `/medplum/device/${deviceId}`,
+      `/medplum/device/${deviceId}`
     );
 
     const result = {

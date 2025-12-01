@@ -5,14 +5,35 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
+import Image from "next/image";
+import Link from "next/link";
+import logo from "@/public/logo.svg";
 
 export default function AppSidebar() {
   return (
     <Sidebar>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/">
+                <Image
+                  src={logo}
+                  alt="Logo"
+                  height={32}
+                  width={100}
+                  className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>

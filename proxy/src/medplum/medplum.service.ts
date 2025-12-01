@@ -35,6 +35,19 @@ export class MedplumService {
     private readonly medplum: MedplumConnectionService,
   ) {}
 
+  private async getMedplumClient(
+    userId?: number,
+    tenantId?: string,
+  ): Promise<MedplumClient> {
+    if (userId) {
+      return await this.medplum.initMedplum(userId);
+    }
+    if (tenantId) {
+      return await this.medplum.initMedplumWithProjectId(tenantId);
+    }
+    throw new BadRequestException('Either userId or tenantId must be provided');
+  }
+
   /**
     here, the rollback mechanism is not needed. the only way for the function to throw an error
     is *const registration = await medplum.startNewUser({* after specifying used Email, or password that
@@ -193,8 +206,15 @@ export class MedplumService {
 
     return await medplumRepository.save(medplumEntity);
   }
-  async createDevice(deviceDto: { identifier: string }, userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async createDevice(
+    deviceDto: { identifier: string },
+    userId?: number,
+    tenantId?: string,
+  ) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
 
     const device: Device = {
       resourceType: 'Device',
@@ -222,15 +242,21 @@ export class MedplumService {
     }
   }
 
-  async getPatientList(userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async getPatientList(userId?: number, tenantId?: string) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
     const patients = await medplum.searchResources('Patient');
 
     return patients;
   }
 
-  async getPatientById(id: string, userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async getPatientById(id: string, userId?: number, tenantId?: string) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
 
     const patient = await medplum.readResource('Patient', id);
     if (!patient) {
@@ -239,8 +265,16 @@ export class MedplumService {
     return patient;
   }
 
-  async updatePatient(id: string, patientDto: Patient, userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async updatePatient(
+    id: string,
+    patientDto: Patient,
+    userId?: number,
+    tenantId?: string,
+  ) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
 
     const patient = await medplum.readResource('Patient', id);
     if (!patient) {
@@ -252,9 +286,10 @@ export class MedplumService {
   async assignPatientToDevice(
     patientId: string,
     deviceId: string,
-    userId: number,
+    userId?: number,
+    tenantId?: string,
   ) {
-    const client: MedplumClient = await this.medplum.initMedplum(userId);
+    const client: MedplumClient = await this.getMedplumClient(userId, tenantId);
 
     const device = await this.getDevice(deviceId, client);
 
@@ -303,8 +338,11 @@ export class MedplumService {
     return device;
   }
 
-  async createPatient(patientDto: Patient, userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async createPatient(patientDto: Patient, userId?: number, tenantId?: string) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
 
     try {
       return await medplum.createResource(patientDto);
@@ -321,8 +359,16 @@ export class MedplumService {
     }
   }
 
-  async getPatientObservations(id: string, count: number = 20, userId: number) {
-    const medplum: MedplumClient = await this.medplum.initMedplum(userId);
+  async getPatientObservations(
+    id: string,
+    count: number = 20,
+    userId?: number,
+    tenantId?: string,
+  ) {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
     const observations = await medplum.searchResources('Observation', {
       _count: count,
       _sort: '-_lastUpdated',
@@ -330,5 +376,67 @@ export class MedplumService {
       subject: `Patient/${id}`,
     });
     return observations;
+  }
+
+  // Search methods for HL7 mapping
+  async findPatientByIdentifier(
+    identifier: { system: string; value: string },
+    userId?: number,
+    tenantId?: string,
+  ): Promise<Patient | null> {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
+    const query = `identifier=${identifier.system}|${identifier.value}`;
+    const patient = await medplum.searchOne('Patient', query);
+    return patient || null;
+  }
+
+  async findEncounterByIdentifier(
+    identifier: { system: string; value: string },
+    userId?: number,
+    tenantId?: string,
+  ): Promise<import('@medplum/fhirtypes').Encounter | null> {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
+    const query = `identifier=${identifier.system}|${identifier.value}`;
+    const encounter = await medplum.searchOne('Encounter', query);
+    return encounter || null;
+  }
+
+  async findPractitionerById(
+    practitionerId: string,
+    userId?: number,
+    tenantId?: string,
+  ): Promise<import('@medplum/fhirtypes').Practitioner | null> {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
+    const practitioner = await medplum.searchOne(
+      'Practitioner',
+      `identifier=${practitionerId}`,
+    );
+    return practitioner || null;
+  }
+
+  async findPractitionerByName(
+    lastName: string,
+    firstName: string,
+    userId?: number,
+    tenantId?: string,
+  ): Promise<import('@medplum/fhirtypes').Practitioner | null> {
+    const medplum: MedplumClient = await this.getMedplumClient(
+      userId,
+      tenantId,
+    );
+    const practitioner = await medplum.searchOne(
+      'Practitioner',
+      `name=${lastName}`,
+    );
+    return practitioner || null;
   }
 }

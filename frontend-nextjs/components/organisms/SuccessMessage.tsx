@@ -10,7 +10,7 @@ export interface SuccessMessageProps {
 
 const SuccessMessage = ({
   title = "Thank you for signing up!",
-  description = "Check your email inbox",
+  description = "We'll send you an email with further instructions shortly.",
   className = "",
 }: SuccessMessageProps) => {
   const baseStyles = ["text-center", "py-3"];

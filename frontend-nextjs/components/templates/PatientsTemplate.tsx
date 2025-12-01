@@ -39,6 +39,7 @@ const PatientsTemplate = (medplumPatients: UseMedplumPatientResult) => {
           title="No patients found"
           description="Start by adding some patients using the form above."
           hint="Add new patient using form"
+          className="flex-1 mb-6"
         />
       </>
     );

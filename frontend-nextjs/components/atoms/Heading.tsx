@@ -1,7 +1,7 @@
 export interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   size?: "sm" | "md" | "lg" | "xl";
-  color?: "default" | "muted";
+  color?: "default" | "muted" | "white";
 }
 
 const Heading = ({
@@ -24,6 +24,7 @@ const Heading = ({
   const colorStyles = {
     default: ["text-gray-900", "dark:text-white"],
     muted: ["text-gray-600", "dark:text-gray-300"],
+    white: ["text-white"],
   };
 
   const allStyles = [
