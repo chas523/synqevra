@@ -11,6 +11,10 @@ import HeroSection from "../organisms/HeroSection";
 import type { FormData } from "../organisms/RegistrationForm";
 import RegistrationForm from "../organisms/RegistrationForm";
 import SuccessMessage from "../organisms/SuccessMessage";
+import Image from "next/image";
+import Link from "next/link";
+
+import backgroundImage from "@/public/landingPageImage.jpg";
 
 export interface LandingTemplateProps {
   // Hero props
@@ -52,7 +56,7 @@ const LandingTemplate = ({
   className = "",
 }: LandingTemplateProps) => {
   const baseStyles = [
-    "min-h-screen",
+    "flex-1",
     "bg-gradient-to-br",
     "from-blue-50",
     "to-indigo-100",
@@ -76,49 +80,77 @@ const LandingTemplate = ({
 
   return (
     <div className={allStyles.join(" ")}>
-      <div className="container mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
-        {/* Hero Section */}
-        <HeroSection title={heroTitle} description={heroDescription} />
+      <div className="flex-1 relative overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Image
+            src={backgroundImage}
+            alt="Healthcare background"
+            fill
+            className="object-cover"
+          />
+          {/* Dark overlay for better form readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
 
-        {/* Registration Card */}
-        <div className="max-w-sm mx-auto mb-6">
-          <Card className="py-4">
-            <CardHeader className="relative text-center pb-3">
-              <CardTitle className="text-xl">Get Started Today</CardTitle>
-              <CardDescription className="text-sm">
-                Create your account and start exploring our platform
-              </CardDescription>
+        <div className="container mx-auto px-4 py-8 flex-1 flex flex-col justify-center relative z-10">
+          {/* Hero Section */}
+          <HeroSection
+            title={heroTitle}
+            description={heroDescription}
+            color="white"
+          />
 
-              {/* Info Tooltip */}
-              <div className="absolute right-2 top-1">
-                <InfoTooltip
-                  content={tooltipContent || defaultTooltipContent}
+          {/* Registration Card */}
+          <div className="max-w-sm mx-auto mb-6">
+            <Card className="py-4 bg-white shadow-2xl">
+              <CardHeader className="relative text-center pb-3">
+                <CardTitle className="text-xl">Get Started Today</CardTitle>
+                <CardDescription className="text-sm">
+                  Create your account and start exploring our platform
+                </CardDescription>
+
+                {/* Info Tooltip */}
+                <div className="absolute right-2 top-1">
+                  <InfoTooltip
+                    content={tooltipContent || defaultTooltipContent}
+                  />
+                </div>
+              </CardHeader>
+
+              <CardContent className="pt-0">
+                {/* Show form or success message */}
+                {!isSubmitted || formError ? (
+                  <RegistrationForm
+                    onSubmit={onFormSubmit}
+                    isLoading={isFormLoading}
+                    error={formError}
+                  />
+                ) : (
+                  <SuccessMessage
+                    title={successTitle}
+                    description={successDescription}
+                  />
+                )}
+
+                {/* Activation Info */}
+                <ActivationInfo
+                  title={activationTitle}
+                  description={activationDescription}
                 />
-              </div>
-            </CardHeader>
-
-            <CardContent className="pt-0">
-              {/* Show form or success message */}
-              {!isSubmitted || formError ? (
-                <RegistrationForm
-                  onSubmit={onFormSubmit}
-                  isLoading={isFormLoading}
-                  error={formError}
-                />
-              ) : (
-                <SuccessMessage
-                  title={successTitle}
-                  description={successDescription}
-                />
-              )}
-
-              {/* Activation Info */}
-              <ActivationInfo
-                title={activationTitle}
-                description={activationDescription}
-              />
-            </CardContent>
-          </Card>
+                {/* Login Redirect */}
+                <div className="text-center text-sm mt-6 pt-4 border-t border-gray-200">
+                  Already have an account?{" "}
+                  <Link
+                    href="/auth/login"
+                    className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                  >
+                    Log in here
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

@@ -22,10 +22,10 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 // Transform flat form data to nested structure
 const transformFormData = (flatData: ConnectionFormData): ApiData => {
   const tenantFieldNames = tenantFields.map(
-    (field) => field.name,
+    (field) => field.name
   ) as (keyof ConnectionFormData)[];
   const userFieldNames = userFields.map(
-    (field) => field.name,
+    (field) => field.name
   ) as (keyof ConnectionFormData)[];
 
   const tenantData: Record<string, string | undefined> = {};
@@ -39,7 +39,7 @@ const transformFormData = (flatData: ConnectionFormData): ApiData => {
       } else if (userFieldNames.includes(key)) {
         userData[key] = value;
       }
-    },
+    }
   );
 
   return {

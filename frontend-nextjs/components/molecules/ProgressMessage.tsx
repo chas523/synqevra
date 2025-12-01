@@ -1,4 +1,6 @@
+import { LogInIcon } from "lucide-react";
 import Text from "../atoms/Text";
+import Link from "next/link";
 
 export interface ProgressMessageProps {
   status: "loading" | "success" | "error";
@@ -39,6 +41,14 @@ const ProgressMessage = ({
         className="w-full"
       >
         {messages[status]}
+        {status === "success" && (
+          <Link
+            className="ml-2 text-slate-500 hover:underline"
+            href="auth/login"
+          >
+            Go to Login
+          </Link>
+        )}
       </Text>
     </div>
   );

@@ -25,7 +25,7 @@ const DeviceForm = ({
 
   const handleInputChange = (
     field: keyof CreateDeviceRequest,
-    value: string,
+    value: string
   ) => {
     setFormData((prev) => ({
       ...prev,
@@ -73,7 +73,7 @@ const DeviceForm = ({
 
           <LoadingButton
             type="submit"
-            className="w-full"
+            className="w-full cursor-pointer bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
             isLoading={isLoading}
             textBeforeClick="Create Device"
             textAfterClick="Creating..."

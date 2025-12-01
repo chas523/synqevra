@@ -23,7 +23,7 @@ const EmptyState = ({
 
   return (
     <div
-      className={`flex flex-col items-center text-center py-12 bg-gray-50 rounded-lg ${className}`}
+      className={`flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg ${className}`}
     >
       <div className="text-gray-500 mb-4">{icon || defaultIcon}</div>
       <Heading level={3} className="text-lg font-medium text-gray-900 mb-2">
