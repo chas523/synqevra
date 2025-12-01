@@ -29,16 +29,8 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
   }
 
   async save(model: ConnectionModel): Promise<ConnectionModel | null> {
-    console.log('asdas');
     const entity = ConnectionMapper.toOrm(model);
-    console.log(entity);
-    let saved: any;
-    try {
-      saved = await this.repository.save(entity);
-      console.log(saved);
-    } catch (error) {
-      console.log(error);
-    }
+    const saved = await this.repository.save(entity);
 
     return saved ? ConnectionMapper.toDomain(saved) : null;
   }

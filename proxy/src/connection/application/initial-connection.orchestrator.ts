@@ -18,7 +18,7 @@ export class InitialConnectionOrchestrator {
     const uow = await this.unitOfWorkFactory.create();
 
     try {
-      const { result } = await this.initialConnectionUseCase.execute(
+      const result = await this.initialConnectionUseCase.execute(
         command,
         token,
         uow,

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InitialConnectionResult } from '../dto/initial-connection.result';
 import { PendingUserService } from '../../../pending-user/pending-user.service';
 import { MedplumService } from '../../../medplum/medplum.service';
@@ -13,9 +13,12 @@ import { Medplum } from '../../../entities/medplum.entity';
 import { Thingsboard } from '../../../entities/thingsboard.entity';
 import { Connection } from '../../infrastructure/persistance/connection.entity';
 import { CreateProjectDto } from '../../../medplum/dtos/createProjectDto';
+import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
 
 @Injectable()
 export class InitialConnectionUseCase {
+  private readonly logger = new Logger(InitialConnectionUseCase.name);
+
   constructor(
     private readonly validateTokenUseCase: ValidateTokenUseCase,
     private readonly createUserUseCase: CreateUserUseCase,
@@ -29,9 +32,7 @@ export class InitialConnectionUseCase {
     command: InitialConnectionCommand,
     token: string,
     uow: UnitOfWork,
-  ): Promise<{
-    result: InitialConnectionResult;
-  }> {
+  ): Promise<InitialConnectionResult> {
     await this.validateTokenUseCase.execute(token);
 
     const { userEmail, firstName, lastName, password } = command.userFields;
@@ -68,15 +69,15 @@ export class InitialConnectionUseCase {
       userRepository,
     );
 
-    console.log('Created new user:', newUser);
+    this.logger.debug(`Created new user: ` + JSON.stringify(newUser));
 
     // connection
     const newConnection = connectionRepository.create(newUser.id!);
     await connectionRepository.save(newConnection!);
-    console.log('Created connection:', newConnection);
+    this.logger.debug('Created connection:' + JSON.stringify(newConnection));
 
-    let thingsboardRollbackData: any;
-    let result: any;
+    let thingsboardRollbackData: ThingsboardRollbackData | null = null;
+    let result: InitialConnectionResult;
 
     try {
       // thingsboard - to be replaced
@@ -88,9 +89,8 @@ export class InitialConnectionUseCase {
           uow.manager.getRepository(Connection),
         );
 
-      console.log(
-        'Created Thingsboard project and connection:',
-        thingsboardResult,
+      this.logger.debug(
+        `${thingsboardResult.message} with tenant ID: ${thingsboardResult.tenantId}`,
       );
 
       thingsboardRollbackData = thingsboardResult.rollbackData ?? null;
@@ -112,11 +112,13 @@ export class InitialConnectionUseCase {
         uow.manager.getRepository(Connection),
       );
 
+      this.logger.debug('Created Medplum project: ' + projectName);
+
       const { rollbackData, ...resultWithoutRollback } = thingsboardResult;
       result = resultWithoutRollback;
     } catch (error) {
       if (thingsboardRollbackData) {
-        console.log(
+        this.logger.warn(
           'Rolling back Thingsboard changes due to Medplum error / other failure',
         );
 
@@ -129,6 +131,6 @@ export class InitialConnectionUseCase {
 
       throw error;
     }
-    return { result: result as InitialConnectionResult };
+    return result;
   }
 }
