@@ -33,7 +33,7 @@ const LandingPage = () => {
       isSubmitted={isSubmitted}
       tooltipContent={tooltipContent}
       activationTitle="Activation Information"
-      activationDescription="We'll send an activation link to configure your account to the provided email. The process usually takes a few minutes."
+      activationDescription="We'll send an activation link to configure your account to the provided email. The process usually takes a few hours."
     />
   );
 };

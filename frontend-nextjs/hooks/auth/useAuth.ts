@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthService } from "@/lib/services/authServices/authService";
 import type { LoginFormData, RegisterFormData } from "@/types/authTypes";
 
@@ -46,4 +47,28 @@ export function useRegister() {
   }
 
   return { register, isLoading, error, success };
+}
+export function useLogout() {
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
+
+  async function logout() {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      await AuthService.logoutRequest();
+      setSuccess(true);
+      router.push("/auth/login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Logout failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { logout, isLoading, error, success };
 }
