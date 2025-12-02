@@ -4,13 +4,12 @@ import * as nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  PendingUser,
-  PendingUserStatus,
-} from '../entities/pending-user.entity';
+
 import { SendEmailDto } from './dtos/send-email.dto';
 import { MailRecipient } from './dtos/mail-recipient.dto';
 import { ConnectionService } from 'src/connection/connection.service';
+import { PendingUserStatus } from 'src/pending-user/domain/enums/status.enum';
+import { PendingUser } from 'src/pending-user/infrastructure/persistence/pending-user.entity';
 
 @Injectable()
 export class MailerService {

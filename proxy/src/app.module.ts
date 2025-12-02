@@ -19,6 +19,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { CacheModule } from '@nestjs/cache-manager';
 import { QueueModule } from './queue/queue.module';
 import { PublicApiModule } from './public-api/public-api.module';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { PublicApiModule } from './public-api/public-api.module';
     CacheModule.register({
       isGlobal: true,
     }),
-
+    CqrsModule.forRoot(),
     QueueModule,
     ConnectionModule,
     UsersModule,

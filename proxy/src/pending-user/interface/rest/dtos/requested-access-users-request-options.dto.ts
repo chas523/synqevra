@@ -1,4 +1,4 @@
-import { PendingUserStatus } from 'src/entities/pending-user.entity';
+import { PendingUserStatus } from 'src/pending-user/domain/enums/status.enum';
 
 export interface RequestedAccessUsersRequestOptions {
   sortBy?: string;

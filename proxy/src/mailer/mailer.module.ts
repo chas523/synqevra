@@ -3,8 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerService } from './mailer.service';
 import { MailerController } from './mailer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PendingUser } from 'src/entities/pending-user.entity';
+
 import { ConnectionModule } from 'src/connection/connection.module';
+import { PendingUser } from 'src/pending-user/infrastructure/persistence/pending-user.entity';
 
 @Module({
   imports: [

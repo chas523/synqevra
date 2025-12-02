@@ -4,11 +4,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
-export enum PendingUserStatus {
-  NEW = 'new',
-  PENDING = 'pending',
-}
+import { PendingUserStatus } from '../../domain/enums/status.enum';
 
 @Entity('pending_users')
 export class PendingUser {

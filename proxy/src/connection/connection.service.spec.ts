@@ -14,12 +14,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
-import {
-  PendingUser,
-  PendingUserStatus,
-} from '../entities/pending-user.entity';
+
 import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
 import { CreateUserDto } from '../users/dtos/createUserDto';
+import { PendingUser } from 'src/pending-user/ddd/infrastructure/persistence/pending-user.entity';
+import { PendingUserStatus } from 'src/pending-user/ddd/domain/enums/status.enum';
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -358,10 +357,10 @@ describe('ConnectionService', () => {
         .spyOn(dataSource, 'createQueryRunner')
         .mockReturnValue(mockQueryRunner);
       jest.spyOn(userService, 'createUser').mockResolvedValueOnce(mockUser);
-      jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection)
+      jest.spyOn(repository, 'create').mockReturnValue(mockCreateConnection);
     });
 
-    it('should build initial connection', async () => {
+    it('should build initial connection', () => {
       const formData = {
         userFields: {
           userEmail: 'email@email.com',
