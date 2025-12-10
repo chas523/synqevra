@@ -1,0 +1,4 @@
+export interface CreateDeviceRequest {
+  name: string;
+  label: string | null;
+}
