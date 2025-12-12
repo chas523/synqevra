@@ -24,6 +24,15 @@ export class PendingUserRepositoryAdapter implements PendingUserRepositoryPort {
     const pendingUserDomain = PendingUserMapper.toDomain(saved);
     return pendingUserDomain;
   }
+
+  async update(pendingUser: PendingUserModel): Promise<void> {
+    const pendingUserOrmEntity = PendingUserMapper.toOrm(pendingUser);
+    await this.repository.update(
+      { id: pendingUser.getId() },
+      pendingUserOrmEntity,
+    );
+  }
+
   async findByEmail(email: string): Promise<PendingUserModel | null> {
     const pendingUserOrm = await this.repository.findOne({ where: { email } });
     if (!pendingUserOrm) {

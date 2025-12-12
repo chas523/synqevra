@@ -10,6 +10,7 @@ export type PaginationPrimitiveSortBy = 'createdAt' | 'email';
 
 export abstract class PendingUserRepositoryPort {
   abstract save(pendingUser: PendingUserModel): Promise<PendingUserModel>;
+  abstract update(pendingUser: PendingUserModel): Promise<void>;
   abstract findByEmail(email: string): Promise<PendingUserModel | null>;
   abstract findById(id: number): Promise<PendingUserModel | null>;
   abstract findForPagination(

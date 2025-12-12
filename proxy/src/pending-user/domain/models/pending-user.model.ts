@@ -55,6 +55,12 @@ export class PendingUserModel {
   getStatus(): PendingUserStatus {
     return this.status;
   }
+  getActivationToken(): string | undefined {
+    return this.activationToken;
+  }
+  getExpiresAt(): Date | undefined {
+    return this.expiresAt;
+  }
   setStatus(status: PendingUserStatus): void {
     this.status = status;
   }
