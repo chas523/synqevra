@@ -1,5 +1,5 @@
 import { ThingsboardDeviceService } from './thingsboard-device.service';
-import { MedplumService } from '../../medplum/medplum.service';
+import { MedplumService } from '../../medplum/application/medplum.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { Test, TestingModule } from '@nestjs/testing';

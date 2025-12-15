@@ -1,4 +1,4 @@
-import { Role } from '../enums/role.enum';
+import { Role } from '../../iam/domain/enums/role.enum';
 
 export type CurrentUser = {
   id: number;

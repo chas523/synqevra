@@ -1,7 +1,7 @@
 import { All, Controller, Get, Req, Res } from '@nestjs/common';
 
 import type { Request, Response } from 'express';
-import { MedplumConnectionService } from './connection/medplum-connection.service';
+import { MedplumConnectionService } from './medplum/application/medplum-connection.service';
 import { ActiveUser } from './auth/decorators/active-user.decorator';
 import type { CurrentUser } from './auth/types/current-user';
 

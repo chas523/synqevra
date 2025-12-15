@@ -1,4 +1,4 @@
-import { Connection } from 'src/entities/connection.entity';
+import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
 
 export class ThingsboardModel {
   constructor(

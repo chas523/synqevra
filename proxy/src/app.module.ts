@@ -7,18 +7,15 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from './connection/connection.module';
-import { UsersModule } from './users/users.module';
+import { IamModule } from './iam/iam.module';
 import dbConfig from './config/db.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
 import { MailerModule } from './mailer/mailer.module';
 import { PendingUserModule } from './pending-user/pending-user.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { Hl7MapperModule } from './hl7-mapper/hl7-mapper.module';
-import { BullModule } from '@nestjs/bullmq';
+import { Hl7Module } from './hl7/hl7.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { QueueModule } from './queue/queue.module';
-import { PublicApiModule } from './public-api/public-api.module';
 import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
@@ -40,14 +37,12 @@ import { CqrsModule } from '@nestjs/cqrs';
       isGlobal: true,
     }),
     CqrsModule.forRoot(),
-    QueueModule,
     ConnectionModule,
-    UsersModule,
+    IamModule,
     ThingsboardModule,
     MailerModule,
     PendingUserModule,
-    Hl7MapperModule,
-    PublicApiModule,
+    Hl7Module,
   ],
   controllers: [AppController],
   providers: [

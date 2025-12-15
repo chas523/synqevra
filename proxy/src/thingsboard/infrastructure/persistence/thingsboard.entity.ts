@@ -1,5 +1,5 @@
-import { Connection } from 'src/entities/connection.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
+import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
 
 @Entity('thingsboard')
 export class Thingsboard {

@@ -3,11 +3,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ThingsboardService } from './thingsboard.service';
 import { Thingsboard } from '../entities/thingsboard.entity';
-import { User } from '../entities/user.entity';
-import { ConnectionService } from '../connection/connection.service';
+import { User } from '../iam/infrastructure/persistance/user.entity';
+import { ConnectionService } from '../connection/application/connection.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { Connection } from '../entities/connection.entity';
+import { Connection } from '../connection/infrastructure/persistance/connection.entity';
 import {
   BadRequestException,
   InternalServerErrorException,

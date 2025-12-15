@@ -28,8 +28,8 @@ import {
   InvalidActivationLinkError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { AxiosError } from 'axios';
-import { ThingsboardModel } from 'src/thingsboard/domain/models/thingsboard.model';
-import { ConnectionService } from 'src/connection/connection.service';
+import { ConnectionService } from '../../../../connection/application/connection.service';
+import { ThingsboardModel } from '../../../domain/models/thingsboard.model';
 
 interface RuleChainData {
   ruleChain: {

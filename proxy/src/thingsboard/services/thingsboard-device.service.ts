@@ -16,7 +16,7 @@ import {
   Device,
   DeviceAttributes,
 } from '../thingsboard.types';
-import { MedplumService } from '../../medplum/medplum.service';
+import { MedplumService } from '../../medplum/application/medplum.service';
 
 @Injectable()
 export class ThingsboardDeviceService {

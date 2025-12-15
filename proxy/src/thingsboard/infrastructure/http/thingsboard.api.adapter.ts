@@ -16,11 +16,11 @@ import {
 import { DeviceDetails } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-device.response.dto';
 import { CreateDeviceRequest } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-device.request.dto';
 import { Device } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-created-device.response.dto';
-import { MedplumService } from 'src/medplum/medplum.service';
 import { DeviceAttributes } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-device-attributes.response.dto';
 import { CreateTenantRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-tenant.request.dto';
 import { CreateTenantAdminRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-tenant-admin.request.dto';
 import * as jwt from 'jsonwebtoken';
+import { MedplumService } from '../../../medplum/application/medplum.service';
 
 interface JwtPayload {
   customerId: string;

@@ -1,18 +1,45 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { MedplumService } from './medplum.service';
-import { MedplumController } from './medplum.controller';
-import { Medplum } from '../entities/medplum.entity';
+import { MedplumService } from './application/medplum.service';
+import { MedplumController } from './interface/rest/medplum.controller';
+import { Medplum } from './infrastructure/persistance/medplum.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Connection } from '../entities/connection.entity';
-import { ConnectionModule } from 'src/connection/connection.module';
+import { ConnectionModule } from '../connection/connection.module';
+import { PatientUseCase } from './application/use-cases/patient.use-case';
+import { DeviceUseCase } from './application/use-cases/device.use-case';
+import { MedplumClientAdapter } from './infrastructure/medplum/medplum-client.adapter';
+import { MedplumClientFactory } from './application/medplum-client.factory';
+import { MedplumClientPort } from './application/ports/medplum-client.port';
+import { MedplumRepository } from './domain/repositories/medplum.repository';
+import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.repository.adapter';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Medplum, Connection]),
+    TypeOrmModule.forFeature([Medplum]),
     forwardRef(() => ConnectionModule),
   ],
   controllers: [MedplumController],
-  providers: [MedplumService],
-  exports: [MedplumService],
+  providers: [
+    MedplumService,
+
+    PatientUseCase,
+    DeviceUseCase,
+
+    MedplumClientFactory,
+    MedplumClientAdapter,
+    {
+      provide: MedplumClientPort,
+      useClass: MedplumClientAdapter,
+    },
+    {
+      provide: MedplumRepository,
+      useClass: MedplumRepositoryAdapter,
+    },
+  ],
+  exports: [
+    MedplumService,
+    MedplumClientPort,
+    MedplumClientFactory,
+    MedplumRepository,
+  ],
 })
 export class MedplumModule {}

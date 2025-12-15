@@ -2,7 +2,6 @@ import { Inject } from '@nestjs/common';
 import { Result, Ok, Err } from 'oxide.ts';
 import { CreateActivationLinkCommand } from './create-activation-link.command';
 import { ConfigService } from '@nestjs/config';
-import { ConnectionService } from 'src/connection/connection.service';
 import { SendEmailDto } from 'src/mailer/interface/rest/dtos/request/send-email.request.dto';
 import { PendingUserStatus } from 'src/pending-user/domain/enums/status.enum';
 import { EMAIL_PORT, EmailPort } from 'src/mailer/application/ports/email.port';
@@ -19,6 +18,7 @@ import {
 } from '@nestjs/cqrs';
 import { GetPendingUserByEmailQuery } from 'src/pending-user/application/queries/get-pending-user-by-email/get-pending-user-by-email.query';
 import { UpdatePendingUserCommand } from 'src/pending-user/application/commands/update-pending-user/update-pending-user.command';
+import { ConnectionService } from '../../../../connection/application/connection.service';
 
 @CommandHandler(CreateActivationLinkCommand)
 export class CreateActivationLinkCommandHandler

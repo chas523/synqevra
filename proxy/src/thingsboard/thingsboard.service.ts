@@ -25,7 +25,7 @@ import {
   RuleChain,
   DeviceProfile,
 } from './thingsboard.types';
-import { ConnectionService } from '../connection/connection.service';
+import { ConnectionService } from '../connection/application/connection.service';
 import { Thingsboard } from '../entities/thingsboard.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
