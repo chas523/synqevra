@@ -1,5 +1,5 @@
 import { PostTelemetryUseCase } from './post-telemetry.use-case';
-import { MedplumConnectionService } from '../../../connection/application/medplum-connection.service';
+import { MedplumConnectionService } from '../../../medplum/application/medplum-connection.service';
 import { PostTelemetryCommand } from '../dto/post-telemetry.command';
 
 describe('PostTelemetryUseCase', () => {

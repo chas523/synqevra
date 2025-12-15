@@ -3,7 +3,7 @@ import { Connection } from '../infrastructure/persistance/connection.entity';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { UsersService } from '../../iam/application/users/users.service';
 import { PendingUserService } from '../../pending-user/pending-user.service';
-import { MedplumService } from '../../medplum/medplum.service';
+import { MedplumService } from '../../medplum/application/medplum.service';
 import { ThingsboardService } from '../../thingsboard/thingsboard.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Test, TestingModule } from '@nestjs/testing';

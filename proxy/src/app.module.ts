@@ -14,11 +14,8 @@ import { MailerModule } from './mailer/mailer.module';
 import { PendingUserModule } from './pending-user/pending-user.module';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { Hl7MapperModule } from './hl7-mapper/hl7-mapper.module';
-import { BullModule } from '@nestjs/bullmq';
+import { Hl7Module } from './hl7/hl7.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { QueueModule } from './queue/queue.module';
-import { PublicApiModule } from './public-api/public-api.module';
 
 @Module({
   imports: [
@@ -38,15 +35,12 @@ import { PublicApiModule } from './public-api/public-api.module';
     CacheModule.register({
       isGlobal: true,
     }),
-
-    QueueModule,
     ConnectionModule,
     IamModule,
     ThingsboardModule,
     MailerModule,
     PendingUserModule,
-    Hl7MapperModule,
-    PublicApiModule,
+    Hl7Module,
   ],
   controllers: [AppController],
   providers: [

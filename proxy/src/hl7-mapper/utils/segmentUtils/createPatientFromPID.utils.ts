@@ -1,9 +1,11 @@
 import type { Patient, HumanName, ContactPoint } from '@medplum/fhirtypes';
 import { Hl7Message } from '@medplum/core';
 import { Logger } from '@nestjs/common';
-import { Hl7ParsingError } from 'src/hl7-mapper/pipes/hl7-to-fhir-pipe';
-import { mapAssigningAuthority } from '../hl7-mapping.utils';
-import { MedplumService } from 'src/medplum/medplum.service';
+import { Hl7ParsingError } from 'src/hl7/interface/pipes/hl7-to-fhir-pipe';
+import { mapAssigningAuthority } from '../../../hl7/infrastructure/utils/hl7-mapping.utils';
+import { MedplumService } from 'src/medplum/application/medplum.service';
+
+//TO BE REMOVED
 
 const logger = new Logger('CreatePatientFromPIDUtils');
 

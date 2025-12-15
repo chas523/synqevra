@@ -11,17 +11,17 @@ import { Connection } from '../infrastructure/persistance/connection.entity';
 import { UsersService } from '../../iam/application/users/users.service';
 import { User } from '../../iam/infrastructure/persistance/user.entity';
 import { Thingsboard } from '../../entities/thingsboard.entity';
-import { Medplum } from '../../entities/medplum.entity';
+import { Medplum } from '../../medplum/infrastructure/persistance/medplum.entity';
 import { PendingUser } from '../../entities/pending-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import { PendingUserService } from '../../pending-user/pending-user.service';
 import { PendingUserStatus } from '../../entities/pending-user.entity';
 import { InitialConnectionFormDto } from '../interface/rest/dto/initial-connection-form.dto';
-import { MedplumService } from '../../medplum/medplum.service';
+import { MedplumService } from '../../medplum/application/medplum.service';
 import { ThingsboardService } from '../../thingsboard/thingsboard.service';
 import { CreateUserDto } from '../../iam/interface/rest/dto/createUserDto';
-import { CreateProjectDto } from '../../medplum/dtos/createProjectDto';
+import { CreateProjectDto } from '../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../thingsboard/thingsboard.types';
 
 @Injectable()

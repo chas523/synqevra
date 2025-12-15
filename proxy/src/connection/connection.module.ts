@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from './infrastructure/persistance/connection.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PendingUserModule } from 'src/pending-user/pending-user.module';
-import { MedplumConnectionService } from './application/medplum-connection.service';
+import { MedplumConnectionService } from '../medplum/application/medplum-connection.service';
 import { IamModule } from '../iam/iam.module';
 import { MedplumModule } from '../medplum/medplum.module';
 import { ThingsboardModule } from '../thingsboard/thingsboard.module';
@@ -14,34 +14,46 @@ import { InitialConnectionUseCase } from './application/use-cases/initial-connec
 import { InitialConnectionOrchestrator } from './application/initial-connection.orchestrator';
 import { UnitOfWorkFactory } from './infrastructure/transaction/unit-of-work.factory';
 import { ConnectionRepositoryAdapter } from './infrastructure/persistance/connection.repository.adapter';
+import { RegisterMedplumUseCase } from '../medplum/application/use-cases/register-medplum.use-case';
+import { MedplumRegistrationService } from '../medplum/application/services/medplum-registration.service';
+import { ConnectionRepository } from './domain/repositories/connection.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Connection]),
+    MedplumModule,
     HttpModule,
     PendingUserModule,
     IamModule,
-    forwardRef(() => MedplumModule),
     forwardRef(() => ThingsboardModule),
   ],
   controllers: [ConnectionController],
   providers: [
     ConnectionService,
     MedplumConnectionService,
+    MedplumRegistrationService,
+
     ValidateTokenUseCase,
     InitialConnectionUseCase,
+    RegisterMedplumUseCase,
+
     InitialConnectionOrchestrator,
     UnitOfWorkFactory,
-    ConnectionRepositoryAdapter,
+    {
+      provide: ConnectionRepository,
+      useClass: ConnectionRepositoryAdapter,
+    },
   ],
   exports: [
     ConnectionService,
     MedplumConnectionService,
+
     ValidateTokenUseCase,
     InitialConnectionUseCase,
+
     InitialConnectionOrchestrator,
     UnitOfWorkFactory,
-    ConnectionRepositoryAdapter,
+    ConnectionRepository,
   ],
 })
 export class ConnectionModule {}

@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { MedplumConnectionService } from '../../../connection/application/medplum-connection.service';
+import { MedplumConnectionService } from '../../../medplum/application/medplum-connection.service';
 import { MedplumClient, QuantityUnit } from '@medplum/core';
 import process from 'node:process';
 import { Bundle, Coding, Device, Observation } from '@medplum/fhirtypes';

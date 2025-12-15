@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InitialConnectionResult } from '../dto/initial-connection.result';
 import { PendingUserService } from '../../../pending-user/pending-user.service';
-import { MedplumService } from '../../../medplum/medplum.service';
 import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
 import { ValidateTokenUseCase } from './validate-token.use-case';
 import { InitialConnectionCommand } from '../dto/initial-connection.command';
@@ -9,11 +8,11 @@ import { CreateUserUseCase } from '../../../iam/application/use-cases/create-use
 import { UserModel } from '../../../iam/domain/entities/user.model';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
 import { PendingUser } from '../../../entities/pending-user.entity';
-import { Medplum } from '../../../entities/medplum.entity';
 import { Thingsboard } from '../../../entities/thingsboard.entity';
 import { Connection } from '../../infrastructure/persistance/connection.entity';
-import { CreateProjectDto } from '../../../medplum/dtos/createProjectDto';
+import { CreateProjectDto } from '../../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
+import { RegisterMedplumUseCase } from '../../../medplum/application/use-cases/register-medplum.use-case';
 
 @Injectable()
 export class InitialConnectionUseCase {
@@ -22,10 +21,10 @@ export class InitialConnectionUseCase {
   constructor(
     private readonly validateTokenUseCase: ValidateTokenUseCase,
     private readonly createUserUseCase: CreateUserUseCase,
+    private readonly registerMedplumUseCase: RegisterMedplumUseCase,
 
     private readonly pendingUserService: PendingUserService,
     private readonly thingsboardService: ThingsboardService,
-    private readonly medplumService: MedplumService,
   ) {}
 
   async execute(
@@ -43,7 +42,6 @@ export class InitialConnectionUseCase {
     // TODO
     const pendingUserRepository = uow.manager.getRepository(PendingUser);
     const thingsboardRepository = uow.manager.getRepository(Thingsboard);
-    const medplumRepository = uow.manager.getRepository(Medplum);
 
     // DDD ready
     const userRepository = uow.userRepository;
@@ -95,7 +93,7 @@ export class InitialConnectionUseCase {
 
       thingsboardRollbackData = thingsboardResult.rollbackData ?? null;
 
-      //medplum - to be replaced
+      // medplum
       const projectName = command.tenantFields.title;
       const createProject: CreateProjectDto = {
         firstName: firstName || 'Unknown Name',
@@ -105,11 +103,10 @@ export class InitialConnectionUseCase {
         project: projectName,
       };
 
-      await this.medplumService.create(
+      await this.registerMedplumUseCase.execute(
         createProject,
         newUser.id!,
-        medplumRepository,
-        uow.manager.getRepository(Connection),
+        uow,
       );
 
       this.logger.debug('Created Medplum project: ' + projectName);

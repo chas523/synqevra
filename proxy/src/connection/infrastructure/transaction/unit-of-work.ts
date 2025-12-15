@@ -1,11 +1,13 @@
 import { UserRepository } from '../../../iam/domain/repositories/user.repository';
 import { ConnectionRepository } from '../../domain/repositories/connection.repository';
 import { QueryRunner } from 'typeorm';
+import { MedplumRepository } from '../../../medplum/domain/repositories/medplum.repository';
 
 export class UnitOfWork {
   constructor(
     public readonly userRepository: UserRepository,
     public readonly connectionRepository: ConnectionRepository,
+    public readonly medplumRepository: MedplumRepository,
     public readonly queryRunner: QueryRunner,
   ) {}
 

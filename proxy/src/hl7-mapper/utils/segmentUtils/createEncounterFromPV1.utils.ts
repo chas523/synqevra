@@ -9,12 +9,14 @@ import { Logger } from '@nestjs/common';
 import {
   mapHL7PatientClassToFHIR,
   mapADTTypeToEncounterStatus,
-} from '../hl7-mapping.utils';
-import { formatHL7DateTime } from '../datetime.utils';
-import { AttendingDoctorField } from 'src/hl7-mapper/types/hl7-mapper.types';
+} from '../../../hl7/infrastructure/utils/hl7-mapping.utils';
+import { formatHL7DateTime } from '../../../hl7/infrastructure/utils/datetime.utils';
+import { AttendingDoctorField } from 'src/hl7/infrastructure/types/hl7-mapper.types';
 import { Cache } from 'cache-manager';
-import { CACHE_CONFIG } from 'src/hl7-mapper/constants/cache.constants';
-import { MedplumService } from 'src/medplum/medplum.service';
+import { CACHE_CONFIG } from 'src/hl7/infrastructure/constants/cache.constants';
+import { MedplumService } from 'src/medplum/application/medplum.service';
+
+// TO BE REMOVED
 
 const logger = new Logger('CreateEncounterFromPV1Utils');
 

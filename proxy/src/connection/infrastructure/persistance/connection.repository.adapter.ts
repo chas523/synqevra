@@ -42,4 +42,19 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
 
     return entity ? ConnectionMapper.toDomain(entity) : null;
   }
+
+  async getOrCreateByUserId(userId: number): Promise<ConnectionModel> {
+    let entity = await this.repository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    if (!entity) {
+      entity = this.repository.create({
+        user: { id: userId },
+      });
+      entity = await this.repository.save(entity);
+    }
+
+    return ConnectionMapper.toDomain(entity);
+  }
 }

@@ -1,7 +1,7 @@
 import { ConnectionModel } from '../../domain/entities/connection.model';
 import { Connection } from './connection.entity';
 import { User } from '../../../iam/infrastructure/persistance/user.entity';
-import { Medplum } from '../../../entities/medplum.entity';
+import { Medplum } from '../../../medplum/infrastructure/persistance/medplum.entity';
 import { Thingsboard } from '../../../entities/thingsboard.entity';
 
 export class ConnectionMapper {

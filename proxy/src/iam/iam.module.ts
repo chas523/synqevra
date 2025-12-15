@@ -30,19 +30,15 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
   providers: [
     UsersService,
     AuthService,
+
     CreateUserUseCase,
     RegisterUserUseCase,
     LoginUserUseCase,
     LogoutUserUseCase,
     RefreshTokensUseCase,
-    UserRepositoryAdapter,
+
     { provide: UserRepository, useClass: UserRepositoryAdapter },
   ],
-  exports: [
-    UsersService,
-    AuthService,
-    CreateUserUseCase,
-    UserRepositoryAdapter,
-  ],
+  exports: [UsersService, AuthService, CreateUserUseCase, UserRepository],
 })
 export class IamModule {}

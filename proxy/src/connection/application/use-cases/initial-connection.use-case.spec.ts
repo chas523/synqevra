@@ -3,24 +3,23 @@ import { CreateUserUseCase } from '../../../iam/application/use-cases/create-use
 import { ValidateTokenUseCase } from './validate-token.use-case';
 import { PendingUserService } from '../../../pending-user/pending-user.service';
 import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
-import { MedplumService } from '../../../medplum/medplum.service';
 import { UserModel } from '../../../iam/domain/entities/user.model';
 import { EntityId } from '../../../thingsboard/thingsboard.types';
 import { ConnectionRepository } from '../../domain/repositories/connection.repository';
 import { UserRepository } from '../../../iam/domain/repositories/user.repository';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
 import { InitialConnectionCommand } from '../dto/initial-connection.command';
-import { Repository } from 'typeorm';
-import { PendingUser } from '../../../entities/pending-user.entity';
 import { ConnectionModel } from '../../domain/entities/connection.model';
+import { RegisterMedplumUseCase } from '../../../medplum/application/use-cases/register-medplum.use-case';
+import { MedplumRepository } from '../../../medplum/domain/repositories/medplum.repository';
 
 describe('InitialConnectionUseCase', () => {
   let useCase: InitialConnectionUseCase;
   let createUserUseCase: jest.Mocked<CreateUserUseCase>;
   let validateTokenUseCase: jest.Mocked<ValidateTokenUseCase>;
+  let registerMedplumUseCase: jest.Mocked<RegisterMedplumUseCase>;
   let pendingUserService: jest.Mocked<PendingUserService>;
   let thingsboardService: jest.Mocked<ThingsboardService>;
-  let medplumService: jest.Mocked<MedplumService>;
 
   const mockedUserModel: UserModel = {
     id: 1,
@@ -64,6 +63,9 @@ describe('InitialConnectionUseCase', () => {
       execute: jest.fn().mockResolvedValue({ valid: true }),
       extractUserIdFromToken: jest.fn().mockReturnValue('1'),
     } as unknown as jest.Mocked<ValidateTokenUseCase>;
+    registerMedplumUseCase = {
+      execute: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<RegisterMedplumUseCase>;
 
     pendingUserService = {
       deletePendingUserById: jest.fn().mockResolvedValue(undefined),
@@ -72,22 +74,20 @@ describe('InitialConnectionUseCase', () => {
       connectRegisterToThingsboard: jest.fn().mockResolvedValue(mockedTBResult),
       performRollback: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<ThingsboardService>;
-    medplumService = {
-      create: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<MedplumService>;
 
     useCase = new InitialConnectionUseCase(
       validateTokenUseCase,
       createUserUseCase,
+      registerMedplumUseCase,
       pendingUserService,
       thingsboardService,
-      medplumService,
     );
   });
 
   const uow = {
     manager: { getRepository: jest.fn().mockReturnValue({}) },
     userRepository: {} as UserRepository,
+    medplumRepository: {} as MedplumRepository,
     connectionRepository: {
       create: jest.fn().mockReturnValue(mockedConnection),
       save: jest.fn().mockResolvedValue(mockedConnection),
