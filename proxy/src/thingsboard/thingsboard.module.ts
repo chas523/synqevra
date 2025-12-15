@@ -1,23 +1,74 @@
-import { Module } from '@nestjs/common';
-import { ThingsboardService } from './thingsboard.service';
-import { ThingsboardController } from './thingsboard.controller';
+import { Module, forwardRef } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { Thingsboard } from 'src/entities/thingsboard.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { forwardRef } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
+
+import { Thingsboard } from './infrastructure/persistence/thingsboard.entity';
+import { ThingsboardController } from './interface/rest/thingsboard.controller';
 import { ConnectionModule } from 'src/connection/connection.module';
-import { ThingsboardDeviceService } from './services/thingsboard-device.service';
 import { MedplumModule } from 'src/medplum/medplum.module';
+
+// Infrastructure
+import { ThingsboardApiAdapter } from './infrastructure/http/thingsboard.api.adapter';
+import { ThingsboardRepositoryAdapter } from './infrastructure/persistence/thingsboard.repository.adapter';
+import { THINGSBOARD_API_PORT } from './application/ports/thingsboard.api.port';
+import { THINGSBOARD_REPOSITORY_PORT } from './application/ports/thingsboard.repository.port';
+
+// Command Handlers
+import { CreateDeviceCommandHandler } from './application/commands/create-device/create-device.command-handler';
+import { DeleteDeviceCommandHandler } from './application/commands/delete-device/delete-device.command-handler';
+import { UpdateDeviceSharedAttributesCommandHandler } from './application/commands/update-device-shared-attributes/update-device-shared-attributes.command-handler';
+import { RegisterTenantCommandHandler } from './application/commands/register-tenant/register-tenant.command-handler';
+import { ThingsboardLoginCommandHandler } from './application/commands/thingsboard-login/thingsboard-login.command-handler';
+import { RefreshTokenCommandHandler } from './application/commands/refresh-token/refresh-token.command-handler';
+
+// Query Handlers
+import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
+import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
+import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
+import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
+
+// Legacy Service (facade for external modules)
+import { ThingsboardService } from './thingsboard.service';
+
+const commandHandlers = [
+  CreateDeviceCommandHandler,
+  DeleteDeviceCommandHandler,
+  UpdateDeviceSharedAttributesCommandHandler,
+  RegisterTenantCommandHandler,
+  ThingsboardLoginCommandHandler,
+  RefreshTokenCommandHandler,
+];
+
+const queryHandlers = [
+  FetchDevicesQueryHandler,
+  FetchDeviceByIdQueryHandler,
+  FetchDeviceSharedAttributesQueryHandler,
+  GetUserQueryHandler,
+];
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Thingsboard]),
     HttpModule,
+    CqrsModule,
     forwardRef(() => ConnectionModule),
     MedplumModule,
   ],
-  providers: [ThingsboardService, ThingsboardDeviceService],
+  providers: [
+    ThingsboardService, // Legacy facade for external modules
+    ...commandHandlers,
+    ...queryHandlers,
+    {
+      provide: THINGSBOARD_API_PORT,
+      useClass: ThingsboardApiAdapter,
+    },
+    {
+      provide: THINGSBOARD_REPOSITORY_PORT,
+      useClass: ThingsboardRepositoryAdapter,
+    },
+  ],
   controllers: [ThingsboardController],
-  exports: [ThingsboardService, ThingsboardDeviceService],
+  exports: [THINGSBOARD_REPOSITORY_PORT, ThingsboardService],
 })
 export class ThingsboardModule {}
