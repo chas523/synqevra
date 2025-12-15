@@ -1,8 +1,7 @@
 import { ConnectionService } from './connection.service';
 import { Connection } from '../infrastructure/persistance/connection.entity';
-import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UsersService } from '../../iam/application/users/users.service';
-import { PendingUserService } from '../../pending-user/pending-user.service';
 import { MedplumService } from '../../medplum/application/medplum.service';
 import { ThingsboardService } from '../../thingsboard/thingsboard.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -14,13 +13,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
-import {
-  PendingUser,
-  PendingUserStatus,
-} from '../../entities/pending-user.entity';
-import { InitialConnectionFormDto } from '../interface/rest/dto/initial-connection-form.dto';
-import { CreateUserDto } from '../../iam/interface/rest/dto/createUserDto';
+import { PendingUserService } from '../../pending-user/application/pending-user.service';
+import { PendingUserStatus } from '../../pending-user/domain/enums/status.enum';
+import { PendingUser } from '../../pending-user/infrastructure/persistence/pending-user.entity';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomBytes: jest

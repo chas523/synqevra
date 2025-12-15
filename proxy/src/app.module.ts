@@ -16,6 +16,7 @@ import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { Hl7Module } from './hl7/hl7.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CacheModule.register({
       isGlobal: true,
     }),
+    CqrsModule.forRoot(),
     ConnectionModule,
     IamModule,
     ThingsboardModule,

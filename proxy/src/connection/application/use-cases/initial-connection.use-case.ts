@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InitialConnectionResult } from '../dto/initial-connection.result';
-import { PendingUserService } from '../../../pending-user/pending-user.service';
 import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
 import { ValidateTokenUseCase } from './validate-token.use-case';
 import { InitialConnectionCommand } from '../dto/initial-connection.command';
 import { CreateUserUseCase } from '../../../iam/application/use-cases/create-user.use-case';
 import { UserModel } from '../../../iam/domain/entities/user.model';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
-import { PendingUser } from '../../../entities/pending-user.entity';
 import { Thingsboard } from '../../../entities/thingsboard.entity';
 import { Connection } from '../../infrastructure/persistance/connection.entity';
 import { CreateProjectDto } from '../../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
 import { RegisterMedplumUseCase } from '../../../medplum/application/use-cases/register-medplum.use-case';
+import { PendingUserService } from '../../../pending-user/application/pending-user.service';
+import { PendingUser } from '../../../pending-user/infrastructure/persistence/pending-user.entity';
 
 @Injectable()
 export class InitialConnectionUseCase {

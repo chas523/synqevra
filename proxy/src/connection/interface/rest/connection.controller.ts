@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { InitialConnectionFormDto } from './dto/initial-connection-form.dto';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { ValidateTokenUseCase } from '../../application/use-cases/validate-token.use-case';
 import { InitialConnectionOrchestrator } from '../../application/initial-connection.orchestrator';
+import { RegisterTenantRequestDto } from '../../../thingsboard/interface/rest/dtos/request/register-tenant.request.dto';
 
 @Controller('connection')
 export class ConnectionController {
@@ -14,7 +14,7 @@ export class ConnectionController {
   @Public()
   @Post('/connect')
   async buildInitialConnection(
-    @Body() formData: InitialConnectionFormDto,
+    @Body() formData: RegisterTenantRequestDto,
     @Query('token') token: string,
   ) {
     return await this.initialConnectionOrchestrator.run(formData, token);

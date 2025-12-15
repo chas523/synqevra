@@ -12,17 +12,17 @@ import { UsersService } from '../../iam/application/users/users.service';
 import { User } from '../../iam/infrastructure/persistance/user.entity';
 import { Thingsboard } from '../../entities/thingsboard.entity';
 import { Medplum } from '../../medplum/infrastructure/persistance/medplum.entity';
-import { PendingUser } from '../../entities/pending-user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
-import { PendingUserService } from '../../pending-user/pending-user.service';
-import { PendingUserStatus } from '../../entities/pending-user.entity';
-import { InitialConnectionFormDto } from '../interface/rest/dto/initial-connection-form.dto';
+import { PendingUserService } from 'src/pending-user/application/pending-user.service';
+import { PendingUserStatus } from 'src/pending-user/domain/enums/status.enum';
+import { PendingUser } from 'src/pending-user/infrastructure/persistence/pending-user.entity';
 import { MedplumService } from '../../medplum/application/medplum.service';
 import { ThingsboardService } from '../../thingsboard/thingsboard.service';
 import { CreateUserDto } from '../../iam/interface/rest/dto/createUserDto';
 import { CreateProjectDto } from '../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../thingsboard/thingsboard.types';
+import { RegisterTenantRequestDto } from '../../thingsboard/interface/rest/dtos/request/register-tenant.request.dto';
 
 @Injectable()
 export class ConnectionService {
@@ -135,7 +135,7 @@ export class ConnectionService {
   }
 
   async buildInitialConnection(
-    formData: InitialConnectionFormDto,
+    formData: RegisterTenantRequestDto,
     token: string,
   ) {
     //everything happens inside transaction so in case of error we can simply roll everything back

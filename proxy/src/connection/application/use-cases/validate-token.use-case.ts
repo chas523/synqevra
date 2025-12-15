@@ -4,9 +4,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { PendingUserService } from '../../../pending-user/pending-user.service';
 import * as crypto from 'crypto';
-import { PendingUserStatus } from '../../../entities/pending-user.entity';
+import { PendingUserService } from '../../../pending-user/application/pending-user.service';
+import { PendingUserStatus } from '../../../pending-user/domain/enums/status.enum';
 
 @Injectable()
 export class ValidateTokenUseCase {

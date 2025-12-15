@@ -1,19 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  TenantFieldsDto,
-  UserFieldsDto,
-} from '../../../../thingsboard/dtos/thingsboardConnectionForm.dto';
+import { CreateTenantRequestDto } from '../../../../thingsboard/interface/rest/dtos/request/create-tenant.request.dto';
+import { CreateTenantAdminRequestDto } from '../../../../thingsboard/interface/rest/dtos/request/create-tenant-admin.request.dto';
 
 export class InitialConnectionFormDto {
-  @ApiProperty({ type: TenantFieldsDto })
+  @ApiProperty({ type: CreateTenantRequestDto })
   @ValidateNested()
-  @Type(() => TenantFieldsDto)
-  tenantFields: TenantFieldsDto;
+  @Type(() => CreateTenantRequestDto)
+  tenantFields: CreateTenantRequestDto;
 
-  @ApiProperty({ type: UserFieldsDto })
+  @ApiProperty({ type: CreateTenantAdminRequestDto })
   @ValidateNested()
-  @Type(() => UserFieldsDto)
-  userFields: UserFieldsDto;
+  @Type(() => CreateTenantAdminRequestDto)
+  userFields: CreateTenantAdminRequestDto;
 }
