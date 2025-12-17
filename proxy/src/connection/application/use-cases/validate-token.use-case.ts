@@ -3,19 +3,25 @@ import {
   GoneException,
   NotFoundException,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { PendingUserService } from '../../../pending-user/application/pending-user.service';
 import { PendingUserStatus } from '../../../pending-user/domain/enums/status.enum';
+import {
+  PENDING_USER_REPOSITORY_PORT,
+  PendingUserRepositoryPort,
+} from '../../../pending-user/application/ports/pending-user.repository.port';
 
 @Injectable()
 export class ValidateTokenUseCase {
-  constructor(private readonly pendingUserService: PendingUserService) {}
+  constructor(
+    @Inject(PENDING_USER_REPOSITORY_PORT)
+    private readonly pendingUserRepository: PendingUserRepositoryPort,
+  ) {}
 
   async execute(token: string): Promise<{ valid: boolean }> {
     const userId = this.extractUserIdFromToken(token);
-    // service should be removed and changed to use-case or repository
-    const pendingUser = await this.pendingUserService.getPendingUserById(
+    const pendingUser = await this.pendingUserRepository.findById(
       Number(userId),
     );
     if (!pendingUser) {
@@ -23,14 +29,17 @@ export class ValidateTokenUseCase {
     }
 
     const hash = crypto.createHash('sha256').update(token).digest('hex');
-    if (pendingUser.activationToken !== hash) {
+    if (pendingUser.getActivationToken() !== hash) {
       throw new UnauthorizedException('Invalid or expired token');
     }
-    if (pendingUser.expiresAt && pendingUser.expiresAt < new Date()) {
+    if (
+      pendingUser.getExpiresAt() &&
+      pendingUser.getExpiresAt()! < new Date()
+    ) {
       throw new GoneException('Token expired');
     }
 
-    if (pendingUser.status !== PendingUserStatus.PENDING) {
+    if (pendingUser.getStatus() !== PendingUserStatus.PENDING) {
       throw new GoneException('Token already used or invalid status');
     }
     return { valid: true };

@@ -70,48 +70,6 @@ export class ThingsboardController {
   ) {}
 
   @Public()
-  @Post('/register')
-  async registerTenant(
-    @Body() formData: RegisterTenantRequestDto,
-    @ActiveUser() user: CurrentUser,
-  ): Promise<RegisterTenantResponseDto> {
-    const command = new RegisterTenantCommand(user.id, formData);
-    const result: Result<RegisterTenantResponseDto, RegisterTenantError> =
-      await this.commandBus.execute(command);
-
-    return match(result, {
-      Ok: (response) => response,
-      Err: (error: RegisterTenantError) => {
-        if (error instanceof PasswordMismatchError) {
-          throw new BadRequestException(error.message);
-        }
-        if (error instanceof UserAlreadyExistsError) {
-          throw new ConflictException(error.message);
-        }
-        if (error instanceof ThingsboardConnectionExistsError) {
-          throw new ConflictException(error.message);
-        }
-        if (
-          error instanceof TenantCreationError ||
-          error instanceof UserCreationError ||
-          error instanceof UserActivationError ||
-          error instanceof InvalidActivationLinkError
-        ) {
-          throw new BadRequestException(error.message);
-        }
-        if (
-          error instanceof RuleChainCreationError ||
-          error instanceof RuleChainConfigurationError ||
-          error instanceof DeviceProfileUpdateError
-        ) {
-          throw new InternalServerErrorException(error.message);
-        }
-        throw new InternalServerErrorException('Failed to register tenant');
-      },
-    });
-  }
-
-  @Public()
   @Post('/login')
   async login(
     @Body() loginDto: ThingsboardLoginRequestDto,

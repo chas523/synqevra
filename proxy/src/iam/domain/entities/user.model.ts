@@ -8,5 +8,5 @@ export class UserModel {
   password: string;
   hashedRt: string | null;
   role?: Role;
-  connection?: any;
+  connectionId?: number;
 }

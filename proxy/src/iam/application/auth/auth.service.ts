@@ -9,19 +9,21 @@ import type { Response } from 'express';
 import jwtConfig from '../../../config/jwt.config';
 import { DUMMY_BCRYPT_HASH } from '../../infrastructure/constants/user-utils';
 import * as argon2 from 'argon2';
-import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
 import { UserRepository } from '../../domain/repositories/user.repository';
+import {
+  THINGSBOARD_API_PORT,
+  ThingsboardApiPort,
+} from '../../../thingsboard/application/ports/thingsboard.api.port';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UserRepository,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly thingsboardService: ThingsboardService,
-
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApiPort: ThingsboardApiPort,
     @Inject(jwtConfig.KEY)
     private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
-
     @Inject(refreshJwtConfig.KEY)
     private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
@@ -68,7 +70,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.getUserByEmail(email);
+    const user = await this.userRepository.getUserByEmail(email);
 
     const hashToCompare = user?.password ?? DUMMY_BCRYPT_HASH;
     const isPasswordValid = await compare(password, hashToCompare);
@@ -79,7 +81,7 @@ export class AuthService {
     console.log('validating');
 
     try {
-      await this.thingsboardService.thingsboardLogin(user.id, email, password);
+      await this.thingsboardApiPort.login(email, password);
     } catch (error) {
       console.warn('ThingsBoard login failed during validation:', error);
     }
@@ -88,7 +90,7 @@ export class AuthService {
   }
 
   async validateJwtUser(userId: number) {
-    const user = await this.usersService.getUserById(userId);
+    const user = await this.userRepository.getUserById(userId);
     if (!user || !user.id || !user.role)
       throw new UnauthorizedException('User not found');
     const currentUser: CurrentUser = { id: user.id, role: user.role };
@@ -97,7 +99,7 @@ export class AuthService {
   }
 
   async validateRefreshToken(userId: number, refreshToken: string) {
-    const user = await this.usersService.getUserById(userId);
+    const user = await this.userRepository.getUserById(userId);
 
     if (!user || !user.hashedRt) {
       throw new UnauthorizedException('Access Denied');

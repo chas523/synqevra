@@ -1,5 +1,6 @@
 import { ThingsboardModel } from 'src/thingsboard/domain/models/thingsboard.model';
 import { Thingsboard } from './thingsboard.entity';
+import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
 
 export class ThingsboardMapper {
   static toDomain(entity: Thingsboard): ThingsboardModel {
@@ -9,7 +10,7 @@ export class ThingsboardMapper {
       entity.id,
       entity.accessToken,
       entity.refreshToken,
-      entity.connection,
+      entity.connection.id,
     );
   }
 
@@ -22,7 +23,9 @@ export class ThingsboardMapper {
     entity.tenantId = model.getTenantId();
     entity.accessToken = model.getAccessToken();
     entity.refreshToken = model.getRefreshToken();
-    entity.connection = model.getConnection();
+    if (model.getConnection()) {
+      entity.connection = { id: model.getConnection() } as Connection;
+    }
 
     return entity;
   }

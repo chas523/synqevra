@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { MedplumService } from './application/medplum.service';
 import { MedplumController } from './interface/rest/medplum.controller';
 import { Medplum } from './infrastructure/persistance/medplum.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -19,8 +18,6 @@ import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.r
   ],
   controllers: [MedplumController],
   providers: [
-    MedplumService,
-
     PatientUseCase,
     DeviceUseCase,
 
@@ -35,11 +32,6 @@ import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.r
       useClass: MedplumRepositoryAdapter,
     },
   ],
-  exports: [
-    MedplumService,
-    MedplumClientPort,
-    MedplumClientFactory,
-    MedplumRepository,
-  ],
+  exports: [MedplumClientPort, MedplumClientFactory, MedplumRepository],
 })
 export class MedplumModule {}

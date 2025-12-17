@@ -9,10 +9,6 @@ import {
   ThingsboardApiPort,
   EntityId,
 } from '../../ports/thingsboard.api.port';
-import {
-  THINGSBOARD_REPOSITORY_PORT,
-  ThingsboardRepositoryPort,
-} from '../../ports/thingsboard.repository.port';
 import { RegisterTenantCommand } from './register-tenant.command';
 import { RegisterTenantResponseDto } from 'src/thingsboard/interface/rest/dtos/response/register-tenant.response.dto';
 import {
@@ -28,8 +24,8 @@ import {
   InvalidActivationLinkError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { AxiosError } from 'axios';
-import { ConnectionService } from '../../../../connection/application/connection.service';
 import { ThingsboardModel } from '../../../domain/models/thingsboard.model';
+import { JwtPayload } from '../../../thingsboard.types';
 
 interface RuleChainData {
   ruleChain: {
@@ -58,9 +54,6 @@ export class RegisterTenantCommandHandler
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    @Inject(THINGSBOARD_REPOSITORY_PORT)
-    private readonly thingsboardRepository: ThingsboardRepositoryPort,
-    private readonly connectionService: ConnectionService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -77,7 +70,7 @@ export class RegisterTenantCommandHandler
   async execute(
     command: RegisterTenantCommand,
   ): Promise<Result<RegisterTenantResponseDto, RegisterTenantError>> {
-    const { userId, formData } = command;
+    const { userId, formData, uow } = command;
     const { userFields, tenantFields } = formData;
     const { password, confirmPassword } = userFields;
 
@@ -88,7 +81,7 @@ export class RegisterTenantCommandHandler
       return Err(new PasswordMismatchError());
     }
 
-    let sysAdminAccessToken: string | undefined;
+    let sysAdminAccessToken: string | undefined = undefined;
     let tenantId: EntityId | null = null;
     let thingsboardUserId: string | null = null;
 
@@ -116,7 +109,7 @@ export class RegisterTenantCommandHandler
       // Decode token to get customerId
       const decoded = JSON.parse(
         Buffer.from(sysAdminAccessToken.split('.')[1], 'base64').toString(),
-      );
+      ) as JwtPayload;
       thingsboardUserId = await this.thingsboardApi.createTenantAdmin(
         userFields,
         tenantId,
@@ -127,15 +120,16 @@ export class RegisterTenantCommandHandler
       // Step 3: Create thingsboard connection in database
       this.logger.log('Step 3: Creating thingsboard entity in database');
       const connection =
-        await this.connectionService.getOrCreateUserConnection(userId);
-      console.log('User connection:', connection);
+        await uow.connectionRepository.getOrCreateByUserId(userId);
+      this.logger.debug('User connection:', connection);
+
       if (!connection) {
-        throw new Error('User connection not found');
+        return Err(new TenantCreationError('Connection entity not found'));
       }
-      if (connection.thingsboard) {
+      if (connection.thingsboardId) {
         return Err(new ThingsboardConnectionExistsError());
       }
-      console.log('Creating ThingsboardModel with:', {
+      this.logger.debug('Creating ThingsboardModel with:', {
         project: tenantFields.title,
         tenantId: tenantId.id,
         connection,
@@ -145,9 +139,9 @@ export class RegisterTenantCommandHandler
         tenantId.id,
         connection,
       );
-      console.log('Created ThingsboardModel:', thingsboardModel);
-      await this.thingsboardRepository.save(thingsboardModel);
-      console.log('Saved ThingsboardModel to repository');
+      this.logger.debug('Created ThingsboardModel:', thingsboardModel);
+      await uow.thingsboardRepository.save(thingsboardModel);
+      this.logger.debug('Saved ThingsboardModel to repository');
 
       // Step 4: Get activation link
       this.logger.log('Step 4: Getting user activation link');
@@ -176,12 +170,11 @@ export class RegisterTenantCommandHandler
 
       // Step 8: Save tokens to database
       this.logger.log('Step 8: Saving tokens to database');
-      const updatedModel =
-        await this.thingsboardRepository.findByUserId(userId);
+      const updatedModel = await uow.thingsboardRepository.findByUserId(userId);
       if (updatedModel) {
         updatedModel.setAccessToken(activationResponse.token);
         updatedModel.setRefreshToken(activationResponse.refreshToken);
-        await this.thingsboardRepository.update(updatedModel);
+        await uow.thingsboardRepository.update(updatedModel);
       }
 
       this.logger.log('ThingsBoard tenant registration completed successfully');
@@ -220,7 +213,7 @@ export class RegisterTenantCommandHandler
         throw new Error('No activateToken parameter found');
       }
       return token;
-    } catch (error) {
+    } catch {
       this.logger.warn(`Failed to parse activation URL: ${activationLink}`);
       throw new InvalidActivationLinkError();
     }

@@ -28,9 +28,6 @@ import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
 
-// Legacy Service (facade for external modules)
-import { ThingsboardService } from './thingsboard.service';
-
 const commandHandlers = [
   CreateDeviceCommandHandler,
   DeleteDeviceCommandHandler,
@@ -53,10 +50,9 @@ const queryHandlers = [
     HttpModule,
     CqrsModule,
     forwardRef(() => ConnectionModule),
-    MedplumModule,
+    forwardRef(() => MedplumModule),
   ],
   providers: [
-    ThingsboardService, // Legacy facade for external modules
     ...commandHandlers,
     ...queryHandlers,
     {
@@ -69,6 +65,6 @@ const queryHandlers = [
     },
   ],
   controllers: [ThingsboardController],
-  exports: [THINGSBOARD_REPOSITORY_PORT, ThingsboardService],
+  exports: [THINGSBOARD_REPOSITORY_PORT, THINGSBOARD_API_PORT],
 })
 export class ThingsboardModule {}

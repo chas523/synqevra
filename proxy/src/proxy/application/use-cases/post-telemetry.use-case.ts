@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { MedplumConnectionService } from '../../../medplum/application/medplum-connection.service';
+import { MedplumClientFactory } from '../../../medplum/application/medplum-client.factory';
 import { MedplumClient, QuantityUnit } from '@medplum/core';
 import process from 'node:process';
 import { Bundle, Coding, Device, Observation } from '@medplum/fhirtypes';
@@ -14,7 +14,7 @@ import { OperationStatus } from '../enums/operation-status.enum';
 
 @Injectable()
 export class PostTelemetryUseCase {
-  constructor(private readonly medplum: MedplumConnectionService) {}
+  constructor(private readonly medplum: MedplumClientFactory) {}
 
   private readonly logger = new Logger(PostTelemetryUseCase.name);
 
@@ -22,8 +22,10 @@ export class PostTelemetryUseCase {
     deviceId: string,
     tenantId: string,
   ): Promise<{ deviceId: string; patientRef: string }> {
-    const client: MedplumClient =
-      await this.medplum.initMedplumWithProjectId(tenantId);
+    const client: MedplumClient = await this.medplum.initMedplum(
+      undefined,
+      tenantId,
+    );
     const tbUrl = process.env.TB_URL as string;
 
     const bundle = (await client.search('Device', {
@@ -42,7 +44,8 @@ export class PostTelemetryUseCase {
   }
 
   async execute(body: PostTelemetryCommand): Promise<PostTelemetryResult> {
-    const client: MedplumClient = await this.medplum.initMedplumWithProjectId(
+    const client: MedplumClient = await this.medplum.initMedplum(
+      undefined,
       body.tenantId,
     );
     const { deviceId, patientRef } = await this.getDeviceProfile(

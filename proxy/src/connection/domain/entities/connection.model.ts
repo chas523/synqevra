@@ -1,6 +1,6 @@
 export class ConnectionModel {
   id?: number;
   userId: number;
-  medplumId?: any;
-  thingsboardId?: any;
+  medplumId?: number;
+  thingsboardId?: number;
 }

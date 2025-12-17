@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
 import { IamModule } from '../iam/iam.module';
+import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { IamModule } from '../iam/iam.module';
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
     IamModule,
+    ThingsboardModule,
   ],
   providers: [
     LocalStrategy,
