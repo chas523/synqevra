@@ -1,12 +1,12 @@
-import { LogInIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import Text from "../atoms/Text";
-import Link from "next/link";
 
 export interface ProgressMessageProps {
   status: "loading" | "success" | "error";
   loadingMessage?: string;
   successMessage?: string;
   errorMessage?: string;
+  actionElement?: ReactNode;
   className?: string;
 }
 
@@ -15,6 +15,7 @@ const ProgressMessage = ({
   loadingMessage = "Loading...",
   successMessage = "Success!",
   errorMessage = "Error occurred",
+  actionElement,
   className = "",
 }: ProgressMessageProps) => {
   const baseStyles = ["text-center", "min-h-[3rem]", "flex", "items-center"];
@@ -41,14 +42,7 @@ const ProgressMessage = ({
         className="w-full"
       >
         {messages[status]}
-        {status === "success" && (
-          <Link
-            className="ml-2 text-slate-500 hover:underline"
-            href="auth/login"
-          >
-            Go to Login
-          </Link>
-        )}
+        {actionElement}
       </Text>
     </div>
   );

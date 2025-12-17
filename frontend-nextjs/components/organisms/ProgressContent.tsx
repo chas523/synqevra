@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Heading from "../atoms/Heading";
 import { ProgressMessage, StatusIcon } from "../molecules";
@@ -8,6 +9,7 @@ export interface ProgressContentProps {
   messages?: string[];
   successMessage?: string;
   errorMessage?: string;
+  actionElement?: ReactNode;
   className?: string;
 }
 
@@ -17,6 +19,7 @@ const ProgressContent = ({
   messages = ["Processing..."],
   successMessage = "Account configured successfully!",
   errorMessage = "Configuration failed",
+  actionElement,
   className = "",
 }: ProgressContentProps) => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -67,6 +70,7 @@ const ProgressContent = ({
         loadingMessage={getCurrentMessage()}
         successMessage={successMessage}
         errorMessage={errorMessage}
+        actionElement={actionElement}
       />
     </div>
   );

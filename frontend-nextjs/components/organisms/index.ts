@@ -8,6 +8,7 @@ export type { DeviceListProps } from "./DeviceList";
 export { default as DeviceList } from "./DeviceList";
 export type { HeroSectionProps } from "./HeroSection";
 export { default as HeroSection } from "./HeroSection";
+export { default as InvitePractitionerModal } from "./InvitePractitionerModal";
 export { default as PatientBasicInfo } from "./PatientBasicInfo";
 export { default as PatientContactInfo } from "./PatientContactInfo";
 export { default as PatientHeader } from "./PatientHeader";

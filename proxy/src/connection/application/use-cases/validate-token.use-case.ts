@@ -24,6 +24,7 @@ export class ValidateTokenUseCase {
     const pendingUser = await this.pendingUserRepository.findById(
       Number(userId),
     );
+    
     if (!pendingUser) {
       throw new NotFoundException('Pending user not found');
     }
