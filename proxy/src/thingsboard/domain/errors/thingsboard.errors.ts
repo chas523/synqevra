@@ -37,7 +37,7 @@ export class TenantCreationError extends ThingsboardDomainError {
   public readonly code = 'TENANT.CREATION_FAILED';
 
   constructor(reason?: string) {
-    super(`Failed to create tenant${reason ? `: ${reason}` : ''}`);
+    super(`Failed to create tenant ${reason ? `: ${reason}` : ''}`);
   }
 }
 

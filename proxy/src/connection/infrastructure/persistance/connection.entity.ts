@@ -6,7 +6,7 @@ import {
   Unique,
 } from 'typeorm';
 import { User } from '../../../iam/infrastructure/persistance/user.entity';
-import { Thingsboard } from '../../../entities/thingsboard.entity';
+import { Thingsboard } from '../../../thingsboard/infrastructure/persistence/thingsboard.entity';
 import { Medplum } from '../../../medplum/infrastructure/persistance/medplum.entity';
 
 @Entity('connections')

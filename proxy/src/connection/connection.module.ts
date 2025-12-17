@@ -1,11 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ConnectionService } from './application/connection.service';
 import { ConnectionController } from './interface/rest/connection.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from './infrastructure/persistance/connection.entity';
 import { HttpModule } from '@nestjs/axios';
 import { PendingUserModule } from 'src/pending-user/pending-user.module';
-import { MedplumConnectionService } from '../medplum/application/medplum-connection.service';
 import { IamModule } from '../iam/iam.module';
 import { MedplumModule } from '../medplum/medplum.module';
 import { ThingsboardModule } from '../thingsboard/thingsboard.module';
@@ -21,7 +19,7 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
 @Module({
   imports: [
     TypeOrmModule.forFeature([Connection]),
-    MedplumModule,
+    forwardRef(() => MedplumModule),
     HttpModule,
     PendingUserModule,
     IamModule,
@@ -29,8 +27,6 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
   ],
   controllers: [ConnectionController],
   providers: [
-    ConnectionService,
-    MedplumConnectionService,
     MedplumRegistrationService,
 
     ValidateTokenUseCase,
@@ -45,9 +41,6 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
     },
   ],
   exports: [
-    ConnectionService,
-    MedplumConnectionService,
-
     ValidateTokenUseCase,
     InitialConnectionUseCase,
 

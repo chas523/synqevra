@@ -18,7 +18,7 @@ import {
 } from '@nestjs/cqrs';
 import { GetPendingUserByEmailQuery } from 'src/pending-user/application/queries/get-pending-user-by-email/get-pending-user-by-email.query';
 import { UpdatePendingUserCommand } from 'src/pending-user/application/commands/update-pending-user/update-pending-user.command';
-import { ConnectionService } from '../../../../connection/application/connection.service';
+import { TokenGeneratorPort } from '../../../../iam/application/ports/token-generator.port';
 
 @CommandHandler(CreateActivationLinkCommand)
 export class CreateActivationLinkCommandHandler
@@ -30,7 +30,7 @@ export class CreateActivationLinkCommandHandler
 {
   constructor(
     private readonly configService: ConfigService,
-    private readonly connectionService: ConnectionService,
+    private readonly tokenGeneratorPort: TokenGeneratorPort,
     @Inject(EMAIL_PORT)
     private readonly emailPort: EmailPort,
 
@@ -57,7 +57,7 @@ export class CreateActivationLinkCommandHandler
         return Err(new ActivationLinkUserNotFoundError(email));
       }
 
-      const tokenResult = this.connectionService.createToken(
+      const tokenResult = this.tokenGeneratorPort.createActivationToken(
         user.getId().toString(),
       );
       const tokenPayloadEncoded = tokenResult.tokenPayloadEncoded;

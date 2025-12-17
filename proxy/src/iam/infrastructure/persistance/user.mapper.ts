@@ -1,6 +1,7 @@
 import { User } from './user.entity';
 import { UserModel } from '../../domain/entities/user.model';
 import { Role } from '../../domain/enums/role.enum';
+import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
 
 export class UserMapper {
   static toDomain(entity: User): UserModel {
@@ -12,7 +13,7 @@ export class UserMapper {
       password: entity.password,
       hashedRt: entity.hashedRt,
       role: entity.role,
-      connection: entity.connection,
+      connectionId: entity.connection.id,
     };
   }
 
@@ -29,8 +30,8 @@ export class UserMapper {
     entity.hashedRt = model.hashedRt ?? null;
     entity.role = model.role ?? Role.USER;
 
-    if (model.connection) {
-      entity.connection = model.connection;
+    if (model.connectionId) {
+      entity.connection = { id: model.connectionId } as Connection;
     }
 
     return entity;

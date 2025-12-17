@@ -19,7 +19,7 @@ export interface JwtPayload {
 }
 
 export interface ThingsboardRollbackData {
-  tenantId: EntityId | null;
+  tenantId: string | null;
   userId: string | null;
   sysAdminAccessToken: string;
 }

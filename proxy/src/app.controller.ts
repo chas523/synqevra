@@ -1,13 +1,13 @@
 import { All, Controller, Get, Req, Res } from '@nestjs/common';
 
 import type { Request, Response } from 'express';
-import { MedplumConnectionService } from './medplum/application/medplum-connection.service';
+import { MedplumClientFactory } from './medplum/application/medplum-client.factory';
 import { ActiveUser } from './auth/decorators/active-user.decorator';
 import type { CurrentUser } from './auth/types/current-user';
 
 @Controller('fhir')
 export class AppController {
-  constructor(private readonly proxy: MedplumConnectionService) {}
+  constructor(private readonly proxy: MedplumClientFactory) {}
 
   private readonly allowedPatterns = [
     /^\/R4\/StructureDefinition\/\$[\w-]+$/, // /R4/StructureDefinition/$expand-profile

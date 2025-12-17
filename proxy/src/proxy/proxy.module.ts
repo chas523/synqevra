@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PostTelemetryUseCase } from './application/use-cases/post-telemetry.use-case';
 import { ProxyController } from './interface/rest/proxy.controller';
 import { HttpModule } from '@nestjs/axios';
-import { ConnectionModule } from '../connection/connection.module';
+import { MedplumModule } from '../medplum/medplum.module';
 
 @Module({
   imports: [
@@ -10,7 +10,7 @@ import { ConnectionModule } from '../connection/connection.module';
       timeout: 5000,
       maxRedirects: 3,
     }),
-    ConnectionModule,
+    MedplumModule,
   ],
   controllers: [ProxyController],
   providers: [PostTelemetryUseCase],

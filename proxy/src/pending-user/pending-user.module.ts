@@ -4,7 +4,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PendingUserRepositoryAdapter } from './infrastructure/persistence/pending-user.repository.adapter';
-import { PENDING_USER_REPOSITORY_PORT } from './application/ports/pending-user.repository.port';
+import {
+  PENDING_USER_REPOSITORY_PORT,
+  PendingUserRepositoryPort,
+} from './application/ports/pending-user.repository.port';
 import { CreatePendingUserCommandHandler } from './application/commands/create-pending-user/create-pending-user.command-handler';
 import { UpdatePendingUserCommandHandler } from './application/commands/update-pending-user/update-pending-user.command-handler';
 import { PendingUserController } from './interface/rest/pending-user.controller';
@@ -34,6 +37,12 @@ import { PendingUserService } from './application/pending-user.service';
       useClass: PendingUserRepositoryAdapter,
     },
   ],
-  exports: [PendingUserService],
+  exports: [
+    PendingUserService,
+    {
+      provide: PENDING_USER_REPOSITORY_PORT,
+      useClass: PendingUserRepositoryAdapter,
+    },
+  ],
 })
 export class PendingUserModule {}

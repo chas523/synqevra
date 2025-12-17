@@ -4,6 +4,7 @@ import { UserRepository } from '../../domain/repositories/user.repository';
 import { UserModel } from '../../domain/entities/user.model';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '../../infrastructure/constants/user-utils';
+import { UnitOfWork } from '../../../connection/infrastructure/transaction/unit-of-work';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -29,13 +30,13 @@ export class CreateUserUseCase {
     return await this.userRepository.save(model);
   }
 
-  async executeWithRepo(
+  async executeWithUOW(
     command: CreateUserCommand,
-    repo: UserRepository,
+    uow: UnitOfWork,
   ): Promise<UserModel> {
     const { email, password } = command;
 
-    const existingUser = await repo.getUserByEmail(email);
+    const existingUser = await uow.userRepository.getUserByEmail(email);
     if (existingUser) {
       throw new BadRequestException(`User with email already exists`);
     }
@@ -49,6 +50,6 @@ export class CreateUserUseCase {
       hashedRt: null,
     };
 
-    return await repo.save(model);
+    return await uow.userRepository.save(model);
   }
 }

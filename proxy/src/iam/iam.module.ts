@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './application/users/users.service';
 import { UsersController } from './interface/rest/users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './infrastructure/persistance/user.entity';
@@ -17,6 +16,8 @@ import { RefreshTokensUseCase } from './application/use-cases/refresh-token.use-
 import { UserRepositoryAdapter } from './infrastructure/persistance/user.repository.adapter';
 import { UserRepository } from './domain/repositories/user.repository';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case';
+import { TokenGeneratorPort } from './application/ports/token-generator.port';
+import { TokenGeneratorAdapter } from './infrastructure/security/token-generator.adapter';
 
 @Module({
   imports: [
@@ -28,7 +29,6 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
   ],
   controllers: [UsersController, AuthController],
   providers: [
-    UsersService,
     AuthService,
 
     CreateUserUseCase,
@@ -38,7 +38,8 @@ import { CreateUserUseCase } from './application/use-cases/create-user.use-case'
     RefreshTokensUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
+    { provide: TokenGeneratorPort, useClass: TokenGeneratorAdapter },
   ],
-  exports: [UsersService, AuthService, CreateUserUseCase, UserRepository],
+  exports: [AuthService, CreateUserUseCase, UserRepository, TokenGeneratorPort],
 })
 export class IamModule {}

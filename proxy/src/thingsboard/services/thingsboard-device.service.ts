@@ -9,14 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
-import {
-  DevicesResponse,
-  DeviceDetails,
-  CreateDeviceRequest,
-  Device,
-  DeviceAttributes,
-} from '../thingsboard.types';
-import { MedplumService } from '../../medplum/application/medplum.service';
+import { DevicesResponse } from '../thingsboard.types';
 
 @Injectable()
 export class ThingsboardDeviceService {
@@ -25,7 +18,6 @@ export class ThingsboardDeviceService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    private readonly medplumService: MedplumService,
   ) {}
 
   private get THINGSBOARD_API_URL(): string {
@@ -83,97 +75,6 @@ export class ThingsboardDeviceService {
         }),
       );
       return response.data;
-    } catch (error) {
-      this.handleThingsboardError(error);
-    }
-  }
-
-  async fetchDevice(accessToken: string, id: string): Promise<DeviceDetails> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/device/info/${id}`;
-      const response = await firstValueFrom(
-        this.httpService.get<DeviceDetails>(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      this.handleThingsboardError(error);
-    }
-  }
-
-  async createDevice(
-    accessToken: string,
-    payload: CreateDeviceRequest,
-    userId: number,
-  ): Promise<Device> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/device`;
-      const response = await firstValueFrom(
-        this.httpService.post<Device>(url, payload, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-      try {
-        await this.medplumService.createDevice(
-          {
-            identifier: response.data.id.id,
-          },
-          userId,
-        );
-      } catch (medplumError) {
-        //if medplum fails - we're rollbacking creation of thingsboard device
-        await this.deleteDevice(accessToken, response.data.id.id);
-        throw medplumError;
-      }
-      return response.data;
-    } catch (error) {
-      this.handleThingsboardError(error);
-    }
-  }
-
-  async deleteDevice(accessToken: string, id: string): Promise<void> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/device/${id}`;
-      await firstValueFrom(
-        this.httpService.delete(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-    } catch (error) {
-      this.handleThingsboardError(error);
-    }
-  }
-
-  async fetchDeviceSharedAttributes(
-    accessToken: string,
-    id: string,
-  ): Promise<DeviceAttributes> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/DEVICE/${id}/values/attributes/SHARED_SCOPE`;
-      const response = await firstValueFrom(
-        this.httpService.get<DeviceAttributes>(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      this.handleThingsboardError(error);
-    }
-  }
-
-  async updateDeviceSharedAttributes(
-    accessToken: string,
-    id: string,
-    attributes: Record<string, any>,
-  ): Promise<void> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/DEVICE/${id}/SHARED_SCOPE`;
-      await firstValueFrom(
-        this.httpService.post(url, attributes, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
     } catch (error) {
       this.handleThingsboardError(error);
     }

@@ -20,7 +20,7 @@ import { DeviceAttributes } from 'src/thingsboard/interface/rest/dtos/response/t
 import { CreateTenantRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-tenant.request.dto';
 import { CreateTenantAdminRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-tenant-admin.request.dto';
 import * as jwt from 'jsonwebtoken';
-import { MedplumService } from '../../../medplum/application/medplum.service';
+import { MedplumClientPort } from '../../../medplum/application/ports/medplum-client.port';
 
 interface JwtPayload {
   customerId: string;
@@ -35,7 +35,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-    private readonly medplumService: MedplumService,
+    private readonly medplum: MedplumClientPort,
   ) {}
 
   private get THINGSBOARD_API_URL(): string {
@@ -96,7 +96,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
       try {
-        await this.medplumService.createDevice(
+        await this.medplum.createDevice(
           {
             identifier: response.data.id.id,
           },

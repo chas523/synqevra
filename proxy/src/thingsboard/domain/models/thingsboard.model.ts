@@ -1,4 +1,4 @@
-import { Connection } from '../../../connection/infrastructure/persistance/connection.entity';
+import { ConnectionModel } from '../../../connection/domain/entities/connection.model';
 
 export class ThingsboardModel {
   constructor(
@@ -7,13 +7,13 @@ export class ThingsboardModel {
     private readonly id?: number,
     private accessToken?: string,
     private refreshToken?: string,
-    private connection?: Connection,
+    private connectionId?: number,
   ) {}
 
   static create(
     project: string,
     tenantId: string,
-    connection: Connection,
+    connection: ConnectionModel,
   ): ThingsboardModel {
     if (!project || !tenantId) {
       throw new Error('Project and tenant ID are required');
@@ -24,7 +24,7 @@ export class ThingsboardModel {
       undefined,
       undefined,
       undefined,
-      connection,
+      connection.id,
     );
   }
 
@@ -56,9 +56,9 @@ export class ThingsboardModel {
   getRefreshToken(): string | undefined {
     return this.refreshToken;
   }
-  getConnection(): Connection {
-    if (!this.connection) throw new Error('Connection is not set');
-    return this.connection;
+  getConnection(): number {
+    if (!this.connectionId) throw new Error('Connection is not set');
+    return this.connectionId;
   }
 
   setRefreshToken(token: string): void {

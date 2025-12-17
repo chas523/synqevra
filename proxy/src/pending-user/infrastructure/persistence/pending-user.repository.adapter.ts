@@ -9,7 +9,7 @@ import { PendingUserStatus } from '../../domain/enums/status.enum';
 import { PendingUserMapper } from './pending-user.mapper';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PendingUser } from './pending-user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class PendingUserRepositoryAdapter implements PendingUserRepositoryPort {
@@ -21,8 +21,8 @@ export class PendingUserRepositoryAdapter implements PendingUserRepositoryPort {
   async save(pendingUser: PendingUserModel): Promise<PendingUserModel> {
     const pendingUserOrmEntity = PendingUserMapper.toOrm(pendingUser);
     const saved = await this.repository.save(pendingUserOrmEntity);
-    const pendingUserDomain = PendingUserMapper.toDomain(saved);
-    return pendingUserDomain;
+
+    return PendingUserMapper.toDomain(saved);
   }
 
   async update(pendingUser: PendingUserModel): Promise<void> {
@@ -179,8 +179,14 @@ export class PendingUserRepositoryAdapter implements PendingUserRepositoryPort {
 
     return { items, hasMore, total };
   }
+
   async delete(id: number): Promise<boolean> {
     const result = await this.repository.delete(id);
     return result.affected !== 0;
+  }
+
+  withManager(manager: EntityManager): PendingUserRepositoryAdapter {
+    const repository = manager.getRepository(PendingUser);
+    return new PendingUserRepositoryAdapter(repository);
   }
 }

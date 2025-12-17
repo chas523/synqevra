@@ -1,18 +1,37 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { InitialConnectionResult } from '../dto/initial-connection.result';
-import { ThingsboardService } from '../../../thingsboard/thingsboard.service';
 import { ValidateTokenUseCase } from './validate-token.use-case';
 import { InitialConnectionCommand } from '../dto/initial-connection.command';
 import { CreateUserUseCase } from '../../../iam/application/use-cases/create-user.use-case';
 import { UserModel } from '../../../iam/domain/entities/user.model';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
-import { Thingsboard } from '../../../entities/thingsboard.entity';
-import { Connection } from '../../infrastructure/persistance/connection.entity';
 import { CreateProjectDto } from '../../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
 import { RegisterMedplumUseCase } from '../../../medplum/application/use-cases/register-medplum.use-case';
-import { PendingUserService } from '../../../pending-user/application/pending-user.service';
-import { PendingUser } from '../../../pending-user/infrastructure/persistence/pending-user.entity';
+import { CommandBus } from '@nestjs/cqrs';
+import { RegisterTenantCommand } from '../../../thingsboard/application/commands/register-tenant/register-tenant.command';
+import { RegisterTenantResponseDto } from '../../../thingsboard/interface/rest/dtos/response/register-tenant.response.dto';
+import {
+  InvalidActivationLinkError,
+  PasswordMismatchError,
+  RegisterTenantError,
+  RuleChainConfigurationError,
+  RuleChainCreationError,
+  TenantCreationError,
+  ThingsboardConnectionExistsError,
+  UserActivationError,
+  UserAlreadyExistsError,
+  UserCreationError,
+} from '../../../thingsboard/domain/errors/thingsboard.errors';
+import { match, Result } from 'oxide.ts';
+import { DeleteTenantCommand } from '../../../thingsboard/application/commands/delete-tenant/delete-tenant.command';
+import { UserNotFoundError } from '../../../pending-user/domain/errors/pending-user.errors';
 
 @Injectable()
 export class InitialConnectionUseCase {
@@ -23,8 +42,7 @@ export class InitialConnectionUseCase {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly registerMedplumUseCase: RegisterMedplumUseCase,
 
-    private readonly pendingUserService: PendingUserService,
-    private readonly thingsboardService: ThingsboardService,
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(
@@ -38,20 +56,13 @@ export class InitialConnectionUseCase {
     const pendingUserId =
       this.validateTokenUseCase.extractUserIdFromToken(token);
 
-    // not DDD!
-    // TODO
-    const pendingUserRepository = uow.manager.getRepository(PendingUser);
-    const thingsboardRepository = uow.manager.getRepository(Thingsboard);
-
-    // DDD ready
-    const userRepository = uow.userRepository;
-    const connectionRepository = uow.connectionRepository;
-
-    // pending-user - to be replaced
-    await this.pendingUserService.deletePendingUserById(
+    // pending-user
+    const deletedPendingUser = await uow.pendingUserRepository.delete(
       Number(pendingUserId),
-      pendingUserRepository,
     );
+    if (!deletedPendingUser) {
+      throw new UserNotFoundError();
+    }
 
     // user
     const userModel: UserModel = {
@@ -61,31 +72,32 @@ export class InitialConnectionUseCase {
       password: password,
       hashedRt: null,
     };
-
-    const newUser = await this.createUserUseCase.executeWithRepo(
-      userModel,
-      userRepository,
-    );
-
+    const newUser = await this.createUserUseCase.executeWithUOW(userModel, uow);
     this.logger.debug(`Created new user: ` + JSON.stringify(newUser));
 
     // connection
-    const newConnection = connectionRepository.create(newUser.id!);
-    await connectionRepository.save(newConnection!);
+    const newConnection = uow.connectionRepository.create(newUser.id!);
+    await uow.connectionRepository.save(newConnection!);
     this.logger.debug('Created connection:' + JSON.stringify(newConnection));
 
     let thingsboardRollbackData: ThingsboardRollbackData | null = null;
     let result: InitialConnectionResult;
 
     try {
-      // thingsboard - to be replaced
-      const thingsboardResult =
-        await this.thingsboardService.connectRegisterToThingsboard(
-          command,
-          newUser.id!,
-          thingsboardRepository,
-          uow.manager.getRepository(Connection),
-        );
+      // thingsboard
+      const thingsboardCommand = new RegisterTenantCommand(
+        newUser.id!,
+        command,
+        uow,
+      );
+      const thingsboardCommandResult: Result<
+        RegisterTenantResponseDto,
+        RegisterTenantError
+      > = await this.commandBus.execute(thingsboardCommand);
+
+      const thingsboardResult = this.handleThingsboardResult(
+        thingsboardCommandResult,
+      );
 
       this.logger.debug(
         `${thingsboardResult.message} with tenant ID: ${thingsboardResult.tenantId}`,
@@ -111,23 +123,59 @@ export class InitialConnectionUseCase {
 
       this.logger.debug('Created Medplum project: ' + projectName);
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { rollbackData, ...resultWithoutRollback } = thingsboardResult;
       result = resultWithoutRollback;
-    } catch (error) {
+    } catch (err) {
       if (thingsboardRollbackData) {
         this.logger.warn(
           'Rolling back Thingsboard changes due to Medplum error / other failure',
         );
 
-        await this.thingsboardService.performRollback(
-          thingsboardRollbackData.tenantId,
-          thingsboardRollbackData.userId,
-          thingsboardRollbackData.sysAdminAccessToken,
+        const rollbackResult = await this.commandBus.execute(
+          new DeleteTenantCommand(thingsboardRollbackData),
         );
+        if (rollbackResult.isErr()) throw rollbackResult.unwrapErr();
       }
 
-      throw error;
+      throw err;
     }
+
     return result;
+  }
+
+  private handleThingsboardResult(
+    result: Result<RegisterTenantResponseDto, RegisterTenantError>,
+  ) {
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: RegisterTenantError) => {
+        if (error instanceof PasswordMismatchError) {
+          throw new BadRequestException(error.message);
+        }
+        if (error instanceof UserAlreadyExistsError) {
+          throw new ConflictException(error.message);
+        }
+        if (error instanceof ThingsboardConnectionExistsError) {
+          throw new ConflictException(error.message);
+        }
+        if (
+          error instanceof TenantCreationError ||
+          error instanceof UserCreationError ||
+          error instanceof UserActivationError ||
+          error instanceof InvalidActivationLinkError
+        ) {
+          throw new BadRequestException(error.message);
+        }
+        if (
+          error instanceof RuleChainCreationError ||
+          error instanceof RuleChainConfigurationError
+        ) {
+          throw new InternalServerErrorException(error.message);
+        }
+
+        throw new InternalServerErrorException('Failed to register tenant');
+      },
+    });
   }
 }

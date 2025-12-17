@@ -1,5 +1,7 @@
 import { PendingUserStatus } from '../../domain/enums/status.enum';
 import { PendingUserModel } from '../../domain/models/pending-user.model';
+import { EntityManager } from 'typeorm';
+import { PendingUserRepositoryAdapter } from '../../infrastructure/persistence/pending-user.repository.adapter';
 
 export interface PaginationCursorPrimitive {
   id: number;
@@ -26,6 +28,7 @@ export abstract class PendingUserRepositoryPort {
     total: number;
   }>;
   abstract delete(id: number): Promise<boolean>;
+  abstract withManager(manager: EntityManager): PendingUserRepositoryAdapter;
 }
 
 export const PENDING_USER_REPOSITORY_PORT = Symbol(
