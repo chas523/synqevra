@@ -1,11 +1,12 @@
 import { PostTelemetryUseCase } from './post-telemetry.use-case';
 import { MedplumClientFactory } from '../../../medplum/application/medplum-client.factory';
 import { PostTelemetryCommand } from '../dto/post-telemetry.command';
+import { MedplumClientPort } from '../../../medplum/application/ports/medplum-client.port';
 
 describe('PostTelemetryUseCase', () => {
   let useCase: PostTelemetryUseCase;
   let medplumConnectionService: jest.Mocked<MedplumClientFactory>;
-  let medplumClient: any;
+  let medplumClient: jest.Mocked<MedplumClientPort>;
 
   const mockedEntry = {
     entry: [
@@ -17,10 +18,10 @@ describe('PostTelemetryUseCase', () => {
     medplumClient = {
       search: jest.fn().mockResolvedValue(mockedEntry),
       createResource: jest.fn().mockResolvedValue({ id: 'obs-1' }),
-    };
+    } as unknown as jest.Mocked<MedplumClientPort>;
 
     medplumConnectionService = {
-      initMedplumWithProjectId: jest.fn().mockResolvedValue(medplumClient),
+      initMedplum: jest.fn().mockResolvedValue(medplumClient),
     } as unknown as jest.Mocked<MedplumClientFactory>;
 
     useCase = new PostTelemetryUseCase(medplumConnectionService);

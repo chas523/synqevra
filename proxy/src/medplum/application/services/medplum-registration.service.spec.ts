@@ -57,9 +57,10 @@ describe('MedplumRegistrationService', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    // jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
-    // jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => undefined);
-    // jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    // silence logger
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
 
     medplumMock();
 

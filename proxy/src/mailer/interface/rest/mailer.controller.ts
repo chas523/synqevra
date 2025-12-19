@@ -5,17 +5,17 @@ import {
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
-
-import { Public } from 'src/auth/decorators/public.decorator';
+import { Public } from '../../../auth/decorators/public.decorator';
 import { MailRecipient } from './dtos/request/mail-recipient.request.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateActivationLinkCommand } from 'src/mailer/application/commands/create-activation-link/create-activation-link.command';
+import { CreateActivationLinkCommand } from '../../application/commands/create-activation-link/create-activation-link.command';
+
+import { match, Result } from 'oxide.ts';
 import {
   ActivationLinkUserNotFoundError,
   CreateActivationLinkError,
   EmailSendError,
-} from 'src/mailer/domain/errors/mailer.errors';
-import { match, Result } from 'oxide.ts';
+} from '../../domain/errors/mailer.errors';
 
 @Controller('mailer')
 export class MailerController {

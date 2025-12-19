@@ -2,22 +2,22 @@ import { Inject } from '@nestjs/common';
 import { Result, Ok, Err } from 'oxide.ts';
 import { CreateActivationLinkCommand } from './create-activation-link.command';
 import { ConfigService } from '@nestjs/config';
-import { SendEmailDto } from 'src/mailer/interface/rest/dtos/request/send-email.request.dto';
-import { PendingUserStatus } from 'src/pending-user/domain/enums/status.enum';
-import { EMAIL_PORT, EmailPort } from 'src/mailer/application/ports/email.port';
+import { SendEmailDto } from '../../../interface/rest/dtos/request/send-email.request.dto';
+import { EMAIL_PORT, EmailPort } from '../../ports/email.port';
+import { PendingUserStatus } from '../../../../pending-user/domain/enums/status.enum';
 import {
   ActivationLinkUserNotFoundError,
   CreateActivationLinkError,
   EmailSendError,
-} from 'src/mailer/domain/errors/mailer.errors';
+} from '../../../domain/errors/mailer.errors';
 import {
   CommandHandler,
   ICommandHandler,
   CommandBus,
   QueryBus,
 } from '@nestjs/cqrs';
-import { GetPendingUserByEmailQuery } from 'src/pending-user/application/queries/get-pending-user-by-email/get-pending-user-by-email.query';
-import { UpdatePendingUserCommand } from 'src/pending-user/application/commands/update-pending-user/update-pending-user.command';
+import { GetPendingUserByEmailQuery } from '../../../../pending-user/application/queries/get-pending-user-by-email/get-pending-user-by-email.query';
+import { UpdatePendingUserCommand } from '../../../../pending-user/application/commands/update-pending-user/update-pending-user.command';
 import { TokenGeneratorPort } from '../../../../iam/application/ports/token-generator.port';
 
 @CommandHandler(CreateActivationLinkCommand)
