@@ -56,3 +56,14 @@ Thumbs.db
 # Next.js
 .next/
 out/
+
+# Debug
+npm-debug.log*
+pnpm-debug.log*
+
+# Turbo
+.turbo
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
