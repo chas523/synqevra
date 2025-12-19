@@ -5,7 +5,7 @@ import { MedplumProvider } from "@medplum/react";
 
 //adjust backend endpoint if needed
 const medplum = new MedplumClient({
-  baseUrl: "http://localhost:3003/fhir",
+  baseUrl: process.env.NEXT_PUBLIC_FHIR_URL ?? 'http://localhost:3003/fhir',
 });
 
 export default function MedplumProviderWrapper({
