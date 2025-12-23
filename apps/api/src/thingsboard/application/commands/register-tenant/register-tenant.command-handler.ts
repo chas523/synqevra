@@ -220,8 +220,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     try {
       const baseRuleChainPath = path.join(
         process.cwd(),
-        'src',
-        'thingsboard',
+        'dist',
         'base_rule_chain.json',
       );
 

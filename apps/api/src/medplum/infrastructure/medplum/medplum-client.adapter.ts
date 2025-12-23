@@ -116,15 +116,16 @@ export class MedplumClientAdapter extends MedplumClientPort {
       id: deviceDto.identifier,
       identifier: [
         {
-          system: 'http://localhost:8088/entities/devices/',
+          system: process.env.TB_URL as string,
           value: deviceDto.identifier,
         },
       ],
     };
-
+    this.logger.debug(JSON.stringify(device.identifier));
     try {
       return await client.createResource(device);
     } catch (error: unknown) {
+      this.logger.error(error);
       this.handleHttpError(error);
     }
   }
@@ -249,6 +250,7 @@ export class MedplumClientAdapter extends MedplumClientPort {
       identifier: `${tbUrl}|${deviceId}`,
     })) as Device | null;
     if (!device) {
+      this.logger.warn('Device not found:', deviceId, tbUrl);
       throw new NotFoundException('Device not found');
     }
 

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-backend
+  namespace: medboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-backend
+  template:
+    metadata:
+      labels:
+        app: redis-backend
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu:  "50m"
+            limits:
+              memory: "96Mi"
+              cpu:  "75m"
+---
+apiVersion:  v1
+kind:  Service
+metadata:
+  name: redis-backend
+  namespace: medboard
+spec:
+  selector:
+    app: redis-backend
+  ports:
+    - port: 6379
+      targetPort: 6379

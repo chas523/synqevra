@@ -1,0 +1,42 @@
+# ThingsBoard Volumes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tb-postgres-pvc
+  namespace: medboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  storageClassName: do-block-storage
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tb-logs-pvc
+  namespace: medboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: do-block-storage
+
+---
+# Medplum Volumes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: medplum-postgres-pvc
+  namespace: medboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: do-block-storage

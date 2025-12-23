@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tb-postgres
+  namespace: medboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tb-postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tb-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: medboard-secrets
+                  key: TB_DB_NAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name:  medboard-secrets
+                  key: TB_DB_PASSWORD
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            exec:
+              command: [ "sh", "-c", "pg_isready" ]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: tb-postgres-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tb-postgres
+  namespace: medboard
+spec:
+  selector:
+    app: tb-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

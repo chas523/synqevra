@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
-import type React from "react";
-import { useEffect, useState } from "react";
+import React from "react";
+import { useState } from "react";
 import { useLogin } from "@/hooks/auth/useAuth";
 import type { LoginFormData } from "@/types/authTypes";
 import { LoadingButton } from "../atoms";
@@ -16,18 +16,12 @@ import {
 
 const LoginForm = () => {
   const router = useRouter();
-  const { login, isLoading, error, success } = useLogin();
+  const { login, isLoading, error } = useLogin();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
-  // Handle successful registration
-  useEffect(() => {
-    if (success) {
-      router.push("/devices");
-    }
-  }, [success, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -40,16 +34,15 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!formData.email || !formData.password) {
-      return;
-    }
+    if (!formData. email || !formData.password) return;
+    if (!formData.email.includes("@")) return;
 
-    if (!formData.email.includes("@")) {
-      return;
+    try {
+      await login(formData);
+      router.push("/devices");
+    } catch (err) {
+      console.error(err);
     }
-
-    await login(formData);
   };
 
   return (

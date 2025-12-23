@@ -18,7 +18,7 @@
         "queueName": "Main",
         "configurationVersion": 3,
         "configuration": {
-          "restEndpointUrlPattern": "http://host.docker.internal:3003/api/proxy/telemetry",
+          "restEndpointUrlPattern": "http://api:3003/api/proxy/telemetry",
           "requestMethod": "POST",
           "useSimpleClientHttpFactory": false,
           "parseToPlainText": false,

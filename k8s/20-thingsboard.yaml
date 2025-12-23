@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  thingsboard
+  namespace: medboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thingsboard
+  strategy:
+    type:  Recreate
+  template:
+    metadata:
+      labels:
+        app: thingsboard
+    spec:
+      securityContext:
+        fsGroup: 799
+        runAsUser: 799
+        runAsNonRoot: true
+      initContainers:
+        - name: wait-for-postgres
+          image:  busybox:1.36
+          command: ['sh', '-c', 'until nc -z tb-postgres 5432; do echo waiting for postgres; sleep 2; done;']
+      containers:
+        - name:  thingsboard
+          image: thingsboard/tb-node:4.2.0
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 1883
+              name: mqtt
+            - containerPort: 7070
+              name: edge
+          env:
+            - name: TB_SERVICE_ID
+              value: "tb-ce-node"
+            - name: TB_TRANSPORT_SNMP_ENABLED
+              value: "false"
+            - name: TB_TRANSPORT_COAP_ENABLED
+              value: "false"
+            - name: JAVA_OPTS
+              value: "-Xms512M -Xmx2048M"
+            - name:  SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://tb-postgres:5432/thingsboard"
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: medboard-secrets
+                  key: TB_DB_PASSWORD
+          volumeMounts:
+            - name: tb-data
+              mountPath: /data
+            - name: tb-logs
+              mountPath: /var/log/thingsboard
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1500m"
+      volumes:
+        - name: tb-data
+          persistentVolumeClaim:
+            claimName: tb-postgres-pvc
+        - name: tb-logs
+          persistentVolumeClaim:
+            claimName: tb-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thingsboard
+  namespace: medboard
+spec:
+  selector:
+    app: thingsboard
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30008
+      name: http
+    - port: 1883
+      targetPort: 1883
+      name: mqtt
