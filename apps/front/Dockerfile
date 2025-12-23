@@ -20,11 +20,6 @@ COPY --from=deps /app/ ./
 COPY apps/front/ ./apps/front/
 # COPY packages/ ./packages/
 
-ARG NEXT_PUBLIC_PROXY_URL
-ENV NEXT_PUBLIC_PROXY_URL=$NEXT_PUBLIC_PROXY_URL
-ARG NEXT_PUBLIC_FHIR_URL
-ENV NEXT_PUBLIC_FHIR_URL=$NEXT_PUBLIC_FHIR_URL
-
 RUN pnpm turbo build --filter=front
 
 # Runner
