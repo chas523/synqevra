@@ -6,7 +6,7 @@ import type { Request } from 'express';
 import { CurrentUser } from '../../../auth/types/current-user';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { GetUserByTokenUseCase } from '../../application/use-cases/get-user-by-token.use-case';
-import { GetUserByTokenResponseDto } from './dtos/response/get-user-by-token.response.dto';
+import { GetUserByTokenResponseDto } from './dto/response/get-user-by-token.response.dto';
 
 @Controller('user')
 export class UsersController {
