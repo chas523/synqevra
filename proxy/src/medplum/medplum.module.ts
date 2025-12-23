@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from '../connection/connection.module';
 import { PatientUseCase } from './application/use-cases/patient.use-case';
 import { DeviceUseCase } from './application/use-cases/device.use-case';
+import { GetPractitionerListUseCase } from './application/use-cases/get-practitioner-list.use-case';
+import { GetPractitionerByIdUseCase } from './application/use-cases/get-practitioner-by-id.use-case';
 import { MedplumClientAdapter } from './infrastructure/medplum/medplum-client.adapter';
 import { MedplumClientFactory } from './application/medplum-client.factory';
 import { MedplumClientPort } from './application/ports/medplum-client.port';
@@ -20,6 +22,8 @@ import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.r
   providers: [
     PatientUseCase,
     DeviceUseCase,
+    GetPractitionerListUseCase,
+    GetPractitionerByIdUseCase,
 
     MedplumClientFactory,
     MedplumClientAdapter,

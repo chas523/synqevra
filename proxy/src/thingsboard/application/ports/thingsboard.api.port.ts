@@ -19,6 +19,11 @@ export const THINGSBOARD_API_PORT = Symbol('THINGSBOARD_API_PORT');
 export abstract class ThingsboardApiPort {
   // Auth operations
   abstract login(
+    userId: number,
+    username: string,
+    password: string,
+  ): Promise<ThingsboardLoginResponse>;
+  abstract loginToSysadminAccount(
     username: string,
     password: string,
   ): Promise<ThingsboardLoginResponse>;

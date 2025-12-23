@@ -20,12 +20,12 @@ export class PendingUserMapper {
     const ormEntity = new PendingUser();
     if (domainEntity.isPersisted()) {
       ormEntity.id = domainEntity.getId();
+      ormEntity.createdAt = domainEntity.getCreatedAt();
     }
     ormEntity.firstName = domainEntity.getFirstName();
     ormEntity.lastName = domainEntity.getLastName();
     ormEntity.email = domainEntity.getEmail().getValue(); // Value Object → string
     ormEntity.status = domainEntity.getStatus();
-    ormEntity.createdAt = domainEntity.getCreatedAt();
     ormEntity.activationToken = domainEntity.getActivationToken();
     ormEntity.expiresAt = domainEntity.getExpiresAt();
     return ormEntity;

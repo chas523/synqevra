@@ -26,12 +26,6 @@ export class UpdatePendingUserCommandHandler
     command: UpdatePendingUserCommand,
   ): Promise<Result<PendingUserModel, UserNotFoundError>> {
     const { id, activationToken, expiresAt, status } = command;
-    console.log('Executing UpdatePendingUserCommand with:', {
-      id,
-      activationToken,
-      expiresAt,
-      status,
-    });
     const existingUser = await this.pendingUserRepository.findById(id);
     if (!existingUser) {
       return Err(new UserNotFoundError());
@@ -44,7 +38,6 @@ export class UpdatePendingUserCommandHandler
     if (status) {
       existingUser.setStatus(status);
     }
-    console.log('Updated user entity:', existingUser);
     await this.pendingUserRepository.update(existingUser);
 
     return Ok(existingUser);

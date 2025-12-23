@@ -82,7 +82,7 @@ export class AppController {
       },
       body,
     });
-
+    console.log('Response:', await fhirResponse.clone().text());
     //we omit content-encoding header because the data is already decoded (instead we'll get ERR_CONTENT_DECODING_FAILED)
     for (const [key, value] of fhirResponse.headers.entries()) {
       if (key.toLowerCase() !== 'content-encoding') {

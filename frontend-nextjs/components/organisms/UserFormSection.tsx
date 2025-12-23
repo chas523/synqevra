@@ -1,18 +1,21 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { userFields } from "@/lib/config/activateFormFields";
 import type { ConnectionFormData } from "@/lib/schemas/activationZodSchema";
+import type { ConfigurePractitionerFormData } from "@/lib/schemas/configurePractitionerZodSchema";
 import HookFormField from "../molecules/HookFormField";
 
 interface UserFormSectionProps {
-  register: UseFormRegister<ConnectionFormData>;
+  register: UseFormRegister<ConnectionFormData | ConfigurePractitionerFormData>;
   errors: FieldErrors<ConnectionFormData>;
   formId: string;
+  disabledFields?: string[];
 }
 
 export const UserFormSection = ({
   register,
   errors,
   formId,
+  disabledFields = [],
 }: UserFormSectionProps) => {
   return (
     <div className="space-y-4">
@@ -24,12 +27,13 @@ export const UserFormSection = ({
       </div>
 
       {userFields.map((field) => (
-        <HookFormField<ConnectionFormData>
+        <HookFormField<ConnectionFormData | ConfigurePractitionerFormData>
           key={field.name}
           field={field}
           register={register}
           errors={errors}
           formId={formId}
+          disabled={disabledFields.includes(String(field.name))}
         />
       ))}
 

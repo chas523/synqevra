@@ -39,7 +39,11 @@ export class ThingsboardLoginCommandHandler
     try {
       const { userId, username, password } = command;
 
-      const loginResponse = await this.thingsboardApi.login(username, password);
+      const loginResponse = await this.thingsboardApi.login(
+        userId,
+        username,
+        password,
+      );
 
       // Find ThingsBoard connection for user
       const thingsboardModel =

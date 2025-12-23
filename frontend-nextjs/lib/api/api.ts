@@ -9,6 +9,7 @@ export const proxyApi = axios.create({
 proxyApi.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log("Error response:", error.response);
     const originalRequest = error.config;
 
     // we avoid refreshing tokens on /auth endpoints ie. on login form (which also throws 401)
@@ -17,8 +18,7 @@ proxyApi.interceptors.response.use(
     //check if tb refresh token is expired (by message)
     if (
       error.response?.data?.statusCode === 401 &&
-      error.response?.data?.message ===
-        "ThingsBoard session expired. Please sign in again."
+      error.response?.data?.message.includes("Token has expired")
     ) {
       proxyApi.post("/auth/logout");
 
@@ -47,5 +47,5 @@ proxyApi.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );

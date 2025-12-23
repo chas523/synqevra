@@ -10,4 +10,7 @@ export abstract class ConnectionRepository {
     userId: number,
   ): Promise<ConnectionModel | null>;
   abstract getOrCreateByUserId(userId: number): Promise<ConnectionModel>;
+  abstract getConnectionByTenantId(
+    tenantId: string,
+  ): Promise<ConnectionModel | null>;
 }

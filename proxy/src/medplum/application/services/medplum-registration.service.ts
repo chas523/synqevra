@@ -99,6 +99,29 @@ export class MedplumRegistrationService {
         );
       }
 
+      this.logger.log('Finding membership for client application');
+      const memberships = await medplum.searchResources('ProjectMembership', {
+        _project: projectId,
+        user: `ClientApplication/${clientApp.id}`,
+      });
+
+      if (memberships.length === 0) {
+        throw new InternalServerErrorException(
+          'No membership found for client application',
+        );
+      }
+
+      const membership = memberships[0];
+      this.logger.log('Found membership:', membership.id);
+
+      // Update membership to set admin to true
+      this.logger.log('Updating membership with admin privileges');
+      await medplum.updateResource({
+        ...membership,
+        admin: true,
+      });
+      this.logger.log('Membership updated with admin privileges');
+
       return {
         clientId: clientApp.id,
         clientSecret: clientApp.secret,

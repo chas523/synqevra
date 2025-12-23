@@ -17,6 +17,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenCommand } from '../../../thingsboard/application/commands/refresh-token/refresh-token.command';
 import {
+  ExpiredTokenError,
   ThingsboardConnectionNotFoundError,
   TokenRefreshError,
 } from '../../../thingsboard/domain/errors/thingsboard.errors';
@@ -72,6 +73,9 @@ export class ThingsboardAuthGuard implements CanActivate {
   }
 
   private handleRefreshError(error: Error): never {
+    if (error instanceof ExpiredTokenError) {
+      throw new UnauthorizedException(error.message);
+    }
     if (error instanceof TokenRefreshError) {
       throw new BadRequestException(error.message);
     }

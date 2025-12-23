@@ -21,6 +21,7 @@ export interface HookFormFieldProps<T extends FieldValues = FieldValues> {
   register: UseFormRegister<T>;
   errors: FieldErrors<T>;
   formId: string;
+  disabled?: boolean;
 }
 
 const HookFormField = <T extends FieldValues = FieldValues>({
@@ -28,6 +29,7 @@ const HookFormField = <T extends FieldValues = FieldValues>({
   register,
   errors,
   formId,
+  disabled = false,
 }: HookFormFieldProps<T>) => {
   const fieldId = `${formId}-${String(field.name)}`;
   const error = errors[field.name]?.message as string | undefined;
@@ -46,7 +48,8 @@ const HookFormField = <T extends FieldValues = FieldValues>({
         <textarea
           id={fieldId}
           placeholder={field.placeholder}
-          className="w-full px-3 py-2 text-sm border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+          disabled={disabled}
+          className="w-full px-3 py-2 text-sm border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-70 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400"
           {...register(field.name, { required: field.required })}
         />
       ) : (
@@ -55,6 +58,12 @@ const HookFormField = <T extends FieldValues = FieldValues>({
           type={field.type || "text"}
           placeholder={field.placeholder}
           variant={error ? "error" : "default"}
+          disabled={disabled}
+          className={
+            disabled
+              ? "disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400 disabled:opacity-70 disabled:cursor-not-allowed"
+              : ""
+          }
           {...register(field.name, { required: field.required })}
         />
       )}

@@ -44,13 +44,10 @@ export class ThingsboardRepositoryAdapter implements ThingsboardRepositoryPort {
   }
 
   async getTokens(userId: number): Promise<ThingsboardModel | null> {
-    const entity = await this.repository
-      .createQueryBuilder('thingsboard')
-      .innerJoin('thingsboard.connection', 'connection')
-      .innerJoin('connection.user', 'user')
-      .where('user.id = :userId', { userId })
-      .select(['thingsboard.accessToken', 'thingsboard.refreshToken'])
-      .getOne();
+    const entity = await this.repository.findOne({
+      where: { connection: { user: { id: userId } } },
+      relations: { connection: true },
+    });
 
     return entity ? ThingsboardMapper.toDomain(entity) : null;
   }

@@ -9,7 +9,8 @@ import { InitialConnectionResult } from '../dto/initial-connection.result';
 import { ValidateTokenUseCase } from './validate-token.use-case';
 import { InitialConnectionCommand } from '../dto/initial-connection.command';
 import { CreateUserUseCase } from '../../../iam/application/use-cases/create-user.use-case';
-import { UserModel } from '../../../iam/domain/entities/user.model';
+import { CreateUserCommand } from '../../../iam/application/dto/create-user.command';
+import { Role } from '../../../iam/domain/enums/role.enum';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
 import { CreateProjectDto } from '../../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
@@ -54,7 +55,7 @@ export class InitialConnectionUseCase {
 
     const { userEmail, firstName, lastName, password } = command.userFields;
     const pendingUserId =
-      this.validateTokenUseCase.extractUserIdFromToken(token);
+      this.validateTokenUseCase.extractPayloadFromToken(token).subjectId;
 
     // pending-user
     const deletedPendingUser = await uow.pendingUserRepository.delete(
@@ -65,18 +66,20 @@ export class InitialConnectionUseCase {
     }
 
     // user
-    const userModel: UserModel = {
+    const userModel: CreateUserCommand = {
       email: userEmail,
       firstName: firstName || 'Unknown Name',
       lastName: lastName || 'Unknown Lastname',
       password: password,
-      hashedRt: null,
     };
     const newUser = await this.createUserUseCase.executeWithUOW(userModel, uow);
     this.logger.debug(`Created new user: ` + JSON.stringify(newUser));
 
     // connection
     const newConnection = uow.connectionRepository.create(newUser.id!);
+    if (newConnection) {
+      newConnection.role = Role.ADMIN;
+    }
     await uow.connectionRepository.save(newConnection!);
     this.logger.debug('Created connection:' + JSON.stringify(newConnection));
 

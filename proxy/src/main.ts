@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 
 async function bootstrap() {
+  Error.stackTraceLimit = 1;
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     //frontend url, super-admin url, thingsboard url (for rulechain to post)

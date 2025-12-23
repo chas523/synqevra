@@ -3,6 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { ErrorMessage } from "@/components/molecules";
 import LoadingOverlayInformation from "@/components/molecules/LoadingOverlayInformation";
 import ActivatePage from "@/components/pages/ActivatePage";
+import ConfigurePractitionerPage from "@/components/pages/ConfigurePractitionerPage";
 import { useTokenValidation } from "@/hooks/auth/useConnections";
 
 const ActivateAccount = () => {
@@ -60,6 +61,20 @@ const ActivateAccount = () => {
       </div>
     );
   }
-  return <ActivatePage token={token} />;
+
+  if (data?.tokenType === "pendingUser") {
+    return <ActivatePage token={token} />;
+  }
+
+  if (data?.tokenType === "user") {
+    return <ConfigurePractitionerPage token={token} />;
+  }
+
+  if (data?.tokenType === "session") {
+    // TODO: Implement session view
+    return null;
+  }
+
+  return null;
 };
 export default ActivateAccount;

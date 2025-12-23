@@ -14,8 +14,9 @@ import {
   RefreshTokenError,
   TokenRefreshError,
   ThingsboardConnectionNotFoundError,
+  ExpiredTokenError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
-import { AxiosError } from 'axios';
+import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import { ThingsboardTokensResponseDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-tokens.response.dto';
 
 @CommandHandler(RefreshTokenCommand)
@@ -63,10 +64,10 @@ export class RefreshTokenCommandHandler
         refreshToken: refreshResponse.refreshToken,
       });
     } catch (error) {
-      if (
-        error instanceof AxiosError &&
-        (error.response?.status === 401 || error.response?.status === 400)
-      ) {
+      if (error instanceof ThingsboardApiException) {
+        if (error.message.includes('Token has expired')) {
+          return Err(new ExpiredTokenError());
+        }
         return Err(new TokenRefreshError());
       }
       return Err(new TokenRefreshError());
