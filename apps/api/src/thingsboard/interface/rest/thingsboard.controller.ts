@@ -10,7 +10,6 @@ import {
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
-  ConflictException,
   NotFoundException,
 } from '@nestjs/common';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
@@ -35,9 +34,6 @@ import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { GetUserQuery } from 'src/thingsboard/application/queries/get-user/get-user.query';
 import { ThingsboardLoginCommand } from 'src/thingsboard/application/commands/thingsboard-login/thingsboard-login.command';
 import { RefreshTokenCommand } from 'src/thingsboard/application/commands/refresh-token/refresh-token.command';
-import { RegisterTenantCommand } from 'src/thingsboard/application/commands/register-tenant/register-tenant.command';
-import { RegisterTenantRequestDto } from './dtos/request/register-tenant.request.dto';
-import { RegisterTenantResponseDto } from './dtos/response/register-tenant.response.dto';
 import { ThingsboardLoginRequestDto } from './dtos/request/thingsboard-login.request.dto';
 import {
   GetUserError,
@@ -45,17 +41,6 @@ import {
   InvalidCredentialsError,
   TokenRefreshError,
   ThingsboardConnectionNotFoundError,
-  RegisterTenantError,
-  PasswordMismatchError,
-  UserAlreadyExistsError,
-  TenantCreationError,
-  UserCreationError,
-  RuleChainCreationError,
-  RuleChainConfigurationError,
-  DeviceProfileUpdateError,
-  ThingsboardConnectionExistsError,
-  UserActivationError,
-  InvalidActivationLinkError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { FetchDeviceSharedAttributesQuery } from 'src/thingsboard/application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query';
 import { DeviceAttributes } from './dtos/response/thingsboard-device-attributes.response.dto';

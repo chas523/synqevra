@@ -21,6 +21,7 @@ import { UpdateDeviceSharedAttributesCommandHandler } from './application/comman
 import { RegisterTenantCommandHandler } from './application/commands/register-tenant/register-tenant.command-handler';
 import { ThingsboardLoginCommandHandler } from './application/commands/thingsboard-login/thingsboard-login.command-handler';
 import { RefreshTokenCommandHandler } from './application/commands/refresh-token/refresh-token.command-handler';
+import { ConfirmPractitionerCommandHandler } from './application/commands/confirm-practitioner/confirm-practitioner.command-handler';
 import { DeleteTenantCommandHandler } from './application/commands/delete-tenant/delete-tenant.command-handler';
 
 // Query Handlers
@@ -37,6 +38,7 @@ const commandHandlers = [
   ThingsboardLoginCommandHandler,
   DeleteTenantCommandHandler,
   RefreshTokenCommandHandler,
+  ConfirmPractitionerCommandHandler,
 ];
 
 const queryHandlers = [

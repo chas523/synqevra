@@ -7,6 +7,7 @@ interface ProgressModalProps {
   error?: string | null;
   success?: boolean;
   onClose?: () => void;
+  messages?: string[];
 }
 
 const PROGRESS_MESSAGES = [
@@ -32,6 +33,7 @@ const ProgressModal = ({
   error,
   success,
   onClose,
+  messages,
 }: ProgressModalProps) => {
   const getStatus = () => {
     if (error) return "error" as const;
@@ -44,14 +46,14 @@ const ProgressModal = ({
       <ProgressContent
         status={getStatus()}
         title="Configuring Your Account"
-        messages={PROGRESS_MESSAGES}
+        messages={messages || PROGRESS_MESSAGES}
         successMessage="Your account has been set up successfully! You can now proceed to login."
         errorMessage={error || "Configuration failed"}
         actionElement={
           getStatus() === "success" ? (
             <Link
               className="ml-2 text-slate-500 hover:underline"
-              href="auth/login"
+              href="/auth/login"
             >
               Go to Login
             </Link>

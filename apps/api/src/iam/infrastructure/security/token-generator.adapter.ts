@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { TokenGeneratorPort } from '../../application/ports/token-generator.port';
+import {
+  CreateTokenParams,
+  TokenGeneratorPort,
+} from '../../application/ports/token-generator.port';
 import { CreateTokenResult } from 'src/iam/application/dto/create-token.result';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class TokenGeneratorAdapter extends TokenGeneratorPort {
-  createActivationToken(userId: string): CreateTokenResult {
+  createActivationToken(params: CreateTokenParams): CreateTokenResult {
+    const { type, subjectId } = params;
     const rawToken = crypto.randomBytes(32).toString('base64url');
-    const tokenPayload = `${rawToken}:${userId}`;
+    const tokenPayload = `${type}:${subjectId}:${rawToken}`;
     const tokenPayloadEncoded = Buffer.from(tokenPayload).toString('base64url');
     const hash = crypto
       .createHash('sha256')

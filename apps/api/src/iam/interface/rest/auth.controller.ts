@@ -14,7 +14,7 @@ import { Public } from '../../../auth/decorators/public.decorator';
 import type { Response, Request } from 'express';
 import { LocalAuthGuard } from '../../../auth/guards/local-auth/local-auth.guard';
 import { CreateUserDto } from './dto/createUserDto';
-import { CurrentUser } from '../../../auth/types/current-user';
+import type { CurrentUser } from '../../../auth/types/current-user';
 import { seconds, Throttle } from '@nestjs/throttler';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
 import { LoginUserUseCase } from 'src/iam/application/use-cases/login-user.use-case';
@@ -24,6 +24,7 @@ import { Role } from 'src/iam/domain/enums/role.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { InvitePractitionerDto } from './dto/invitePractitionerDto';
 import { InvitePractitionerUseCase } from 'src/iam/application/use-cases/invite-practitioner.use-case';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -56,7 +57,7 @@ export class AuthController {
   ) {
     return this.loginUserUseCase.execute({
       userId: req.user.id,
-      role: req.user.role,
+      role: req.user.connectionRole,
       response: res,
     });
   }
@@ -86,14 +87,16 @@ export class AuthController {
     });
   }
 
-  @Roles(Role.MODERATOR)
+  @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @Post('invite')
   async invitePractitioner(
     @Body() invitePractitionerDto: InvitePractitionerDto,
+    @ActiveUser() user: CurrentUser,
   ) {
     return this.invitePractitionerUseCase.execute({
       ...invitePractitionerDto,
+      currentUser: user,
     });
   }
 }

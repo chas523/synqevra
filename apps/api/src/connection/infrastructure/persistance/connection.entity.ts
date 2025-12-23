@@ -1,16 +1,17 @@
 import {
+  Column,
   Entity,
   JoinColumn,
   OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
-  Unique,
 } from 'typeorm';
 import { User } from '../../../iam/infrastructure/persistance/user.entity';
 import { Thingsboard } from '../../../thingsboard/infrastructure/persistence/thingsboard.entity';
 import { Medplum } from '../../../medplum/infrastructure/persistance/medplum.entity';
+import { Role } from '../../../iam/domain/enums/role.enum';
 
 @Entity('connections')
-@Unique(['user'])
 export class Connection {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,17 +24,23 @@ export class Connection {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToOne(() => Medplum, (medplum) => medplum.connection, {
+  @ManyToOne(() => Medplum, (medplum) => medplum.connection, {
     nullable: true,
-    cascade: true,
   })
   @JoinColumn({ name: 'medplum_id' })
   medplum?: Medplum | null;
 
   @OneToOne(() => Thingsboard, (tb) => tb.connection, {
     nullable: true,
-    cascade: true,
+    cascade: ['insert', 'update', 'remove'],
   })
   @JoinColumn({ name: 'thingsboard_id' })
   thingsboard?: Thingsboard | null;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.MODERATOR,
+  })
+  role: Role;
 }

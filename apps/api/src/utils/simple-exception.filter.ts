@@ -18,6 +18,9 @@ export class SimpleExceptionFilter implements ExceptionFilter {
         ? exception.message
         : 'Internal server error';
 
+    // Log only message and status, not stacktrace
+    console.log(`[${status}] ${message}`);
+
     response.status(status).json({ statusCode: status, message });
   }
 }

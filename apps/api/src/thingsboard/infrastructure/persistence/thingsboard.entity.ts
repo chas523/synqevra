@@ -9,9 +9,7 @@ export class Thingsboard {
   @Column()
   project: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column()
   tenantId: string;
 
   @Column({ nullable: true })

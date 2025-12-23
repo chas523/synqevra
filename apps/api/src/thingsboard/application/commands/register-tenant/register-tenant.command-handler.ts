@@ -89,6 +89,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
         this.THINGSBOARD_SYSADMIN_EMAIL,
         this.THINGSBOARD_SYSADMIN_PASSWORD,
       );
+
       sysAdminAccessToken = loginResponse.token;
 
       // Step 1: Create tenant

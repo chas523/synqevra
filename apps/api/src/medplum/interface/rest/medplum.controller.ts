@@ -1,15 +1,19 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ActiveUser } from '../../../auth/decorators/active-user.decorator';
 import type { CurrentUser } from '../../../auth/types/current-user';
-import type { Observation, Patient } from '@medplum/fhirtypes';
+import type { Observation, Patient, Practitioner } from '@medplum/fhirtypes';
 import { DeviceUseCase } from '../../application/use-cases/device.use-case';
 import { PatientUseCase } from '../../application/use-cases/patient.use-case';
+import { GetPractitionerByIdUseCase } from '../../application/use-cases/get-practitioner-by-id.use-case';
+import { GetPractitionerListUseCase } from 'src/medplum/application/use-cases/get-practitioner-list.use-case';
 
 @Controller('medplum')
 export class MedplumController {
   constructor(
     private readonly deviceUseCase: DeviceUseCase,
     private readonly patientUseCase: PatientUseCase,
+    private readonly getPractitionerListUseCase: GetPractitionerListUseCase,
+    private readonly getPractitionerByIdUseCase: GetPractitionerByIdUseCase,
   ) {}
 
   @Get('device/:deviceId')
@@ -75,5 +79,20 @@ export class MedplumController {
     @Query('count') count?: number,
   ): Promise<Observation[]> {
     return this.patientUseCase.getPatientObservations(id, user.id, count);
+  }
+
+  @Get('practitioners')
+  async getPractitionerList(
+    @ActiveUser() user: CurrentUser,
+  ): Promise<Practitioner[]> {
+    return this.getPractitionerListUseCase.execute(user.id);
+  }
+
+  @Get('practitioners/:id')
+  async getPractitioner(
+    @Param('id') id: string,
+    @ActiveUser() user: CurrentUser,
+  ): Promise<Practitioner> {
+    return this.getPractitionerByIdUseCase.execute(user.id, id);
   }
 }

@@ -24,6 +24,14 @@ export class InvalidTokenError extends ThingsboardDomainError {
   }
 }
 
+export class ExpiredTokenError extends ThingsboardDomainError {
+  public readonly code = 'AUTH.TOKEN_EXPIRED';
+
+  constructor(message?: string) {
+    super(message || 'Token has expired');
+  }
+}
+
 export class TokenRefreshError extends ThingsboardDomainError {
   public readonly code = 'AUTH.TOKEN_REFRESH_FAILED';
 
@@ -37,7 +45,7 @@ export class TenantCreationError extends ThingsboardDomainError {
   public readonly code = 'TENANT.CREATION_FAILED';
 
   constructor(reason?: string) {
-    super(`Failed to create tenant ${reason ? `: ${reason}` : ''}`);
+    super(reason || 'Failed to create tenant');
   }
 }
 
@@ -61,8 +69,8 @@ export class TenantDeletionError extends ThingsboardDomainError {
 export class UserAlreadyExistsError extends ThingsboardDomainError {
   public readonly code = 'USER.ALREADY_EXISTS';
 
-  constructor(email: string) {
-    super(`User with email ${email} already exists`);
+  constructor(message: string) {
+    super(message);
   }
 }
 
@@ -183,6 +191,13 @@ export type LoginError = InvalidCredentialsError | ThingsboardConnectionError;
 
 export type RefreshTokenError =
   | TokenRefreshError
+  | ExpiredTokenError
   | ThingsboardConnectionNotFoundError;
 
 export type GetUserError = InvalidTokenError | ThingsboardConnectionError;
+
+export type ConfirmPractitionerError =
+  | TenantCreationError
+  | UserCreationError
+  | ThingsboardConnectionExistsError
+  | PasswordMismatchError;

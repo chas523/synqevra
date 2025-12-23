@@ -40,11 +40,6 @@ export class CreateActivationLinkCommandHandler implements ICommandHandler<
   ): Promise<Result<void, CreateActivationLinkError>> {
     try {
       const { firstname, lastname, email } = command;
-      console.log('CreateActivationLinkCommandHandler execute called with:', {
-        firstname,
-        lastname,
-        email,
-      });
       const userResult = await this.queryBus.execute(
         new GetPendingUserByEmailQuery({ email }),
       );
@@ -54,17 +49,14 @@ export class CreateActivationLinkCommandHandler implements ICommandHandler<
         return Err(new ActivationLinkUserNotFoundError(email));
       }
 
-      const tokenResult = this.tokenGeneratorPort.createActivationToken(
-        user.getId().toString(),
-      );
+      const tokenResult = this.tokenGeneratorPort.createActivationToken({
+        type: 'pendingUser',
+        subjectId: user.getId().toString(),
+      });
       const tokenPayloadEncoded = tokenResult.tokenPayloadEncoded;
       const hash = tokenResult.hash;
 
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      console.log('Updating user with activation token and expiry:', {
-        hash,
-        expiresAt,
-      });
       await this.commandBus.execute(
         new UpdatePendingUserCommand({
           id: user.getId(),
