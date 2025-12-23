@@ -10,6 +10,7 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 import { ValidateTokenUseCase } from './application/use-cases/validate-token.use-case';
 import { InitialConnectionUseCase } from './application/use-cases/initial-connection.use-case';
 import { InitialConnectionOrchestrator } from './application/initial-connection.orchestrator';
+import { ConfirmPractitionerUseCase } from './application/use-cases/confirm-practitioner.use-case';
 import { UnitOfWorkFactory } from './infrastructure/transaction/unit-of-work.factory';
 import { ConnectionRepositoryAdapter } from './infrastructure/persistance/connection.repository.adapter';
 import { RegisterMedplumUseCase } from '../medplum/application/use-cases/register-medplum.use-case';
@@ -31,6 +32,7 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
 
     ValidateTokenUseCase,
     InitialConnectionUseCase,
+    ConfirmPractitionerUseCase,
     RegisterMedplumUseCase,
 
     InitialConnectionOrchestrator,
@@ -43,6 +45,7 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
   exports: [
     ValidateTokenUseCase,
     InitialConnectionUseCase,
+    ConfirmPractitionerUseCase,
 
     InitialConnectionOrchestrator,
     UnitOfWorkFactory,

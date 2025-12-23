@@ -11,6 +11,7 @@ export class ConnectionMapper {
       userId: entity.user.id,
       medplumId: entity.medplum?.id,
       thingsboardId: entity.thingsboard?.id,
+      role: entity.role,
     };
   }
 
@@ -29,6 +30,10 @@ export class ConnectionMapper {
     if (model.thingsboardId !== undefined) {
       entity.thingsboard = { id: model.thingsboardId } as Thingsboard;
     } else entity.thingsboard = null;
+
+    if (model.role !== undefined) {
+      entity.role = model.role;
+    }
 
     return entity;
   }

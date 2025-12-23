@@ -14,11 +14,14 @@ import {
   THINGSBOARD_API_PORT,
   ThingsboardApiPort,
 } from '../../../thingsboard/application/ports/thingsboard.api.port';
+import { ConnectionRepository } from '../../../connection/domain/repositories/connection.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
+    @Inject(ConnectionRepository)
+    private readonly connectionRepository: ConnectionRepository,
     private readonly jwtService: JwtService,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,
@@ -86,14 +89,29 @@ export class AuthService {
       console.warn('ThingsBoard login failed during validation:', error);
     }
 
-    return { id: user.id, role: user.role };
+    // Pobierz role z connection
+    const connection = await this.connectionRepository.getConnectionByUserId(
+      user.id,
+    );
+    const connectionRole = connection?.role;
+
+    return { id: user.id, connectionRole };
   }
 
   async validateJwtUser(userId: number) {
     const user = await this.userRepository.getUserById(userId);
-    if (!user || !user.id || !user.role)
-      throw new UnauthorizedException('User not found');
-    const currentUser: CurrentUser = { id: user.id, role: user.role };
+    if (!user || !user.id) throw new UnauthorizedException('User not found');
+
+    // Pobierz role z connection
+    const connection =
+      await this.connectionRepository.getConnectionByUserId(userId);
+    if (!connection || !connection.role)
+      throw new UnauthorizedException('User role not found');
+
+    const currentUser: CurrentUser = {
+      id: user.id,
+      connectionRole: connection.role,
+    };
 
     return currentUser;
   }

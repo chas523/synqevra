@@ -79,7 +79,9 @@ export interface ConnectionResponse {
   message: string;
 }
 
+type TokenType = "pendingUser" | "user" | "session";
 // Response from token validation API
 export interface TokenValidationResponse {
   valid: boolean;
+  tokenType: TokenType;
 }

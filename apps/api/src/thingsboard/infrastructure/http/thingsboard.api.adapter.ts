@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { AxiosError } from 'axios';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -25,7 +26,6 @@ import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
 } from '../../application/ports/thingsboard.repository.port';
-
 interface JwtPayload {
   customerId: string;
   tenantId: string;
@@ -64,10 +64,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to fetch devices:', error);
       ThingsboardApiException.createException(
         'Failed to fetch devices from ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -82,10 +82,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to fetch device:', error);
       ThingsboardApiException.createException(
         'Failed to fetch device from ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -119,10 +119,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       }
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to fetch device:', error);
       ThingsboardApiException.createException(
         'Failed to fetch device from ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -136,10 +136,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
     } catch (error) {
-      this.logger.error('Failed to delete device:', error);
       ThingsboardApiException.createException(
         'Failed to delete device from ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -157,10 +157,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to delete device:', error);
       ThingsboardApiException.createException(
         'Failed to delete device from ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -178,10 +178,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
     } catch (error) {
-      this.logger.error('Failed to delete device:', error);
       ThingsboardApiException.createException(
-        'Failed to delete device from ThingsBoard API',
+        'Failed to update device shared attributes in ThingsBoard API',
         error,
+        this.logger,
       );
     }
   }
@@ -200,16 +200,37 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           password,
         }),
       );
-
       const { token: accessToken, refreshToken } = response.data;
       await this.loginWithTokens(userId, accessToken, refreshToken);
 
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to login to ThingsBoard:', error);
       ThingsboardApiException.createException(
         'Failed to login to ThingsBoard',
         error,
+        this.logger,
+      );
+    }
+  }
+
+  async loginToSysadminAccount(
+    username: string,
+    password: string,
+  ): Promise<ThingsboardLoginResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/auth/login`;
+      const response = await firstValueFrom(
+        this.httpService.post<ThingsboardLoginResponse>(url, {
+          username,
+          password,
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to login to ThingsBoard',
+        error,
+        this.logger,
       );
     }
   }
@@ -231,28 +252,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     await this.thingsboardRepository.update(thingsboardModel);
   }
 
-  async loginToSysadminAccount(
-    username: string,
-    password: string,
-  ): Promise<ThingsboardLoginResponse> {
-    try {
-      const url = `${this.THINGSBOARD_API_URL}/auth/login`;
-      const response = await firstValueFrom(
-        this.httpService.post<ThingsboardLoginResponse>(url, {
-          username,
-          password,
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      this.logger.error('Failed to login to ThingsBoard:', error);
-      ThingsboardApiException.createException(
-        'Failed to login to ThingsBoard',
-        error,
-      );
-    }
-  }
-
   async getUser(accessToken: string): Promise<UserResponse> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/auth/user`;
@@ -263,10 +262,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to fetch user:', error);
       ThingsboardApiException.createException(
         'Failed to fetch user from ThingsBoard',
         error,
+        this.logger,
       );
     }
   }
@@ -281,8 +280,11 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to refresh token:', error);
-      ThingsboardApiException.createException('Failed to refresh token', error);
+      ThingsboardApiException.createException(
+        'Failed to refresh token',
+        error,
+        this.logger,
+      );
     }
   }
 
@@ -299,10 +301,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data.id;
     } catch (error) {
-      this.logger.error('Failed to get default tenant profile:', error);
       ThingsboardApiException.createException(
         'Failed to get default tenant profile',
         error,
+        this.logger,
       );
     }
   }
@@ -348,8 +350,11 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
     } catch (error) {
-      this.logger.error('Failed to delete tenant:', error);
-      ThingsboardApiException.createException('Failed to delete tenant', error);
+      ThingsboardApiException.createException(
+        'Failed to delete tenant',
+        error,
+        this.logger,
+      );
     }
   }
 
@@ -390,10 +395,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data.id.id;
     } catch (error) {
-      this.logger.error('Failed to create tenant admin:', error);
       ThingsboardApiException.createException(
         'Failed to create tenant admin',
         error,
+        this.logger,
       );
     }
   }
@@ -411,10 +416,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data.value;
     } catch (error) {
-      this.logger.error('Failed to get activation link:', error);
       ThingsboardApiException.createException(
         'Failed to get user activation link',
         error,
+        this.logger,
       );
     }
   }
@@ -439,10 +444,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         tenantId: decodedToken.tenantId,
       };
     } catch (error) {
-      this.logger.error('Failed to activate tenant admin:', error);
       ThingsboardApiException.createException(
         'Failed to activate tenant admin',
         error,
+        this.logger,
       );
     }
   }
@@ -467,10 +472,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data.id;
     } catch (error) {
-      this.logger.error('Failed to create rule chain:', error);
       ThingsboardApiException.createException(
         'Failed to create rule chain',
         error,
+        this.logger,
       );
     }
   }
@@ -495,10 +500,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         ),
       );
     } catch (error) {
-      this.logger.error('Failed to update rule chain metadata:', error);
       ThingsboardApiException.createException(
         'Failed to update rule chain metadata',
         error,
+        this.logger,
       );
     }
   }
@@ -513,10 +518,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data.id;
     } catch (error) {
-      this.logger.error('Failed to get default device profile:', error);
       ThingsboardApiException.createException(
         'Failed to get default device profile',
         error,
+        this.logger,
       );
     }
   }
@@ -534,10 +539,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.error('Failed to get device profile:', error);
       ThingsboardApiException.createException(
         'Failed to get device profile',
         error,
+        this.logger,
       );
     }
   }
@@ -554,10 +559,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
     } catch (error) {
-      this.logger.error('Failed to update device profile:', error);
       ThingsboardApiException.createException(
         'Failed to update device profile',
         error,
+        this.logger,
       );
     }
   }

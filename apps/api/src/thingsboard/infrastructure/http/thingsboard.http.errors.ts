@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 
 export class ThingsboardApiException extends Error {
@@ -10,11 +11,20 @@ export class ThingsboardApiException extends Error {
     this.name = 'ThingsboardApiException';
   }
 
-  static createException(message: string, error: unknown): never {
+  static createException(
+    message: string,
+    error: unknown,
+    logger?: Logger,
+  ): never {
     const statusCode =
       error instanceof AxiosError ? error.response?.status : undefined;
 
-    throw new ThingsboardApiException(message, statusCode, error);
+    const apiMessage =
+      error instanceof AxiosError && error.response?.data?.message
+        ? error.response.data.message
+        : message;
+    logger?.error(message + ' ' + apiMessage);
+    throw new ThingsboardApiException(apiMessage, statusCode, error);
   }
 }
 
@@ -33,6 +43,12 @@ export class MedplumApiError extends Error {
     const statusCode =
       error instanceof AxiosError ? error.response?.status : undefined;
 
-    throw new MedplumApiError(message, statusCode, error);
+    // Wyciągnij message z API response jeśli dostępny
+    const apiMessage =
+      error instanceof AxiosError && error.response?.data?.message
+        ? error.response.data.message
+        : message;
+
+    throw new MedplumApiError(apiMessage, statusCode, error);
   }
 }

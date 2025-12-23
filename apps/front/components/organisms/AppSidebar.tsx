@@ -1,4 +1,8 @@
-import { Home, PersonStanding, Settings } from "lucide-react";
+import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
+import Image from "next/image";
+
+import Link from "next/link";
+import logo from "@/public/logo.svg";
 import {
   Sidebar,
   SidebarContent,
@@ -10,9 +14,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
-import Image from "next/image";
-import Link from "next/link";
-import logo from "@/public/logo.svg";
+
+const MENU_ITEMS = [
+  { href: "/", icon: Home, label: "Landing Page" },
+  { href: "/devices", icon: Settings, label: "Devices" },
+  { href: "/patients", icon: PersonStanding, label: "Patients" },
+  { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+];
 
 export default function AppSidebar() {
   return (
@@ -39,30 +47,16 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="/">
-                    <Home />
-                    <span>Landing Page</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="/devices">
-                    <Settings />
-                    <span>Devices</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href="/patients">
-                    <PersonStanding />
-                    <span>Patients</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {MENU_ITEMS.map(({ href, icon: Icon, label }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton asChild>
+                    <a href={href}>
+                      <Icon />
+                      <span>{label}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

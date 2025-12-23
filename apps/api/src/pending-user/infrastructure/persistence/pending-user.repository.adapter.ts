@@ -19,6 +19,7 @@ export class PendingUserRepositoryAdapter implements PendingUserRepositoryPort {
   ) {}
 
   async save(pendingUser: PendingUserModel): Promise<PendingUserModel> {
+    console.log('pendingUser in repo adapter:', pendingUser);
     const pendingUserOrmEntity = PendingUserMapper.toOrm(pendingUser);
     const saved = await this.repository.save(pendingUserOrmEntity);
 

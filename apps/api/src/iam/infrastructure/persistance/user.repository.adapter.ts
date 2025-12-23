@@ -39,17 +39,21 @@ export class UserRepositoryAdapter extends UserRepository {
   async getUserByIdNoToken(id: number): Promise<UserModel | null> {
     const entity = await this.repository.findOne({
       where: { id },
-      select: ['id', 'email', 'firstName', 'lastName', 'role'],
+      select: ['id', 'email', 'firstName', 'lastName'],
     });
 
     return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async save(model: UserModel): Promise<UserModel> {
-    const entity = UserMapper.toOrm(model);
-    const saved = await this.repository.save(entity);
-
-    return UserMapper.toDomain(saved);
+    try {
+      const entity = UserMapper.toOrm(model);
+      const saved = await this.repository.save(entity);
+      return UserMapper.toDomain(saved);
+    } catch (error) {
+      console.error('Error saving User entity:', error);
+      throw error;
+    }
   }
 
   async updateHashedRt(userId: number, hashedRt: string | null): Promise<void> {

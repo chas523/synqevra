@@ -3,7 +3,7 @@ import { ConnectionRepository } from '../../domain/repositories/connection.repos
 import { ConnectionModel } from 'src/connection/domain/entities/connection.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection } from './connection.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, Not, IsNull } from 'typeorm';
 import { ConnectionMapper } from './connection.mapper';
 
 @Injectable()
@@ -46,6 +46,7 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
   async getOrCreateByUserId(userId: number): Promise<ConnectionModel> {
     let entity = await this.repository.findOne({
       where: { user: { id: userId } },
+      relations: { thingsboard: true, medplum: true },
     });
 
     if (!entity) {
@@ -56,5 +57,20 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
     }
 
     return ConnectionMapper.toDomain(entity);
+  }
+  async getConnectionByTenantId(
+    tenantId: string,
+  ): Promise<ConnectionModel | null> {
+    const entity = await this.repository.findOne({
+      where: {
+        thingsboard: {
+          tenantId: tenantId,
+        },
+        medplum: Not(IsNull()),
+      },
+      relations: ['thingsboard', 'medplum'],
+    });
+
+    return entity ? ConnectionMapper.toDomain(entity) : null;
   }
 }

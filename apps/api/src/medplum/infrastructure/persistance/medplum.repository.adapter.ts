@@ -35,15 +35,12 @@ export class MedplumRepositoryAdapter extends MedplumRepository {
   }
 
   async findByUserId(userId: number): Promise<MedplumModel | null> {
-    console.log('in repos');
     const entity = await this.repository
       .createQueryBuilder('medplum')
       .innerJoin('medplum.connection', 'connection')
       .innerJoin('connection.user', 'user')
       .where('user.id = :userId', { userId })
       .getOne();
-
-    console.log(entity);
 
     return entity ? MedplumMapper.toDomain(entity) : null;
   }
