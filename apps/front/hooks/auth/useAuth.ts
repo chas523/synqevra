@@ -18,6 +18,7 @@ export function useLogin() {
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
+      setSuccess(false);
     } finally {
       setLoading(false);
     }

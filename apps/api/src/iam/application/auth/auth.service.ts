@@ -44,8 +44,8 @@ export class AuthService {
 
     response.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      secure: false,
+      sameSite: 'lax',
       maxAge: expiresInSec * 1000,
     });
   }
@@ -62,8 +62,8 @@ export class AuthService {
 
     response.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      secure: false,
+      sameSite: 'lax',
       maxAge: expiresInSec * 1000,
       path: '/api/auth/refresh',
     });

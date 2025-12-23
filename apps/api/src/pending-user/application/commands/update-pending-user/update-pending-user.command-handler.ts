@@ -10,13 +10,10 @@ import { UserNotFoundError } from 'src/pending-user/domain/errors/pending-user.e
 import { PendingUserModel } from 'src/pending-user/domain/models/pending-user.model';
 
 @CommandHandler(UpdatePendingUserCommand)
-export class UpdatePendingUserCommandHandler
-  implements
-    ICommandHandler<
-      UpdatePendingUserCommand,
-      Result<PendingUserModel, UserNotFoundError>
-    >
-{
+export class UpdatePendingUserCommandHandler implements ICommandHandler<
+  UpdatePendingUserCommand,
+  Result<PendingUserModel, UserNotFoundError>
+> {
   constructor(
     @Inject(PENDING_USER_REPOSITORY_PORT)
     private readonly pendingUserRepository: PendingUserRepositoryPort,

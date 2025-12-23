@@ -21,13 +21,10 @@ import { UpdatePendingUserCommand } from '../../../../pending-user/application/c
 import { TokenGeneratorPort } from '../../../../iam/application/ports/token-generator.port';
 
 @CommandHandler(CreateActivationLinkCommand)
-export class CreateActivationLinkCommandHandler
-  implements
-    ICommandHandler<
-      CreateActivationLinkCommand,
-      Result<void, CreateActivationLinkError>
-    >
-{
+export class CreateActivationLinkCommandHandler implements ICommandHandler<
+  CreateActivationLinkCommand,
+  Result<void, CreateActivationLinkError>
+> {
   constructor(
     private readonly configService: ConfigService,
     private readonly tokenGeneratorPort: TokenGeneratorPort,

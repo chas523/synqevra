@@ -1,15 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RequestMethod } from '@nestjs/common';
+import { Logger, RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
+
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'], // ← Wszystkie levele
+  });
+
   app.enableCors({
-    //frontend url, super-admin url, thingsboard url (for rulechain to post)
-    origin: [
+    origin: process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:3000',
       'http://localhost:3002',
       'http://localhost:8088',
@@ -34,9 +38,11 @@ async function bootstrap() {
       { path: 'public-api/*path', method: RequestMethod.ALL },
     ],
   });
-  app.useGlobalFilters(new SimpleExceptionFilter());
+  // app.useGlobalFilters(new SimpleExceptionFilter());
 
-  await app.listen(process.env.PORT ?? 3003);
+  const port = process.env.PORT ?? 3003;
+  await app.listen(port);
+  logger.log(`✅ Server running on port ${port}`);
 }
 
 bootstrap().catch((err) => {
