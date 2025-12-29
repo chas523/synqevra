@@ -19,7 +19,7 @@ spec:
           command: ['sh', '-c', 'until nc -z redis-backend 6379; do echo waiting for redis; sleep 2; done;']
       containers:
         - name: api
-          image: registry.digitalocean.com/medboard-registry/api:1.1.0
+          image: registry.digitalocean.com/medboard-registry/api:1.1.1
           imagePullPolicy: Always
           ports:
             - containerPort: 3003

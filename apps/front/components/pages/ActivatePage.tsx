@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useState } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
+import {type SubmitHandler, useForm, UseFormRegister} from "react-hook-form";
 import { useEstablishConnection } from "@/hooks/auth/useConnections";
 import { tenantFields, userFields } from "@/lib/config/activateFormFields";
 import {
@@ -18,6 +18,7 @@ import { HeroSection, ProgressModal } from "../organisms";
 import { TenantFormSection } from "../organisms/TenantFormSection";
 import { UserFormSection } from "../organisms/UserFormSection";
 import { Card, CardContent, CardHeader } from "../ui/card";
+import { ConfigurePractitionerFormData } from "@/lib/schemas/configurePractitionerZodSchema";
 
 // Transform flat form data to nested structure
 const transformFormData = (flatData: ConnectionFormData): ApiData => {
@@ -116,7 +117,7 @@ const ActivatePage = ({ token }: ConnectionFormProps) => {
                   />
 
                   <UserFormSection
-                    register={register}
+                    register={register as unknown as UseFormRegister<ConfigurePractitionerFormData>}
                     errors={errors}
                     formId={formId}
                   />
