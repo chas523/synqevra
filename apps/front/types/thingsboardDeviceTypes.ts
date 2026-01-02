@@ -16,6 +16,7 @@ export interface Device {
 export interface CreateDeviceRequest {
   name: string;
   label: string | null;
+  parameters?: string[];
 }
 
 export interface DeviceDetails {

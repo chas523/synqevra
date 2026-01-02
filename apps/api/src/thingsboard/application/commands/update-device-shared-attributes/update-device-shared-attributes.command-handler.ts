@@ -9,13 +9,10 @@ import {
 } from '../../ports/thingsboard.api.port';
 
 @CommandHandler(UpdateDeviceSharedAttributesCommand)
-export class UpdateDeviceSharedAttributesCommandHandler
-  implements
-    ICommandHandler<
-      UpdateDeviceSharedAttributesCommand,
-      Result<void, ThingsboardApiException>
-    >
-{
+export class UpdateDeviceSharedAttributesCommandHandler implements ICommandHandler<
+  UpdateDeviceSharedAttributesCommand,
+  Result<void, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,

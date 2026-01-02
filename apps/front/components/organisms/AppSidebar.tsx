@@ -2,7 +2,7 @@ import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
 import Image from "next/image";
 
 import Link from "next/link";
-import logo from "@/public/logo.svg";
+import logo from "@/public/logo-white.svg";
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +24,11 @@ const MENU_ITEMS = [
 
 export default function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar
+      collapsible="icon"
+      variant="floating"
+      className=" bg-slate-900/30 shadow-lg shadow-blue-500/10"
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

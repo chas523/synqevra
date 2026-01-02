@@ -1,3 +1,5 @@
+export type { DeviceCardProps } from "./DeviceCard";
+export { default as DeviceCard } from "./DeviceCard";
 export type { DeviceHeaderProps } from "./DeviceHeader";
 export { default as DeviceHeader } from "./DeviceHeader";
 export type { DeviceTableRowProps } from "./DeviceTableRow";
@@ -14,8 +16,8 @@ export type { InfoBoxProps } from "./InfoBox";
 export { default as InfoBox } from "./InfoBox";
 export type { InfoTooltipProps } from "./InfoTooltip";
 export { default as InfoTooltip } from "./InfoTooltip";
-export type { PaginationProps } from "./Pagination";
-export { default as Pagination } from "./Pagination";
+export type { PaginationControlsProps } from "./PaginationControls";
+export { default as PaginationControls } from "./PaginationControls";
 export type { ParameterCardProps } from "./ParameterCard";
 export { default as ParameterCard } from "./ParameterCard";
 export type { ParameterSelectorProps } from "./ParameterSelector";

@@ -10,6 +10,8 @@ export interface FormFieldProps {
   type?: string;
   placeholder?: string;
   value?: string;
+  labelClassName?: string;
+  inputClassName?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -23,6 +25,8 @@ const FormField = ({
   placeholder,
   value,
   onChange,
+  labelClassName = "",
+  inputClassName = "",
   ...props
 }: FormFieldProps) => {
   // Prosty sposób na unikalne ID
@@ -35,6 +39,7 @@ const FormField = ({
         htmlFor={fieldId}
         required={required}
         variant={error ? "error" : "default"}
+        className={labelClassName}
       >
         {label}
       </Label>
@@ -47,6 +52,7 @@ const FormField = ({
         onChange={onChange}
         required={required}
         variant={error ? "error" : "default"}
+        className={inputClassName}
         {...props}
       />
       {error && (

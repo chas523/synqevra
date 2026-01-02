@@ -1,4 +1,5 @@
 import type {
+  DeviceParameterConfig,
   DeviceParameterLimits,
   MedicalParameter,
 } from "@/types/deviceParameterTypes";
@@ -6,12 +7,12 @@ import { Label, Text } from "../atoms";
 import ParameterCard from "../molecules/ParameterCard";
 
 export interface CurrentParametersProps {
-  limits: DeviceParameterLimits;
+  limits: DeviceParameterConfig;
   medicalParameters: MedicalParameter[];
   onRemoveLimit: (key: string) => void;
   onRemoveSpecificThreshold: (
     parameterKey: string,
-    thresholdType: string,
+    thresholdType: string
   ) => void;
   className?: string;
 }
@@ -23,22 +24,40 @@ const CurrentParameters = ({
   onRemoveSpecificThreshold,
   className = "",
 }: CurrentParametersProps) => {
-  if (Object.keys(limits).length === 0) return null;
+  console.log("Rendering CurrentParameters with limits:", limits);
+  console.log("limits.limits:", Object.keys(limits.limits).length);
+  console.log("limits.telemetry_keys:", limits.telemetry_keys.length);
+
+  //no telemetry keys at all - nothing to show
+  if (limits.telemetry_keys.length === 0) {
+    return null;
+  }
+
+  //count how many have configured limits
+  const configuredCount = limits.telemetry_keys.filter(
+    (key) => limits.limits[key] && Object.keys(limits.limits[key]).length > 0
+  ).length;
 
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
         <Label className="text-lg font-medium">Current Threshold Values</Label>
         <Text size="sm" className="text-gray-500">
-          {Object.keys(limits).length} parameter
-          {Object.keys(limits).length !== 1 ? "s" : ""} configured
+          {configuredCount} of {limits.telemetry_keys.length} parameter
+          {limits.telemetry_keys.length !== 1 ? "s" : ""} configured
         </Text>
       </div>
 
       <div className="space-y-4">
-        {Object.entries(limits).map(([parameterKey, parameterValue]) => {
+        {limits.telemetry_keys.map((parameterKey) => {
           const paramInfo = medicalParameters.find(
-            (p) => p.key === parameterKey,
+            (p) => p.key === parameterKey
+          );
+          const parameterValue = limits.limits[parameterKey];
+          console.log(
+            "Rendering ParameterCard for:",
+            parameterKey,
+            parameterValue
           );
 
           return (

@@ -9,7 +9,7 @@ import { Button } from "../ui/button";
 
 export interface ParameterCardProps {
   parameterKey: string;
-  parameterValue: Record<string, unknown>;
+  parameterValue?: Record<string, unknown>;
   paramInfo?: MedicalParameter;
   onRemoveAll: (key: string) => void;
   onRemoveThreshold: (parameterKey: string, thresholdType: string) => void;
@@ -24,10 +24,11 @@ const ParameterCard = ({
   onRemoveThreshold,
   className = "",
 }: ParameterCardProps) => {
+  console.log("parameterkey: ", parameterKey);
   return (
     <div className={`p-4 border rounded-lg bg-gray-50 ${className}`}>
       <div className="flex items-center justify-between mb-3">
-        <div>
+        <div className="flex flex-row">
           <Label className="font-semibold text-gray-800 text-base">
             {paramInfo?.label || parameterKey}
           </Label>
@@ -37,51 +38,62 @@ const ParameterCard = ({
             </Text>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onRemoveAll(parameterKey)}
-          className="text-red-600 hover:text-red-700 h-7 px-2"
-        >
-          Remove All
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {Object.entries(parameterValue).map(
-          ([thresholdType, thresholdValue]) => (
-            <div
-              key={thresholdType}
-              className={`relative flex items-center justify-between p-3 rounded-md border ${getThresholdColor(
-                thresholdType,
-              )}`}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <Text
-                    size="xs"
-                    className="font-medium uppercase tracking-wide"
-                  >
-                    {getThresholdLabel(thresholdType)}
-                  </Text>
-                </div>
-                <div className="font-semibold truncate">
-                  {formatParameterValue(thresholdValue)}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => onRemoveThreshold(parameterKey, thresholdType)}
-                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors shadow-sm"
-                title="Remove this threshold"
-              >
-                ×
-              </button>
-            </div>
-          ),
+        {parameterValue && Object.keys(parameterValue).length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRemoveAll(parameterKey)}
+            className="text-red-600 hover:text-red-700 h-7 px-2"
+          >
+            Remove All
+          </Button>
         )}
       </div>
+
+      {!parameterValue || Object.keys(parameterValue).length === 0 ? (
+        <div className="p-4 rounded-md bg-blue-50 border border-blue-200">
+          <Text size="sm" className="text-blue-700">
+            No thresholds configured yet. Add thresholds to monitor this
+            parameter.
+          </Text>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {Object.entries(parameterValue).map(
+            ([thresholdType, thresholdValue]) => (
+              <div
+                key={thresholdType}
+                className={`relative flex items-center justify-between p-3 rounded-md border ${getThresholdColor(
+                  thresholdType
+                )}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Text
+                      size="xs"
+                      className="font-medium uppercase tracking-wide"
+                    >
+                      {getThresholdLabel(thresholdType)}
+                    </Text>
+                  </div>
+                  <div className="font-semibold truncate">
+                    {formatParameterValue(thresholdValue)}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onRemoveThreshold(parameterKey, thresholdType)}
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors shadow-sm"
+                  title="Remove this threshold"
+                >
+                  ×
+                </button>
+              </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 };

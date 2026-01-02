@@ -8,7 +8,7 @@ import type {
   ThresholdOption,
 } from "@/types/deviceParameterTypes";
 
-const MEDICAL_PARAMETERS: MedicalParameter[] = [
+export const MEDICAL_PARAMETERS: MedicalParameter[] = [
   { key: "temperature", label: "Temperature (°C)", unit: "°C" },
   { key: "heart_rate", label: "Heart Rate (BPM)", unit: "BPM" },
   { key: "oxygen_saturation", label: "Oxygen Saturation (%)", unit: "%" },

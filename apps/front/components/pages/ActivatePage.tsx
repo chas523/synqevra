@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useState } from "react";
-import {type SubmitHandler, useForm, UseFormRegister} from "react-hook-form";
+import { type SubmitHandler, useForm, UseFormRegister } from "react-hook-form";
 import { useEstablishConnection } from "@/hooks/auth/useConnections";
 import { tenantFields, userFields } from "@/lib/config/activateFormFields";
 import {
@@ -117,7 +117,9 @@ const ActivatePage = ({ token }: ConnectionFormProps) => {
                   />
 
                   <UserFormSection
-                    register={register as unknown as UseFormRegister<ConfigurePractitionerFormData>}
+                    register={
+                      register as unknown as UseFormRegister<ConfigurePractitionerFormData>
+                    }
                     errors={errors}
                     formId={formId}
                   />

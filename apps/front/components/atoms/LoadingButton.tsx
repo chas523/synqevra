@@ -1,11 +1,13 @@
 import { Loader2Icon } from "lucide-react";
 import { Button } from "../ui/button";
+import { text } from "stream/consumers";
 
 export interface LoadingButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading: boolean;
   textBeforeClick: string;
   textAfterClick: string;
+  iconBeforeClick?: React.ReactNode;
   variant?:
     | "default"
     | "destructive"
@@ -24,6 +26,7 @@ const LoadingButton = ({
   size = "default",
   className = "",
   disabled,
+  iconBeforeClick,
   ...props
 }: LoadingButtonProps) => {
   return (
@@ -43,7 +46,10 @@ const LoadingButton = ({
           {textAfterClick}
         </div>
       ) : (
-        textBeforeClick
+        <div className="flex items-center">
+          {iconBeforeClick && <span className="mr-2">{iconBeforeClick}</span>}
+          {textBeforeClick}
+        </div>
       )}
     </Button>
   );

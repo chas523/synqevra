@@ -1,14 +1,10 @@
+"use client";
+
+import { useState } from "react";
+import { Zap, Package, Loader2 } from "lucide-react";
 import type { Device } from "@/types/thingsboardDeviceTypes";
-import { Text } from "../atoms";
-import { DeviceTableRow, Pagination } from "../molecules";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
+import DeviceCard from "../molecules/DeviceCard";
+import PaginationControls from "../molecules/PaginationControls";
 
 export interface DeviceListProps {
   devices: Device[];
@@ -18,6 +14,8 @@ export interface DeviceListProps {
   error?: Error | null;
   onDeviceClick: (device: Device) => void;
   onPageChange: (page: number) => void;
+  onDuplicate?: (device: Device) => void;
+  onDelete?: (id: string) => void;
   className?: string;
 }
 
@@ -29,56 +27,66 @@ const DeviceList = ({
   error,
   onDeviceClick,
   onPageChange,
+  onDuplicate,
+  onDelete,
   className = "",
 }: DeviceListProps) => {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="text-center py-8">
-          <Text color="muted">Loading devices...</Text>
+        <div className="text-center py-16">
+          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+          </div>
+          <p className="text-gray-400 text-sm">Loading devices...</p>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="text-center py-8">
-          <Text color="error">Error loading devices</Text>
+        <div className="text-center py-16">
+          <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <Zap className="w-10 h-10 text-red-400" />
+          </div>
+          <p className="text-red-400 text-sm">Error loading devices</p>
         </div>
       );
     }
 
     if (devices.length === 0) {
       return (
-        <div className="text-center py-8">
-          <Text color="muted">No devices to display</Text>
+        <div className="text-center py-16">
+          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+            <Zap className="w-10 h-10 text-gray-500" />
+          </div>
+          <p className="text-gray-400 text-sm">
+            No devices yet. Create your first device to get started.
+          </p>
         </div>
       );
     }
 
     return (
       <>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Label</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {devices.map((device) => (
-              <DeviceTableRow
-                key={device.id?.id}
-                device={device}
-                onClick={onDeviceClick}
-              />
-            ))}
-          </TableBody>
-        </Table>
+        <div className="space-y-3">
+          {devices.map((device, index) => (
+            <DeviceCard
+              key={device.id?.id}
+              device={device}
+              index={index}
+              openMenuId={openMenuId}
+              onToggleMenu={setOpenMenuId}
+              onDeviceClick={onDeviceClick}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
 
-        <Pagination
+        <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={onPageChange}
@@ -89,12 +97,25 @@ const DeviceList = ({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>Device List</CardTitle>
-      </CardHeader>
-      <CardContent>{renderContent()}</CardContent>
-    </Card>
+    <div
+      className={`h-fit bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl ${className}`}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+            <Package className="w-5 h-5 text-cyan-400" />
+          </div>
+          <h2 className="text-xl font-semibold text-white">
+            Registered Devices
+          </h2>
+        </div>
+        <div className="text-sm text-gray-400">
+          {devices.length} device{devices.length !== 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {renderContent()}
+    </div>
   );
 };
 

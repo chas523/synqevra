@@ -12,10 +12,10 @@ import {
 import { Device } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-created-device.response.dto';
 
 @CommandHandler(CreateDeviceCommand)
-export class CreateDeviceCommandHandler
-  implements
-    ICommandHandler<CreateDeviceCommand, Result<Device, CreateDeviceErrors>>
-{
+export class CreateDeviceCommandHandler implements ICommandHandler<
+  CreateDeviceCommand,
+  Result<Device, CreateDeviceErrors>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

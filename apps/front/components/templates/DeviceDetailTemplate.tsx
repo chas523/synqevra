@@ -1,6 +1,7 @@
 import type { UseMedplumDeviceResult } from "@/hooks/medplum/useMedplumDevice";
 import type { UseMedplumPatientDeviceResult } from "@/hooks/medplum/useMedplumPatientDevice";
 import type {
+  DeviceParameterConfig,
   DeviceParameterLimits,
   MedicalParameter,
   ThresholdOption,
@@ -26,7 +27,7 @@ export interface DeviceDetailTemplateProps {
   device: DeviceDetails | null;
   isLoading: boolean;
   error: Error | null;
-  limits: DeviceParameterLimits;
+  limits: DeviceParameterConfig;
   medicalParameters: MedicalParameter[];
   thresholdOptions: ThresholdOption[];
   onBackToList: () => void;
@@ -35,12 +36,12 @@ export interface DeviceDetailTemplateProps {
   onRemoveLimit: (key: string) => void;
   onRemoveSpecificThreshold: (
     parameterKey: string,
-    thresholdType: string,
+    thresholdType: string
   ) => void;
   onAddParameter: (
     parameterKey: string,
     thresholdType: string,
-    value: string,
+    value: string
   ) => void;
   updating: boolean;
   className?: string;
@@ -66,22 +67,28 @@ const DeviceDetailTemplate = ({
 }: DeviceDetailTemplateProps) => {
   if (isLoading || medplumDeviceHook.isLoadingDevice) {
     return (
-      <div className={`container mx-auto p-6 ${className}`}>
-        <div className="text-center py-8">Loading device details...</div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Loading device details...</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !device) {
     return (
-      <div className={`container mx-auto p-6 ${className}`}>
-        <div className="text-center py-8 text-red-500">
-          Error loading device: {error.message}
-        </div>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <Button onClick={onBackToList} variant="outline">
+          <p className="text-red-400 mb-4">
+            {error?.message || "Device not found"}
+          </p>
+          <button
+            onClick={onBackToList}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+          >
             Back to Device List
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -101,7 +108,7 @@ const DeviceDetailTemplate = ({
   }
 
   const hasParameters = Object.keys(limits).length > 0;
-  console.log(medplumDeviceHook.medplumDevice);
+
   return (
     <div className={`container mx-auto p-6 ${className}`}>
       <div className="flex flex-col max-w-6xl mx-auto gap-4">
