@@ -35,7 +35,7 @@ const PatientCard = ({ patient }: PatientCardProps) => {
 
   return (
     <div
-      className="group relative overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 hover:border-cyan-500/50 rounded-2xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 h-[450px] flex flex-col"
+      className="group relative overflow-hidden bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 hover:border-cyan-500/50 rounded-2xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 h-[450px] flex flex-col shadow-sm"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -61,11 +61,11 @@ const PatientCard = ({ patient }: PatientCardProps) => {
 
         <PatientBasicInfo patient={patient} />
 
-        <div className="px-2 flex-shrink-0 h-[80px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-800/50">
+        <div className="px-2 flex-shrink-0 h-[80px] overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-200 dark:scrollbar-track-slate-800/50">
           <PatientPersonalInfo patient={patient} />
         </div>
 
-        <div className="border-t border-white/10 pt-2 mb-2 flex-shrink-0 h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-800/50">
+        <div className="border-t border-slate-200 dark:border-white/10 pt-2 mb-2 flex-shrink-0 h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-200 dark:scrollbar-track-slate-800/50">
           <PatientContactInfo patient={patient} />
         </div>
 

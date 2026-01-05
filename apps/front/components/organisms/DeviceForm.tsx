@@ -62,12 +62,14 @@ const DeviceForm = ({
   };
 
   return (
-    <div className="h-fit bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+    <div className="h-fit bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-xl dark:shadow-2xl">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-          <Plus className="w-5 h-5 text-blue-400" />
+        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+          <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
         </div>
-        <h2 className="text-xl font-semibold text-white">Add New Device</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+          Add New Device
+        </h2>
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <FormField
@@ -78,8 +80,8 @@ const DeviceForm = ({
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
           required
-          labelClassName="text-gray-300 mb-2"
-          inputClassName="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+          labelClassName="text-slate-600 dark:text-gray-300 mb-2"
+          inputClassName="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
         />
 
         <FormField
@@ -89,12 +91,12 @@ const DeviceForm = ({
           placeholder="Body temperature sensor - chest placed"
           value={formData.label || ""}
           onChange={(e) => handleInputChange("label", e.target.value)}
-          labelClassName="text-gray-300 mb-2"
-          inputClassName="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+          labelClassName="text-slate-600 dark:text-gray-300 mb-2"
+          inputClassName="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
         />
 
-        <div className="mt-6 pt-6 border-t border-white/10">
-          <div className="text-xs text-gray-400 mb-3 uppercase tracking-wider">
+        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10">
+          <div className="text-xs text-slate-500 dark:text-gray-400 mb-3 uppercase tracking-wider">
             Select Measurement Types
           </div>
           <div className="flex flex-wrap gap-2">
@@ -108,8 +110,8 @@ const DeviceForm = ({
                   style={{ fontSize: "12px" }}
                   className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-blue-500/30 border border-blue-400/50 text-blue-300"
-                      : "bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:border-white/20"
+                      ? "bg-blue-100 dark:bg-blue-500/30 border border-blue-300 dark:border-blue-400/50 text-blue-600 dark:text-blue-300"
+                      : "bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20"
                   }`}
                 >
                   {parameter.label}
@@ -118,7 +120,7 @@ const DeviceForm = ({
             })}
           </div>
           {formData.parameters && formData.parameters.length > 0 && (
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-slate-500 dark:text-gray-500">
               Selected: {formData.parameters.join(", ")}
             </div>
           )}

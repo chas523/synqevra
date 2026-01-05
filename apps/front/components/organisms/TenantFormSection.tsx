@@ -16,9 +16,11 @@ export const TenantFormSection = ({
 }: TenantFormSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="pb-2 border-b">
-        <h3 className="text-lg font-semibold">Company Details</h3>
-        <p className="text-sm text-muted-foreground">
+      <div className="pb-2 border-b border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+          Company Details
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Information about your organization
         </p>
       </div>

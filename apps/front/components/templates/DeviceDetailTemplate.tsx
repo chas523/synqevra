@@ -68,10 +68,12 @@ const DeviceDetailTemplate = ({
 }: DeviceDetailTemplateProps) => {
   if (isLoading || medplumDeviceHook.isLoadingDevice) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400">Loading device details...</p>
+          <p className="text-slate-500 dark:text-slate-400">
+            Loading device details...
+          </p>
         </div>
       </div>
     );
@@ -79,14 +81,14 @@ const DeviceDetailTemplate = ({
 
   if (error || !device) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 mb-4">
+          <p className="text-red-500 dark:text-red-400 mb-4">
             {error?.message || "Device not found"}
           </p>
           <button
             onClick={onBackToList}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-lg transition-colors"
           >
             Back to Device List
           </button>
@@ -125,20 +127,24 @@ const DeviceDetailTemplate = ({
           <div className="flex items-center gap-4">
             <button
               onClick={onBackToList}
-              className="p-2 bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all"
+              className="p-2 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-white">{device.name}</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {device.name}
+                </h1>
                 <StatusBadge active={device.active}>
                   {device.active ? "Active" : "Inactive"}
                 </StatusBadge>
               </div>
               {device.label && (
-                <p className="text-slate-400 text-sm mt-1">{device.label}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                  {device.label}
+                </p>
               )}
             </div>
           </div>
@@ -147,7 +153,7 @@ const DeviceDetailTemplate = ({
             <button
               onClick={onRefresh}
               disabled={isLoading}
-              className="p-2 bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all disabled:opacity-50"
+              className="p-2 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all disabled:opacity-50 shadow-sm"
             >
               <RefreshCw
                 className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`}
@@ -182,26 +188,28 @@ const DeviceDetailTemplate = ({
           onAssign={medplumPatientDeviceHook.onAssignPatient}
         />
 
-        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+        <div className="bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg border border-cyan-500/30">
-              <Activity className="w-5 h-5 text-cyan-400" />
+            <div className="p-2 bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/30">
+              <Activity className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Medical Parameters
               </h2>
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Configure threshold values for monitoring and alerts
               </p>
             </div>
           </div>
 
           {configuredParameters.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-slate-700/50 rounded-xl">
-              <Activity className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 mb-2">No telemetry configured yet</p>
-              <p className="text-slate-500 text-sm">
+            <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700/50 rounded-xl">
+              <Activity className="w-12 h-12 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-500 dark:text-slate-400 mb-2">
+                No telemetry configured yet
+              </p>
+              <p className="text-slate-400 dark:text-slate-500 text-sm">
                 Hover over the left edge to add telemetry parameters
               </p>
             </div>

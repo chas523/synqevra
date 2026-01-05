@@ -79,24 +79,24 @@ const PractitionersPage = (
           // biome-ignore lint/a11y/useKeyWithClickEvents: <explanatiossn>
           <div
             key={practitioner.id}
-            className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-4 shadow-sm hover:border-cyan-500/50 transition-all cursor-pointer"
+            className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/10 p-4 shadow-sm hover:border-cyan-500/50 transition-all cursor-pointer hover:shadow-md"
             onClick={() => router.push(`/practitioners/${practitioner.id}`)}
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-cyan-500/20 rounded-lg">
-                <Users className="h-6 w-6 text-cyan-400" />
+              <div className="p-2 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg">
+                <Users className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-white">
+                <h3 className="font-semibold text-slate-900 dark:text-white">
                   {practitioner.name?.[0]?.given?.join(" ")}{" "}
                   {practitioner.name?.[0]?.family}
                 </h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                   {practitioner.qualification?.[0]?.code?.coding?.[0]
                     ?.display || "Practitioner"}
                 </p>
                 {practitioner.telecom?.[0]?.value && (
-                  <p className="text-sm text-slate-400 mt-2">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
                     {practitioner.telecom[0].value}
                   </p>
                 )}

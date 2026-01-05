@@ -13,9 +13,11 @@ const HeaderWithText: React.FC<HeaderWithTextProps> = ({
   miniText,
 }) => {
   return (
-    <div className="mb-8 p-2 flex items-center justify-between text-slate-300">
+    <div className="mb-8 p-2 flex items-center justify-between text-slate-600 dark:text-slate-300">
       <div>
-        <h1 className="text-3xl font-bold ">{mainText}</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          {mainText}
+        </h1>
         <p className="mt-1 text-sm ">{miniText}</p>
       </div>
     </div>

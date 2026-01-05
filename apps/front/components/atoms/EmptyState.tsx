@@ -23,15 +23,20 @@ const EmptyState = ({
 
   return (
     <div
-      className={`flex flex-col items-center justify-center py-12 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl ${className}`}
+      className={`flex flex-col items-center justify-center py-12 bg-slate-50 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl ${className}`}
     >
       <div className="text-slate-400 mb-4">{icon || defaultIcon}</div>
-      <Heading level={3} className="text-lg font-medium text-white mb-2">
+      <Heading
+        level={3}
+        className="text-lg font-medium text-slate-900 dark:text-white mb-2"
+      >
         {title}
       </Heading>
-      <Text className="text-slate-400 mb-4">{description}</Text>
+      <Text className="text-slate-500 dark:text-slate-400 mb-4">
+        {description}
+      </Text>
       {hint && (
-        <Text size="sm" className="text-slate-500">
+        <Text size="sm" className="text-slate-400 dark:text-slate-500">
           {hint}
         </Text>
       )}

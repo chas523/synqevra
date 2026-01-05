@@ -103,10 +103,12 @@ const LandingTemplate = ({
 
           {/* Registration Card */}
           <div className="max-w-sm mx-auto mb-6">
-            <Card className="py-4 bg-white shadow-2xl">
+            <Card className="py-4 bg-white dark:bg-slate-800 shadow-2xl border-slate-200 dark:border-slate-700">
               <CardHeader className="relative text-center pb-3">
-                <CardTitle className="text-xl">Get Started Today</CardTitle>
-                <CardDescription className="text-sm">
+                <CardTitle className="text-xl text-slate-900 dark:text-white">
+                  Get Started Today
+                </CardTitle>
+                <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
                   Create your account and start exploring our platform
                 </CardDescription>
 
@@ -139,11 +141,11 @@ const LandingTemplate = ({
                   description={activationDescription}
                 />
                 {/* Login Redirect */}
-                <div className="text-center text-sm mt-6 pt-4 border-t border-gray-200">
+                <div className="text-center text-sm mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                   Already have an account?{" "}
                   <Link
                     href="/auth/login"
-                    className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:underline"
                   >
                     Log in here
                   </Link>

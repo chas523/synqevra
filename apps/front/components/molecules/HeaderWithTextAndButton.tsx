@@ -20,8 +20,12 @@ const HeaderWithTextAndButton: React.FC<HeaderWithTextAndButtonProps> = ({
   return (
     <div className="mb-8 p-2 flex items-center justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-white">{mainText}</h1>
-        <p className="mt-1 text-sm text-slate-400">{miniText}</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          {mainText}
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          {miniText}
+        </p>
       </div>
       <Button
         size="lg"

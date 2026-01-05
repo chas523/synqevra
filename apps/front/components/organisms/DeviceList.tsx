@@ -37,10 +37,12 @@ const DeviceList = ({
     if (isLoading) {
       return (
         <div className="text-center py-16">
-          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
-            <Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+          <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-10 h-10 text-cyan-500 dark:text-cyan-400 animate-spin" />
           </div>
-          <p className="text-gray-400 text-sm">Loading devices...</p>
+          <p className="text-slate-500 dark:text-gray-400 text-sm">
+            Loading devices...
+          </p>
         </div>
       );
     }
@@ -48,10 +50,12 @@ const DeviceList = ({
     if (error) {
       return (
         <div className="text-center py-16">
-          <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-            <Zap className="w-10 h-10 text-red-400" />
+          <div className="w-20 h-20 rounded-2xl bg-red-100 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <Zap className="w-10 h-10 text-red-500 dark:text-red-400" />
           </div>
-          <p className="text-red-400 text-sm">Error loading devices</p>
+          <p className="text-red-500 dark:text-red-400 text-sm">
+            Error loading devices
+          </p>
         </div>
       );
     }
@@ -59,10 +63,10 @@ const DeviceList = ({
     if (devices.length === 0) {
       return (
         <div className="text-center py-16">
-          <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
-            <Zap className="w-10 h-10 text-gray-500" />
+          <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center mx-auto mb-4">
+            <Zap className="w-10 h-10 text-slate-400 dark:text-gray-500" />
           </div>
-          <p className="text-gray-400 text-sm">
+          <p className="text-slate-500 dark:text-gray-400 text-sm">
             No devices yet. Create your first device to get started.
           </p>
         </div>
@@ -98,18 +102,18 @@ const DeviceList = ({
 
   return (
     <div
-      className={`h-fit bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl ${className}`}
+      className={`h-fit bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-xl dark:shadow-2xl ${className}`}
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-            <Package className="w-5 h-5 text-cyan-400" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-500/20 flex items-center justify-center">
+            <Package className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
           </div>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
             Registered Devices
           </h2>
         </div>
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-slate-500 dark:text-gray-400">
           {devices.length} device{devices.length !== 1 ? "s" : ""}
         </div>
       </div>

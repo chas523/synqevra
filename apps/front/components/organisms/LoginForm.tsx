@@ -34,7 +34,7 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData. email || !formData.password) return;
+    if (!formData.email || !formData.password) return;
     if (!formData.email.includes("@")) return;
 
     try {
@@ -48,10 +48,12 @@ const LoginForm = () => {
   return (
     <div className="max-w-sm w-full mx-auto">
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <Card className="py-4">
+        <Card className="py-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-lg">
           <CardHeader className="relative text-center pb-3">
-            <CardTitle className="text-xl">Log in to account</CardTitle>
-            <CardDescription className="text-sm">
+            <CardTitle className="text-xl text-slate-900 dark:text-white">
+              Log in to account
+            </CardTitle>
+            <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
               Enter your credentials to log in to this app
             </CardDescription>
           </CardHeader>

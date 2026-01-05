@@ -61,16 +61,16 @@ export function TelemetrySidebar({
         </div>
 
         <div
-          className={`absolute right-0 top-0 bottom-0 w-80 bg-slate-900/95 backdrop-blur-xl border-l border-slate-700/50 shadow-2xl transform transition-transform duration-300 ${
+          className={`absolute right-0 top-0 bottom-0 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700/50 shadow-2xl transform transition-transform duration-300 ${
             isOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="h-full flex flex-col p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-2">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
                 Add Telemetry
               </h3>
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
                 Select parameters to monitor
               </p>
             </div>
@@ -82,13 +82,13 @@ export function TelemetrySidebar({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search telemetry..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-800/60 border border-slate-700/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500/50 transition-colors"
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-800/50 hover:scrollbar-thumb-cyan-500/50">
+            <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-slate-200 dark:scrollbar-track-slate-800/50 hover:scrollbar-thumb-cyan-500/50">
               {filteredTelemetry.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-sm">
+                <div className="text-center py-8 text-slate-500 dark:text-slate-400 text-sm">
                   {searchQuery
                     ? "No telemetry found"
                     : "All telemetry configured"}
@@ -103,22 +103,22 @@ export function TelemetrySidebar({
                         onAddTelemetry(telemetry.key);
                         setSearchQuery("");
                       }}
-                      className="cursor-pointer w-full flex items-center gap-3 p-3 bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/30 hover:border-cyan-500/50 rounded-lg transition-all group"
+                      className="cursor-pointer w-full flex items-center gap-3 p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/40 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-700/30 hover:border-cyan-500/50 rounded-lg transition-all group"
                     >
-                      <div className="p-2 bg-cyan-500/10 group-hover:bg-cyan-500/20 rounded-lg border border-cyan-500/20 transition-colors">
-                        <Icon className="w-4 h-4 text-cyan-400" />
+                      <div className="p-2 bg-cyan-100 dark:bg-cyan-500/10 group-hover:bg-cyan-200 dark:group-hover:bg-cyan-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/20 transition-colors">
+                        <Icon className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                       </div>
                       <div className="flex-1 text-left">
-                        <div className="text-white text-sm font-medium">
+                        <div className="text-slate-900 dark:text-white text-sm font-medium">
                           {telemetry.label}
                         </div>
                         {telemetry.unit && (
-                          <div className="text-slate-400 text-xs">
+                          <div className="text-slate-500 dark:text-slate-400 text-xs">
                             {telemetry.unit}
                           </div>
                         )}
                       </div>
-                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors" />
                     </button>
                   );
                 })

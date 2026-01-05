@@ -27,7 +27,7 @@ const PatientObservationList = ({
       {observations.map((obs) => (
         <div
           key={obs.id ?? `${obs.code?.text}-${obs.effectiveDateTime}`}
-          className="bg-white/5 border border-white/10 hover:border-cyan-500/30 rounded-xl p-3 transition-colors"
+          className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-cyan-500/30 rounded-xl p-3 transition-colors"
         >
           <div className="flex items-center justify-between overflow-x-auto gap-4">
             <div className="flex items-center gap-4 flex-1">
@@ -35,16 +35,16 @@ const PatientObservationList = ({
                 {getObservationIcon(obs.code?.text)}
                 <Badge
                   variant="secondary"
-                  className="bg-slate-700/50 text-slate-200 hover:bg-slate-700/70 border border-slate-600/50"
+                  className="bg-slate-200 text-slate-700 hover:bg-slate-300 border border-slate-300 dark:bg-slate-700/50 dark:text-slate-200 dark:hover:bg-slate-700/70 dark:border-slate-600/50"
                 >
                   {obs.code?.text || "Unknown"}
                 </Badge>
               </div>
 
-              <div className="w-px h-6 bg-white/10" />
+              <div className="w-px h-6 bg-slate-200 dark:bg-white/10" />
 
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-400">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   Value:
                 </span>
                 {obs.valueQuantity ? (
@@ -63,11 +63,11 @@ const PatientObservationList = ({
                 )}
               </div>
 
-              <div className="w-px h-6 bg-white/10" />
+              <div className="w-px h-6 bg-slate-200 dark:bg-white/10" />
 
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-400" />
-                <span className="text-sm text-slate-400 text-nowrap">
+                <span className="text-sm text-slate-500 dark:text-slate-400 text-nowrap">
                   {formatDate(obs.effectiveDateTime)}
                 </span>
               </div>
@@ -76,7 +76,7 @@ const PatientObservationList = ({
             <div className="flex items-center gap-3">
               {obs.device?.reference ? (
                 <button
-                  className="h-8 px-3 text-xs cursor-pointer flex items-center gap-1 bg-white/5 border border-white/10 hover:border-cyan-500/30 rounded-lg text-slate-300 hover:text-cyan-400 transition-colors"
+                  className="h-8 px-3 text-xs cursor-pointer flex items-center gap-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-cyan-500/30 rounded-lg text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors"
                   onClick={() =>
                     router.push(`/devices/${obs.device?.identifier?.value}`)
                   }
@@ -85,7 +85,7 @@ const PatientObservationList = ({
                   View device
                 </button>
               ) : (
-                <span className="text-xs text-slate-500 flex items-center gap-1">
+                <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
                   <Cpu className="h-3 w-3" />
                   No device
                 </span>
