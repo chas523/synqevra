@@ -1,6 +1,6 @@
 import { Public } from '../../../auth/decorators/public.decorator';
 import { Queue, QueueEvents } from 'bullmq';
-import { Body, Controller, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Post, Logger, Get } from '@nestjs/common';
 import {
   QUEUE_NAMES,
   QUEUE_CONFIG,

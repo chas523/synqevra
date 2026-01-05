@@ -8,6 +8,7 @@ import type {
   DeviceParameterConfig,
   DeviceParameterLimits,
 } from "@/types/deviceParameterTypes";
+import { on } from "events";
 
 export const useDeviceDetail = (deviceId: string) => {
   const router = useRouter();
@@ -16,7 +17,7 @@ export const useDeviceDetail = (deviceId: string) => {
   const updateHook = useUpdateDeviceAttributes(deviceId);
   const medplumPatientDeviceHook = useMedplumPatientDevice(deviceId);
   const medplumDeviceHook = useMedplumDevice(deviceId);
-
+  console.log("devicehook", deviceHook);
   const [limits, setLimits] = useState<DeviceParameterConfig>({
     limits: {},
     telemetry_keys: [],
@@ -35,8 +36,11 @@ export const useDeviceDetail = (deviceId: string) => {
     );
   }, [deviceHook.attributes]);
 
+  console.log("telemetryKeys", telemetryKeys);
+  console.log("currentLimits", currentLimits);
   const isLoading = deviceHook.isLoading || medplumDeviceHook.isLoadingDevice;
   const hasParameters = Object.keys(limits).length > 0;
+  console.log("limits", limits);
 
   useEffect(() => {
     setLimits({ limits: { ...currentLimits }, telemetry_keys: telemetryKeys });
@@ -50,11 +54,11 @@ export const useDeviceDetail = (deviceId: string) => {
     setLimits((prev) => {
       const { [key]: _, ...newLimits } = prev.limits;
       // Also remove from telemetry_keys
-      const updatedTelemetryKeys = prev.telemetry_keys.filter((k) => k !== key);
+      //const updatedTelemetryKeys = prev.telemetry_keys.filter((k) => k !== key);
       return {
         ...prev,
         limits: newLimits,
-        telemetry_keys: updatedTelemetryKeys,
+        // telemetry_keys: updatedTelemetryKeys,
       };
     });
   }, []);
@@ -70,13 +74,13 @@ export const useDeviceDetail = (deviceId: string) => {
         if (Object.keys(updatedParameter).length === 0) {
           // Last threshold removed - remove from both limits and telemetry_keys
           const { [parameterKey]: __, ...newLimits } = prev.limits;
-          const updatedTelemetryKeys = prev.telemetry_keys.filter(
-            (k) => k !== parameterKey
-          );
+          // const updatedTelemetryKeys = prev.telemetry_keys.filter(
+          //   (k) => k !== parameterKey
+          // );
           return {
             ...prev,
             limits: newLimits,
-            telemetry_keys: updatedTelemetryKeys,
+            //telemetry_keys: updatedTelemetryKeys,
           };
         } else {
           return {
@@ -91,6 +95,17 @@ export const useDeviceDetail = (deviceId: string) => {
     },
     []
   );
+
+  const handleAddTelemetryKey = useCallback((parameterKey: string) => {
+    setLimits((prev) => {
+      return prev.telemetry_keys.includes(parameterKey)
+        ? prev
+        : {
+            ...prev,
+            telemetry_keys: [...prev.telemetry_keys, parameterKey],
+          };
+    });
+  }, []);
 
   const handleAddParameter = useCallback(
     (parameterKey: string, thresholdType: string, value: string) => {
@@ -186,5 +201,6 @@ export const useDeviceDetail = (deviceId: string) => {
     onRemoveLimit: handleRemoveLimit,
     onRemoveSpecificThreshold: handleRemoveSpecificThreshold,
     onAddParameter: handleAddParameter,
+    onAddTelemetry: handleAddTelemetryKey,
   };
 };

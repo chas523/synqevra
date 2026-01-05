@@ -18,8 +18,6 @@ export type { InfoTooltipProps } from "./InfoTooltip";
 export { default as InfoTooltip } from "./InfoTooltip";
 export type { PaginationControlsProps } from "./PaginationControls";
 export { default as PaginationControls } from "./PaginationControls";
-export type { ParameterCardProps } from "./ParameterCard";
-export { default as ParameterCard } from "./ParameterCard";
 export type { ParameterSelectorProps } from "./ParameterSelector";
 export { default as ParameterSelector } from "./ParameterSelector";
 export type { ProgressMessageProps } from "./ProgressMessage";

@@ -17,11 +17,11 @@ const PatientBasicInfo = ({ patient }: PatientBasicInfoProps) => {
 
   return (
     <div className="h-12 text-center flex-shrink-0">
-      <h3 className="text-lg font-bold text-slate-900 mb-0.5 leading-tight">
+      <h3 className="text-lg font-bold text-white mb-0.5 leading-tight">
         {fullName}
       </h3>
       {primaryIdentifier?.value && (
-        <div className="flex items-center justify-center gap-1 text-xs text-slate-500">
+        <div className="flex items-center justify-center gap-1 text-xs text-slate-400">
           <FileText className="h-3 w-3" />
           <span className="font-mono">{primaryIdentifier.value}</span>
         </div>

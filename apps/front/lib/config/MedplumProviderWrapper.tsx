@@ -2,7 +2,7 @@
 
 import { MedplumClient } from "@medplum/core";
 import { MedplumProvider } from "@medplum/react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 export default function MedplumProviderWrapper({
   children,
@@ -14,9 +14,9 @@ export default function MedplumProviderWrapper({
 
   useEffect(() => {
     const baseUrl =
-        typeof window !== 'undefined'
-            ? `${window.location.origin}/fhir`
-            : 'http://localhost:3003/fhir';
+      typeof window !== "undefined"
+        ? `${window.location.origin}/fhir`
+        : "http://localhost:3003/fhir";
     const client = new MedplumClient({
       baseUrl,
     });
@@ -25,7 +25,11 @@ export default function MedplumProviderWrapper({
   }, []);
 
   if (isLoading || !medplum) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return <MedplumProvider medplum={medplum}>{children}</MedplumProvider>;

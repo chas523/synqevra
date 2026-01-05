@@ -14,7 +14,7 @@ const LoadingOverlayInformation = ({
   return (
     <div className={allStyles.join(" ")}>
       <Icon name="loading" size="lg" />
-      <p className="text-lg text-gray-600">{text}</p>
+      <p className="text-lg text-slate-400">{text}</p>
     </div>
   );
 };

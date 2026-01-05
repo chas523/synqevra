@@ -7,13 +7,12 @@ import type {
   ThresholdOption,
 } from "@/types/deviceParameterTypes";
 import type { DeviceDetails } from "@/types/thingsboardDeviceTypes";
-import { EmptyState, Label, LoadingButton } from "../atoms";
-import { DeviceHeader } from "../molecules";
-import ParameterSelector from "../molecules/ParameterSelector";
-import { CurrentParameters } from "../organisms";
-import AssignTbDeviceToMedplumPatient from "../organisms/AssignTbDeviceToMedplumPatient";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { PatientAssignmentCompact } from "../organisms/PatientAssignmentCompact";
+import { Activity, ArrowLeft, RefreshCw, Save } from "lucide-react";
+import { ParameterThresholdCard } from "../organisms/ParameterThresholdCard";
+import { TelemetrySidebar } from "../organisms/TelemetrySidebar";
+import { StatusBadge } from "../atoms";
 
 export interface DeviceDetailMedplumProps
   extends UseMedplumPatientDeviceResult {
@@ -43,6 +42,7 @@ export interface DeviceDetailTemplateProps {
     thresholdType: string,
     value: string
   ) => void;
+  onAddTelemetry: (key: string) => void;
   updating: boolean;
   className?: string;
 }
@@ -62,6 +62,7 @@ const DeviceDetailTemplate = ({
   onRemoveLimit,
   onRemoveSpecificThreshold,
   onAddParameter,
+  onAddTelemetry,
   updating,
   className = "",
 }: DeviceDetailTemplateProps) => {
@@ -107,104 +108,123 @@ const DeviceDetailTemplate = ({
     );
   }
 
-  const hasParameters = Object.keys(limits).length > 0;
+  const configuredParameters = medicalParameters.filter((param) =>
+    limits.telemetry_keys.includes(param.key)
+  );
 
   return (
-    <div className={`container mx-auto p-6 ${className}`}>
-      <div className="flex flex-col max-w-6xl mx-auto gap-4">
-        <DeviceHeader
-          deviceName={device.name}
-          deviceActive={device.active}
-          deviceLabel={device.label}
-          onBackToList={onBackToList}
+    <div className="h-full mr-[5%] relative overflow-hidden">
+      <TelemetrySidebar
+        availableTelemetry={medicalParameters}
+        configuredKeys={limits.telemetry_keys}
+        onAddTelemetry={onAddTelemetry}
+      />
+
+      <div className="relative w-full  px-6 py-8 space-y-6">
+        <div className="flex items-start md:items-center justify-between flex-col md:flex-row gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBackToList}
+              className="p-2 bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-white">{device.name}</h1>
+                <StatusBadge active={device.active}>
+                  {device.active ? "Active" : "Inactive"}
+                </StatusBadge>
+              </div>
+              {device.label && (
+                <p className="text-slate-400 text-sm mt-1">{device.label}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onRefresh}
+              disabled={isLoading}
+              className="p-2 bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-300 hover:text-cyan-400 transition-all disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`w-5 h-5 ${isLoading ? "animate-spin" : ""}`}
+              />
+            </button>
+
+            <button
+              onClick={onSaveChanges}
+              disabled={updating}
+              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 text-white rounded-lg font-medium transition-all disabled:cursor-not-allowed"
+            >
+              {updating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Configuration
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <PatientAssignmentCompact
+          patientList={medplumPatientDeviceHook.patientList}
+          currentPatient={medplumDeviceHook.medplumDevice?.patient || undefined}
+          isLoadingPatients={medplumPatientDeviceHook.isLoadingPatients}
+          isAssigning={medplumPatientDeviceHook.isAssigning}
+          onAssign={medplumPatientDeviceHook.onAssignPatient}
         />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Assign device to patient
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Pick the patient from dropdown list and save.
-            </p>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <div className="flex flex-col sm:flex-row border-t"></div>
-            {medplumDeviceHook.medplumDevice?.patient ? (
-              <Label>
-                Assigned patient:{" "}
-                {medplumDeviceHook.medplumDevice?.patient.display}
-              </Label>
-            ) : (
-              <AssignTbDeviceToMedplumPatient {...medplumPatientDeviceHook} />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Medical Parameters Configuration
-              <Button
-                onClick={onRefresh}
-                variant="outline"
-                size="sm"
-                disabled={isLoading}
-              >
-                Refresh
-              </Button>
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              Configure threshold values for medical parameters. These values
-              will be used for monitoring and alerts.
-              <br />
-              <strong>Note:</strong> Set appropriate threshold values based on
-              medical standards and patient requirements.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <CurrentParameters
-              limits={limits}
-              medicalParameters={medicalParameters}
-              onRemoveLimit={onRemoveLimit}
-              onRemoveSpecificThreshold={onRemoveSpecificThreshold}
-            />
-
-            <ParameterSelector
-              availableParameters={medicalParameters}
-              thresholdOptions={thresholdOptions}
-              onAddParameter={onAddParameter}
-            />
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
-              <LoadingButton
-                onClick={onSaveChanges}
-                isLoading={updating}
-                textBeforeClick="Save Configuration"
-                textAfterClick="Saving Changes..."
-                disabled={updating || !hasParameters}
-                className="flex-1 sm:flex-none"
-                size="lg"
-              />
-
-              <div className="text-sm text-gray-600 flex items-center">
-                <span>
-                  Changes will update both threshold limits and telemetry keys
-                  automatically
-                </span>
-              </div>
+        <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg border border-cyan-500/30">
+              <Activity className="w-5 h-5 text-cyan-400" />
             </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">
+                Medical Parameters
+              </h2>
+              <p className="text-slate-400 text-sm">
+                Configure threshold values for monitoring and alerts
+              </p>
+            </div>
+          </div>
 
-            {!hasParameters && (
-              <EmptyState
-                title="No Medical Parameters Configured"
-                description="Start by adding medical parameters with their threshold values for monitoring."
-                hint="Available parameters: Temperature, Heart Rate, Oxygen Saturation, Respiratory Rate"
-              />
-            )}
-          </CardContent>
-        </Card>
+          {configuredParameters.length === 0 ? (
+            <div className="text-center py-12 border-2 border-dashed border-slate-700/50 rounded-xl">
+              <Activity className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+              <p className="text-slate-400 mb-2">No telemetry configured yet</p>
+              <p className="text-slate-500 text-sm">
+                Hover over the left edge to add telemetry parameters
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {configuredParameters.map((param) => (
+                <ParameterThresholdCard
+                  key={param.key}
+                  parameter={param}
+                  currentValues={limits.limits[param.key]}
+                  thresholdOptions={thresholdOptions}
+                  onAdd={(type, value) =>
+                    onAddParameter(param.key, type, value)
+                  }
+                  onRemove={(type) =>
+                    onRemoveSpecificThreshold(param.key, type)
+                  }
+                  onRemoveAll={() => onRemoveLimit(param.key)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
