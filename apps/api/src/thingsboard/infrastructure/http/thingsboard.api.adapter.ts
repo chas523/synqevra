@@ -101,6 +101,13 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
+      if (payload.parameters && payload.parameters.length > 0) {
+        await this.updateDeviceSharedAttributes(
+          accessToken,
+          response.data.id.id,
+          { telemetry_keys: payload.parameters },
+        );
+      }
       try {
         await this.medplum.createDevice(
           {

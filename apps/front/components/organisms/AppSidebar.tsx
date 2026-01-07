@@ -2,7 +2,8 @@ import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
 import Image from "next/image";
 
 import Link from "next/link";
-import logo from "@/public/logo.svg";
+import logoDark from "@/public/logo.svg";
+import logoLight from "@/public/logo-white.svg";
 import {
   Sidebar,
   SidebarContent,
@@ -24,18 +25,29 @@ const MENU_ITEMS = [
 
 export default function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar
+      collapsible="icon"
+      variant="floating"
+      className=" bg-transparent dark:bg-slate-900/30 shadow-lg shadow-slate-500/10 dark:shadow-blue-500/10"
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
                 <Image
-                  src={logo}
+                  src={logoDark}
                   alt="Logo"
                   height={32}
                   width={100}
-                  className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+                  className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity dark:hidden"
+                />
+                <Image
+                  src={logoLight}
+                  alt="Logo"
+                  height={32}
+                  width={100}
+                  className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity hidden dark:block"
                 />
               </Link>
             </SidebarMenuButton>

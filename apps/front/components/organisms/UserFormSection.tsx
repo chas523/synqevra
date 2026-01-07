@@ -19,9 +19,11 @@ export const UserFormSection = ({
 }: UserFormSectionProps) => {
   return (
     <div className="space-y-4">
-      <div className="pb-2 border-b">
-        <h3 className="text-lg font-semibold">Your Details</h3>
-        <p className="text-sm text-muted-foreground">
+      <div className="pb-2 border-b border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+          Your Details
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Personal information for your account
         </p>
       </div>

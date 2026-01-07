@@ -42,7 +42,7 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
   const { observations, isLoadingObservations, observationsError } =
     useMedplumObservationsByPatientId(
       patient.id,
-      OBSERVATIONS_COUNT_ON_USER_DETAILS_PAGE,
+      OBSERVATIONS_COUNT_ON_USER_DETAILS_PAGE
     );
 
   const getFullName = () => {
@@ -71,18 +71,17 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
     patient.generalPractitioner || patient.managingOrganization;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="mx-auto max-w-5xl">
-        <Button
-          variant="ghost"
+        <button
           onClick={() => router.push("/patients")}
-          className="mb-4 gap-2 text-slate-600 hover:text-slate-900"
+          className="mb-4 flex items-center gap-2 p-2 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Patients
-        </Button>
+        </button>
 
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-6 shadow-sm dark:shadow-2xl">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-6">
               <div className="relative">
@@ -96,22 +95,22 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
 
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold text-slate-900">
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                     {getFullName()}
                   </h1>
                   <Badge
                     variant={patient.active ? "default" : "secondary"}
                     className={
                       patient.active
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200"
-                        : "bg-slate-200 text-slate-600 hover:bg-slate-200"
+                        ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border-emerald-500/30"
+                        : "bg-slate-700/50 text-slate-400 hover:bg-slate-700/70"
                     }
                   >
                     <Activity className="mr-1 h-3 w-3" />
                     {patient.active ? "Active" : "Inactive"}
                   </Badge>
                 </div>
-                <div className="space-y-1 text-sm text-slate-600">
+                <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400">
                   {patient.id && (
                     <div className="flex items-center gap-2">
                       <HashIcon className="h-3.5 w-3.5" />
@@ -165,17 +164,15 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
                 patientId={patient.id}
               />
               <div className="flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs cursor-pointer text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 px-2 py-1 h-7"
+                <button
+                  className="text-xs cursor-pointer text-cyan-400 hover:text-cyan-300 px-2 py-1 flex items-center gap-1 transition-colors"
                   onClick={() =>
                     router.push(`/patients/${patient.id}/observations`)
                   }
                 >
                   View all observations
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
             </>
           )}

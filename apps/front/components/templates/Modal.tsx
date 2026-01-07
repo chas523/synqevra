@@ -33,6 +33,7 @@ const Modal = ({ isOpen, onClose, children, className = "" }: ModalProps) => {
 
   const contentStyles = [
     "bg-white",
+    "dark:bg-slate-800",
     "rounded-lg",
     "shadow-xl",
     "p-8",

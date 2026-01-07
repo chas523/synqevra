@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const proxyApi = axios.create({
-  baseURL: "/api",
+  baseURL: "/api", //process.env.NEXT_PUBLIC_PROXY_URL || "http://localhost:3003/api",
   timeout: 100000,
   withCredentials: true,
 });

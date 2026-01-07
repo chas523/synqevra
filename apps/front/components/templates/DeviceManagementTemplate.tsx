@@ -1,4 +1,5 @@
 import { Heading } from "../atoms";
+import HeaderWithText from "../molecules/HeaderWithText";
 import type { DeviceFormProps } from "../organisms/DeviceForm";
 import DeviceForm from "../organisms/DeviceForm";
 import type { DeviceListProps } from "../organisms/DeviceList";
@@ -17,16 +18,23 @@ const DeviceManagementTemplate = ({
   deviceListProps,
   className = "",
 }: DeviceManagementTemplateProps) => {
-  const baseStyles = ["container", "mx-auto", "p-6"];
+  const baseStyles = ["p-2"];
 
   const allStyles = [...baseStyles, className];
 
   return (
     <div className={allStyles.join(" ")}>
-      <div className="flex flex-col max-w-6xl mx-auto gap-2">
-        <Heading level={1} size="lg" className="mb-6">
-          {title}
-        </Heading>
+      <div className="flex flex-col  gap-2">
+        <HeaderWithText
+          mainText={title}
+          miniText="Create IoT devices and assign them to patients. You should set accurate thresholds for upcoming observations."
+        />
+
+        <img
+          src="/device-flow.svg"
+          alt="Device Flow Animation"
+          className="w-full h-auto mb-2"
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DeviceForm {...deviceFormProps} />

@@ -100,14 +100,14 @@ const ConfigurePractitionerPage = ({
           "Setup complete, last checks...",
         ]}
       />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 transition-colors">
         <div className="max-w-6xl mx-auto space-y-6">
           <HeroSection
             title="Set Your Password"
             description="Create a secure password to access your practitioner account"
           />
-          <Card className="shadow-lg">
-            <CardHeader className="border-b bg-muted/30">
+          <Card className="shadow-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+            <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30">
               <Heading level={2}>Complete Your Profile</Heading>
             </CardHeader>
             <CardContent className="p-6">

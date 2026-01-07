@@ -1,3 +1,5 @@
+export type { DeviceIconProps } from "./DeviceIcon";
+export { default as DeviceIcon } from "./DeviceIcon";
 export type { EmptyStateProps } from "./EmptyState";
 export { default as EmptyState } from "./EmptyState";
 export type { HeadingProps } from "./Heading";

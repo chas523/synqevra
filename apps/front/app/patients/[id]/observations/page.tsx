@@ -6,7 +6,11 @@ import LoadingOverlayInformation from "@/components/molecules/LoadingOverlayInfo
 import { extractErrorMessage } from "@/lib/utils";
 import ObservationPage from "@/components/pages/ObservationPage";
 import { EmptyState } from "@/components/atoms";
-import { EqualApproximately } from "lucide-react";
+import {
+  BadgeAlert,
+  EqualApproximately,
+  EqualApproximatelyIcon,
+} from "lucide-react";
 
 const OBSERVATIONS_COUNT_ON_OBSERVATION_PAGE = 20;
 const Page = () => {
@@ -16,7 +20,7 @@ const Page = () => {
   const { observations, isLoadingObservations, observationsError } =
     useMedplumObservationsByPatientId(
       patientId,
-      OBSERVATIONS_COUNT_ON_OBSERVATION_PAGE,
+      OBSERVATIONS_COUNT_ON_OBSERVATION_PAGE
     );
 
   if (!patientId) {
@@ -32,16 +36,17 @@ const Page = () => {
       <ErrorOverlayInformation text={extractErrorMessage(observationsError)} />
     );
   }
-  if (!observations) {
+
+  if (!!!observations?.length || !observations) {
     return (
       <EmptyState
         title="No observations found."
         description="Observations will appear after you connect to a device."
-        icon={<EqualApproximately />}
+        icon={<BadgeAlert />}
       />
     );
   }
-
+  console.log("Rendering ObservationPage with observations", observations);
   return <ObservationPage observations={observations} patientId={patientId} />;
 };
 

@@ -65,11 +65,13 @@ export default function Page() {
       isError={errorVisible || patientNotFound}
       onClose={errorVisible ? handleCloseError : undefined}
     >
-      <ResourceForm
-        defaultValue={patient ?? {}}
-        profileUrl="http://hl7.org/fhir/StructureDefinition/Patient"
-        onSubmit={handleSubmit}
-      />
+      <div className="[&_label]:text-white ">
+        <ResourceForm
+          defaultValue={patient ?? {}}
+          profileUrl="http://hl7.org/fhir/StructureDefinition/Patient"
+          onSubmit={handleSubmit}
+        />
+      </div>
     </OverlayRelativeToParent>
   );
 }

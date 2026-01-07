@@ -1,7 +1,5 @@
 export type { ActivationInfoProps } from "./ActivationInfo";
 export { default as ActivationInfo } from "./ActivationInfo";
-export type { CurrentParametersProps } from "./CurrentParameters";
-export { default as CurrentParameters } from "./CurrentParameters";
 export type { DeviceFormProps } from "./DeviceForm";
 export { default as DeviceForm } from "./DeviceForm";
 export type { DeviceListProps } from "./DeviceList";

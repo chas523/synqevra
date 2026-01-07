@@ -21,7 +21,7 @@ const PatientCommunicationPreferences = ({
 
   if (!hasCommunicationPreferences) {
     return (
-      <p className="text-center text-xs text-slate-500 py-2">
+      <p className="text-center text-xs text-slate-500 dark:text-slate-400 py-2">
         No communication preferences available
       </p>
     );

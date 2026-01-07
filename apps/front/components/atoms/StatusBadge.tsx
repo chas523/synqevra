@@ -6,17 +6,17 @@ const badgeVariants = cva(
     variants: {
       variant: {
         active:
-          "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300",
+          "bg-transparent text-green-800 dark:bg-green-900/20 dark:text-green-300 border-2 border-green-600/30",
         inactive:
-          "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300",
+          "bg-transparent text-red-800 dark:bg-red-900/20 dark:text-red-300 border-2 border-red-600/30",
         default:
-          "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300",
+          "bg-transparent text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 border-2 border-gray-600/30",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 export interface StatusBadgeProps

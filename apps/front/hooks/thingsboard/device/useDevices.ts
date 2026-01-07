@@ -2,10 +2,10 @@ import useSWR from "swr";
 import { DeviceService } from "@/lib/services/thingsboardServices/deviceService";
 import type { DevicesResponse } from "@/types/thingsboardDeviceTypes";
 
-export function useDevices(page = 0, pageSize = 10) {
+export function useDevices(page = 0, pageSize = 5) {
   const { data, error, isLoading, mutate } = useSWR<DevicesResponse>(
     `devices-${page}-${pageSize}`,
-    () => DeviceService.fetchDevices(page, pageSize),
+    () => DeviceService.fetchDevices(page, pageSize)
   );
 
   return {

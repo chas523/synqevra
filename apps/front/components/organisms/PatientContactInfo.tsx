@@ -31,8 +31,8 @@ const PatientContactInfo = ({
           icon={Phone}
           label="Phone"
           value={phoneContact.value}
-          iconBgColor="bg-green-100"
-          iconColor="text-green-600"
+          iconBgColor="bg-green-100 dark:bg-green-500/20"
+          iconColor="text-green-600 dark:text-green-400"
           variant={variant}
         />
       )}
@@ -42,8 +42,8 @@ const PatientContactInfo = ({
           icon={Mail}
           label="Email"
           value={emailContact.value}
-          iconBgColor="bg-blue-100"
-          iconColor="text-blue-600"
+          iconBgColor="bg-blue-100 dark:bg-blue-500/20"
+          iconColor="text-blue-600 dark:text-blue-400"
           variant={variant}
         />
       )}
@@ -53,14 +53,14 @@ const PatientContactInfo = ({
           icon={MapPin}
           label="Address"
           value={addressText}
-          iconBgColor="bg-orange-100"
-          iconColor="text-orange-600"
+          iconBgColor="bg-orange-100 dark:bg-orange-500/20"
+          iconColor="text-orange-600 dark:text-orange-400"
           variant={variant}
         />
       )}
     </div>
   ) : (
-    <p className="text-center text-xs text-slate-500 py-2">
+    <p className="text-center text-xs text-slate-500 dark:text-slate-400 py-2">
       No contact information available
     </p>
   );

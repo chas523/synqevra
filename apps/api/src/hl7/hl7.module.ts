@@ -12,6 +12,7 @@ import { PidToPatientMapper } from './infrastructure/mappers/pid-to-patient.mapp
 import { Pv1ToEncounterMapper } from './infrastructure/mappers/pv1-to-encounter.mapper';
 import { PractitionerLookupService } from './application/services/practitioner-lookup.service';
 import { Hl7ValidationPipe } from './interface/pipes/hl7-validation.pipe';
+import { HL7Controller } from './interface/rest/hl7.controller';
 
 @Module({
   imports: [
@@ -44,5 +45,6 @@ import { Hl7ValidationPipe } from './interface/pipes/hl7-validation.pipe';
     FhirToMedplumSaveQueue,
   ],
   exports: [BullModule],
+  controllers: [HL7Controller],
 })
 export class Hl7Module {}
