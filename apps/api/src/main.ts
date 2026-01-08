@@ -24,9 +24,8 @@ async function bootstrap() {
     .setTitle('Proxy API')
     .setDescription('API for Proxy')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
 
   app.use(cookieParser());
 
@@ -39,6 +38,13 @@ async function bootstrap() {
     ],
   });
   // app.useGlobalFilters(new SimpleExceptionFilter());
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('swagger', app, document, {
+    swaggerOptions: {
+      tagsSorter: 'alpha',
+    },
+  });
 
   const port = process.env.PORT ?? 3003;
   await app.listen(port);

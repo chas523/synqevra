@@ -4,6 +4,7 @@ import { QueryRunner } from 'typeorm';
 import { MedplumRepository } from '../../../medplum/domain/repositories/medplum.repository';
 import { ThingsboardRepositoryPort } from '../../../thingsboard/application/ports/thingsboard.repository.port';
 import { PendingUserRepositoryPort } from '../../../pending-user/application/ports/pending-user.repository.port';
+import { ActivationLinkRepository } from 'src/iam/domain/repositories/activation-link.repository';
 
 export class UnitOfWork {
   constructor(
@@ -12,6 +13,7 @@ export class UnitOfWork {
     public readonly medplumRepository: MedplumRepository,
     public readonly thingsboardRepository: ThingsboardRepositoryPort,
     public readonly pendingUserRepository: PendingUserRepositoryPort,
+    public readonly activationLinkRepository: ActivationLinkRepository,
     public readonly queryRunner: QueryRunner,
   ) {}
 

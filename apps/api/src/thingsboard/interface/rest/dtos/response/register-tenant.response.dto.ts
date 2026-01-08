@@ -1,6 +1,6 @@
 export interface RollbackData {
   tenantId: string;
-  userId: string | null;
+  userId: string;
   sysAdminAccessToken: string;
 }
 

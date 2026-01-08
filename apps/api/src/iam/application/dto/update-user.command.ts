@@ -1,3 +1,4 @@
+import { UnitOfWork } from 'src/connection/infrastructure/transaction/unit-of-work';
 import { Role } from '../../domain/enums/role.enum';
 
 export class UpdateUserCommand {
@@ -8,4 +9,5 @@ export class UpdateUserCommand {
   password?: string;
   role?: Role;
   hashedRt?: string | null;
+  uow: UnitOfWork;
 }

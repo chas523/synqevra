@@ -9,6 +9,13 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { RefreshAuthGuard } from '../../../auth/guards/refresh-auth/refresh-auth.guard';
 import { Public } from '../../../auth/decorators/public.decorator';
 import type { Response, Request } from 'express';
@@ -25,7 +32,13 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { InvitePractitionerDto } from './dto/invitePractitionerDto';
 import { InvitePractitionerUseCase } from 'src/iam/application/use-cases/invite-practitioner.use-case';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import { RegisterUserResult } from '../../application/dto/register-user.result';
+import { LoginResult } from '../../application/dto/login.result';
+import { LogoutResult } from '../../application/dto/logout.result';
+import { RefreshTokensResult } from '../../application/dto/refresh-token.result';
+import { InvitePractitionerResult } from '../../application/dto/invite-practitioner.result';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -39,6 +52,24 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
+  @ApiOperation({
+    summary: '(NOT USED) Register a new user',
+    description:
+      'Create a new user account with email and password. Not used, because users are being invited by admins',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User registered successfully',
+    type: RegisterUserResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or user already exists',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'An unexpected error occurred during registration',
+  })
   async register(
     @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
@@ -51,6 +82,43 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @Throttle({ default: { ttl: seconds(30), limit: 5 } })
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticate user with email and password.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['email', 'password'],
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email',
+          example: 'john.doe@example.com',
+          description: 'User email address',
+        },
+        password: {
+          type: 'string',
+          example: 'password123',
+          description: 'User password (minimum 6 characters)',
+          minLength: 6,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Login successful, tokens returned',
+    type: LoginResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid email or password',
+  })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'Too many login attempts, please try again later',
+  })
   async login(
     @Req() req: Request & { user: CurrentUser },
     @Res({ passthrough: true }) res: Response,
@@ -62,8 +130,23 @@ export class AuthController {
     });
   }
 
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @Post('logout')
+  @ApiOperation({
+    summary: 'User logout',
+    description:
+      'Logout the authenticated user and invalidate their session. Removes cookies containing tokens',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User logged out successfully',
+    type: LogoutResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or missing authentication token',
+  })
   logout(
     @Req() req: Request & { user: CurrentUser },
     @Res({ passthrough: true }) res: Response,
@@ -77,6 +160,20 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description:
+      'Use a valid refresh token to obtain a new access token (from our database)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Token refreshed successfully',
+    type: RefreshTokensResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired refresh token',
+  })
   refresh(
     @Req() req: Request & { user: CurrentUser },
     @Res({ passthrough: true }) res: Response,
@@ -87,9 +184,33 @@ export class AuthController {
     });
   }
 
+  @ApiBearerAuth()
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @Post('invite')
+  @ApiOperation({
+    summary: 'Invite a new practitioner',
+    description:
+      'Send an invitation to a new practitioner to join the system. Happens when Practitioner Admin wants to invite a new practitioner user.',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Practitioner invitation sent successfully',
+    type: InvitePractitionerResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data or practitioner already exists',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or missing authentication token',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description:
+      'User does not have ADMIN role required to invite practitioners',
+  })
   async invitePractitioner(
     @Body() invitePractitionerDto: InvitePractitionerDto,
     @ActiveUser() user: CurrentUser,

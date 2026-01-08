@@ -29,6 +29,7 @@ import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fe
 import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
+import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -67,8 +68,13 @@ const queryHandlers = [
       provide: THINGSBOARD_REPOSITORY_PORT,
       useClass: ThingsboardRepositoryAdapter,
     },
+    ThingsboardRollbackService,
   ],
   controllers: [ThingsboardController],
-  exports: [THINGSBOARD_REPOSITORY_PORT, THINGSBOARD_API_PORT],
+  exports: [
+    THINGSBOARD_REPOSITORY_PORT,
+    THINGSBOARD_API_PORT,
+    ThingsboardRollbackService,
+  ],
 })
 export class ThingsboardModule {}

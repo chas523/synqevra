@@ -16,10 +16,15 @@ spec:
       initContainers:
         - name: wait-for-redis
           image: busybox:1.36
-          command: ['sh', '-c', 'until nc -z redis-backend 6379; do echo waiting for redis; sleep 2; done;']
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z redis-backend 6379; do echo waiting for redis; sleep 2; done;",
+            ]
       containers:
         - name: api
-          image: registry.digitalocean.com/medboard-registry/api:1.1.1
+          image: registry.digitalocean.com/medboard-registry/api:1.1.2
           imagePullPolicy: Always
           ports:
             - containerPort: 3003
@@ -46,7 +51,7 @@ metadata:
 spec:
   selector:
     app: api
-  type:  NodePort
+  type: NodePort
   ports:
     - port: 3003
       targetPort: 3003

@@ -13,10 +13,10 @@ export class UpdateUserUseCase {
   ) {}
 
   async execute(command: UpdateUserCommand): Promise<UserModel> {
-    const { userId, ...updateFields } = command;
+    const { userId, uow, ...updateFields } = command;
 
     // Sprawdzenie czy użytkownik istnieje
-    const existingUser = await this.userRepository.getUserById(userId);
+    const existingUser = await uow.userRepository.getUserById(userId);
     if (!existingUser) {
       throw new BadRequestException(`User with ID ${userId} not found`);
     }
@@ -34,12 +34,12 @@ export class UpdateUserUseCase {
       ...updateData,
     };
 
-    return await this.userRepository.save(updatedUser);
+    return await uow.userRepository.save(updatedUser);
   }
 
   //creates object with only defined fields (non undefined) and assigns at the end
   private async buildUpdateData(
-    fields: Partial<Omit<UpdateUserCommand, 'userId'>>,
+    fields: Partial<Omit<UpdateUserCommand, 'userId' | 'uow'>>,
   ): Promise<Partial<UserModel>> {
     const updates: Partial<UserModel> = {};
 

@@ -1,10 +1,3 @@
-import {
-  Injectable,
-  GoneException,
-  NotFoundException,
-  UnauthorizedException,
-  Inject,
-} from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PendingUserStatus } from '../../../pending-user/domain/enums/status.enum';
 import {
@@ -14,6 +7,15 @@ import {
 import { ActivationLinkRepository } from 'src/iam/domain/repositories/activation-link.repository';
 import { UserRepository } from 'src/iam/domain/repositories/user.repository';
 
+import {
+  Injectable,
+  GoneException,
+  NotFoundException,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
+import { ApiProperty } from '@nestjs/swagger';
+
 type TokenType = 'pendingUser' | 'user' | 'session';
 
 interface DecodedTokenPayload {
@@ -22,8 +24,20 @@ interface DecodedTokenPayload {
   randomBytes: string;
 }
 
-export interface ValidateTokenResult {
+export class ValidateTokenResult {
+  @ApiProperty({
+    description: 'Whether the token is valid',
+    example: true,
+    type: Boolean,
+  })
   valid: boolean;
+
+  @ApiProperty({
+    description: 'Type of token',
+    enum: ['pendingUser', 'user', 'session'],
+    example: 'pendingUser',
+    type: String,
+  })
   tokenType: TokenType;
 }
 
