@@ -12,6 +12,7 @@ import { MedplumClientFactory } from './application/medplum-client.factory';
 import { MedplumClientPort } from './application/ports/medplum-client.port';
 import { MedplumRepository } from './domain/repositories/medplum.repository';
 import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.repository.adapter';
+import { MedplumRollbackService } from './application/services/medplum-rollback.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.r
 
     MedplumClientFactory,
     MedplumClientAdapter,
+    MedplumRollbackService,
     {
       provide: MedplumClientPort,
       useClass: MedplumClientAdapter,
@@ -36,6 +38,6 @@ import { MedplumRepositoryAdapter } from './infrastructure/persistance/medplum.r
       useClass: MedplumRepositoryAdapter,
     },
   ],
-  exports: [MedplumClientPort, MedplumClientFactory, MedplumRepository],
+  exports: [MedplumClientPort, MedplumClientFactory, MedplumRepository, MedplumRollbackService],
 })
 export class MedplumModule {}

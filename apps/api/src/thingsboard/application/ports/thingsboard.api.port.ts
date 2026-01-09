@@ -45,6 +45,10 @@ export abstract class ThingsboardApiPort {
     tenantId: string,
     sysAdminAccessToken: string,
   ): Promise<void>;
+  abstract deleteTenantAdmin(
+    tenantAdminId: string,
+    sysAdminAccessToken: string,
+  ): Promise<void>;
 
   // User operations
   abstract createTenantAdmin(

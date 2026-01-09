@@ -12,6 +12,7 @@ import {
   PENDING_USER_REPOSITORY_PORT,
   PendingUserRepositoryPort,
 } from '../../../pending-user/application/ports/pending-user.repository.port';
+import { ActivationLinkRepository } from 'src/iam/domain/repositories/activation-link.repository';
 
 @Injectable()
 export class UnitOfWorkFactory {
@@ -27,6 +28,8 @@ export class UnitOfWorkFactory {
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
     @Inject(PENDING_USER_REPOSITORY_PORT)
     private readonly pendingUserRepository: PendingUserRepositoryPort,
+    @Inject(ActivationLinkRepository)
+    private readonly activationLinkRepository: ActivationLinkRepository,
   ) {}
 
   async create(): Promise<UnitOfWork> {
@@ -41,6 +44,8 @@ export class UnitOfWorkFactory {
     const medplumRepo = this.medplumRepository.withManager(manager);
     const thingsboardRepo = this.thingsboardRepository.withManager(manager);
     const pendingUserRepo = this.pendingUserRepository.withManager(manager);
+    const activationLinkRepo =
+      this.activationLinkRepository.withManager(manager);
 
     return new UnitOfWork(
       userRepo,
@@ -48,6 +53,7 @@ export class UnitOfWorkFactory {
       medplumRepo,
       thingsboardRepo,
       pendingUserRepo,
+      activationLinkRepo,
       queryRunner,
     );
   }

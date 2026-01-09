@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpStatus,
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import {
   CreateActivationLinkError,
   EmailSendError,
 } from '../../domain/errors/mailer.errors';
+import { ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 
 @Controller('mailer')
 export class MailerController {
@@ -29,6 +31,26 @@ export class MailerController {
 
   @Public()
   @Post('/email-activation-link')
+  @Public()
+  @Post('/email-activation-link')
+  @ApiOperation({
+    summary: 'Send activation link via email',
+    description:
+      'Send an account activation link to the provided email address. The link will be used to activate the user/practitioner/other account.',
+  })
+  @ApiBody({ type: MailRecipient })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Activation link sent successfully to the email',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'User not found with provided email or email sending failed',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'An unexpected error occurred while sending the email',
+  })
   async emailActivationLink(@Body() recipient: MailRecipient) {
     const result: Result<void, CreateActivationLinkError> =
       await this.commandBus.execute(

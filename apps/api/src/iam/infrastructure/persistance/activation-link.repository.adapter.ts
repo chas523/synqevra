@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { ActivationLink } from './activation-link.entity';
 import { ActivationLinkRepository } from '../../domain/repositories/activation-link.repository';
 
@@ -36,5 +36,9 @@ export class ActivationLinkRepositoryAdapter extends ActivationLinkRepository {
 
   async deleteByUserId(userId: number): Promise<void> {
     await this.repository.delete({ userId });
+  }
+  withManager(manager: EntityManager): ActivationLinkRepositoryAdapter {
+    const repository = manager.getRepository(ActivationLink);
+    return new ActivationLinkRepositoryAdapter(repository);
   }
 }

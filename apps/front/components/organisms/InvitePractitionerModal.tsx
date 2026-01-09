@@ -110,7 +110,7 @@ const InvitePractitionerModal = ({
         {status === "idle" ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">
+              <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
                 Invite New Practitioner
               </DialogTitle>
               <p className="text-sm text-gray-600 mt-2">
@@ -130,7 +130,7 @@ const InvitePractitionerModal = ({
                 />
               ))}
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4  text-gray-900 dark:text-white">
                 <Button type="button" variant="outline" onClick={handleClose}>
                   Cancel
                 </Button>

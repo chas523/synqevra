@@ -16,6 +16,7 @@ import { ConnectionRepositoryAdapter } from './infrastructure/persistance/connec
 import { RegisterMedplumUseCase } from '../medplum/application/use-cases/register-medplum.use-case';
 import { MedplumRegistrationService } from '../medplum/application/services/medplum-registration.service';
 import { ConnectionRepository } from './domain/repositories/connection.repository';
+import { ConfirmPractitionerOrchestrator } from './application/confirm-practitioner.orchestrator';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ConnectionRepository } from './domain/repositories/connection.repositor
     RegisterMedplumUseCase,
 
     InitialConnectionOrchestrator,
+    ConfirmPractitionerOrchestrator,
     UnitOfWorkFactory,
     {
       provide: ConnectionRepository,

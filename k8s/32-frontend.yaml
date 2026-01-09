@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: registry.digitalocean.com/medboard-registry/front:1.1.0
+          image: registry.digitalocean.com/medboard-registry/front:1.1.2
           imagePullPolicy: Always
 
           ports:
@@ -50,7 +50,7 @@ spec:
             httpGet:
               path: /
               port: 3000
-            initialDelaySeconds:  15
+            initialDelaySeconds: 15
             periodSeconds: 5
 
 ---

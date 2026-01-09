@@ -365,6 +365,26 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async deleteTenantAdmin(
+    tenantAdminId: string,
+    sysAdminAccessToken: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/user/${tenantAdminId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete tenant admin',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   // User operations
   async createTenantAdmin(
     userData: CreateTenantAdminRequestDto,

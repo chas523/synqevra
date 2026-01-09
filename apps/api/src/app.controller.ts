@@ -4,7 +4,11 @@ import type { Request, Response } from 'express';
 import { MedplumClientFactory } from './medplum/application/medplum-client.factory';
 import { ActiveUser } from './auth/decorators/active-user.decorator';
 import type { CurrentUser } from './auth/types/current-user';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags(
+  'Ω FHIR Proxy - used Temporarily for fetching Medplum specific Form Components (probably to be removed later)',
+)
 @Controller('fhir')
 export class AppController {
   constructor(private readonly proxy: MedplumClientFactory) {}

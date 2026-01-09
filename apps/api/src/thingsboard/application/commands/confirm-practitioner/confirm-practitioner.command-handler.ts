@@ -35,13 +35,10 @@ import {
 } from '../../ports/thingsboard.repository.port';
 
 @CommandHandler(ConfirmPractitionerCommand)
-export class ConfirmPractitionerCommandHandler
-  implements
-    ICommandHandler<
-      ConfirmPractitionerCommand,
-      Result<ConfirmPractitionerResponseDto, ConfirmPractitionerError>
-    >
-{
+export class ConfirmPractitionerCommandHandler implements ICommandHandler<
+  ConfirmPractitionerCommand,
+  Result<ConfirmPractitionerResponseDto, ConfirmPractitionerError>
+> {
   private readonly logger = new Logger(ConfirmPractitionerCommandHandler.name);
 
   constructor(
@@ -67,7 +64,7 @@ export class ConfirmPractitionerCommandHandler
   async execute(
     command: ConfirmPractitionerCommand,
   ): Promise<Result<ConfirmPractitionerResponseDto, ConfirmPractitionerError>> {
-    const { formFields, tenantId, userId } = command;
+    const { formFields, tenantId, userId, uow } = command;
     // const { userFields, tenantFields } = formData;
     const { password, confirmPassword } = formFields;
 
@@ -132,7 +129,7 @@ export class ConfirmPractitionerCommandHandler
       // Step 3: Create thingsboard connection in database
       this.logger.log('Step 3: Creating thingsboard entity in database');
       const connection =
-        await this.connectionRepository.getOrCreateByUserId(userId);
+        await uow.connectionRepository.getOrCreateByUserId(userId);
       this.logger.debug('User connection:', connection);
 
       if (!connection) {
@@ -159,7 +156,7 @@ export class ConfirmPractitionerCommandHandler
       );
       this.logger.debug('Created ThingsboardModel:', thingsboardModel);
       const savedThingsboard =
-        await this.thingsboardRepository.save(thingsboardModel);
+        await uow.thingsboardRepository.save(thingsboardModel);
       this.logger.log(
         'Saved ThingsboardModel to repository:',
         savedThingsboard,
@@ -167,7 +164,7 @@ export class ConfirmPractitionerCommandHandler
 
       // Refresh connection from database to reflect thingsboardId
       const refreshedConnection =
-        await this.connectionRepository.getConnectionByUserId(userId);
+        await uow.connectionRepository.getConnectionByUserId(userId);
       this.logger.log(
         'Refreshed connection with thingsboardId:',
         refreshedConnection,
@@ -203,14 +200,13 @@ export class ConfirmPractitionerCommandHandler
 
       // Step 8: Save tokens to database
       this.logger.log('Step 8: Saving tokens to database');
-      const updatedModel =
-        await this.thingsboardRepository.findByUserId(userId);
+      const updatedModel = await uow.thingsboardRepository.findByUserId(userId);
       this.logger.debug('Found thingsboard model:', updatedModel);
       if (updatedModel) {
         this.logger.log('Updating tokens for user:', userId);
         updatedModel.setAccessToken(activationResponse.token);
         updatedModel.setRefreshToken(activationResponse.refreshToken);
-        await this.thingsboardRepository.update(updatedModel);
+        await uow.thingsboardRepository.update(updatedModel);
         this.logger.log('Tokens updated successfully');
       }
 
@@ -263,17 +259,20 @@ export class ConfirmPractitionerCommandHandler
   ): Promise<void> {
     this.logger.warn('Starting rollback of changes');
 
-    if (!sysAdminAccessToken || !tenantId) {
-      this.logger.warn('No sysadmin token or tenant ID for rollback');
+    if (!sysAdminAccessToken || !userId) {
+      this.logger.warn('No sysadmin token or tenant admin ID for rollback');
       return;
     }
 
     try {
-      this.logger.log(`Rolling back: Deleting tenant ${tenantId.id}`);
-      //await this.thingsboardApi.deleteTenant(tenantId.id, sysAdminAccessToken);
-      this.logger.log('MOCK DELETE TENANT SUCCdESSFULL');
+      this.logger.log(`Rolling back: Deleting tenant admin ${userId}`);
+      await this.thingsboardApi.deleteTenantAdmin(userId, sysAdminAccessToken);
+      this.logger.log('DELETE TENANT ADMIN SUCCESSFUL');
     } catch (rollbackError) {
-      this.logger.error('Failed to rollback changes:', rollbackError);
+      this.logger.error(
+        'Failed to rollback changes, maybe tenant admin was not even created:',
+        rollbackError,
+      );
     }
   }
 
