@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -18,7 +19,6 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
     if (!requiredRoles) return true;
 
     const request: Request & { user: CurrentUser } = context
@@ -30,6 +30,12 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('User is not authenticated');
     }
 
-    return requiredRoles.some((role) => user.connectionRole === role);
+    if (!requiredRoles.some((role) => user.connectionRole === role)) {
+      throw new ForbiddenException(
+        `You do not have permission to make this operation.`,
+      );
+    }
+
+    return true;
   }
 }

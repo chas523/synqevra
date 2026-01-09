@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: registry.digitalocean.com/medboard-registry/front:1.1.1
+          image: registry.digitalocean.com/medboard-registry/front:1.1.2
           imagePullPolicy: Always
 
           ports:

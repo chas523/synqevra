@@ -101,6 +101,11 @@ export class ConfirmPractitionerUseCase {
     await this.updateUserUseCase.execute(updateUserCommand);
     console.log('User password updated successfully');
 
+    //delete row from activation link table
+    console.log('Deleting activation link for userId:', newUserId);
+    await uow.activationLinkRepository.deleteByUserId(Number(newUserId));
+    console.log('Activation link deleted successfully');
+
     //thingsboard
     //here we get thingsboardid
     console.log('Executing ConfirmPractitionerCommand...');

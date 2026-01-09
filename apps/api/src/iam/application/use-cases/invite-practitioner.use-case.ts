@@ -33,6 +33,10 @@ export class InvitePractitionerUseCase {
   async execute(
     command: InvitePractitionerCommand,
   ): Promise<{ id: number; email: string; activationToken: string }> {
+    console.log(
+      'InvitePractitionerUseCase.execute called with command:',
+      command,
+    );
     const { firstName, lastName, email, currentUser } = command;
 
     const currentUserThingsboard =
