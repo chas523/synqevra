@@ -4,11 +4,13 @@ import { RefreshTokensResult } from '../dto/refresh-token.result';
 import * as argon2 from 'argon2';
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../domain/repositories/user.repository';
+import { AdminRepository } from '../../domain/repositories/admin.repository';
 
 @Injectable()
 export class RefreshTokensUseCase {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly adminRepository: AdminRepository,
     private readonly tokenService: AuthService,
   ) {}
 
@@ -20,6 +22,22 @@ export class RefreshTokensUseCase {
     const hashedRt = await argon2.hash(refreshToken);
 
     await this.userRepository.updateHashedRt(userId, hashedRt);
+
+    this.tokenService.setTokenCookies(response, accessToken, refreshToken);
+
+    return { id: userId, success: true };
+  }
+
+  async executeForAdmin(
+    command: RefreshTokensCommand,
+  ): Promise<RefreshTokensResult> {
+    const { userId, response } = command;
+
+    const accessToken = await this.tokenService.generateAccessToken(userId);
+    const refreshToken = await this.tokenService.generateRefreshToken(userId);
+    const hashedRt = await argon2.hash(refreshToken);
+
+    await this.adminRepository.updateHashedRt(userId, hashedRt);
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken);
 

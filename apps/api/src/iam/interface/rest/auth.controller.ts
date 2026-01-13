@@ -7,7 +7,6 @@ import {
   Req,
   Res,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { RefreshAuthGuard } from '../../../auth/guards/refresh-auth/refresh-auth.guard';
 import { Public } from '../../../auth/decorators/public.decorator';

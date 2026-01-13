@@ -78,7 +78,7 @@ export class InitialConnectionUseCase {
     // connection
     const newConnection = uow.connectionRepository.create(newUser.id!);
     if (newConnection) {
-      newConnection.role = Role.ADMIN;
+      newConnection.role = Role.MODERATOR;
     }
     await uow.connectionRepository.save(newConnection!);
     this.logger.debug('Created connection:' + JSON.stringify(newConnection));

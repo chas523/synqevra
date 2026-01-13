@@ -10,17 +10,18 @@ import jwtConfig from '../../../config/jwt.config';
 import { DUMMY_BCRYPT_HASH } from '../../infrastructure/constants/user-utils';
 import * as argon2 from 'argon2';
 import { UserRepository } from '../../domain/repositories/user.repository';
+import { ConnectionRepository } from '../../../connection/domain/repositories/connection.repository';
+import { AdminRepository } from '../../domain/repositories/admin.repository';
 import {
   THINGSBOARD_API_PORT,
   ThingsboardApiPort,
 } from '../../../thingsboard/application/ports/thingsboard.api.port';
-import { ConnectionRepository } from '../../../connection/domain/repositories/connection.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
-    @Inject(ConnectionRepository)
+    private readonly adminRepository: AdminRepository,
     private readonly connectionRepository: ConnectionRepository,
     private readonly jwtService: JwtService,
     @Inject(THINGSBOARD_API_PORT)
@@ -72,7 +73,7 @@ export class AuthService {
     });
   }
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<CurrentUser> {
     const user = await this.userRepository.getUserByEmail(email);
 
     const hashToCompare = user?.password ?? DUMMY_BCRYPT_HASH;
@@ -95,7 +96,23 @@ export class AuthService {
     );
     const connectionRole = connection?.role;
 
+    if (!connectionRole) {
+      throw new UnauthorizedException('User role not found');
+    }
+
     return { id: user.id, connectionRole };
+  }
+
+  async validateAdmin(email: string, password: string): Promise<CurrentUser> {
+    const admin = await this.adminRepository.getAdminByEmail(email);
+    const hashToCompare = admin?.password ?? DUMMY_BCRYPT_HASH;
+    const isPasswordValid = await compare(password, hashToCompare);
+
+    if (!admin || !admin.id || !isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return { id: admin.id, connectionRole: admin.role };
   }
 
   async validateJwtUser(userId: number) {
@@ -116,6 +133,18 @@ export class AuthService {
     return currentUser;
   }
 
+  async validateJwtAdmin(adminId: number) {
+    const admin = await this.adminRepository.getAdminById(adminId);
+    if (!admin || !admin.id) throw new UnauthorizedException('User not found');
+
+    const currentAdmin: CurrentUser = {
+      id: admin.id,
+      connectionRole: admin.role,
+    };
+
+    return currentAdmin;
+  }
+
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.userRepository.getUserById(userId);
 
@@ -130,6 +159,22 @@ export class AuthService {
     if (!refreshTokenMatches) throw new UnauthorizedException('Access Denied');
 
     return { id: user.id };
+  }
+
+  async validateAdminRefreshToken(adminId: number, refreshToken: string) {
+    const admin = await this.adminRepository.getAdminById(adminId);
+
+    if (!admin || !admin.hashedRt) {
+      throw new UnauthorizedException('Access Denied');
+    }
+
+    const refreshTokenMatches: boolean = await argon2.verify(
+      admin.hashedRt,
+      refreshToken,
+    );
+    if (!refreshTokenMatches) throw new UnauthorizedException('Access Denied');
+
+    return { id: admin.id };
   }
 
   clearAuthCookies(response: Response): void {
