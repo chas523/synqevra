@@ -31,7 +31,7 @@ pipelines:
             - docker push registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG
 
             # Update API tag
-            - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/api:.*|image: registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG|g" k8s/30-api.yaml'
+            - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/api:\).*#\1$IMAGE_TAG#g" k8s/30-api.yaml
 
             # Deploy backend
             - pipe: atlassian/kubectl-run:3.12.0
@@ -55,11 +55,12 @@ pipelines:
 
             # Build and push frontend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/front/Dockerfile -t registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG .
-            - docker push registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG
+            - docker build -f apps/front/Dockerfile -t registry.digitalocean.com/medboard-registry/front:$IMAGE_TAG .
+            - docker push registry.digitalocean.com/medboard-registry/front:$IMAGE_TAG
 
             # Update Frontend tag
-            - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/frontend:.*|image: registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG|g" k8s/32-frontend.yaml'
+            - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/32-frontend.yaml
+            - grep -n "image:" k8s/32-frontend.yaml
 
             # Deploy frontend
             - pipe: atlassian/kubectl-run:3.12.0
@@ -67,17 +68,3 @@ pipelines:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
                 RESOURCE_PATH: 'k8s/32-frontend.yaml'
-
-      - step:
-          name: Deploy Kubernetes Changes
-          condition:
-            changesets:
-              includePaths:
-                - "k8s/**"
-          script:
-            # Deploy all k8s files without rebuilding images
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'apply'
-                RESOURCE_PATH: 'k8s/'
