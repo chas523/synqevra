@@ -68,3 +68,21 @@ pipelines:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
                 RESOURCE_PATH: 'k8s/32-frontend.yaml'
+
+      - step:
+          name: Deploy Kubernetes changes excluding frontend/api
+          condition:
+            changesets:
+              includePaths:
+                - "k8s/**"
+          script:
+            # Remove local job copies of frontend and api yaml files to avoid redeployment
+            - rm -f k8s/30-api.yaml
+            - rm -f k8s/32-frontend.yaml
+
+            # Deploy other k8s resources
+            - pipe: atlassian/kubectl-run:3.12.0
+              variables:
+                KUBE_CONFIG: $KUBE_CONFIG
+                KUBECTL_COMMAND: 'apply'
+                RESOURCE_PATH: 'k8s/'
