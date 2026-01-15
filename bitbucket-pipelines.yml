@@ -5,6 +5,11 @@
 
 image: atlassian/default-image:3
 
+definitions:
+  services:
+    docker:
+      memory: 2048
+
 pipelines:
   branches:
     dev:
@@ -36,6 +41,7 @@ pipelines:
                 KUBECTL_ARGS: '-f k8s/30-api.yaml'
 
       - step:
+          size: 2x
           name: Build and Deploy Frontend (only if frontend changed)
           condition:
             changesets:
