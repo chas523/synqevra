@@ -21,6 +21,8 @@ const MENU_ITEMS = [
   { href: "/devices", icon: Settings, label: "Devices" },
   { href: "/patients", icon: PersonStanding, label: "Patients" },
   { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+  {href: "/dashboard/requestedUsers", icon: PersonStanding, label: "Pending Users"},
+  {href: "/dashboard/activeUsers", icon: PersonStanding, label: "Active Users"},
 ];
 
 export default function AppSidebar() {

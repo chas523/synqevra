@@ -7,7 +7,6 @@ import {
   Req,
   Res,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiTags,

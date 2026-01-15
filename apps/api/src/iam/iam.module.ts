@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { UsersController } from './interface/rest/users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './infrastructure/persistance/user.entity';
+import { Admin } from './infrastructure/persistance/admin.entity';
 import { ActivationLink } from './infrastructure/persistance/activation-link.entity';
 import { AuthController } from './interface/rest/auth.controller';
 import { AuthService } from './application/auth/auth.service';
@@ -27,10 +28,14 @@ import { TokenGeneratorAdapter } from './infrastructure/security/token-generator
 import { EMAIL_PORT } from 'src/mailer/application/ports/email.port';
 import { NodemailerAdapter } from 'src/mailer/infrastructure/mailer/nodemailer.adapter';
 import { GetUserByTokenUseCase } from './application/use-cases/get-user-by-token.use-case';
+import { LoginAdminUseCase } from './application/use-cases/login-admin.use-case';
+import { LogoutAdminUseCase } from './application/use-cases/logout-admin.use-case';
+import { AdminRepository } from './domain/repositories/admin.repository';
+import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repository.adapter';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, ActivationLink]),
+    TypeOrmModule.forFeature([User, Admin, ActivationLink]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
@@ -45,12 +50,15 @@ import { GetUserByTokenUseCase } from './application/use-cases/get-user-by-token
     UpdateUserUseCase,
     RegisterUserUseCase,
     LoginUserUseCase,
+    LoginAdminUseCase,
     LogoutUserUseCase,
+    LogoutAdminUseCase,
     RefreshTokensUseCase,
     InvitePractitionerUseCase,
     GetUserByTokenUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
+    { provide: AdminRepository, useClass: AdminRepositoryAdapter },
     { provide: TokenGeneratorPort, useClass: TokenGeneratorAdapter },
     {
       provide: ActivationLinkRepository,

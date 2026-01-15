@@ -20,6 +20,19 @@ export class AuthService {
     }
   }
 
+  public static async loginAdminRequest(formData: LoginFormData): Promise<void> {
+    try {
+      await proxyApi.post("/admin/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+      localStorage.setItem("isAuthenticatedAdmin", "true");
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err, "Authentication failed");
+      throw new Error(message);
+    }
+  }
+
   public static async registerRequest(
     formData: RegisterFormData,
   ): Promise<RegisterResponse> {
@@ -41,6 +54,16 @@ export class AuthService {
     try {
       await proxyApi.post("/auth/logout");
       localStorage.removeItem("isAuthenticated");
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err, "Logout failed");
+      throw new Error(message);
+    }
+  }
+
+  public static async logoutAdminRequest(): Promise<void> {
+    try {
+      await proxyApi.post("/admin/logout");
+      localStorage.removeItem("isAuthenticatedAdmin");
     } catch (err: unknown) {
       const message = extractErrorMessage(err, "Logout failed");
       throw new Error(message);

@@ -97,3 +97,15 @@ export const formatDate = (dateString?: string) => {
     minute: "2-digit",
   });
 };
+
+export const buildQueryParams = (
+    options: Record<string, unknown>,
+): URLSearchParams => {
+  const params = new URLSearchParams();
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      params.append(key, String(value));
+    }
+  });
+  return params;
+};
