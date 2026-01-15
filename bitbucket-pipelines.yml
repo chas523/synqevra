@@ -34,15 +34,15 @@ pipelines:
             - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/api:.*|image: registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG|g" k8s/30-api.yaml'
 
             # Deploy backend
-            - pipe: atlassian/kubectl-run:1.1.0
+            - pipe: atlassian/kubectl-run:3.12.0
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
-                KUBECTL_ARGS: '-f k8s/30-api.yaml'
+                RESOURCE_PATH: 'k8s/30-api.yaml'
 
       - step:
           size: 2x
-          name: Build and Deploy Frontend (only if frontend changed)
+          name: Build and Deploy Frontend
           condition:
             changesets:
               includePaths:
@@ -61,12 +61,12 @@ pipelines:
             # Update Frontend tag
             - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/frontend:.*|image: registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG|g" k8s/32-frontend.yaml'
 
-            # Deploy only frontend
-            - pipe: atlassian/kubectl-run:1.1.0
+            # Deploy frontend
+            - pipe: atlassian/kubectl-run:3.12.0
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
-                KUBECTL_ARGS: '-f k8s/32-frontend.yaml'
+                RESOURCE_PATH: 'k8s/32-frontend.yaml'
 
       - step:
           name: Deploy Kubernetes Changes
@@ -76,8 +76,8 @@ pipelines:
                 - "k8s/**"
           script:
             # Deploy all k8s files without rebuilding images
-            - pipe: atlassian/kubectl-run:1.1.0
+            - pipe: atlassian/kubectl-run:3.12.0
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
-                KUBECTL_ARGS: '-f k8s/'
+                RESOURCE_PATH: 'k8s/'
