@@ -1,3 +1,5 @@
+"use client"
+
 import type { Observation } from "@medplum/fhirtypes";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";

@@ -1,0 +1,37 @@
+# This is an example Starter pipeline configuration
+# Use a skeleton to build, test and deploy using manual and parallel steps
+# -----
+# You can specify a custom docker image from Docker Hub as your build environment.
+
+image: atlassian/default-image:3
+
+pipelines:
+  branches:
+    dev:
+      - step:
+          name: Build and Deploy API & Frontend
+          services:
+            - docker
+          script:
+            # Set image TAG
+            - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
+
+            # Build and push
+            - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
+            - docker build -f apps/backend/Dockerfile -t registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG .
+            - docker push registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG
+            - docker build -f apps/frontend/Dockerfile -t registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG .
+            - docker push registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG
+
+            # Update API tag
+            - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/api:.*|image: registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG|g" k8s/30-api.yaml'
+
+            # Update Frontend tag
+            - 'sed -i "s|image: registry.digitalocean.com/medboard-registry/frontend:.*|image: registry.digitalocean.com/medboard-registry/frontend:$IMAGE_TAG|g" k8s/32-frontend.yaml'
+
+            # Deploy
+            - pipe: atlassian/kubectl-run:1.1.0
+              variables:
+                KUBE_CONFIG: $KUBE_CONFIG
+                KUBECTL_COMMAND: 'apply'
+                KUBECTL_ARGS: '-f k8s/'

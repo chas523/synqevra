@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import { LoadingButton } from "../atoms";
 import ErrorMessage from "../molecules/ErrorMessage";

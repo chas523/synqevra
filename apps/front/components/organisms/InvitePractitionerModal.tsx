@@ -1,3 +1,5 @@
+"use client"
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useRef, useState } from "react";
 import { useForm } from "react-hook-form";

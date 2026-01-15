@@ -18,3 +18,5 @@ export type { StatusBadgeProps } from "./StatusBadge";
 export { default as StatusBadge } from "./StatusBadge";
 export type { TextProps } from "./Text";
 export { default as Text } from "./Text";
+export { TextWithVariant } from "./TextWithVariant";
+export { ErrorMessageAtom } from "./ErrorMessage";
