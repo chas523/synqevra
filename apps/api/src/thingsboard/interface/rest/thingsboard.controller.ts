@@ -58,8 +58,6 @@ import { UpdateDeviceSharedAttributesCommand } from 'src/thingsboard/application
 import { DevicesResponse } from './dtos/response/thingsboard-devices.response.dto';
 import { ThingsboardTokensResponseDto } from './dtos/response/thingsboard-tokens.response.dto';
 import { ThingsboardUserResponseDto } from './dtos/response/thingsboard-user.response.dto';
-import { TelemetryService } from 'src/thingsboard/application/services/telemetry.service';
-import { DashboardQueries } from 'src/thingsboard/application/services/dashboard-queries';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -68,7 +66,6 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly telemetryService: TelemetryService,
   ) {}
 
   @Public()
@@ -465,90 +462,5 @@ export class ThingsboardController {
         throw error;
       },
     });
-  }
-
-  //simulate frontend websocket continous connection for x minutes
-  @Public()
-  @Get('/websocket/demo')
-  @ApiOperation({
-    summary: 'Demo WebSocket - 5 minut ciągłego nasłuchiwania',
-    description:
-      'Symuluje frontend: łączy się z WebSocket, wysyła zapytania i loguje WSZYSTKIE przychodzące wiadomości przez 5 minut.',
-  })
-  async websocketDemo() {
-    const DEMO_DURATION_MS = 5 * 60 * 1100; // 5 minut
-    const startTime = Date.now();
-    let messageCount = 0;
-
-    console.log('='.repeat(60));
-    console.log('🚀 DEMO START - Ciągłe nasłuchiwanie przez 5 minut');
-    console.log('='.repeat(60));
-
-    // 1. Ustaw handler - KAŻDA wiadomość będzie logowana
-    this.telemetryService.setMessageHandler((msg) => {
-      messageCount++;
-      const elapsed = Math.round((Date.now() - startTime) / 1000);
-      console.log(`\n📨 [${elapsed}s] Wiadomość #${messageCount}:`);
-      console.log(`   cmdId: ${msg.cmdId}`);
-      console.log(`   type: ${msg.cmdUpdateType}`);
-      this.logger.log(msg);
-      // if (msg.data) {
-      //   console.log(`   data: ${JSON.stringify(msg.data)}...`);
-      // }
-      // if (msg.update) {
-      //   console.log(`   update: ${JSON.stringify(msg.update)}...`);
-      // }
-      if (msg.errorCode !== 0) {
-        console.log(`   ❌ ERROR: ${msg.errorMsg}`);
-      }
-    });
-
-    // 2. Połącz jako sysadmin
-    await this.telemetryService.connectAsSysadmin();
-    console.log('✅ Połączono z WebSocket');
-
-    // 3. Wyślij zapytania - entity counts
-    const countCommands = DashboardQueries.allEntityCounts();
-    this.telemetryService.sendCommands(countCommands);
-    console.log(`📤 Wysłano ${countCommands.length} entity count komend`);
-
-    // 4. Wyślij złożone zapytanie (query + tsCmd)
-    // const [queryCmd, tsCmd] = DashboardQueries.systemMetricsWithTimeseries(10);
-    // this.telemetryService.sendCommands([queryCmd]);
-    // console.log('📤 Wysłano query dla system metrics (cmdId: 10)');
-
-    // Poczekaj chwilę i wyślij tsCmd
-    // await this.delay(500);
-    // this.telemetryService.sendCommands([tsCmd]);
-    // console.log('📤 Wysłano tsCmd dla system metrics (cmdId: 10)');
-
-    // 5. Symulacja frontendu - czekaj 5 minut, nowe wiadomości będą logowane
-    console.log(
-      `\n⏳ Nasłuchiwanie przez ${DEMO_DURATION_MS / 1000} sekund...`,
-    );
-    console.log('   (Wszystkie przychodzące wiadomości będą logowane)\n');
-
-    await this.delay(DEMO_DURATION_MS);
-
-    // 6. Zakończ
-    this.telemetryService.disconnect();
-
-    const summary = {
-      durationSeconds: DEMO_DURATION_MS / 1000,
-      totalMessages: messageCount,
-      status: 'completed',
-    };
-
-    console.log('\n' + '='.repeat(60));
-    console.log('🏁 DEMO ZAKOŃCZONE');
-    console.log(`   Czas: ${summary.durationSeconds}s`);
-    console.log(`   Wiadomości: ${summary.totalMessages}`);
-    console.log('='.repeat(60));
-
-    return summary;
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
