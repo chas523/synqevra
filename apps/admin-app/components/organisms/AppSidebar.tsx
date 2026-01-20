@@ -20,7 +20,15 @@ export default function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/dashboard/requestedUsers">
+                  <a href="/dashboard">
+                    <Home />
+                    <span>Dashboard</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/manage-users/requested-users">
                     <Home />
                     <span>Pending Users</span>
                   </a>
@@ -28,7 +36,7 @@ export default function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="/dashboard/activeUsers">
+                  <a href="/manage-users/active-users">
                     <Home />
                     <span>Active Users</span>
                   </a>

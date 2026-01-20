@@ -124,6 +124,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-transparent">
+          {/* <SidebarInset className="h-screen overflow-hidden flex flex-col bg-transparent"> */}
           <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-10">
             <SidebarTrigger className="-ml-1 text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-black" />
             <div className="flex items-center gap-3">
