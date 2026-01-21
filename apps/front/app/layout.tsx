@@ -5,6 +5,7 @@ import { MantineProvider } from "@mantine/core";
 import SidebarLayout from "@/components/organisms/SidebarLayout";
 import MedplumProviderWrapper from "@/lib/config/MedplumProviderWrapper";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ export default function RootLayout({
           <MedplumProviderWrapper>
             <MantineProvider>
               <SidebarLayout>{children}</SidebarLayout>
+              <Toaster richColors theme="system" />
             </MantineProvider>
           </MedplumProviderWrapper>
         </ThemeProvider>

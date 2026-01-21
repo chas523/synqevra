@@ -33,6 +33,11 @@ const MENU_ITEMS = [
     icon: PersonStanding,
     label: "Active Users",
   },
+  {
+    href: "/settings",
+    icon: Settings,
+    label: "Settings",
+  },
 ];
 
 export default function AppSidebar() {

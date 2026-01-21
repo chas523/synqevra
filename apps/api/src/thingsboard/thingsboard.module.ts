@@ -32,11 +32,13 @@ import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fe
 import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
+import { FetchSecuritySettingsQueryHandler } from './application/queries/fetch-security-settings/fetch-security-settings.query.handler';
 
 // Services
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryService } from './application/services/telemetry.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
+import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -47,6 +49,7 @@ const commandHandlers = [
   DeleteTenantCommandHandler,
   RefreshTokenCommandHandler,
   ConfirmPractitionerCommandHandler,
+  UpdateSecuritySettingsCommandHandler,
 ];
 
 const queryHandlers = [
@@ -54,6 +57,7 @@ const queryHandlers = [
   FetchDeviceByIdQueryHandler,
   FetchDeviceSharedAttributesQueryHandler,
   GetUserQueryHandler,
+  FetchSecuritySettingsQueryHandler,
 ];
 
 @Module({
