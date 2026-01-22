@@ -27,10 +27,7 @@ import {
   ThingsboardRepositoryPort,
 } from '../../application/ports/thingsboard.repository.port';
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
-import {
-  ExtendedSecuritySettingsDto,
-  SecuritySettingsDto,
-} from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
+import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
 
 interface JwtPayload {
   customerId: string;
