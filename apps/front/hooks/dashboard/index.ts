@@ -5,3 +5,6 @@ export { usePagination } from "./usePagination";
 export { useRequestedUsers } from "./useRequestedUsers";
 export { useSendEmailActivation } from "./useSendEmailActivation";
 export { useSortFilter } from "./useSortFilter";
+export { useTenants } from "./useTenants";
+export { useTenantUsers } from "./useTenantUsers";
+export { useTenantDevices } from "./useTenantDevices";

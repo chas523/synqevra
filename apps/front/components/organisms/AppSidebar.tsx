@@ -38,6 +38,7 @@ const MENU_ITEMS = [
     icon: Settings,
     label: "Settings",
   },
+    { href: "/dashboard/tenants", icon: PersonStanding, label: "Tenants" },
 ];
 
 export default function AppSidebar() {

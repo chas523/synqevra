@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -28,6 +27,10 @@ import {
 } from '../../application/ports/thingsboard.repository.port';
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
 import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
+import { GetTenantsResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenants.response.dto';
+import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-users.response.dto';
+import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
+import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -635,6 +638,199 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         error,
         this.logger,
       );
+    }
+  }
+
+  async fetchNotifications(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetNotificationsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notifications?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      const response = await firstValueFrom(
+        this.httpService.get<GetNotificationsResponse>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch tenants',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchTenants(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/tenants?pageSize=${pageSize}&page=${page}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get<GetTenantsResponse>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch tenants',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchTenantUsers(
+    sysadminAccessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantUsersResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/tenant/${id}/users?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      const response = await firstValueFrom(
+        this.httpService.get<GetTenantUsersResponse>(url, {
+          headers: { Authorization: `Bearer ${sysadminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch tenant users',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchTenantDevices(
+    sysadminAccessToken: string,
+    tenantId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantDevicesResponse> {
+    try {
+      const tenantAdminUserId = await this.getTenantAdminUserId(
+        sysadminAccessToken,
+        tenantId,
+      );
+
+      if (!tenantAdminUserId) {
+        throw new Error(`No Tenant Admin found for tenant ${tenantId}`);
+      }
+
+      const tenantAdminToken = await this.getTenantToken(
+        sysadminAccessToken,
+        tenantAdminUserId,
+      );
+
+      return this.fetchTenantDevicesAsTenantAdmin(
+        tenantAdminToken,
+        tenantId,
+        page,
+        pageSize,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error fetching tenant devices: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        'ThingsboardApiAdapter',
+      );
+      ThingsboardApiException.createException(
+        'Failed to fetch tenant devices',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  private async getTenantToken(
+    sysadminAccessToken: string,
+    userId: string,
+  ): Promise<string> {
+    const url = `${this.THINGSBOARD_API_URL}/user/${userId}/token`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysadminAccessToken}` },
+        }),
+      );
+
+      return response.data.token;
+    } catch (error) {
+      this.logger.error(`Failed to get token for user ${userId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private async getTenantAdminUserId(
+    sysadminAccessToken: string,
+    tenantId: string,
+  ): Promise<string | null> {
+    const url = `${this.THINGSBOARD_API_URL}/tenant/${tenantId}/users?pageSize=10&page=0`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysadminAccessToken}` },
+        }),
+      );
+
+      // first 'TENANT_ADMIN'
+      const adminUser = response.data.data.find(
+        (u: any) => u.authority === 'TENANT_ADMIN',
+      );
+      return adminUser ? adminUser.id.id : null;
+    } catch (error) {
+      this.logger.error(`Failed to find tenant admin user: ${error}`);
+      throw error;
+    }
+  }
+
+  private async fetchTenantDevicesAsTenantAdmin(
+    tenantAdminAccessToken: string,
+    tenantId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantDevicesResponse> {
+    const url = `${this.THINGSBOARD_API_URL}/tenant/devices`;
+
+    try {
+      this.logger.log(
+        `Fetching devices as tenant admin for tenantId: ${tenantId}`,
+        'ThingsboardApiAdapter',
+      );
+
+      const response = await firstValueFrom(
+        this.httpService.get<GetTenantDevicesResponse>(url, {
+          headers: { Authorization: `Bearer ${tenantAdminAccessToken}` },
+          params: {
+            pageSize,
+            page,
+            sortProperty: 'createdTime',
+            sortOrder: 'DESC',
+          },
+        }),
+      );
+
+      this.logger.log(
+        `Successfully fetched ${response.data.data.length} devices for tenant ${tenantId}`,
+        'ThingsboardApiAdapter',
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching devices: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
+        'ThingsboardApiAdapter',
+      );
+      throw error;
     }
   }
 }
