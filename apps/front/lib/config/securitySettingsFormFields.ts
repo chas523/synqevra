@@ -129,6 +129,6 @@ export const passwordPolicyFieldPairs = [
   },
   {
     left: passwordPolicyFields[6], // passwordExpirationPeriodDays
-    right: passwordPolicyFields[7], // passwordReuseFrequencyDays
+    right: passwordPolicyFields[7], //passwordReuseFrequencyDays
   },
 ];
