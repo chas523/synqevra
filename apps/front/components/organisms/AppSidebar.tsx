@@ -1,4 +1,4 @@
-import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
+import {Home, PersonStanding, Settings, Stethoscope} from "lucide-react";
 import Image from "next/image";
 
 import Link from "next/link";
@@ -21,8 +21,17 @@ const MENU_ITEMS = [
   { href: "/devices", icon: Settings, label: "Devices" },
   { href: "/patients", icon: PersonStanding, label: "Patients" },
   { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
-  {href: "/dashboard/requestedUsers", icon: PersonStanding, label: "Pending Users"},
-  {href: "/dashboard/activeUsers", icon: PersonStanding, label: "Active Users"},
+  {
+    href: "/dashboard/requestedUsers",
+    icon: PersonStanding,
+    label: "Pending Users",
+  },
+  {
+    href: "/dashboard/activeUsers",
+    icon: PersonStanding,
+    label: "Active Users",
+  },
+  { href: "/dashboard/tenants", icon: PersonStanding, label: "Tenants" },
 ];
 
 export default function AppSidebar() {

@@ -6,17 +6,14 @@ import {
   ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { DevicesResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-devices.response.dto';
-import { Result, Ok, Err } from 'oxide.ts';
+import { Err, Ok, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 @QueryHandler(FetchDevicesQuery)
-export class FetchDevicesQueryHandler
-  implements
-    IQueryHandler<
-      FetchDevicesQuery,
-      Result<DevicesResponse, ThingsboardApiException>
-    >
-{
+export class FetchDevicesQueryHandler implements IQueryHandler<
+  FetchDevicesQuery,
+  Result<DevicesResponse, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

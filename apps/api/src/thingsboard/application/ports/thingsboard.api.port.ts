@@ -10,6 +10,10 @@ import {
   ThingsboardLoginResponse,
   UserResponse,
 } from 'src/thingsboard/infrastructure/http/thingsboard.api.types';
+import { GetTenantsResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenants.response.dto';
+import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-users.response.dto';
+import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
+import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -110,4 +114,28 @@ export abstract class ThingsboardApiPort {
     id: string,
     attributes: Record<string, any>,
   ): Promise<void>;
+
+  // Admin operations
+  abstract fetchTenants(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantsResponse>;
+  abstract fetchTenantUsers(
+    sysadminAccessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantUsersResponse>;
+  abstract fetchTenantDevices(
+    sysadminAccessToken: string,
+    tenantId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetTenantDevicesResponse>;
+  abstract fetchNotifications(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+  ): Promise<GetNotificationsResponse>;
 }

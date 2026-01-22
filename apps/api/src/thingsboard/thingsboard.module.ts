@@ -1,10 +1,10 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
-
 import { Thingsboard } from './infrastructure/persistence/thingsboard.entity';
 import { ThingsboardController } from './interface/rest/thingsboard.controller';
+import { DashboardController } from './interface/rest/dashboard.controller';
 import { ConnectionModule } from 'src/connection/connection.module';
 import { MedplumModule } from 'src/medplum/medplum.module';
 
@@ -30,6 +30,10 @@ import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
+import { FetchTenantsQueryHandler } from './application/queries/fetch-tenants/fetch-tenants.query-handler';
+import { FetchTenantUsersQueryHandler } from './application/queries/fetch-users-by-tenant/fetch-tenant-users.query-handler';
+import { FetchTenantDevicesQueryHandler } from './application/queries/fetch-tenant-devices/fetch-tenant-devices.query-handler';
+import { FetchNotificationsQueryHandler } from './application/queries/fetch-notifications/fetch-notifications.query-handler';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -47,6 +51,10 @@ const queryHandlers = [
   FetchDeviceByIdQueryHandler,
   FetchDeviceSharedAttributesQueryHandler,
   GetUserQueryHandler,
+  FetchTenantsQueryHandler,
+  FetchTenantUsersQueryHandler,
+  FetchTenantDevicesQueryHandler,
+  FetchNotificationsQueryHandler,
 ];
 
 @Module({
@@ -70,7 +78,7 @@ const queryHandlers = [
     },
     ThingsboardRollbackService,
   ],
-  controllers: [ThingsboardController],
+  controllers: [ThingsboardController, DashboardController],
   exports: [
     THINGSBOARD_REPOSITORY_PORT,
     THINGSBOARD_API_PORT,

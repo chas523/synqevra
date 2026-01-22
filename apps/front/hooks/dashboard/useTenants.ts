@@ -1,34 +1,34 @@
 import useSWR from "swr";
 import type {
-  ActiveUsersRequestOptions,
+  TenantsRequestOptions,
   PaginatedResponse,
-  User,
+  Tenant,
 } from "@/lib/types/dashboardTypes";
-import { UserService } from "@/lib/services/userServices/userService";
+import { TenantService } from "@/lib/services/adminServices/tenantService";
 
-interface UseActiveUsersResult {
-  data: PaginatedResponse<User> | undefined;
+interface UseTenantsResult {
+  data: PaginatedResponse<Tenant> | undefined;
   error: Error | undefined;
   isLoading: boolean;
   mutate: () => void;
 }
 
-const DEFAULT_OPTIONS: ActiveUsersRequestOptions = {
-  sortBy: "createdAt",
+const DEFAULT_OPTIONS: TenantsRequestOptions = {
+  sortBy: "createdTime",
   sortOrder: "desc",
-  limit: 10,
+  limit: 20,
 };
 
-export function useActiveUsers(
-  options: ActiveUsersRequestOptions = DEFAULT_OPTIONS,
-): UseActiveUsersResult {
+export function useTenants(
+  options: TenantsRequestOptions = DEFAULT_OPTIONS,
+): UseTenantsResult {
   const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
-  const swrKey = ["activeUsers", JSON.stringify(mergedOptions)];
+  const swrKey = ["tenants", JSON.stringify(mergedOptions)];
 
   const { data, error, isLoading, mutate } = useSWR(
     swrKey,
-    () => UserService.getActiveUsers(mergedOptions),
+    () => TenantService.getTenants(mergedOptions),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
