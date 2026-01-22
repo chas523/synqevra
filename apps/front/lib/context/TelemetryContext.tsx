@@ -36,12 +36,9 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
 
     isInitialized.current = true;
 
-    //to be updated
-    const proxyUrl = process.env.NEXT_PUBLIC_PROXY_URL || "http://api:3003";
-
-    const wsUrl = process.env.NEXT_PUBLIC_PROXY_URL
-      ? proxyUrl.replace(/\/api\/?$/, "")
-      : proxyUrl;
+    const proxyUrl =
+      process.env.NEXT_PUBLIC_PROXY_URL || "http://167.172.178.76:30003/api";
+    const wsUrl = proxyUrl.replace(/\/api\/?$/, "");
 
     console.log("connecting websocket to:", `${wsUrl}/telemetry`);
 
