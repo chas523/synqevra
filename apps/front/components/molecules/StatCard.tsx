@@ -1,10 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-} from "../../../admin-app/components/ui/card";
+import { CardHeader, CardContent } from "../ui/card";
 
 interface StatCardProps {
   label: string;

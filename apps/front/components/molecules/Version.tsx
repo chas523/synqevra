@@ -1,6 +1,6 @@
 import React from "react";
 import { Check } from "lucide-react";
-import { Button } from "../../../admin-app/components/ui/button";
+import { Button } from "../ui/button";
 
 interface VersionProps {
   currentVersion?: string;
