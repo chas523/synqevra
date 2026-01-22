@@ -24,3 +24,4 @@ export { ErrorState } from "./ErrorState";
 export { FilterBar } from "./FilterBar";
 export { ListHeader } from "./ListHeader";
 export { UserCard } from "./UserCard";
+export { SecuritySettingsForm } from "./SecuritySettingsForm";

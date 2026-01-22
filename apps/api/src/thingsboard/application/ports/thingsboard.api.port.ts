@@ -10,6 +10,11 @@ import {
   ThingsboardLoginResponse,
   UserResponse,
 } from 'src/thingsboard/infrastructure/http/thingsboard.api.types';
+import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
+import {
+  ExtendedSecuritySettingsDto,
+  SecuritySettingsDto,
+} from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -110,4 +115,14 @@ export abstract class ThingsboardApiPort {
     id: string,
     attributes: Record<string, any>,
   ): Promise<void>;
+
+  //Settings operations
+  abstract fetchSecuritySettings(
+    sysAdminAccessToken: string,
+  ): Promise<SecuritySettingsDtoResponse>;
+
+  abstract updateSecuritySettings(
+    sysAdminAccessToken: string,
+    settings: ExtendedSecuritySettingsDto,
+  ): Promise<SecuritySettingsDtoResponse>;
 }

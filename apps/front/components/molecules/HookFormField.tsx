@@ -10,7 +10,7 @@ import Label from "../atoms/Label";
 export interface FieldConfig<T extends FieldValues = FieldValues> {
   name: Path<T>;
   label: string;
-  type?: "text" | "email" | "tel" | "password" | "textarea";
+  type?: "text" | "email" | "tel" | "password" | "textarea" | "number";
   required?: boolean;
   placeholder?: string;
   gridCols?: number;
@@ -24,6 +24,24 @@ export interface HookFormFieldProps<T extends FieldValues = FieldValues> {
   disabled?: boolean;
 }
 
+const getNestedError = (
+  errors: FieldErrors,
+  path: string
+): string | undefined => {
+  const keys = path.split(".");
+  let current: any = errors;
+
+  for (const key of keys) {
+    if (current?.[key]) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+
+  return current?.message as string | undefined;
+};
+
 const HookFormField = <T extends FieldValues = FieldValues>({
   field,
   register,
@@ -32,7 +50,8 @@ const HookFormField = <T extends FieldValues = FieldValues>({
   disabled = false,
 }: HookFormFieldProps<T>) => {
   const fieldId = `${formId}-${String(field.name)}`;
-  const error = errors[field.name]?.message as string | undefined;
+
+  const error = getNestedError(errors, String(field.name));
 
   return (
     <div className="w-full">
@@ -64,7 +83,19 @@ const HookFormField = <T extends FieldValues = FieldValues>({
               ? "disabled:bg-gray-200 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-400 disabled:opacity-70 disabled:cursor-not-allowed"
               : ""
           }
-          {...register(field.name, { required: field.required })}
+          {...register(field.name, {
+            required: field.required,
+            setValueAs: (value) => {
+              if (field.type === "number") {
+                if (value === "" || value === null || value === undefined) {
+                  return null;
+                }
+                const num = Number(value);
+                return isNaN(num) ? null : num;
+              }
+              return value;
+            },
+          })}
         />
       )}
 

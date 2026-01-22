@@ -26,6 +26,12 @@ import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
 } from '../../application/ports/thingsboard.repository.port';
+import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
+import {
+  ExtendedSecuritySettingsDto,
+  SecuritySettingsDto,
+} from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
+
 interface JwtPayload {
   customerId: string;
   tenantId: string;
@@ -588,6 +594,47 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to update device profile',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchSecuritySettings(sysAdminAccessToken: string) {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/securitySettings`;
+
+      const response = await firstValueFrom(
+        this.httpService.get<SecuritySettingsDtoResponse>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch security settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateSecuritySettings(
+    sysAdminAccessToken: string,
+    settings: ExtendedSecuritySettingsDto,
+  ) {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/securitySettings`;
+
+      const response = await firstValueFrom(
+        this.httpService.post<SecuritySettingsDtoResponse>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update security settings',
         error,
         this.logger,
       );

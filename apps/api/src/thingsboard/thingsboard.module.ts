@@ -11,8 +11,11 @@ import { MedplumModule } from 'src/medplum/medplum.module';
 // Infrastructure
 import { ThingsboardApiAdapter } from './infrastructure/http/thingsboard.api.adapter';
 import { ThingsboardRepositoryAdapter } from './infrastructure/persistence/thingsboard.repository.adapter';
+import { ThingsboardTelemetryAdapter } from './infrastructure/websocket/thingsboard.telemetry.adapter';
+import { TelemetryGateway } from './interface/websocket/telemetry.gateway';
 import { THINGSBOARD_API_PORT } from './application/ports/thingsboard.api.port';
 import { THINGSBOARD_REPOSITORY_PORT } from './application/ports/thingsboard.repository.port';
+import { THINGSBOARD_TELEMETRY_PORT } from './application/ports/thingsboard.telemetry.port';
 
 // Command Handlers
 import { CreateDeviceCommandHandler } from './application/commands/create-device/create-device.command-handler';
@@ -29,7 +32,13 @@ import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fe
 import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
+import { FetchSecuritySettingsQueryHandler } from './application/queries/fetch-security-settings/fetch-security-settings.query.handler';
+
+// Services
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
+import { TelemetryService } from './application/services/telemetry.service';
+import { TelemetryParserService } from './application/services/telemetry-parser.service';
+import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -40,6 +49,7 @@ const commandHandlers = [
   DeleteTenantCommandHandler,
   RefreshTokenCommandHandler,
   ConfirmPractitionerCommandHandler,
+  UpdateSecuritySettingsCommandHandler,
 ];
 
 const queryHandlers = [
@@ -47,6 +57,7 @@ const queryHandlers = [
   FetchDeviceByIdQueryHandler,
   FetchDeviceSharedAttributesQueryHandler,
   GetUserQueryHandler,
+  FetchSecuritySettingsQueryHandler,
 ];
 
 @Module({
@@ -68,13 +79,22 @@ const queryHandlers = [
       provide: THINGSBOARD_REPOSITORY_PORT,
       useClass: ThingsboardRepositoryAdapter,
     },
+    {
+      provide: THINGSBOARD_TELEMETRY_PORT,
+      useClass: ThingsboardTelemetryAdapter,
+    },
     ThingsboardRollbackService,
+    TelemetryService,
+    TelemetryParserService,
+    TelemetryGateway,
   ],
   controllers: [ThingsboardController],
   exports: [
     THINGSBOARD_REPOSITORY_PORT,
     THINGSBOARD_API_PORT,
+    THINGSBOARD_TELEMETRY_PORT,
     ThingsboardRollbackService,
+    TelemetryService,
   ],
 })
 export class ThingsboardModule {}
