@@ -18,7 +18,7 @@ pipelines:
           condition:
             changesets:
               includePaths:
-                - "apps/backend/**"
+                - "apps/api/**"
           services:
             - docker
           script:
@@ -27,7 +27,7 @@ pipelines:
 
             # Build and push backend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/backend/Dockerfile -t registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG .
+            - docker build -f apps/api/Dockerfile -t registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG .
             - docker push registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG
 
             # Update API tag
