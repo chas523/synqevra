@@ -14,4 +14,16 @@ export const SORT_OPTIONS = {
     { value: "updatedAt-desc", label: "Recently Updated" },
     { value: "updatedAt-asc", label: "Least Updated" },
   ],
+  TENANTS: [
+    { value: "createdTime-desc", label: "Newest First" },
+    { value: "createdTime-asc", label: "Oldest First" },
+    { value: "title-asc", label: "Name A-Z" },
+    { value: "title-desc", label: "Name Z-A" },
+  ],
+  DEVICES: [
+    { value: "createdTime-desc", label: "Newest First" },
+    { value: "createdTime-asc", label: "Oldest First" },
+    { value: "name-asc", label: "Name A-Z" },
+    { value: "name-desc", label: "Name Z-A" },
+  ],
 } as const;
