@@ -14,6 +14,8 @@ import { GetTenantsResponse } from '../../interface/rest/dtos/response/thingsboa
 import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-users.response.dto';
 import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
 import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
+import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
+import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -138,4 +140,14 @@ export abstract class ThingsboardApiPort {
     page: number,
     pageSize: number,
   ): Promise<GetNotificationsResponse>;
+
+  //Settings operations
+  abstract fetchSecuritySettings(
+    sysAdminAccessToken: string,
+  ): Promise<SecuritySettingsDtoResponse>;
+
+  abstract updateSecuritySettings(
+    sysAdminAccessToken: string,
+    settings: ExtendedSecuritySettingsDto,
+  ): Promise<SecuritySettingsDtoResponse>;
 }

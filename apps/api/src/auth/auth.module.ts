@@ -11,6 +11,8 @@ import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
 import { IamModule } from '../iam/iam.module';
 import { ThingsboardModule } from '../thingsboard/thingsboard.module';
+import { JwtAdminStrategy } from './strategies/jwt.admin.strategy';
+import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
+    JwtAdminStrategy,
+    RefreshAdminStrategy,
     // global guards
     {
       provide: APP_GUARD,

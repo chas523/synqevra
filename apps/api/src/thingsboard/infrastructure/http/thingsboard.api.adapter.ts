@@ -25,6 +25,8 @@ import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
 } from '../../application/ports/thingsboard.repository.port';
+import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
+import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
 import { GetTenantsResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenants.response.dto';
 import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-users.response.dto';
 import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
@@ -597,6 +599,48 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async fetchSecuritySettings(sysAdminAccessToken: string) {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/securitySettings`;
+
+      const response = await firstValueFrom(
+        this.httpService.get<SecuritySettingsDtoResponse>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch security settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateSecuritySettings(
+    sysAdminAccessToken: string,
+    settings: ExtendedSecuritySettingsDto,
+  ) {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/securitySettings`;
+
+      const response = await firstValueFrom(
+        this.httpService.post<SecuritySettingsDtoResponse>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update security settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchNotifications(
     sysAdminAccessToken: string,
     page: number,

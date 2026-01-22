@@ -12,6 +12,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -57,10 +58,15 @@ import { UpdateDeviceSharedAttributesCommand } from 'src/thingsboard/application
 import { DevicesResponse } from './dtos/response/thingsboard-devices.response.dto';
 import { ThingsboardTokensResponseDto } from './dtos/response/thingsboard-tokens.response.dto';
 import { ThingsboardUserResponseDto } from './dtos/response/thingsboard-user.response.dto';
+import { SecuritySettingsDto } from './dtos/request/thingsboard-security-settings.request.dto';
+import { SecuritySettingsDto as SecuritySettingsDtoResponse } from './dtos/response/thingsboard-security-settings.response.dto';
+import { FetchSecuritySettingsQuery } from 'src/thingsboard/application/queries/fetch-security-settings/fetch-security-settings.query';
+import { UpdateSecuritySettingsCommand } from 'src/thingsboard/application/commands/update-security-settings/update-security-settings.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
 export class ThingsboardController {
+  private readonly logger = new Logger(ThingsboardController.name);
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
@@ -456,6 +462,79 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/admin/securitySettings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get security settings',
+    description: 'Retrieve current security settings configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Security settings retrieved successfully',
+    type: SecuritySettingsDtoResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch security settings',
+  })
+  async getSecuritySettings() {
+    const query = new FetchSecuritySettingsQuery();
+    const result: Result<SecuritySettingsDtoResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (securityResponse: SecuritySettingsDtoResponse) => securityResponse,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/securitySettings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update security settings',
+    description: 'Update security policies configuration for tenants',
+  })
+  @ApiBody({
+    type: SecuritySettingsDto,
+    description: 'Security settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Security settings updated successfully',
+    type: SecuritySettingsDtoResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update security settings',
+  })
+  async updateSecuritySettings(@Body() settings: SecuritySettingsDto) {
+    const command = new UpdateSecuritySettingsCommand(settings);
+    const result: Result<SecuritySettingsDtoResponse, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (securityResponse: SecuritySettingsDtoResponse) => securityResponse,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
