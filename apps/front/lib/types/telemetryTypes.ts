@@ -48,3 +48,80 @@ export interface LatestSystemMetrics {
   disk: number;
   time?: string;
 }
+
+export interface NotificationRequestId {
+  entityType: string;
+  id: string;
+}
+
+export interface NotificationRecipientId {
+  entityType: string;
+  id: string;
+}
+
+export interface NotificationInfo {
+  type: string;
+  entityId?: {
+    entityType: string;
+    id: string;
+  };
+  entityName?: string;
+  actionType?: string;
+  entityCustomerId?: {
+    entityType: string;
+    id: string;
+  };
+  userId?: string;
+  userTitle?: string;
+  userEmail?: string;
+  userFirstName?: string;
+  userLastName?: string;
+  stateEntityId?: {
+    entityType: string;
+    id: string;
+  };
+  affectedCustomerId?: {
+    entityType: string;
+    id: string;
+  };
+  dashboardId?: string;
+  status: string;
+  id: {
+    entityType: string;
+    id: string;
+  };
+  createdTime: number;
+}
+
+export interface NotificationAdditionalConfig {
+  icon?: {
+    enabled: boolean;
+    icon: string;
+    color: string;
+  };
+  actionButtonConfig?: {
+    enabled: boolean;
+    text: string;
+    linkType: string;
+    link: string;
+  };
+}
+
+export interface Notification {
+  requestId: NotificationRequestId;
+  recipientId: NotificationRecipientId;
+  type: string;
+  deliveryMethod: string;
+  subject: string;
+  text: string;
+  additionalConfig?: NotificationAdditionalConfig;
+  info?: NotificationInfo;
+  status: string;
+  id: {
+    entityType: string;
+    id: string;
+  };
+  createdTime: number;
+  read?: boolean; // Frontend state
+}
+

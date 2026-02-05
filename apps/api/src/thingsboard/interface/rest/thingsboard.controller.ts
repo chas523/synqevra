@@ -62,6 +62,8 @@ import { SecuritySettingsDto } from './dtos/request/thingsboard-security-setting
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from './dtos/response/thingsboard-security-settings.response.dto';
 import { FetchSecuritySettingsQuery } from 'src/thingsboard/application/queries/fetch-security-settings/fetch-security-settings.query';
 import { UpdateSecuritySettingsCommand } from 'src/thingsboard/application/commands/update-security-settings/update-security-settings.command';
+import { DashboardVersionResponse } from './dtos/response/thingsboard-version.response.dto';
+import { FetchVersionQuery } from 'src/thingsboard/application/queries/fetch-version/fetch-version.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -535,6 +537,35 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (securityResponse: SecuritySettingsDtoResponse) => securityResponse,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/updates')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get current and newest version',
+    description:
+      'Get current and newest version of thingsboard - get updates info',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Security settings updated successfully',
+    type: DashboardVersionResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  async getCurrentVersion() {
+    const query = new FetchVersionQuery();
+    const result: Result<DashboardVersionResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (result: DashboardVersionResponse) => result,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

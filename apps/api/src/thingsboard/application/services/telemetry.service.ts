@@ -26,7 +26,7 @@ export class TelemetryService {
     private readonly thingsboardApi: ThingsboardApiPort,
 
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   setMessageHandler(handler: (msg: TelemetryResponse) => void): void {
     this.telemetryPort.setMessageHandler(handler);
@@ -35,7 +35,7 @@ export class TelemetryService {
   async connect(accessToken: string): Promise<void> {
     // after implementing admin dashboard remove const token = await this.connectAsSysadmin();
     const token = await this.connectAsSysadmin();
-    const result = await this.telemetryPort.connect(token);
+    const result = await this.telemetryPort.connect(accessToken);
     if (result.isErr()) {
       throw result.unwrapErr();
     }
@@ -73,7 +73,7 @@ export class TelemetryService {
     }
   }
 
-  unsubscribe(cmdIdTypes: Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA'>): void {
+  unsubscribe(cmdIdTypes: Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA' | "NOTIFICATIONS_COUNT" | "NOTIFICATIONS">): void {
     const result = this.telemetryPort.unsubscribe(cmdIdTypes);
     if (result.isErr()) {
       throw result.unwrapErr();

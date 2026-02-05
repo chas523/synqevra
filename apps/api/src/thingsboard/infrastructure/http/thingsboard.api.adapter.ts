@@ -31,6 +31,7 @@ import { GetTenantsResponse } from '../../interface/rest/dtos/response/thingsboa
 import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-users.response.dto';
 import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
 import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
+import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -831,6 +832,28 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         'ThingsboardApiAdapter',
       );
       throw error;
+    }
+  }
+
+  async fetchDashboardVersion(
+    sysadminAccessToken: string,
+  ): Promise<DashboardVersionResponse> {
+    const url = `${this.THINGSBOARD_API_URL}/admin/updates`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<DashboardVersionResponse>(url, {
+          headers: { Authorization: `Bearer ${sysadminAccessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch tenants',
+        error,
+        this.logger,
+      );
     }
   }
 }

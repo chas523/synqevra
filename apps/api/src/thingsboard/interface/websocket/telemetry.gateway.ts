@@ -14,6 +14,11 @@ import { TelemetryService } from '../../application/services/telemetry.service';
 import { DashboardQueries } from '../../application/services/dashboard-queries';
 import { TelemetryParserService } from '../../application/services/telemetry-parser.service';
 import { TelemetryResponse } from 'src/thingsboard/interface/websocket/types/telemetry.types';
+import {
+  NotificationCountCommand,
+  NotificationsCommand,
+  MarkNotificationsReadCommand,
+} from 'src/thingsboard/interface/websocket/types/telemetry.types';
 import { ThingsboardWsAuthGuard } from 'src/auth/guards/thingsboard-ws-auth/thingsboard-ws-auth.guard';
 import { WsTbAccessToken } from 'src/auth/decorators/ws-tb-access-token.decorator';
 
@@ -28,8 +33,7 @@ import { WsTbAccessToken } from 'src/auth/decorators/ws-tb-access-token.decorato
   },
 })
 export class TelemetryGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -40,7 +44,7 @@ export class TelemetryGateway
   private cmdIdToTopic = new Map<number, string>();
   private cmdIdToCommandType = new Map<
     number,
-    'ENTITY_COUNT' | 'ENTITY_DATA'
+    'ENTITY_COUNT' | 'ENTITY_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS'
   >();
   private clientSubscriptions = new Map<string, Set<number>>();
   private activeSubscriptions = new Set<number>();
@@ -48,7 +52,7 @@ export class TelemetryGateway
   constructor(
     private readonly telemetryService: TelemetryService,
     private readonly parserService: TelemetryParserService,
-  ) {}
+  ) { }
 
   handleConnection(client: Socket) {
     this.logger.log(`client connected: ${client.id}`);
@@ -82,7 +86,13 @@ export class TelemetryGateway
       }
 
       if (cmdIdsToUnsubscribe.size > 0) {
-        const cmdIdTypes = new Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA'>();
+        const cmdIdTypes = new Map<
+          number,
+          | 'ENTITY_COUNT'
+          | 'ENTITY_DATA'
+          | 'NOTIFICATIONS_COUNT'
+          | 'NOTIFICATIONS'
+        >();
         for (const cmdId of cmdIdsToUnsubscribe) {
           const type = this.cmdIdToCommandType.get(cmdId);
           if (type) {
@@ -280,6 +290,103 @@ export class TelemetryGateway
     }
   }
 
+
+  @UseGuards(ThingsboardWsAuthGuard)
+  @SubscribeMessage('notifications-count')
+  handleNotificationsCount(@ConnectedSocket() client: Socket) {
+    try {
+      if (!this.isThingsboardConnected) {
+        client.emit('error', { message: 'not connected to thingsboard' });
+        return;
+      }
+
+      if (!this.clientSubscriptions.has(client.id)) {
+        this.clientSubscriptions.set(client.id, new Set());
+      }
+      const clientSubs = this.clientSubscriptions.get(client.id)!;
+
+      const cmdId = 1;
+      this.cmdIdToTopic.set(cmdId, 'notifications-count');
+      this.cmdIdToCommandType.set(cmdId, 'NOTIFICATIONS_COUNT');
+      this.activeSubscriptions.add(cmdId);
+      clientSubs.add(cmdId);
+
+      const command: NotificationCountCommand = {
+        type: 'NOTIFICATIONS_COUNT',
+        cmdId: cmdId,
+      };
+      this.telemetryService.sendCommands([command]);
+    } catch (error) {
+      this.logger.error('notifications-count error:', error);
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @UseGuards(ThingsboardWsAuthGuard)
+  @SubscribeMessage('notifications')
+  handleNotifications(@ConnectedSocket() client: Socket) {
+    try {
+      if (!this.isThingsboardConnected) {
+        client.emit('error', { message: 'not connected to thingsboard' });
+        return;
+      }
+
+      if (!this.clientSubscriptions.has(client.id)) {
+        this.clientSubscriptions.set(client.id, new Set());
+      }
+      const clientSubs = this.clientSubscriptions.get(client.id)!;
+
+      const cmdId = 10;
+      this.cmdIdToTopic.set(cmdId, 'notifications');
+      this.cmdIdToCommandType.set(cmdId, 'NOTIFICATIONS');
+      this.activeSubscriptions.add(cmdId);
+      clientSubs.add(cmdId);
+
+      const command: NotificationsCommand = {
+        type: 'NOTIFICATIONS',
+        limit: 6,
+        types: [],
+        cmdId: cmdId,
+      };
+      this.telemetryService.sendCommands([command]);
+    } catch (error) {
+      this.logger.error('notifications error:', error);
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @UseGuards(ThingsboardWsAuthGuard)
+  @SubscribeMessage('mark-notifications-read')
+  handleMarkNotificationsAsRead(
+    @MessageBody() data: { notifications: string[] },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      if (!this.isThingsboardConnected) {
+        client.emit('error', { message: 'not connected to thingsboard' });
+        return;
+      }
+
+      if (!data.notifications || !Array.isArray(data.notifications)) {
+        return;
+      }
+
+      const cmdId = 11;
+      // We don't subscribe to cmdId 11 (it's a one-off action), but we might map it just in case
+      this.cmdIdToTopic.set(cmdId, 'mark-notifications-read');
+
+      const command: MarkNotificationsReadCommand = {
+        type: 'MARK_NOTIFICATIONS_AS_READ',
+        notifications: data.notifications,
+        cmdId: cmdId,
+      };
+      this.telemetryService.sendCommands([command]);
+    } catch (error) {
+      this.logger.error('mark-notifications-read error:', error);
+      client.emit('error', { message: error.message });
+    }
+  }
+
   private isTelemetryResponse(msg: unknown): msg is TelemetryResponse {
     return (
       typeof msg === 'object' &&
@@ -331,6 +438,27 @@ export class TelemetryGateway
               `transportMsgCountHourly: ${parsed.length} records`,
             );
             this.server.emit('transportMsgCountHourly', parsed);
+          }
+          break;
+        }
+
+        case 'notifications-count': {
+          const parsed = this.parserService.parseNotificationCount(msg);
+          if (parsed) {
+            this.logger.debug(
+              `notifications-count: ${parsed.count} (cmdId: ${parsed.cmdId})`,
+            );
+            this.server.emit('notifications-count', parsed);
+          }
+          break;
+        }
+        case 'notifications': {
+          const parsed = this.parserService.parseNotifications(msg);
+          if (parsed) {
+            this.logger.debug(
+              `notifications: ${parsed.notifications.length} items (count: ${parsed.count})`,
+            );
+            this.server.emit('notifications', parsed);
           }
           break;
         }

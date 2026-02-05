@@ -8,9 +8,10 @@ import logo from "@/public/logo.svg";
 import logoWhite from "@/public/logo-white.svg";
 import { useLogout } from "@/hooks/auth/useAuth";
 import { Button } from "../ui/button";
-import { LogOutIcon, Moon, Sun, Loader2 } from "lucide-react";
+import { LogOutIcon, Moon, Sun, Loader2, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import NotificationButton from "../molecules/NotificationButton";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -72,6 +73,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                 className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity hidden dark:block"
               />
             </Link>
+
             <Button
               size="icon"
               variant="outline"
@@ -125,9 +127,11 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
         <AppSidebar />
         <SidebarInset className="bg-transparent">
           {/* <SidebarInset className="h-screen overflow-hidden flex flex-col bg-transparent"> */}
-          <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-10">
+          <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-20">
             <SidebarTrigger className="-ml-1 text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-black" />
             <div className="flex items-center gap-3">
+              <NotificationButton />
+
               <Button
                 size="icon"
                 variant="outline"
