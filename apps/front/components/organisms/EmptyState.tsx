@@ -1,4 +1,4 @@
-import {TextWithVariant as Text} from "@/components/atoms/TextWithVariant";
+import {Text} from "@/components/atoms/Text";
 
 interface EmptyStateProps {
   icon: React.ReactNode;

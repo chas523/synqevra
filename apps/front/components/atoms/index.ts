@@ -16,7 +16,5 @@ export type { LoadingButtonProps } from "./LoadingButton";
 export { default as LoadingButton } from "./LoadingButton";
 export type { StatusBadgeProps } from "./StatusBadge";
 export { default as StatusBadge } from "./StatusBadge";
-export type { TextProps } from "./Text";
-export { default as Text } from "./Text";
-export { TextWithVariant } from "./TextWithVariant";
+export { Text } from "./Text";
 export { ErrorMessageAtom } from "./ErrorMessage";

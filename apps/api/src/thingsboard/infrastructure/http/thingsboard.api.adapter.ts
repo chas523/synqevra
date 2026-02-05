@@ -48,7 +48,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly medplum: MedplumClientPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -641,6 +641,18 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  private stripHtmlTags(html: string): string {
+    return html
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+      .replace(/&lt;/g, '<') // Replace &lt; with <
+      .replace(/&gt;/g, '>') // Replace &gt; with >
+      .replace(/&amp;/g, '&') // Replace &amp; with &
+      .replace(/&quot;/g, '"') // Replace &quot; with "
+      .replace(/&#39;/g, "'") // Replace &#39; with '
+      .trim();
+  }
+
   async fetchNotifications(
     sysAdminAccessToken: string,
     page: number,
@@ -653,10 +665,21 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
         }),
       );
-      return response.data;
+
+      // Strip HTML tags from notification text and subject
+      const cleanedData = {
+        ...response.data,
+        data: response.data.data.map((notification) => ({
+          ...notification,
+          text: notification.text ? this.stripHtmlTags(notification.text) : notification.text,
+          subject: notification.subject ? this.stripHtmlTags(notification.subject) : notification.subject,
+        })),
+      };
+
+      return cleanedData;
     } catch (error) {
       ThingsboardApiException.createException(
-        'Failed to fetch tenants',
+        'Failed to fetch notifications',
         error,
         this.logger,
       );

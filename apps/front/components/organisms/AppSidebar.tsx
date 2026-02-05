@@ -80,10 +80,10 @@ export default function AppSidebar() {
               {MENU_ITEMS.map(({ href, icon: Icon, label }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild>
-                    <a href={href}>
+                    <Link href={href}>
                       <Icon />
                       <span>{label}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

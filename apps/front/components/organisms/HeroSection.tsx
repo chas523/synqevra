@@ -1,5 +1,5 @@
 import Heading from "../atoms/Heading";
-import Text from "../atoms/Text";
+import { Text } from "../atoms";
 
 export interface HeroSectionProps {
   title: string;
@@ -28,14 +28,15 @@ const HeroSection = ({
       >
         {title}
       </Heading>
-      <Text
-        size="md"
-        color="muted"
-        align="center"
-        className="mb-6 max-w-2xl mx-auto drop-shadow-md"
-      >
-        {description}
-      </Text>
+      <div className="text-center">
+        <Text
+          size="base"
+          color="muted"
+          className="mb-6 max-w-2xl mx-auto drop-shadow-md block"
+        >
+          {description}
+        </Text>
+      </div>
     </div>
   );
 };

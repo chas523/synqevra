@@ -26,4 +26,10 @@ export const SORT_OPTIONS = {
     { value: "name-asc", label: "Name A-Z" },
     { value: "name-desc", label: "Name Z-A" },
   ],
+  NOTIFICATIONS: [
+    { value: "createdTime-desc", label: "Newest First" },
+    { value: "createdTime-asc", label: "Oldest First" },
+    { value: "subject-asc", label: "Subject A-Z" },
+    { value: "subject-desc", label: "Subject Z-A" },
+  ],
 } as const;

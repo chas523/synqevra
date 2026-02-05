@@ -1,62 +1,62 @@
-export interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  size?: "xs" | "sm" | "md" | "lg";
+import { cn } from "@/lib/utils";
+
+interface TextProps {
+  children: React.ReactNode;
+  variant?: "body" | "caption" | "label" | "heading";
+  weight?: "normal" | "medium" | "semibold";
   color?: "default" | "muted" | "error" | "success";
-  weight?: "normal" | "medium" | "semibold" | "bold";
-  align?: "left" | "center" | "right";
+  size?: "xs" | "sm" | "base" | "lg" | "xl";
+  className?: string;
 }
 
-const Text = ({
-  size = "md",
-  color = "default",
-  weight = "normal",
-  align = "left",
-  className = "",
+export const Text = ({
   children,
-  ...props
+  variant = "body",
+  weight = "normal",
+  color = "default",
+  size,
+  className,
 }: TextProps) => {
-  const baseStyles: string[] = [];
-
-  const sizeStyles = {
-    xs: ["text-xs"],
-    sm: ["text-sm"],
-    md: ["text-sm", "md:text-base"],
-    lg: ["text-base", "md:text-lg"],
+  const variantClasses = {
+    body: "text-sm sm:text-base",
+    caption: "text-xs sm:text-sm",
+    label: "text-sm font-medium",
+    heading: "text-lg sm:text-xl font-medium",
   };
 
-  const colorStyles = {
-    default: ["text-gray-900", "dark:text-white"],
-    muted: ["text-gray-600", "dark:text-gray-300"],
-    error: ["text-red-600", "dark:text-red-400"],
-    success: ["text-green-600", "dark:text-green-400"],
+  const weightClasses = {
+    normal: "font-normal",
+    medium: "font-medium",
+    semibold: "font-semibold",
   };
 
-  const weightStyles = {
-    normal: ["font-normal"],
-    medium: ["font-medium"],
-    semibold: ["font-semibold"],
-    bold: ["font-bold"],
+  const colorClasses = {
+    default: "text-gray-900 dark:text-gray-100",
+    muted: "text-gray-600 dark:text-gray-400",
+    error: "text-red-600 dark:text-red-400",
+    success: "text-green-600 dark:text-green-400",
   };
 
-  const alignStyles = {
-    left: ["text-left"],
-    center: ["text-center"],
-    right: ["text-right"],
-  };
-
-  const allStyles = [
-    ...baseStyles,
-    ...sizeStyles[size],
-    ...colorStyles[color],
-    ...weightStyles[weight],
-    ...alignStyles[align],
-    className,
-  ];
+  const sizeClasses = size
+    ? {
+      xs: "text-xs",
+      sm: "text-sm",
+      base: "text-base",
+      lg: "text-lg",
+      xl: "text-xl",
+    }[size]
+    : undefined;
 
   return (
-    <p className={allStyles.join(" ")} {...props}>
+    <span
+      className={cn(
+        size ? sizeClasses : variantClasses[variant],
+        weightClasses[weight],
+        colorClasses[color],
+        className,
+      )}
+    >
       {children}
-    </p>
+    </span>
   );
 };
-
-export default Text;

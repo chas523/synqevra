@@ -1,5 +1,5 @@
 import Heading from "../atoms/Heading";
-import Text from "../atoms/Text";
+import { Text } from "../atoms";
 import { StatusIcon } from "../molecules";
 
 export interface SuccessMessageProps {
@@ -25,9 +25,11 @@ const SuccessMessage = ({
         {title}
       </Heading>
 
-      <Text size="sm" color="muted" align="center">
-        {description}
-      </Text>
+      <div className="text-center">
+        <Text size="sm" color="muted">
+          {description}
+        </Text>
+      </div>
     </div>
   );
 };

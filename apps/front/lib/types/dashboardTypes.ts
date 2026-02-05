@@ -125,3 +125,33 @@ export interface DeviceData extends Record<string, unknown> {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface NotificationInfo {
+  dashboardId: EntityId;
+  stateEntityId: EntityId;
+  type: string;
+}
+
+export interface Notification {
+  requestId: EntityId;
+  recipientId: EntityId;
+  type?: string;
+  deliveryMethod?: string;
+  subject?: string;
+  text?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: <>
+  additionalConfig?: Record<string, any>;
+  info: NotificationInfo;
+  status?: string;
+  id: EntityId;
+  createdTime?: number;
+}
+
+export interface NotificationsRequestOptions extends Record<string, unknown> {
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  limit?: number;
+  page?: number;
+  afterRef?: string;
+  beforeRef?: string;
+}

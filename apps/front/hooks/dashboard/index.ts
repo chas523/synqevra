@@ -8,3 +8,4 @@ export { useSortFilter } from "./useSortFilter";
 export { useTenants } from "./useTenants";
 export { useTenantUsers } from "./useTenantUsers";
 export { useTenantDevices } from "./useTenantDevices";
+export { useNotifications } from "./useNotifications";

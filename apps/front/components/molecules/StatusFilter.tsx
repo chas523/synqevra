@@ -1,4 +1,4 @@
-import { TextWithVariant as Text } from "../atoms";
+import { Text } from "../atoms";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface StatusFilterOption {
