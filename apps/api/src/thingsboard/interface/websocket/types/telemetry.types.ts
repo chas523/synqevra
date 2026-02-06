@@ -137,7 +137,10 @@ export type UnsubscribeCommand =
 export type TelemetryCommand =
   | EntityCountCommand
   | EntityDataCommand
-  | UnsubscribeCommand;
+  | UnsubscribeCommand
+  | NotificationCountCommand
+  | NotificationsCommand
+  | MarkNotificationsReadCommand;
 
 export interface WebSocketMessage {
   cmds?: TelemetryCommand[];
@@ -193,5 +196,121 @@ export interface TelemetryResponse {
   errorCode: number;
   errorMsg: string | null;
   allowedEntities?: number;
-  cmdUpdateType: 'ENTITY_DATA' | 'COUNT_DATA';
+  cmdUpdateType: 'ENTITY_DATA' | 'COUNT_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS';
+}
+
+// ============================================================================
+// Notification Types
+// ============================================================================
+
+export interface NotificationRequestId {
+  entityType: string;
+  id: string;
+}
+
+export interface NotificationRecipientId {
+  entityType: string;
+  id: string;
+}
+
+export interface NotificationInfo {
+  type: string;
+  entityId?: {
+    entityType: string;
+    id: string;
+  };
+  entityName?: string;
+  actionType?: string;
+  entityCustomerId?: {
+    entityType: string;
+    id: string;
+  };
+  userId?: string;
+  userTitle?: string;
+  userEmail?: string;
+  userFirstName?: string;
+  userLastName?: string;
+  stateEntityId?: {
+    entityType: string;
+    id: string;
+  };
+  affectedCustomerId?: {
+    entityType: string;
+    id: string;
+  };
+  dashboardId?: string;
+  status: string;
+  id: {
+    entityType: string;
+    id: string;
+  };
+  createdTime: number;
+}
+
+export interface NotificationAdditionalConfig {
+  icon?: {
+    enabled: boolean;
+    icon: string;
+    color: string;
+  };
+  actionButtonConfig?: {
+    enabled: boolean;
+    text: string;
+    linkType: string;
+    link: string;
+  };
+}
+
+export interface Notification {
+  requestId: NotificationRequestId;
+  recipientId: NotificationRecipientId;
+  type: string;
+  deliveryMethod: string;
+  subject: string;
+  text: string;
+  additionalConfig?: NotificationAdditionalConfig;
+  info?: NotificationInfo;
+  status: string;
+  id: {
+    entityType: string;
+    id: string;
+  };
+  createdTime: number;
+}
+
+export interface NotificationsResponse {
+  cmdId: number;
+  errorCode: number;
+  errorMsg: string | null;
+  notifications: Notification[];
+  totalUnreadCount: number;
+  sequenceNumber: number;
+  cmdUpdateType: 'NOTIFICATIONS';
+}
+
+export interface NotificationsCountResponse {
+  cmdId: number;
+  errorCode: number;
+  errorMsg: string | null;
+  totalUnreadCount: number;
+  sequenceNumber: number;
+  cmdUpdateType: 'NOTIFICATIONS_COUNT';
+}
+
+export interface NotificationCountCommand {
+  type: 'NOTIFICATIONS_COUNT';
+  cmdId: number;
+}
+
+export interface NotificationsCommand {
+  type: 'NOTIFICATIONS';
+  limit: number;
+  types?: string[];
+  cmdId: number;
+}
+
+export interface MarkNotificationsReadCommand {
+  type: 'MARK_NOTIFICATIONS_AS_READ';
+  notifications: string[]; // array of notification IDs
+  cmdId: number;
 }

@@ -18,7 +18,7 @@ export class ThingsboardTelemetryAdapter implements ThingsboardTelemetryPort {
   private authenticated = false;
   private messageHandler: ((msg: TelemetryResponse) => void) | null = null;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) { }
 
   isConnected(): boolean {
     return (
@@ -116,7 +116,10 @@ export class ThingsboardTelemetryAdapter implements ThingsboardTelemetryPort {
   }
 
   unsubscribe(
-    cmdIdTypes: Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA'>,
+    cmdIdTypes: Map<
+      number,
+      'ENTITY_COUNT' | 'ENTITY_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS'
+    >,
   ): Result<void, Error> {
     if (!this.isConnected() || !this.ws) {
       return Err(new Error('not connected to websocket'));

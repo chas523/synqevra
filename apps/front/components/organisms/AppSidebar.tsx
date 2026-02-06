@@ -1,4 +1,12 @@
-import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
+import {
+  Building2,
+  Home,
+  LayoutDashboard,
+  PersonStanding,
+  Settings,
+  Stethoscope,
+  UserRoundCog,
+} from "lucide-react";
 import Image from "next/image";
 
 import Link from "next/link";
@@ -16,30 +24,28 @@ import {
   SidebarMenuItem,
 } from "../ui/sidebar";
 
-const MENU_ITEMS = [
-  { href: "/", icon: Home, label: "Landing Page" },
-  { href: "/devices", icon: Settings, label: "Devices" },
-  { href: "/patients", icon: PersonStanding, label: "Patients" },
-  { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
-  { href: "/dashboard", icon: PersonStanding, label: "Dashboard" },
-
-  {
-    href: "/dashboard/requestedUsers",
-    icon: PersonStanding,
-    label: "Pending Users",
-  },
-  {
-    href: "/dashboard/activeUsers",
-    icon: PersonStanding,
-    label: "Active Users",
-  },
-  {
-    href: "/settings",
-    icon: Settings,
-    label: "Settings",
-  },
-    { href: "/dashboard/tenants", icon: PersonStanding, label: "Tenants" },
-];
+const MENU_ITEMS = {
+  admin: [
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
+    {
+      href: "/dashboard/requestedUsers",
+      icon: UserRoundCog,
+      label: "Pending Users",
+    },
+    {
+      href: "/settings",
+      icon: Settings,
+      label: "Settings",
+    },
+  ],
+  user: [
+    { href: "/", icon: Home, label: "Landing Page" },
+    { href: "/devices", icon: Settings, label: "Devices" },
+    { href: "/patients", icon: PersonStanding, label: "Patients" },
+    { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+  ],
+};
 
 export default function AppSidebar() {
   return (
@@ -74,10 +80,28 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {MENU_ITEMS.map(({ href, icon: Icon, label }) => (
+              {MENU_ITEMS.admin.map(({ href, icon: Icon, label }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton asChild>
+                    <a href={href}>
+                      <Icon />
+                      <span>{label}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>User</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {MENU_ITEMS.user.map(({ href, icon: Icon, label }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild>
                     <a href={href}>

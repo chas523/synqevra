@@ -1,17 +1,28 @@
+"use client";
+
 import React from "react";
 import { Check } from "lucide-react";
 import { Button } from "../ui/button";
+import { useDashboardVersion } from "@/hooks/thingsboard/dashboard/useDashboardVersion";
+import { LoadingSpinner } from "../atoms/LoadingSpinner";
+import { extractErrorMessage } from "@/lib/utils";
+import ErrorMessage from "./ErrorMessage";
 
-interface VersionProps {
-  currentVersion?: string;
-  availableVersion?: string;
-}
+export function Version() {
+  const { data: version, isLoading, error } = useDashboardVersion();
 
-export function Version({
-  currentVersion = "4.2.0",
-  availableVersion = "4.2.1.1",
-}: VersionProps) {
-  const isUpToDate = currentVersion === availableVersion;
+  if (isLoading) {
+    return (
+      <div className="flex h-full justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+  if (error) {
+    <ErrorMessage message={extractErrorMessage(error)} />;
+  }
+
+  const isUpToDate = version!.currentVersion === version!.latestVersion;
 
   return (
     <>
@@ -25,13 +36,13 @@ export function Version({
             <div className="text-muted-foreground text-[9px] mb-0.5">
               Current
             </div>
-            <div className="text-xs font-bold">{currentVersion}</div>
+            <div className="text-xs font-bold">{version!.currentVersion}</div>
           </div>
           <div>
             <div className="text-muted-foreground text-[9px] mb-0.5">
               Available
             </div>
-            <div className="text-xs font-bold">{availableVersion}</div>
+            <div className="text-xs font-bold">{version!.latestVersion}</div>
           </div>
         </div>
         {!isUpToDate && (
@@ -39,8 +50,9 @@ export function Version({
             variant="outline"
             size="sm"
             className="w-full text-[9px] h-6 px-2"
+            asChild
           >
-            Contact us
+            <a href="mailto:support@example.com">Contact us</a>
           </Button>
         )}
       </div>

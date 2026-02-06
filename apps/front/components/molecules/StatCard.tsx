@@ -7,6 +7,7 @@ interface StatCardProps {
   value: string | number;
   subtitle?: string;
   addButton?: boolean;
+  onAddClick?: () => void;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export function StatCard({
   value,
   subtitle,
   addButton,
+  onAddClick,
   className,
 }: StatCardProps) {
   return (
@@ -30,7 +32,10 @@ export function StatCard({
             {label}
           </span>
           {addButton && (
-            <Plus className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground flex-shrink-0" />
+            <Plus
+              className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground flex-shrink-0"
+              onClick={onAddClick}
+            />
           )}
         </div>
       </CardHeader>

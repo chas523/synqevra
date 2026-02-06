@@ -38,6 +38,7 @@ import { FetchTenantsQueryHandler } from './application/queries/fetch-tenants/fe
 import { FetchTenantUsersQueryHandler } from './application/queries/fetch-users-by-tenant/fetch-tenant-users.query-handler';
 import { FetchTenantDevicesQueryHandler } from './application/queries/fetch-tenant-devices/fetch-tenant-devices.query-handler';
 import { FetchNotificationsQueryHandler } from './application/queries/fetch-notifications/fetch-notifications.query-handler';
+import { FetchVersionQueryHandler } from './application/queries/fetch-version/fetch-version.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -66,6 +67,7 @@ const queryHandlers = [
   FetchTenantDevicesQueryHandler,
   FetchNotificationsQueryHandler,
   FetchSecuritySettingsQueryHandler,
+  FetchVersionQueryHandler,
 ];
 
 @Module({
