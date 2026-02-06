@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useCallback,
 } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -13,8 +14,10 @@ interface TelemetryContextType {
   socket: Socket | null;
   isConnected: boolean;
   isThingsboardConnected: boolean;
+  reconnect: () => void;
   requestEntityCount: () => void;
   requestSystemMetrics: () => void;
+  requestMsgCount: () => void;
   requestNotificationsCount: () => void;
   requestNotifications: () => void;
   markNotificationsAsRead: (ids: string[]) => void;
@@ -67,25 +70,17 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
       console.log("disconnected from backend");
       setIsConnected(false);
       setIsThingsboardConnected(false);
+      hasRequestedEntityCount.current = false;
+      hasRequestedSystemMetrics.current = false;
+      hasRequestedNotificationsCount.current = false;
+      hasRequestedNotifications.current = false;
+      hasRequestedMsgCount.current = false;
     });
 
     socket.on("thingsboard-connected", () => {
       console.log("thingsboard connected");
       setIsThingsboardConnected(true);
 
-      if (!hasRequestedEntityCount.current) {
-        socket.emit("entity-count");
-        hasRequestedEntityCount.current = true;
-      }
-
-      if (!hasRequestedSystemMetrics.current) {
-        socket.emit("systemMetricsChart");
-        hasRequestedSystemMetrics.current = true;
-      }
-      if (!hasRequestedMsgCount.current) {
-        socket.emit("transportMsgCountHourly");
-        hasRequestedSystemMetrics.current = true;
-      }
       if (!hasRequestedNotificationsCount.current) {
         socket.emit("notifications-count");
         hasRequestedNotificationsCount.current = true;
@@ -99,6 +94,7 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
       hasRequestedSystemMetrics.current = false;
       hasRequestedNotificationsCount.current = false;
       hasRequestedNotifications.current = false;
+      hasRequestedMsgCount.current = false;
     });
 
     socket.on("thingsboard-error", (data: { message: string }) => {
@@ -123,54 +119,60 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const requestEntityCount = () => {
-    if (socketRef.current && isThingsboardConnected) {
-      if (hasRequestedEntityCount.current) {
-        return;
-      }
+  const reconnect = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current.connect();
+    }
+  }, []);
 
+  const requestEntityCount = useCallback(() => {
+    if (socketRef.current && isThingsboardConnected) {
+      if (hasRequestedEntityCount.current) return;
       socketRef.current.emit("entity-count");
       hasRequestedEntityCount.current = true;
     }
-  };
+  }, [isThingsboardConnected]);
 
-  const requestSystemMetrics = () => {
+  const requestSystemMetrics = useCallback(() => {
     if (socketRef.current && isThingsboardConnected) {
-      if (hasRequestedSystemMetrics.current) {
-        return;
-      }
-
+      if (hasRequestedSystemMetrics.current) return;
       socketRef.current.emit("systemMetricsChart");
       hasRequestedSystemMetrics.current = true;
     }
-  };
+  }, [isThingsboardConnected]);
 
-  const requestNotificationsCount = () => {
+  const requestMsgCount = useCallback(() => {
     if (socketRef.current && isThingsboardConnected) {
-      if (hasRequestedNotificationsCount.current) {
-        return;
-      }
+      if (hasRequestedMsgCount.current) return;
+      socketRef.current.emit("transportMsgCountHourly");
+      hasRequestedMsgCount.current = true;
+    }
+  }, [isThingsboardConnected]);
+
+  const requestNotificationsCount = useCallback(() => {
+    if (socketRef.current && isThingsboardConnected) {
+      if (hasRequestedNotificationsCount.current) return;
       socketRef.current.emit("notifications-count");
       hasRequestedNotificationsCount.current = true;
     }
-  };
+  }, [isThingsboardConnected]);
 
-  const requestNotifications = () => {
+  const requestNotifications = useCallback(() => {
     if (socketRef.current && isThingsboardConnected) {
-      // Allow re-requesting notifications list on demand (e.g. click)
-      // but if we want strictly once per session logic, uncomment check:
-      // if (hasRequestedNotifications.current) return;
-
       socketRef.current.emit("notifications");
       hasRequestedNotifications.current = true;
     }
-  };
+  }, [isThingsboardConnected]);
 
-  const markNotificationsAsRead = (ids: string[]) => {
-    if (socketRef.current && isThingsboardConnected) {
-      socketRef.current.emit("mark-notifications-read", { notifications: ids });
-    }
-  };
+  const markNotificationsAsRead = useCallback(
+    (ids: string[]) => {
+      if (socketRef.current && isThingsboardConnected) {
+        socketRef.current.emit("mark-notifications-read", { notifications: ids });
+      }
+    },
+    [isThingsboardConnected]
+  );
 
   return (
     <TelemetryContext.Provider
@@ -178,8 +180,10 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
         socket: socketRef.current,
         isConnected,
         isThingsboardConnected,
+        reconnect,
         requestEntityCount,
         requestSystemMetrics,
+        requestMsgCount,
         requestNotificationsCount,
         requestNotifications,
         markNotificationsAsRead,

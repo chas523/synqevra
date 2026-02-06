@@ -7,6 +7,7 @@ import type { Notification } from "@/lib/types/telemetryTypes";
 export function useNotifications() {
     const {
         socket,
+        isThingsboardConnected,
         requestNotificationsCount,
         requestNotifications,
         markNotificationsAsRead,
@@ -18,9 +19,6 @@ export function useNotifications() {
 
     useEffect(() => {
         if (!socket) return;
-
-        // Initial request for count
-        requestNotificationsCount();
 
         const handleNotificationsCount = (data: { count: number }) => {
             setUnreadCount(data.count);
@@ -42,7 +40,7 @@ export function useNotifications() {
             socket.off("notifications-count", handleNotificationsCount);
             socket.off("notifications", handleNotifications);
         };
-    }, [socket, requestNotificationsCount]);
+    }, [socket]);
 
     const fetchNotifications = () => {
         setIsLoading(true);
