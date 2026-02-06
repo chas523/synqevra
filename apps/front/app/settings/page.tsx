@@ -1,9 +1,5 @@
-"use client";
-import SettingsPage from "@/components/pages/SettingsPage";
-import React from "react";
+import SystemSettingsPage from "@/components/pages/SystemSettingsPage";
 
-const Settings = () => {
-  return <SettingsPage />;
-};
-
-export default Settings;
+export default function SettingsRoute() {
+    return <SystemSettingsPage />;
+}

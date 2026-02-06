@@ -64,6 +64,14 @@ import { FetchSecuritySettingsQuery } from 'src/thingsboard/application/queries/
 import { UpdateSecuritySettingsCommand } from 'src/thingsboard/application/commands/update-security-settings/update-security-settings.command';
 import { DashboardVersionResponse } from './dtos/response/thingsboard-version.response.dto';
 import { FetchVersionQuery } from 'src/thingsboard/application/queries/fetch-version/fetch-version.query';
+import { GeneralSettingsDto } from './dtos/response/general-settings.response.dto';
+import { GeneralSettingsRequestDto } from './dtos/request/general-settings.request.dto';
+import { FetchGeneralSettingsQuery } from 'src/thingsboard/application/queries/fetch-general-settings/fetch-general-settings.query';
+import { UpdateGeneralSettingsCommand } from 'src/thingsboard/application/commands/update-general-settings/update-general-settings.command';
+import { ConnectivitySettingsDto } from './dtos/response/connectivity-settings.response.dto';
+import { ConnectivitySettingsRequestDto } from './dtos/request/connectivity-settings.request.dto';
+import { FetchConnectivitySettingsQuery } from 'src/thingsboard/application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query';
+import { UpdateConnectivitySettingsCommand } from 'src/thingsboard/application/commands/update-connectivity-settings/update-connectivity-settings.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -72,7 +80,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -566,6 +574,150 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (result: DashboardVersionResponse) => result,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/settings/general')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get general settings',
+    description: 'Retrieve general settings including base URL configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'General settings retrieved successfully',
+    type: GeneralSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch general settings',
+  })
+  async getGeneralSettings() {
+    const query = new FetchGeneralSettingsQuery();
+    const result: Result<GeneralSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: GeneralSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/general')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update general settings',
+    description: 'Update general settings including base URL configuration',
+  })
+  @ApiBody({
+    type: GeneralSettingsRequestDto,
+    description: 'General settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'General settings updated successfully',
+    type: GeneralSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update general settings',
+  })
+  async updateGeneralSettings(@Body() settings: GeneralSettingsRequestDto) {
+    const command = new UpdateGeneralSettingsCommand(settings);
+    const result: Result<GeneralSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: GeneralSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/settings/connectivity')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get connectivity settings',
+    description: 'Retrieve device connectivity settings for all protocols',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connectivity settings retrieved successfully',
+    type: ConnectivitySettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch connectivity settings',
+  })
+  async getConnectivitySettings() {
+    const query = new FetchConnectivitySettingsQuery();
+    const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: ConnectivitySettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/connectivity')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update connectivity settings',
+    description: 'Update device connectivity settings for all protocols',
+  })
+  @ApiBody({
+    type: ConnectivitySettingsRequestDto,
+    description: 'Connectivity settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connectivity settings updated successfully',
+    type: ConnectivitySettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update connectivity settings',
+  })
+  async updateConnectivitySettings(@Body() settings: ConnectivitySettingsRequestDto) {
+    const command = new UpdateConnectivitySettingsCommand(settings);
+    const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: ConnectivitySettingsDto) => settings,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

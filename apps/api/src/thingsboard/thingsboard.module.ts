@@ -27,6 +27,8 @@ import { RefreshTokenCommandHandler } from './application/commands/refresh-token
 import { ConfirmPractitionerCommandHandler } from './application/commands/confirm-practitioner/confirm-practitioner.command-handler';
 import { DeleteTenantCommandHandler } from './application/commands/delete-tenant/delete-tenant.command-handler';
 import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
+import { UpdateGeneralSettingsCommandHandler } from './application/commands/update-general-settings/update-general-settings.command.handler';
+import { UpdateConnectivitySettingsCommandHandler } from './application/commands/update-connectivity-settings/update-connectivity-settings.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -39,6 +41,8 @@ import { FetchTenantUsersQueryHandler } from './application/queries/fetch-users-
 import { FetchTenantDevicesQueryHandler } from './application/queries/fetch-tenant-devices/fetch-tenant-devices.query-handler';
 import { FetchNotificationsQueryHandler } from './application/queries/fetch-notifications/fetch-notifications.query-handler';
 import { FetchVersionQueryHandler } from './application/queries/fetch-version/fetch-version.query-handler';
+import { FetchGeneralSettingsQueryHandler } from './application/queries/fetch-general-settings/fetch-general-settings.query.handler';
+import { FetchConnectivitySettingsQueryHandler } from './application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -55,6 +59,8 @@ const commandHandlers = [
   RefreshTokenCommandHandler,
   ConfirmPractitionerCommandHandler,
   UpdateSecuritySettingsCommandHandler,
+  UpdateGeneralSettingsCommandHandler,
+  UpdateConnectivitySettingsCommandHandler,
 ];
 
 const queryHandlers = [
@@ -68,6 +74,8 @@ const queryHandlers = [
   FetchNotificationsQueryHandler,
   FetchSecuritySettingsQueryHandler,
   FetchVersionQueryHandler,
+  FetchGeneralSettingsQueryHandler,
+  FetchConnectivitySettingsQueryHandler,
 ];
 
 @Module({
@@ -107,4 +115,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule {}
+export class ThingsboardModule { }

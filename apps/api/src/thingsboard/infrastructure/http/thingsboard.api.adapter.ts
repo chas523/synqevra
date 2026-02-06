@@ -32,6 +32,8 @@ import { GetTenantUsersResponse } from '../../interface/rest/dtos/response/thing
 import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thingsboard-get-tenant-devices.response.dto';
 import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
 import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
+import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-settings.response.dto';
+import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -49,7 +51,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly medplum: MedplumClientPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -851,6 +853,88 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch tenants',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchGeneralSettings(
+    sysAdminAccessToken: string,
+  ): Promise<GeneralSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings/general`;
+      const response = await firstValueFrom(
+        this.httpService.get<GeneralSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch general settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateGeneralSettings(
+    sysAdminAccessToken: string,
+    settings: GeneralSettingsDto,
+  ): Promise<GeneralSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<GeneralSettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update general settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchConnectivitySettings(
+    sysAdminAccessToken: string,
+  ): Promise<ConnectivitySettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings/connectivity`;
+      const response = await firstValueFrom(
+        this.httpService.get<ConnectivitySettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch connectivity settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateConnectivitySettings(
+    sysAdminAccessToken: string,
+    settings: ConnectivitySettingsDto,
+  ): Promise<ConnectivitySettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<ConnectivitySettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update connectivity settings',
         error,
         this.logger,
       );

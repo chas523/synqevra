@@ -17,6 +17,8 @@ import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thi
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
 import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
 import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
+import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-settings.response.dto';
+import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -154,4 +156,24 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: ExtendedSecuritySettingsDto,
   ): Promise<SecuritySettingsDtoResponse>;
+
+  // General Settings operations
+  abstract fetchGeneralSettings(
+    sysAdminAccessToken: string,
+  ): Promise<GeneralSettingsDto>;
+
+  abstract updateGeneralSettings(
+    sysAdminAccessToken: string,
+    settings: GeneralSettingsDto,
+  ): Promise<GeneralSettingsDto>;
+
+  // Connectivity Settings operations
+  abstract fetchConnectivitySettings(
+    sysAdminAccessToken: string,
+  ): Promise<ConnectivitySettingsDto>;
+
+  abstract updateConnectivitySettings(
+    sysAdminAccessToken: string,
+    settings: ConnectivitySettingsDto,
+  ): Promise<ConnectivitySettingsDto>;
 }

@@ -1,7 +1,7 @@
 import {
   useSecuritySettings,
   useUpdateSecuritySettings,
-} from "@/hooks/thingsboard/settings/useSecuritySettings";
+} from "@/hooks/thingsboard/security-settings/useSecuritySettings";
 import { extractErrorMessage } from "@/lib/utils";
 import React from "react";
 import { ErrorMessage } from "../molecules";

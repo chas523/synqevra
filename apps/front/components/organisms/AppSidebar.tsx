@@ -38,6 +38,11 @@ const MENU_ITEMS = {
       icon: Settings,
       label: "Settings",
     },
+    {
+      href: "/security-settings",
+      icon: Settings,
+      label: "Security Settings",
+    },
   ],
   user: [
     { href: "/", icon: Home, label: "Landing Page" },
