@@ -34,6 +34,9 @@ import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thi
 import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
 import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-settings.response.dto';
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
+import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
+import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { QueueDto, QueuesPageResponseDto } from '../../interface/rest/dtos/response/queue.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -940,4 +943,153 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async fetchSmsSettings(
+    sysAdminAccessToken: string,
+  ): Promise<SmsSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings/sms`;
+      const response = await firstValueFrom(
+        this.httpService.get<SmsSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch SMS settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateSmsSettings(
+    sysAdminAccessToken: string,
+    settings: SmsSettingsDto,
+  ): Promise<SmsSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<SmsSettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update SMS settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchNotificationSettings(
+    sysAdminAccessToken: string,
+  ): Promise<NotificationSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/settings`;
+      const response = await firstValueFrom(
+        this.httpService.get<NotificationSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch notification settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateNotificationSettings(
+    sysAdminAccessToken: string,
+    settings: NotificationSettingsDto,
+  ): Promise<NotificationSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<NotificationSettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update notification settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Queue operations
+  async fetchQueues(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<QueuesPageResponseDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/queues?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}&serviceType=TB_RULE_ENGINE`;
+      const response = await firstValueFrom(
+        this.httpService.get<QueuesPageResponseDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch queues',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createQueue(
+    sysAdminAccessToken: string,
+    queue: QueueDto,
+  ): Promise<QueueDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/queues?serviceType=TB_RULE_ENGINE`;
+      const response = await firstValueFrom(
+        this.httpService.post<QueueDto>(url, queue, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create/update queue',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteQueue(
+    sysAdminAccessToken: string,
+    queueId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/queues/${queueId}?serviceType=TB_RULE_ENGINE`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete queue',
+        error,
+        this.logger,
+      );
+    }
+  }
 }
+

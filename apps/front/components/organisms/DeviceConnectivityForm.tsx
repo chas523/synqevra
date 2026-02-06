@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useEffect } from "react";
+import { useId, useState, useEffect, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -67,7 +67,7 @@ const ProtocolSection = ({
                 <Switch
                     id={`${formId}-${protocol}-enabled`}
                     checked={config.enabled}
-                    onCheckedChange={(checked) =>
+                    onCheckedChange={(checked: boolean) =>
                         onChange(protocol, { ...config, enabled: checked })
                     }
                 />
@@ -79,7 +79,7 @@ const ProtocolSection = ({
                     <Input
                         id={`${formId}-${protocol}-host`}
                         value={config.host}
-                        onChange={(e) =>
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             onChange(protocol, { ...config, host: e.target.value })
                         }
                         placeholder="Leave empty for default"
@@ -91,7 +91,7 @@ const ProtocolSection = ({
                     <Input
                         id={`${formId}-${protocol}-port`}
                         value={config.port}
-                        onChange={(e) =>
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             onChange(protocol, { ...config, port: e.target.value })
                         }
                         placeholder={`Default: ${defaultPorts[protocol]}`}

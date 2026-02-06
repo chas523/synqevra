@@ -58,6 +58,7 @@ export const GeneralSettingsForm = ({
             },
         };
         await onSave(updatedSettings);
+        reset(data);
     };
 
     return (

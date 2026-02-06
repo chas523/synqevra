@@ -7,6 +7,7 @@ import {
   Query,
   Param,
   Put,
+  Delete, // Added Delete
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
@@ -22,6 +23,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -72,6 +74,16 @@ import { ConnectivitySettingsDto } from './dtos/response/connectivity-settings.r
 import { ConnectivitySettingsRequestDto } from './dtos/request/connectivity-settings.request.dto';
 import { FetchConnectivitySettingsQuery } from 'src/thingsboard/application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query';
 import { UpdateConnectivitySettingsCommand } from 'src/thingsboard/application/commands/update-connectivity-settings/update-connectivity-settings.command';
+import { SmsSettingsDto } from './dtos/response/sms-settings.response.dto';
+import { FetchSmsSettingsQuery } from 'src/thingsboard/application/queries/fetch-sms-settings/fetch-sms-settings.query';
+import { UpdateSmsSettingsCommand } from 'src/thingsboard/application/commands/update-sms-settings/update-sms-settings.command';
+import { NotificationSettingsDto } from './dtos/response/notification-settings.response.dto';
+import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
+import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
+import { QueueDto, QueuesPageResponseDto } from './dtos/response/queue.response.dto';
+import { FetchQueuesQuery } from 'src/thingsboard/application/queries/fetch-queues/fetch-queues.query';
+import { CreateQueueCommand } from 'src/thingsboard/application/commands/create-queue/create-queue.command';
+import { DeleteQueueCommand } from 'src/thingsboard/application/commands/delete-queue/delete-queue.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -723,4 +735,221 @@ export class ThingsboardController {
       },
     });
   }
+
+  @Get('/admin/settings/sms')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get SMS settings',
+    description: 'Retrieve SMS provider settings',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'SMS settings retrieved successfully',
+    type: SmsSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch SMS settings',
+  })
+  async getSmsSettings() {
+    const query = new FetchSmsSettingsQuery();
+    const result: Result<SmsSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: SmsSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/sms')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update SMS settings',
+    description: 'Update SMS provider settings',
+  })
+  @ApiBody({
+    type: SmsSettingsDto,
+    description: 'SMS settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'SMS settings updated successfully',
+    type: SmsSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update SMS settings',
+  })
+  async updateSmsSettings(@Body() settings: SmsSettingsDto) {
+    const command = new UpdateSmsSettingsCommand(settings);
+    const result: Result<SmsSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: SmsSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/notification/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get notification settings',
+    description: 'Retrieve notification settings including Slack configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification settings retrieved successfully',
+    type: NotificationSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch notification settings',
+  })
+  async getNotificationSettings() {
+    const query = new FetchNotificationSettingsQuery();
+    const result: Result<NotificationSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: NotificationSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/notification/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update notification settings',
+    description: 'Update notification settings including Slack configuration',
+  })
+  @ApiBody({
+    type: NotificationSettingsDto,
+    description: 'Notification settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification settings updated successfully',
+    type: NotificationSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update notification settings',
+  })
+  async updateNotificationSettings(@Body() settings: NotificationSettingsDto) {
+    const command = new UpdateNotificationSettingsCommand(settings);
+    const result: Result<NotificationSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: NotificationSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('queues')
+  @ApiOperation({ summary: 'Fetch queues' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: QueuesPageResponseDto,
+  })
+  async fetchQueues(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const query = new FetchQueuesQuery(
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+    );
+    const result: Result<QueuesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: QueuesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('queues')
+  @ApiOperation({ summary: 'Create or update queue' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: QueueDto,
+  })
+  async createQueue(@Body() queue: QueueDto) {
+    const command = new CreateQueueCommand(queue);
+    const result: Result<QueueDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: QueueDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('queues/:queueId')
+  @ApiOperation({ summary: 'Delete queue' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async deleteQueue(@Param('queueId') queueId: string) {
+    const command = new DeleteQueueCommand(queueId);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => { },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
 }
+

@@ -29,6 +29,10 @@ import { DeleteTenantCommandHandler } from './application/commands/delete-tenant
 import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
 import { UpdateGeneralSettingsCommandHandler } from './application/commands/update-general-settings/update-general-settings.command.handler';
 import { UpdateConnectivitySettingsCommandHandler } from './application/commands/update-connectivity-settings/update-connectivity-settings.command.handler';
+import { UpdateSmsSettingsCommandHandler } from './application/commands/update-sms-settings/update-sms-settings.command.handler';
+import { UpdateNotificationSettingsCommandHandler } from './application/commands/update-notification-settings/update-notification-settings.command.handler';
+import { CreateQueueCommandHandler } from './application/commands/create-queue/create-queue.command.handler';
+import { DeleteQueueCommandHandler } from './application/commands/delete-queue/delete-queue.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -43,6 +47,9 @@ import { FetchNotificationsQueryHandler } from './application/queries/fetch-noti
 import { FetchVersionQueryHandler } from './application/queries/fetch-version/fetch-version.query-handler';
 import { FetchGeneralSettingsQueryHandler } from './application/queries/fetch-general-settings/fetch-general-settings.query.handler';
 import { FetchConnectivitySettingsQueryHandler } from './application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query.handler';
+import { FetchSmsSettingsQueryHandler } from './application/queries/fetch-sms-settings/fetch-sms-settings.query.handler';
+import { FetchNotificationSettingsQueryHandler } from './application/queries/fetch-notification-settings/fetch-notification-settings.query.handler';
+import { FetchQueuesQueryHandler } from './application/queries/fetch-queues/fetch-queues.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -61,6 +68,10 @@ const commandHandlers = [
   UpdateSecuritySettingsCommandHandler,
   UpdateGeneralSettingsCommandHandler,
   UpdateConnectivitySettingsCommandHandler,
+  UpdateSmsSettingsCommandHandler,
+  UpdateNotificationSettingsCommandHandler,
+  CreateQueueCommandHandler,
+  DeleteQueueCommandHandler,
 ];
 
 const queryHandlers = [
@@ -76,6 +87,9 @@ const queryHandlers = [
   FetchVersionQueryHandler,
   FetchGeneralSettingsQueryHandler,
   FetchConnectivitySettingsQueryHandler,
+  FetchSmsSettingsQueryHandler,
+  FetchNotificationSettingsQueryHandler,
+  FetchQueuesQueryHandler,
 ];
 
 @Module({

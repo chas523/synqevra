@@ -19,6 +19,9 @@ import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos
 import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
 import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-settings.response.dto';
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
+import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
+import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { QueueDto, QueuesPageResponseDto } from '../../interface/rest/dtos/response/queue.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -176,4 +179,43 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: ConnectivitySettingsDto,
   ): Promise<ConnectivitySettingsDto>;
+
+  // SMS Settings operations
+  abstract fetchSmsSettings(
+    sysAdminAccessToken: string,
+  ): Promise<SmsSettingsDto>;
+
+  abstract updateSmsSettings(
+    sysAdminAccessToken: string,
+    settings: SmsSettingsDto,
+  ): Promise<SmsSettingsDto>;
+
+  // Notification Settings operations
+  abstract fetchNotificationSettings(
+    sysAdminAccessToken: string,
+  ): Promise<NotificationSettingsDto>;
+
+  abstract updateNotificationSettings(
+    sysAdminAccessToken: string,
+    settings: NotificationSettingsDto,
+  ): Promise<NotificationSettingsDto>;
+
+  // Queue operations
+  abstract fetchQueues(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<QueuesPageResponseDto>;
+
+  abstract createQueue(
+    sysAdminAccessToken: string,
+    queue: QueueDto,
+  ): Promise<QueueDto>;
+
+  abstract deleteQueue(
+    sysAdminAccessToken: string,
+    queueId: string,
+  ): Promise<void>;
 }
