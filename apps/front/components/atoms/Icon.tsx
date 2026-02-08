@@ -1,12 +1,15 @@
 import {
+  Calendar,
   Check as CheckIcon,
   InfoIcon,
   Loader2Icon,
+  Mail,
+  Users,
   XCircle as XCircleIcon,
 } from "lucide-react";
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
-  name: "info" | "loading" | "error" | "success";
+  name: "info" | "loading" | "error" | "success" | "mail" | "users" | "calendar";
   size?: "sm" | "md" | "lg";
 }
 
@@ -32,6 +35,9 @@ const Icon = ({ name, size = "md", className = "", ...props }: IconProps) => {
     ),
     error: <XCircleIcon className={allStyles.join(" ")} {...props} />,
     success: <CheckIcon className={allStyles.join(" ")} {...props} />,
+    mail: <Mail className={allStyles.join(" ")} {...props} />,
+    users: <Users className={allStyles.join(" ")} {...props} />,
+    calendar: <Calendar className={allStyles.join(" ")} {...props} />,
   };
 
   return icons[name];
