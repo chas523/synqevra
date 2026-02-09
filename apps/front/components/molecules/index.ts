@@ -32,3 +32,7 @@ export { ActionButtons } from "./ActionButtons";
 export { UserInfoItem } from "./UserInfoItem";
 export { SortSelect } from "./SortSelect";
 export { StatusFilter } from "./StatusFilter";
+export { DetailPanelSection } from "./DetailPanelSection";
+export type { DetailPanelSectionProps } from "./DetailPanelSection";
+export { DetailPanelHeader } from "./DetailPanelHeader";
+export type { DetailPanelHeaderProps } from "./DetailPanelHeader";

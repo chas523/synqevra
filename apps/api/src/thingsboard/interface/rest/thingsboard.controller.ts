@@ -81,11 +81,18 @@ import { UpdateSmsSettingsCommand } from 'src/thingsboard/application/commands/u
 import { NotificationSettingsDto } from './dtos/response/notification-settings.response.dto';
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
-import { QueueDto, QueuesPageResponseDto } from './dtos/response/queue.response.dto';
+import {
+  QueueDto,
+  QueuesPageResponseDto,
+} from './dtos/response/queue.response.dto';
 import { FetchQueuesQuery } from 'src/thingsboard/application/queries/fetch-queues/fetch-queues.query';
 import { CreateQueueCommand } from 'src/thingsboard/application/commands/create-queue/create-queue.command';
 import { DeleteQueueCommand } from 'src/thingsboard/application/commands/delete-queue/delete-queue.command';
-import { ResourceDto, ResourceCreateDto, ResourcesPageResponseDto } from './dtos/response/resource.response.dto';
+import {
+  ResourceDto,
+  ResourceCreateDto,
+  ResourcesPageResponseDto,
+} from './dtos/response/resource.response.dto';
 import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
 import { CreateResourceCommand } from 'src/thingsboard/application/commands/create-resource/create-resource.command';
 import { DeleteResourceCommand } from 'src/thingsboard/application/commands/delete-resource/delete-resource.command';
@@ -98,7 +105,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -729,7 +736,9 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update connectivity settings',
   })
-  async updateConnectivitySettings(@Body() settings: ConnectivitySettingsRequestDto) {
+  async updateConnectivitySettings(
+    @Body() settings: ConnectivitySettingsRequestDto,
+  ) {
     const command = new UpdateConnectivitySettingsCommand(settings);
     const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
@@ -900,12 +909,7 @@ export class ThingsboardController {
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
   ) {
-    const query = new FetchQueuesQuery(
-      page,
-      pageSize,
-      sortProperty,
-      sortOrder,
-    );
+    const query = new FetchQueuesQuery(page, pageSize, sortProperty, sortOrder);
     const result: Result<QueuesPageResponseDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -951,7 +955,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1029,7 +1033,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1066,4 +1070,3 @@ export class ThingsboardController {
     });
   }
 }
-

@@ -16,7 +16,10 @@ export abstract class ThingsboardTelemetryPort {
   abstract isConnected(): boolean;
   abstract sendCommands(commands: TelemetryCommand[]): Result<void, Error>;
   abstract unsubscribe(
-    cmdIdTypes: Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA' | "NOTIFICATIONS_COUNT" | "NOTIFICATIONS">,
+    cmdIdTypes: Map<
+      number,
+      'ENTITY_COUNT' | 'ENTITY_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS'
+    >,
   ): Result<void, Error>;
 }
 

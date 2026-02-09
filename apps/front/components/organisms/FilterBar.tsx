@@ -19,7 +19,7 @@ export const FilterBar = ({
   showStatusFilter = false,
 }: FilterBarProps) => {
   return (
-    <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
+    <div className="flex flex-wrap gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
       <SortSelect
         value={sortValue}
         onValueChange={onSortChange}

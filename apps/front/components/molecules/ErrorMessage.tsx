@@ -1,4 +1,4 @@
-import Text from "../atoms/Text";
+import { Text } from "../atoms";
 
 export interface ErrorMessageProps {
   message: string;
@@ -14,8 +14,10 @@ const ErrorMessage = ({
   const baseStyles = ["mt-2"];
   const allStyles = [...baseStyles, className];
 
+  const textAlignClass = `text-${align}`;
+
   return (
-    <Text size="xs" color="error" align={align} className={allStyles.join(" ")}>
+    <Text size="xs" color="error" className={`${allStyles.join(" ")} ${textAlignClass}`}>
       {message}
     </Text>
   );

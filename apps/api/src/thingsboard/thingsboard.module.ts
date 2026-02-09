@@ -35,6 +35,11 @@ import { CreateQueueCommandHandler } from './application/commands/create-queue/c
 import { DeleteQueueCommandHandler } from './application/commands/delete-queue/delete-queue.command.handler';
 import { CreateResourceCommandHandler } from './application/commands/create-resource/create-resource.command.handler';
 import { DeleteResourceCommandHandler } from './application/commands/delete-resource/delete-resource.command.handler';
+import { UpdateTenantCommandHandler } from './application/commands/update-tenant/update-tenant.command-handler';
+import { SaveEntityAttributesCommandHandler } from './application/commands/save-entity-attributes/save-entity-attributes.command-handler';
+import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
+import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
+import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -54,11 +59,19 @@ import { FetchNotificationSettingsQueryHandler } from './application/queries/fet
 import { FetchQueuesQueryHandler } from './application/queries/fetch-queues/fetch-queues.query.handler';
 import { FetchResourcesQueryHandler } from './application/queries/fetch-resources/fetch-resources.query.handler';
 import { DownloadResourceQueryHandler } from './application/queries/download-resource/download-resource.query.handler';
+import { FetchTenantAttributesQueryHandler } from './application/queries/fetch-tenant-attributes/fetch-tenant-attributes.query-handler';
+import { FetchTenantAlarmsQueryHandler } from './application/queries/fetch-tenant-alarms/fetch-tenant-alarms.query-handler';
+import { FetchTenantEventsQueryHandler } from './application/queries/fetch-tenant-events/fetch-tenant-events.query-handler';
+import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-tenant-relations/fetch-tenant-relations.query-handler';
+import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query-handler';
+import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
+import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
+import { SysAdminAuthService } from './application/services/sysadmin-auth.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -78,6 +91,11 @@ const commandHandlers = [
   DeleteQueueCommandHandler,
   CreateResourceCommandHandler,
   DeleteResourceCommandHandler,
+    UpdateTenantCommandHandler,
+    SaveEntityAttributesCommandHandler,
+    CreateRelationCommandHandler,
+    DeleteRelationCommandHandler,
+    SaveTenantProfileCommandHandler,
 ];
 
 const queryHandlers = [
@@ -98,6 +116,13 @@ const queryHandlers = [
   FetchQueuesQueryHandler,
   FetchResourcesQueryHandler,
   DownloadResourceQueryHandler,
+    FetchTenantAttributesQueryHandler,
+    FetchTenantAlarmsQueryHandler,
+    FetchTenantEventsQueryHandler,
+    FetchTenantRelationsQueryHandler,
+    FetchTenantProfilesQueryHandler,
+    FetchTenantProfileAttributesQueryHandler,
+    FetchTenantProfileAlarmsQueryHandler,
 ];
 
 @Module({
@@ -127,6 +152,7 @@ const queryHandlers = [
     TelemetryService,
     TelemetryParserService,
     TelemetryGateway,
+    SysAdminAuthService,
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [
@@ -137,4 +163,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule { }
+export class ThingsboardModule {}

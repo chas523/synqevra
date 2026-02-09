@@ -6,3 +6,5 @@ export type { LandingTemplateProps } from "./LandingTemplate";
 export { default as LandingTemplate } from "./LandingTemplate";
 export type { ModalProps } from "./Modal";
 export { default as Modal } from "./Modal";
+export type { EntityDetailPanelProps, TabConfig, ActionButton } from "./EntityDetailPanel";
+export { EntityDetailPanel } from "./EntityDetailPanel";

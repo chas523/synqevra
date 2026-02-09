@@ -4,9 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
   EntityId,
+  RelationInfo,
+  TenantProfilesResponse,
   ThingsboardApiPort,
   ThingsboardLoginResponse,
   UserResponse,
+  TenantProfile,
 } from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { DevicesResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-devices.response.dto';
 import {
@@ -36,8 +39,15 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
-import { QueueDto, QueuesPageResponseDto } from '../../interface/rest/dtos/response/queue.response.dto';
-import { ResourceDto, ResourceCreateDto, ResourcesPageResponseDto } from '../../interface/rest/dtos/response/resource.response.dto';
+import {
+  QueueDto,
+  QueuesPageResponseDto,
+} from '../../interface/rest/dtos/response/queue.response.dto';
+import {
+  ResourceDto,
+  ResourceCreateDto,
+  ResourcesPageResponseDto,
+} from '../../interface/rest/dtos/response/resource.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -55,7 +65,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly medplum: MedplumClientPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) { }
+  ) {}
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -378,6 +388,24 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async updateTenant(
+    tenantData: any,
+    sysAdminAccessToken: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/tenant`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, tenantData, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Failed to update tenant:', error);
+      ThingsboardApiException.createException('Failed to update tenant', error);
+    }
+  }
+
   async deleteTenantAdmin(
     tenantAdminId: string,
     sysAdminAccessToken: string,
@@ -648,6 +676,18 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  private stripHtmlTags(html: string): string {
+    return html
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+      .replace(/&lt;/g, '<') // Replace &lt; with <
+      .replace(/&gt;/g, '>') // Replace &gt; with >
+      .replace(/&amp;/g, '&') // Replace &amp; with &
+      .replace(/&quot;/g, '"') // Replace &quot; with "
+      .replace(/&#39;/g, "'") // Replace &#39; with '
+      .trim();
+  }
+
   async fetchNotifications(
     sysAdminAccessToken: string,
     page: number,
@@ -660,10 +700,25 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
         }),
       );
-      return response.data;
+
+      // Strip HTML tags from notification text and subject
+      const cleanedData = {
+        ...response.data,
+        data: response.data.data.map((notification) => ({
+          ...notification,
+          text: notification.text
+            ? this.stripHtmlTags(notification.text)
+            : notification.text,
+          subject: notification.subject
+            ? this.stripHtmlTags(notification.subject)
+            : notification.subject,
+        })),
+      };
+
+      return cleanedData;
     } catch (error) {
       ThingsboardApiException.createException(
-        'Failed to fetch tenants',
+        'Failed to fetch notifications',
         error,
         this.logger,
       );
@@ -863,6 +918,256 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  // Tenant detail operations
+  async fetchTenantAttributes(
+    sysAdminAccessToken: string,
+    tenantId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<any[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/TENANT/${tenantId}/values/attributes/${scope}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch tenant attributes (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<any[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/attributes/${scope}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch entity attributes (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchEntityAlarms(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      let url = `${this.THINGSBOARD_API_URL}/v2/alarm/${entityType}/${entityId}?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      if (statusList && statusList.length > 0) {
+        url += `&statusList=${statusList.join(',')}`;
+      }
+      if (severityList && severityList.length > 0) {
+        url += `&severityList=${severityList.join(',')}`;
+      }
+      if (startTime !== undefined) {
+        url += `&startTime=${startTime}`;
+      }
+      if (endTime !== undefined) {
+        url += `&endTime=${endTime}`;
+      }
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch entity alarms (may not be available): ${error}`,
+      );
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
+  async fetchEntityEvents(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    eventType?: string,
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      // ThingsBoard events API requires startTime and endTime
+      const end = endTime || Date.now();
+      const start = startTime || end - 30 * 24 * 60 * 60 * 1000; // Last 30 days or provided
+      const type = eventType || 'LC_EVENT'; // Default to lifecycle events
+
+      const url = `${this.THINGSBOARD_API_URL}/events/${entityType}/${entityId}/${type}?tenantId=${entityId}&startTime=${start}&endTime=${end}&pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch entity events (may not be available): ${error}`,
+      );
+      // Return empty response instead of throwing - events may not exist for all entities
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
+  async fetchEntityRelations(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    direction: 'FROM' | 'TO',
+  ): Promise<any[]> {
+    try {
+      const param = direction === 'FROM' ? 'fromId' : 'toId';
+      const typeParam = direction === 'FROM' ? 'fromType' : 'toType';
+      const url = `${this.THINGSBOARD_API_URL}/relations/info?${param}=${entityId}&${typeParam}=${entityType}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch entity relations (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async saveEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    attributes: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/${scope}`;
+      await firstValueFrom(
+        this.httpService.post(url, attributes, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      this.logger.error(`Failed to save entity attributes: ${error}`);
+      ThingsboardApiException.createException(
+        'Failed to save entity attributes',
+        error,
+      );
+    }
+  }
+
+  async saveRelation(
+    sysAdminAccessToken: string,
+    relation: RelationInfo,
+  ): Promise<void> {
+    const url = `${this.THINGSBOARD_API_URL}/relation`;
+    await firstValueFrom(
+      this.httpService.post(url, relation, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
+  }
+
+  async deleteRelation(
+    sysAdminAccessToken: string,
+    fromId: string,
+    fromType: string,
+    relationType: string,
+    toId: string,
+    toType: string,
+  ): Promise<void> {
+    const url = `${this.THINGSBOARD_API_URL}/relation`;
+    const params = new URLSearchParams({
+      fromId,
+      fromType,
+      relationType,
+      toId,
+      toType,
+    });
+
+    await firstValueFrom(
+      this.httpService.delete(`${url}?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
+  }
+
+  async fetchTenantProfiles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: string,
+    textSearch?: string,
+  ): Promise<TenantProfilesResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    if (sortProperty) {
+      params.append('sortProperty', sortProperty);
+    }
+
+    if (sortOrder) {
+      params.append('sortOrder', sortOrder);
+    }
+
+    if (textSearch) {
+      params.append('textSearch', textSearch);
+    }
+
+    const url = `${this.THINGSBOARD_API_URL}/tenantProfiles?${params.toString()}`;
+
+    const response = await firstValueFrom(
+      this.httpService.get<TenantProfilesResponse>(url, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
+
+    return response.data;
+  }
+
+  async saveTenantProfile(
+    accessToken: string,
+    tenantProfile: TenantProfile,
+  ): Promise<TenantProfile> {
+    const url = `${this.THINGSBOARD_API_URL}/tenantProfile`;
+
+    const response = await firstValueFrom(
+      this.httpService.post<TenantProfile>(url, tenantProfile, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }),
+    );
+
+    return response.data;
+  }
+
   async fetchGeneralSettings(
     sysAdminAccessToken: string,
   ): Promise<GeneralSettingsDto> {
@@ -945,9 +1250,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async fetchSmsSettings(
-    sysAdminAccessToken: string,
-  ): Promise<SmsSettingsDto> {
+  async fetchSmsSettings(sysAdminAccessToken: string): Promise<SmsSettingsDto> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/admin/settings/sms`;
       const response = await firstValueFrom(
@@ -1186,4 +1489,3 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 }
-

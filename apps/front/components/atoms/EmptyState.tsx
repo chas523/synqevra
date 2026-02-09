@@ -1,6 +1,6 @@
 import { BarChart3Icon } from "lucide-react";
 import Heading from "./Heading";
-import Text from "./Text";
+import { Text } from ".";
 
 export interface EmptyStateProps {
   title?: string;

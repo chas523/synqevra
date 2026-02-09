@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Text from "../atoms/Text";
+import { Text } from "../atoms";
 
 export interface ProgressMessageProps {
   status: "loading" | "success" | "error";
@@ -38,8 +38,7 @@ const ProgressMessage = ({
       <Text
         color={colors[status]}
         weight="medium"
-        align="center"
-        className="w-full"
+        className="w-full text-center"
       >
         {messages[status]}
         {actionElement}

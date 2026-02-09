@@ -1,8 +1,9 @@
-import { TextWithVariant as Text } from "../atoms";
-import { SelectAdmin as Select,
+import { Text } from "../atoms";
+import {
+  SelectAdmin as Select,
   SelectItem,
   SelectTrigger,
-  SelectValue,SelectContent
+  SelectValue, SelectContent
 } from "@/components/ui/admin_select";
 
 interface SortOption {

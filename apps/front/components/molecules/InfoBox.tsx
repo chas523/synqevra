@@ -1,4 +1,4 @@
-import Text from "../atoms/Text";
+import { Text } from "../atoms";
 
 export interface InfoBoxProps {
   title: string;
