@@ -3,6 +3,7 @@ import type {
   TenantsRequestOptions,
   PaginatedResponse,
   Tenant,
+  TenantProfile,
   TenantUser,
   DeviceData,
 } from "@/lib/types/dashboardTypes";
@@ -40,6 +41,127 @@ export class TenantService {
       throw new Error(message);
     }
   }
+
+  public static async getTenantProfiles(
+    options: TenantsRequestOptions,
+  ): Promise<PaginatedResponse<TenantProfile>> {
+    try {
+      const params = new URLSearchParams();
+
+      params.append("page", (options.page ?? 0).toString());
+      params.append("pageSize", (options.limit ?? 20).toString());
+
+      if (options.sortBy) {
+        params.append("sortProperty", options.sortBy);
+      }
+
+      if (options.sortOrder) {
+        params.append("sortOrder", options.sortOrder.toUpperCase());
+      }
+
+      if (options.textSearch) {
+        params.append("textSearch", options.textSearch as string);
+      }
+
+      const response = await proxyApi.get<GetTenantProfilesResponse>(
+        `/dashboard/tenant-profiles?${params.toString()}`,
+      );
+
+      return this.mapTenantProfilesResponse(response.data, options.limit ?? 20);
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err, "Failed to fetch tenant profiles");
+      throw new Error(message);
+    }
+  }
+
+  public static async saveTenantProfile(
+    tenantProfile: TenantProfile,
+  ): Promise<TenantProfile> {
+    try {
+      const response = await proxyApi.post<TenantProfile>(
+        `/dashboard/tenant-profiles/${tenantProfile.id.id}`,
+        tenantProfile,
+      );
+
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err, "Failed to save tenant profile");
+      throw new Error(message);
+    }
+  }
+
+  public static async getTenantProfileAttributes(
+    profileId: string,
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<TenantAttribute[]> {
+    try {
+      const response = await proxyApi.get<TenantAttribute[]>(
+        `/dashboard/tenant-profiles/${profileId}/attributes?scope=${scope}`,
+      );
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to fetch attributes for tenant profile ${profileId}`,
+      );
+      throw new Error(message);
+    }
+  }
+
+  public static async saveTenantProfileAttributes(
+    profileId: string,
+    attributes: Record<string, unknown>,
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<{ success: boolean }> {
+    try {
+      const response = await proxyApi.post<{ success: boolean }>(
+        `/dashboard/tenant-profiles/${profileId}/attributes`,
+        { scope, attributes },
+      );
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to save attributes for tenant profile ${profileId}`,
+      );
+      throw new Error(message);
+    }
+  }
+
+  public static async getTenantProfileAlarms(
+    profileId: string,
+    page = 0,
+    pageSize = 10,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityAlarmsResponse> {
+    try {
+      let url = `/dashboard/tenant-profiles/${profileId}/alarms?page=${page}&pageSize=${pageSize}`;
+      if (statusList && statusList.length > 0) {
+        url += `&statusList=${statusList.join(',')}`;
+      }
+      if (severityList && severityList.length > 0) {
+        url += `&severityList=${severityList.join(',')}`;
+      }
+      if (startTime !== undefined) {
+        url += `&startTime=${startTime}`;
+      }
+      if (endTime !== undefined) {
+        url += `&endTime=${endTime}`;
+      }
+      const response = await proxyApi.get<EntityAlarmsResponse>(url);
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to fetch alarms for tenant profile ${profileId}`,
+      );
+      throw new Error(message);
+    }
+  }
+
 
   public static async getTenantById(tenantId: string): Promise<Tenant> {
     try {
@@ -125,6 +247,23 @@ export class TenantService {
     data: GetTenantsResponse,
     limit: number,
   ): PaginatedResponse<Tenant> {
+    return {
+      data: data.data || [],
+      pagination: {
+        limit,
+        hasNext: data.hasNext ?? false,
+        hasPrev: false,
+        nextCursor: undefined,
+        prevCursor: undefined,
+      },
+      total: data.totalElements ?? 0,
+    };
+  }
+
+  private static mapTenantProfilesResponse(
+    data: GetTenantProfilesResponse,
+    limit: number,
+  ): PaginatedResponse<TenantProfile> {
     return {
       data: data.data || [],
       pagination: {
@@ -381,6 +520,14 @@ interface GetTenantsResponse {
   totalElements: number;
   hasNext: boolean;
 }
+
+interface GetTenantProfilesResponse {
+  data: TenantProfile[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 interface GetTenantUsersResponse {
   data: TenantUser[];
   totalPages: number;

@@ -76,34 +76,34 @@ export function AlarmFilters({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="h-8 gap-2 text-xs font-normal">
+                <Button variant="outline" className="h-8 gap-2 text-xs font-normal dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
                     <Filter className="h-3.5 w-3.5" />
                     Filters
                     {(selectedStatuses.length > 0 || selectedSeverities.length > 0) && (
-                        <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-900 dark:text-slate-50">
+                        <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-900 dark:text-slate-100">
                             {selectedStatuses.length + selectedSeverities.length}
                         </span>
                     )}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] dark:bg-slate-900 dark:border-slate-800">
                 <DialogHeader>
-                    <DialogTitle>Filter alarms</DialogTitle>
+                    <DialogTitle className="dark:text-slate-100">Filter alarms</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
                     {/* Status Section */}
                     <div className="space-y-3">
-                        <h4 className="text-sm font-medium leading-none">Status</h4>
+                        <h4 className="text-sm font-medium leading-none text-slate-900 dark:text-slate-200">Status</h4>
                         <div className="flex flex-wrap gap-2">
                             {ALARM_STATUSES.map(({ value, label }) => (
                                 <button
                                     key={value}
                                     type="button"
                                     onClick={() => toggleStatus(value)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${tempStatuses.includes(value)
-                                            ? 'bg-cyan-500 text-white'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors border ${tempStatuses.includes(value)
+                                        ? 'bg-cyan-500 border-cyan-500 text-white'
+                                        : 'bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     {label}
@@ -114,16 +114,16 @@ export function AlarmFilters({
 
                     {/* Severity Section */}
                     <div className="space-y-3">
-                        <h4 className="text-sm font-medium leading-none">Severity</h4>
+                        <h4 className="text-sm font-medium leading-none text-slate-900 dark:text-slate-200">Severity</h4>
                         <div className="flex flex-wrap gap-2">
                             {ALARM_SEVERITIES.map(({ value, label }) => (
                                 <button
                                     key={value}
                                     type="button"
                                     onClick={() => toggleSeverity(value)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${tempSeverities.includes(value)
-                                            ? 'bg-slate-700 text-white dark:bg-slate-200 dark:text-slate-900'
-                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors border ${tempSeverities.includes(value)
+                                        ? 'bg-slate-700 border-slate-700 text-white dark:bg-slate-200 dark:border-slate-200 dark:text-slate-900'
+                                        : 'bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     {label}

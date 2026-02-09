@@ -20,6 +20,12 @@ export const SORT_OPTIONS = {
     { value: "title-asc", label: "Name A-Z" },
     { value: "title-desc", label: "Name Z-A" },
   ],
+  TENANT_PROFILES: [
+    { value: "createdTime-desc", label: "Newest First" },
+    { value: "createdTime-asc", label: "Oldest First" },
+    { value: "name-asc", label: "Name A-Z" },
+    { value: "name-desc", label: "Name Z-A" },
+  ],
   DEVICES: [
     { value: "createdTime-desc", label: "Newest First" },
     { value: "createdTime-asc", label: "Oldest First" },

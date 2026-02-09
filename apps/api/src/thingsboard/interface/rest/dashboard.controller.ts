@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { match, Result } from 'oxide.ts';
 import {
@@ -23,14 +35,19 @@ import { DeleteRelationCommand } from 'src/thingsboard/application/commands/dele
 import { FetchTenantRelationsQuery } from '../../application/queries/fetch-tenant-relations/fetch-tenant-relations.query';
 import { UpdateTenantCommand } from '../../application/commands/update-tenant/update-tenant.command';
 import { SaveEntityAttributesCommand } from '../../application/commands/save-entity-attributes/save-entity-attributes.command';
+import { FetchTenantProfilesQuery } from '../../application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query';
+import { SaveTenantProfileCommand } from '../../application/commands/save-tenant-profile/save-tenant-profile.command';
 import {
   TenantAttributesResponse,
   EntityAlarmsResponse,
   EntityEventsResponse,
   EntityRelationsResponse,
   TenantResponse,
+  TenantProfilesResponse,
 } from '../../application/ports/thingsboard.api.port';
 import type { UpdateTenantDto } from '../../application/ports/thingsboard.api.port';
+import { FetchTenantProfileAttributesQuery } from '../../application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query';
+import { FetchTenantProfileAlarmsQuery } from '../../application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -55,6 +72,122 @@ export class DashboardController {
       },
     });
   }
+
+  @Get('/tenant-profiles')
+  async getTenantProfiles(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 20,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('textSearch') textSearch?: string,
+  ) {
+    const query = new FetchTenantProfilesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      textSearch,
+    );
+    const result: Result<TenantProfilesResponse, TBAdminGetError> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (dto: TenantProfilesResponse) => dto,
+      Err: (error: TBAdminGetError) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('tenant-profiles/:id')
+  @HttpCode(HttpStatus.OK)
+  async saveTenantProfile(
+    @Param('id') id: string,
+    @Body() tenantProfile: any,
+  ): Promise<any> {
+    const command = new SaveTenantProfileCommand(tenantProfile);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (profile) => profile,
+      Err: (error) => {
+        throw new HttpException(
+          'Failed to save tenant profile',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      },
+    });
+  }
+
+  @Get('tenant-profiles/:id/attributes')
+  async getTenantProfileAttributes(
+    @Param('id') id: string,
+    @Query('scope') scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
+  ) {
+    const query = new FetchTenantProfileAttributesQuery(id, scope);
+    const result: Result<TenantAttributesResponse, TBAdminGetError> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (dto: TenantAttributesResponse) => dto,
+      Err: (error: TBAdminGetError) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('tenant-profiles/:id/attributes')
+  async saveTenantProfileAttributes(
+    @Param('id') id: string,
+    @Body() body: { scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE'; attributes: Record<string, unknown> },
+  ) {
+    const scope = body.scope || 'SERVER_SCOPE';
+    const command = new SaveEntityAttributesCommand('TENANT_PROFILE', id, scope, body.attributes);
+    const result: Result<void, TBAdminGetError> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: TBAdminGetError) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('tenant-profiles/:id/alarms')
+  async getTenantProfileAlarms(
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    const statusArray = statusList ? statusList.split(',') : undefined;
+    const severityArray = severityList ? severityList.split(',') : undefined;
+    const startTimeNum = startTime ? Number(startTime) : undefined;
+    const endTimeNum = endTime ? Number(endTime) : undefined;
+    const query = new FetchTenantProfileAlarmsQuery(
+      id,
+      Number(page),
+      Number(pageSize),
+      statusArray,
+      severityArray,
+      startTimeNum,
+      endTimeNum,
+    );
+    const result: Result<EntityAlarmsResponse, TBAdminGetError> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (dto: EntityAlarmsResponse) => dto,
+      Err: (error: TBAdminGetError) => {
+        throw error;
+      },
+    });
+  }
+
 
   @Get('/tenants/:id/users')
   async getTenantUsers(

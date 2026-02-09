@@ -82,6 +82,130 @@ export interface Tenant {
   additionalInfo?: Record<string, any>;
 }
 
+export interface TenantProfile {
+  id: {
+    id: string;
+    entityType: string;
+  };
+  name: string;
+  description?: string;
+  default: boolean;
+  isolatedTbRuleEngine?: boolean;
+  createdTime: number;
+  profileData?: {
+    configuration: {
+      // Entities limits
+      maxDevices?: number;
+      maxDashboards?: number;
+      maxAssets?: number;
+      maxUsers?: number;
+      maxCustomers?: number;
+      maxRuleChains?: number;
+      maxEdges?: number;
+
+      // Rule Engine limits
+      maxREExecutions?: number;
+      maxTransportMessages?: number;
+      maxJSExecutions?: number;
+      maxTbelExecutions?: number;
+      maxRuleNodeExecutionsPerMessage?: number;
+      maxExecuteRateLimit?: number;
+      maxTransportDataPoints?: number;
+
+      // Calculated fields
+      maxCalculatedFieldsPerEntity?: number;
+      maxArgumentsPerCF?: number;
+      maxDataPointsPerRollingArg?: number;
+      maxStateSizeInKBytes?: number;
+      maxSingleValueArgumentSizeInKBytes?: number;
+
+      // Time-to-live
+      defaultStorageTtlDays?: number;
+      alarmsTtlDays?: number;
+      rpcTtlDays?: number;
+      queueStatsTtlDays?: number;
+      ruleEngineExceptionsTtlDays?: number;
+      maxDPStorageDays?: number;
+
+      // Alarms and notifications
+      smsEnabled?: boolean | null;
+      maxEmails?: number;
+      maxSms?: number;
+      maxCreatedAlarms?: number;
+
+      // Debug
+      maxDebugModeDurationMinutes?: number;
+
+      // WebSocket
+      maxWsSessionsPerTenant?: number;
+      maxWsSessionsPerCustomer?: number;
+      maxWsSessionsPerRegularUser?: number;
+      maxWsSessionsPerPublicUser?: number;
+      maxWsSubscriptionsPerTenant?: number;
+      maxWsSubscriptionsPerCustomer?: number;
+      maxWsSubscriptionsPerRegularUser?: number;
+      maxWsSubscriptionsPerPublicUser?: number;
+      wsMsgQueueLimitPerSession?: number;
+
+      // Rate limits
+      transportTenantMsgRateLimit?: string | null;
+      transportTenantTelemetryMsgRateLimit?: string | null;
+      transportTenantTelemetryDataPointsRateLimit?: string | null;
+      transportDeviceMsgRateLimit?: string | null;
+      transportDeviceTelemetryMsgRateLimit?: string | null;
+      transportDeviceTelemetryDataPointsRateLimit?: string | null;
+      transportGatewayMsgRateLimit?: string | null;
+      transportGatewayTelemetryMsgRateLimit?: string | null;
+      transportGatewayTelemetryDataPointsRateLimit?: string | null;
+      transportGatewayDeviceMsgRateLimit?: string | null;
+      transportGatewayDeviceTelemetryMsgRateLimit?: string | null;
+      transportGatewayDeviceTelemetryDataPointsRateLimit?: string | null;
+
+      // Other limits
+      maxResourcesInBytes?: number;
+      maxResourceSize?: number;
+      maxOtaPackagesInBytes?: number;
+      tenantServerRestLimitsConfiguration?: any;
+      customerServerRestLimitsConfiguration?: any;
+      wsUpdatesPerSessionRateLimit?: string | null;
+      cassandraReadQueryTenantRuleEngineRateLimits?: any;
+      cassandraReadQueryTenantCoreRateLimits?: any;
+      cassandraWriteQueryTenantRuleEngineRateLimits?: any;
+      cassandraWriteQueryTenantCoreRateLimits?: any;
+      tenantEntityExportRateLimit?: string | null;
+      tenantEntityImportRateLimit?: string | null;
+      tenantNotificationRequestsRateLimit?: string | null;
+      tenantNotificationRequestsPerRuleRateLimit?: string | null;
+      edgeEventRateLimits?: string | null;
+      edgeEventRateLimitsPerEdge?: string | null;
+      edgeUplinkMessagesRateLimits?: string | null;
+      edgeUplinkMessagesRateLimitsPerEdge?: string | null;
+      warnThreshold?: number;
+      type?: string;
+    };
+    queueConfiguration?: Array<{
+      name: string;
+      topic: string;
+      pollInterval: number;
+      partitions: number;
+      consumerPerPartition: boolean;
+      packProcessingTimeout: number;
+      submitStrategy: {
+        type: string;
+        batchSize: number;
+      };
+      processingStrategy: {
+        type: string;
+        retries: number;
+        failurePercentage: number;
+        pauseBetweenRetries: number;
+        maxPauseBetweenRetries: number;
+      };
+      additionalInfo?: any;
+    }> | null;
+  };
+}
+
 export interface TenantsRequestOptions extends Record<string, unknown> {
   sortBy?: string;
   sortOrder?: "asc" | "desc";

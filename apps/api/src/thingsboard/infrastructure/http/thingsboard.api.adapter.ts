@@ -5,9 +5,11 @@ import { firstValueFrom } from 'rxjs';
 import {
   EntityId,
   RelationInfo,
+  TenantProfilesResponse,
   ThingsboardApiPort,
   ThingsboardLoginResponse,
   UserResponse,
+  TenantProfile,
 } from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { DevicesResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-devices.response.dto';
 import {
@@ -896,6 +898,26 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<any[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/attributes/${scope}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch entity attributes (may not be available): ${error}`);
+      return [];
+    }
+  }
+
   async fetchEntityAlarms(
     sysAdminAccessToken: string,
     entityType: string,
@@ -1042,5 +1064,56 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
       }),
     );
+  }
+
+  async fetchTenantProfiles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: string,
+    textSearch?: string,
+  ): Promise<TenantProfilesResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    if (sortProperty) {
+      params.append('sortProperty', sortProperty);
+    }
+
+    if (sortOrder) {
+      params.append('sortOrder', sortOrder);
+    }
+
+    if (textSearch) {
+      params.append('textSearch', textSearch);
+    }
+
+    const url = `${this.THINGSBOARD_API_URL}/tenantProfiles?${params.toString()}`;
+
+    const response = await firstValueFrom(
+      this.httpService.get<TenantProfilesResponse>(url, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
+
+    return response.data;
+  }
+
+  async saveTenantProfile(
+    accessToken: string,
+    tenantProfile: TenantProfile,
+  ): Promise<TenantProfile> {
+    const url = `${this.THINGSBOARD_API_URL}/tenantProfile`;
+
+    const response = await firstValueFrom(
+      this.httpService.post<TenantProfile>(url, tenantProfile, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }),
+    );
+
+    return response.data;
   }
 }

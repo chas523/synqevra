@@ -162,6 +162,13 @@ export abstract class ThingsboardApiPort {
     scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
   ): Promise<TenantAttributesResponse>;
 
+  abstract fetchEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<TenantAttributesResponse>;
+
   abstract fetchEntityAlarms(
     sysAdminAccessToken: string,
     entityType: string,
@@ -213,6 +220,20 @@ export abstract class ThingsboardApiPort {
     toId: string,
     toType: string,
   ): Promise<void>;
+
+  abstract fetchTenantProfiles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: string,
+    textSearch?: string,
+  ): Promise<TenantProfilesResponse>;
+
+  abstract saveTenantProfile(
+    accessToken: string,
+    tenantProfile: TenantProfile,
+  ): Promise<TenantProfile>;
 }
 
 // Response types for new methods
@@ -313,4 +334,47 @@ export interface TenantResponse {
   tenantProfileId?: EntityId;
   additionalInfo?: Record<string, unknown>;
   version?: number;
+}
+
+export interface TenantProfile {
+  id: {
+    id: string;
+    entityType: string;
+  };
+  name: string;
+  description?: string;
+  default: boolean;
+  isolatedTbRuleEngine?: boolean;
+  createdTime: number;
+  profileData?: {
+    configuration?: any; // Complex config object
+    queueConfiguration?: Array<{
+      name: string;
+      topic: string;
+      pollInterval: number;
+      partitions: number;
+      consumerPerPartition: boolean;
+      packProcessingTimeout: number;
+      submitStrategy: {
+        type: string;
+        batchSize: number;
+      };
+      processingStrategy: {
+        type: string;
+        retries: number;
+        failurePercentage: number;
+        pauseBetweenRetries: number;
+        maxPauseBetweenRetries: number;
+      };
+      additionalInfo?: any;
+    }> | null;
+  };
+}
+
+
+export interface TenantProfilesResponse {
+  data: TenantProfile[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
 }

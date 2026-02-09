@@ -31,6 +31,7 @@ import { UpdateTenantCommandHandler } from './application/commands/update-tenant
 import { SaveEntityAttributesCommandHandler } from './application/commands/save-entity-attributes/save-entity-attributes.command-handler';
 import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
 import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
+import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -46,6 +47,9 @@ import { FetchTenantAttributesQueryHandler } from './application/queries/fetch-t
 import { FetchTenantAlarmsQueryHandler } from './application/queries/fetch-tenant-alarms/fetch-tenant-alarms.query-handler';
 import { FetchTenantEventsQueryHandler } from './application/queries/fetch-tenant-events/fetch-tenant-events.query-handler';
 import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-tenant-relations/fetch-tenant-relations.query-handler';
+import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query-handler';
+import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
+import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -67,6 +71,7 @@ const commandHandlers = [
   SaveEntityAttributesCommandHandler,
   CreateRelationCommandHandler,
   DeleteRelationCommandHandler,
+  SaveTenantProfileCommandHandler,
 ];
 
 const queryHandlers = [
@@ -83,6 +88,9 @@ const queryHandlers = [
   FetchTenantAlarmsQueryHandler,
   FetchTenantEventsQueryHandler,
   FetchTenantRelationsQueryHandler,
+  FetchTenantProfilesQueryHandler,
+  FetchTenantProfileAttributesQueryHandler,
+  FetchTenantProfileAlarmsQueryHandler,
 ];
 
 @Module({

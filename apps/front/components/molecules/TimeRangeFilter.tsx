@@ -89,43 +89,44 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="h-8 gap-2 text-xs font-normal">
+                <Button variant="outline" className="h-8 gap-2 text-xs font-normal dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
                     <Clock className="h-3.5 w-3.5" />
                     {getDisplayLabel()}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] dark:bg-slate-900 dark:border-slate-800">
                 <DialogHeader>
-                    <DialogTitle>Time window</DialogTitle>
+                    <DialogTitle className="dark:text-slate-100">Time window</DialogTitle>
                 </DialogHeader>
                 <Tabs
                     defaultValue={tempValue.type}
                     onValueChange={(v) => setTempValue(prev => ({ ...prev, type: v as any }))}
                     className="w-full"
                 >
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="ALL_TIME">For all time</TabsTrigger>
-                        <TabsTrigger value="LAST">Last</TabsTrigger>
-                        <TabsTrigger value="RANGE">Range</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 dark:bg-slate-800">
+                        <TabsTrigger value="ALL_TIME" className="dark:data-[state=active]:bg-slate-700 dark:data-[state=active]:text-slate-100 dark:text-slate-400">For all time</TabsTrigger>
+                        <TabsTrigger value="LAST" className="dark:data-[state=active]:bg-slate-700 dark:data-[state=active]:text-slate-100 dark:text-slate-400">Last</TabsTrigger>
+                        <TabsTrigger value="RANGE" className="dark:data-[state=active]:bg-slate-700 dark:data-[state=active]:text-slate-100 dark:text-slate-400">Range</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="ALL_TIME" className="py-4 text-sm text-slate-500">
+                    <TabsContent value="ALL_TIME" className="py-4 text-sm text-slate-500 dark:text-slate-400">
                         History will be displayed for all time.
                     </TabsContent>
 
                     <TabsContent value="LAST" className="space-y-4 py-4">
                         <div className="flex gap-4">
                             <div className="flex-1">
-                                <Label>Value</Label>
+                                <Label className="dark:text-slate-300">Value</Label>
                                 <Input
                                     type="number"
                                     min="1"
                                     value={tempValue.lastValue || ""}
                                     onChange={(e) => setTempValue(prev => ({ ...prev, lastValue: parseInt(e.target.value) || 1 }))}
+                                    className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                                 />
                             </div>
                             <div className="flex-1">
-                                <Label>Unit</Label>
+                                <Label className="dark:text-slate-300">Unit</Label>
                                 <Select
                                     options={UNIT_OPTIONS}
                                     value={tempValue.lastUnit || "MINUTES"}
@@ -137,7 +138,7 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
 
                     <TabsContent value="RANGE" className="space-y-4 py-4">
                         <div className="grid gap-2">
-                            <Label>From</Label>
+                            <Label className="dark:text-slate-300">From</Label>
                             <Input
                                 type="datetime-local"
                                 value={tempValue.startTime ? new Date(tempValue.startTime - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : ""}
@@ -145,10 +146,11 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
                                     const date = e.target.value ? new Date(e.target.value) : undefined;
                                     setTempValue(prev => ({ ...prev, startTime: date?.getTime() }));
                                 }}
+                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:[color-scheme:dark]"
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label>To</Label>
+                            <Label className="dark:text-slate-300">To</Label>
                             <Input
                                 type="datetime-local"
                                 value={tempValue.endTime ? new Date(tempValue.endTime - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : ""}
@@ -156,12 +158,13 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
                                     const date = e.target.value ? new Date(e.target.value) : undefined;
                                     setTempValue(prev => ({ ...prev, endTime: date?.getTime() }));
                                 }}
+                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:[color-scheme:dark]"
                             />
                         </div>
                     </TabsContent>
                 </Tabs>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button variant="outline" onClick={() => setOpen(false)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">Cancel</Button>
                     <Button onClick={handleUpdate}>Update</Button>
                 </DialogFooter>
             </DialogContent>
