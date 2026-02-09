@@ -54,32 +54,31 @@ const Select = ({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className="w-full bg-slate-800/80 border border-slate-700/50 rounded-lg px-4 py-2.5 text-white text-sm focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-between hover:bg-slate-800"
+        className="w-full bg-background border border-input rounded-lg px-4 py-2.5 text-foreground text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-between hover:bg-muted/50"
       >
-        <span className={selectedOption ? "text-white" : "text-slate-400"}>
+        <span className={selectedOption ? "text-foreground" : "text-muted-foreground"}>
           {selectedOption?.label || placeholder}
         </span>
         <ChevronDownIcon
-          className={`h-4 w-4 text-slate-400 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""
+            }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-slate-800 border border-slate-700/50 rounded-lg shadow-2xl max-h-60 overflow-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => handleSelect(option.value)}
-              className="w-full px-4 py-3 text-left hover:bg-slate-700/50 transition-colors flex flex-col border-b border-slate-700/30 last:border-b-0"
+              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex flex-col border-b border-border last:border-b-0"
             >
-              <span className="text-white text-sm font-medium">
+              <span className="text-foreground text-sm font-medium">
                 {option.label}
               </span>
               {option.description && (
-                <span className="text-xs text-slate-400 mt-0.5">
+                <span className="text-xs text-muted-foreground mt-0.5">
                   {option.description}
                 </span>
               )}
@@ -92,3 +91,4 @@ const Select = ({
 };
 
 export default Select;
+

@@ -22,6 +22,7 @@ import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/conn
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
 import { QueueDto, QueuesPageResponseDto } from '../../interface/rest/dtos/response/queue.response.dto';
+import { ResourceDto, ResourceCreateDto, ResourcesPageResponseDto } from '../../interface/rest/dtos/response/resource.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -218,4 +219,30 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     queueId: string,
   ): Promise<void>;
+
+  // Resource operations
+  abstract fetchResources(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    resourceType?: string,
+  ): Promise<ResourcesPageResponseDto>;
+
+  abstract createResource(
+    sysAdminAccessToken: string,
+    resource: ResourceCreateDto,
+  ): Promise<ResourceDto>;
+
+  abstract deleteResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+    force?: boolean,
+  ): Promise<void>;
+
+  abstract downloadResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<Buffer>;
 }

@@ -188,7 +188,17 @@ export const SystemSettingsPage = () => {
 };
 
 const QueuesTabContent = () => {
-    const { queuesData, isLoading, mutate } = useQueues(0, 50, "createdTime", "DESC");
+    const [currentPage, setCurrentPage] = useState(0);
+    const [sortProperty, setSortProperty] = useState("createdTime");
+    const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+    const pageSize = 10;
+
+    const { queuesData, isLoading, mutate } = useQueues(
+        currentPage,
+        pageSize,
+        sortProperty,
+        sortOrder
+    );
     const { createOrUpdateQueue, deleteQueue } = useManageQueue();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingQueue, setEditingQueue] = useState<Queue | null>(null);
@@ -204,24 +214,37 @@ const QueuesTabContent = () => {
     };
 
     const handleDelete = async (queueId: string) => {
-
         try {
             await deleteQueue(queueId);
             mutate();
             toast.success("Queue deleted successfully");
         } catch (error: any) {
             console.error(error);
-            const errorMessage = error?.response?.data?.message || error?.message || "Failed to delete queue";
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to delete queue";
             toast.error(errorMessage);
         }
-
     };
 
     const handleSave = async (queue: Queue) => {
         await createOrUpdateQueue(queue);
         mutate();
-        toast.success(editingQueue ? "Queue updated successfully" : "Queue created successfully");
+        toast.success(
+            editingQueue ? "Queue updated successfully" : "Queue created successfully"
+        );
         setIsDialogOpen(false);
+    };
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleSortChange = (property: string, order: "ASC" | "DESC") => {
+        setSortProperty(property);
+        setSortOrder(order);
+        setCurrentPage(0); // Reset to first page on sort change
     };
 
     return (
@@ -229,6 +252,14 @@ const QueuesTabContent = () => {
             <QueuesTable
                 queues={queuesData?.data || []}
                 isLoading={isLoading}
+                currentPage={currentPage}
+                totalPages={queuesData?.totalPages || 0}
+                totalElements={queuesData?.totalElements || 0}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                sortProperty={sortProperty}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
                 onRefresh={() => mutate()}
                 onAdd={handleAdd}
                 onEdit={handleEdit}

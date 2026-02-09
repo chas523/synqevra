@@ -37,6 +37,7 @@ import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/conn
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
 import { QueueDto, QueuesPageResponseDto } from '../../interface/rest/dtos/response/queue.response.dto';
+import { ResourceDto, ResourceCreateDto, ResourcesPageResponseDto } from '../../interface/rest/dtos/response/resource.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -1086,6 +1087,99 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to delete queue',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Resource operations
+  async fetchResources(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    resourceType?: string,
+  ): Promise<ResourcesPageResponseDto> {
+    try {
+      let url = `${this.THINGSBOARD_API_URL}/resource?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      if (resourceType) {
+        url += `&resourceType=${resourceType}`;
+      }
+      const response = await firstValueFrom(
+        this.httpService.get<ResourcesPageResponseDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch resources',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createResource(
+    sysAdminAccessToken: string,
+    resource: ResourceCreateDto,
+  ): Promise<ResourceDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/resource`;
+      const response = await firstValueFrom(
+        this.httpService.post<ResourceDto>(url, resource, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create resource',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+    force: boolean = false,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/resource/${resourceId}?force=${force}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete resource',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async downloadResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<Buffer> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/resource/${resourceId}/download`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+          responseType: 'arraybuffer',
+        }),
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to download resource',
         error,
         this.logger,
       );

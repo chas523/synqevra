@@ -33,6 +33,8 @@ import { UpdateSmsSettingsCommandHandler } from './application/commands/update-s
 import { UpdateNotificationSettingsCommandHandler } from './application/commands/update-notification-settings/update-notification-settings.command.handler';
 import { CreateQueueCommandHandler } from './application/commands/create-queue/create-queue.command.handler';
 import { DeleteQueueCommandHandler } from './application/commands/delete-queue/delete-queue.command.handler';
+import { CreateResourceCommandHandler } from './application/commands/create-resource/create-resource.command.handler';
+import { DeleteResourceCommandHandler } from './application/commands/delete-resource/delete-resource.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -50,6 +52,8 @@ import { FetchConnectivitySettingsQueryHandler } from './application/queries/fet
 import { FetchSmsSettingsQueryHandler } from './application/queries/fetch-sms-settings/fetch-sms-settings.query.handler';
 import { FetchNotificationSettingsQueryHandler } from './application/queries/fetch-notification-settings/fetch-notification-settings.query.handler';
 import { FetchQueuesQueryHandler } from './application/queries/fetch-queues/fetch-queues.query.handler';
+import { FetchResourcesQueryHandler } from './application/queries/fetch-resources/fetch-resources.query.handler';
+import { DownloadResourceQueryHandler } from './application/queries/download-resource/download-resource.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -72,6 +76,8 @@ const commandHandlers = [
   UpdateNotificationSettingsCommandHandler,
   CreateQueueCommandHandler,
   DeleteQueueCommandHandler,
+  CreateResourceCommandHandler,
+  DeleteResourceCommandHandler,
 ];
 
 const queryHandlers = [
@@ -90,6 +96,8 @@ const queryHandlers = [
   FetchSmsSettingsQueryHandler,
   FetchNotificationSettingsQueryHandler,
   FetchQueuesQueryHandler,
+  FetchResourcesQueryHandler,
+  DownloadResourceQueryHandler,
 ];
 
 @Module({

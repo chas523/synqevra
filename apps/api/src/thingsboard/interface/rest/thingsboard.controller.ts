@@ -8,6 +8,7 @@ import {
   Param,
   Put,
   Delete, // Added Delete
+  Res,
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
@@ -84,6 +85,11 @@ import { QueueDto, QueuesPageResponseDto } from './dtos/response/queue.response.
 import { FetchQueuesQuery } from 'src/thingsboard/application/queries/fetch-queues/fetch-queues.query';
 import { CreateQueueCommand } from 'src/thingsboard/application/commands/create-queue/create-queue.command';
 import { DeleteQueueCommand } from 'src/thingsboard/application/commands/delete-queue/delete-queue.command';
+import { ResourceDto, ResourceCreateDto, ResourcesPageResponseDto } from './dtos/response/resource.response.dto';
+import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
+import { CreateResourceCommand } from 'src/thingsboard/application/commands/create-resource/create-resource.command';
+import { DeleteResourceCommand } from 'src/thingsboard/application/commands/delete-resource/delete-resource.command';
+import { DownloadResourceQuery } from 'src/thingsboard/application/queries/download-resource/download-resource.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -946,6 +952,114 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: () => { },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // Resource endpoints
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('resources')
+  @ApiOperation({ summary: 'Fetch resources' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ResourcesPageResponseDto,
+  })
+  async fetchResources(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('resourceType') resourceType?: string,
+  ) {
+    const query = new FetchResourcesQuery(
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+      resourceType,
+    );
+    const result: Result<ResourcesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: ResourcesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('resources')
+  @ApiOperation({ summary: 'Create resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ResourceDto,
+  })
+  async createResource(@Body() resource: ResourceCreateDto) {
+    const command = new CreateResourceCommand(resource);
+    const result: Result<ResourceDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: ResourceDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('resources/:resourceId')
+  @ApiOperation({ summary: 'Delete resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async deleteResource(
+    @Param('resourceId') resourceId: string,
+    @Query('force') force: boolean = false,
+  ) {
+    const command = new DeleteResourceCommand(resourceId, force);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => { },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('resources/:resourceId/download')
+  @ApiOperation({ summary: 'Download resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Resource file',
+  })
+  async downloadResource(
+    @Param('resourceId') resourceId: string,
+    @Res() res: any,
+  ) {
+    const query = new DownloadResourceQuery(resourceId);
+    const result: Result<Buffer, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (buffer: Buffer) => {
+        res.set({
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="resource"`,
+        });
+        res.send(buffer);
+      },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

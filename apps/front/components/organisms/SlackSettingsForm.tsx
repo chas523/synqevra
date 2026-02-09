@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useEffect, useState, useCallback, DragEvent, ChangeEvent } from "react";
+import { useId, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -15,7 +15,7 @@ import InfoTooltip from "@/components/molecules/InfoTooltip";
 import { LoadingButton } from "../atoms";
 import { useForm } from "react-hook-form";
 import { NotificationSettings } from "@/types/notificationSettingsTypes";
-import { Upload, X, FileJson } from "lucide-react";
+import { FileDropzone } from "@/components/molecules/FileDropzone";
 
 interface SlackSettingsFormProps {
     initialSettings: NotificationSettings | null;
@@ -35,7 +35,7 @@ export const SlackSettingsForm = ({
     const formId = useId();
     const [firebaseFileName, setFirebaseFileName] = useState<string>("");
     const [firebaseFileContent, setFirebaseFileContent] = useState<string>("");
-    const [isDragging, setIsDragging] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [fileError, setFileError] = useState<string>("");
     const [isFormDirty, setIsFormDirty] = useState(false);
 
@@ -63,9 +63,13 @@ export const SlackSettingsForm = ({
         }
     }, [initialSettings, reset]);
 
-    const handleFileRead = useCallback((file: File) => {
+    const handleFilesSelected = useCallback((files: File[]) => {
+        if (files.length === 0) return;
+
+        const file = files[0];
         if (!file.name.endsWith('.json')) {
             setFileError("Please upload a JSON file");
+            setSelectedFiles([]);
             return;
         }
 
@@ -76,44 +80,21 @@ export const SlackSettingsForm = ({
                 JSON.parse(content); // Validate JSON
                 setFirebaseFileName(file.name);
                 setFirebaseFileContent(content);
+                setSelectedFiles([file]);
                 setFileError("");
                 setIsFormDirty(true);
             } catch {
                 setFileError("Invalid JSON file");
+                setSelectedFiles([]);
             }
         };
         reader.readAsText(file);
     }, []);
 
-    const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-    }, []);
-
-    const handleDrop = useCallback((e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            handleFileRead(file);
-        }
-    }, [handleFileRead]);
-
-    const handleFileInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            handleFileRead(file);
-        }
-    }, [handleFileRead]);
-
     const handleRemoveFile = useCallback(() => {
         setFirebaseFileName("");
         setFirebaseFileContent("");
+        setSelectedFiles([]);
         setIsFormDirty(true);
     }, []);
 
@@ -144,6 +125,7 @@ export const SlackSettingsForm = ({
         });
         setFirebaseFileName(initialSettings?.deliveryMethodsConfigs?.MOBILE_APP?.firebaseServiceAccountCredentialsFileName || "");
         setFirebaseFileContent(initialSettings?.deliveryMethodsConfigs?.MOBILE_APP?.firebaseServiceAccountCredentials || "");
+        setSelectedFiles([]);
         setIsFormDirty(false);
     };
 
@@ -189,57 +171,20 @@ export const SlackSettingsForm = ({
 
                         <div className="space-y-2">
                             <Label>Firebase service account credentials JSON file</Label>
-
-                            <div
-                                onDragOver={handleDragOver}
-                                onDragLeave={handleDragLeave}
-                                onDrop={handleDrop}
-                                className={`
-                                    relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-                                    ${isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
-                                    ${fileError ? 'border-destructive' : ''}
-                                `}
-                            >
-                                <input
-                                    type="file"
-                                    accept=".json"
-                                    onChange={handleFileInput}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                />
-                                <div className="flex flex-col items-center gap-2">
-                                    <Upload className="w-8 h-8 text-muted-foreground" />
-                                    <p className="text-sm text-muted-foreground">
-                                        Drag and drop your Firebase service account credentials file or{" "}
-                                        <span className="text-primary font-medium">Browse file</span>
-                                    </p>
-                                </div>
-                                {!firebaseFileName && (
-                                    <button
-                                        type="button"
-                                        onClick={() => { }}
-                                        className="absolute top-2 right-2 p-1 hover:bg-muted rounded"
-                                    >
-                                        <X className="w-4 h-4 text-muted-foreground" />
-                                    </button>
-                                )}
-                            </div>
-
+                            <FileDropzone
+                                accept=".json"
+                                multiple={false}
+                                onFilesSelected={handleFilesSelected}
+                                selectedFiles={selectedFiles}
+                                onRemoveFile={handleRemoveFile}
+                            />
                             {fileError && (
                                 <p className="text-sm text-destructive">{fileError}</p>
                             )}
-
-                            {firebaseFileName && (
-                                <div className="flex items-center gap-2 mt-2">
-                                    <FileJson className="w-4 h-4 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">{firebaseFileName}</span>
-                                    <button
-                                        type="button"
-                                        onClick={handleRemoveFile}
-                                        className="p-1 hover:bg-muted rounded ml-auto"
-                                    >
-                                        <X className="w-4 h-4 text-muted-foreground" />
-                                    </button>
-                                </div>
+                            {firebaseFileName && selectedFiles.length === 0 && (
+                                <p className="text-sm text-muted-foreground">
+                                    Current file: {firebaseFileName}
+                                </p>
                             )}
                         </div>
                     </div>
@@ -269,4 +214,5 @@ export const SlackSettingsForm = ({
 };
 
 export default SlackSettingsForm;
+
 
