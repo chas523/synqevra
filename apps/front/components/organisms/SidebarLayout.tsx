@@ -8,10 +8,11 @@ import logo from "@/public/logo.svg";
 import logoWhite from "@/public/logo-white.svg";
 import { useLogout } from "@/hooks/auth/useAuth";
 import { Button } from "../ui/button";
-import { LogOutIcon, Moon, Sun, Loader2, Bell } from "lucide-react";
+import { LogOutIcon, Moon, Sun, Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import NotificationButton from "../molecules/NotificationButton";
+import { useTelemetryContext } from "@/lib/context/TelemetryContext";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -19,16 +20,28 @@ interface SidebarLayoutProps {
 
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   const [mounted, setMounted] = useState(false);
+  const { reconnect } = useTelemetryContext();
 
   const pathname = usePathname();
-  const { logout, isLoading, error, success } = useLogout();
+  const { logout, isLoading } = useLogout();
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
 
-  //we check if component is mounted (because useeffect only runs on client)
+  const prevPathRef = useRef(pathname);
+
   useEffect(() => {
+    //we check if component is mounted (because useeffect only runs on client)
     setMounted(true);
-  }, []);
+
+    const wasAuth = prevPathRef.current === "/" || prevPathRef.current.includes("/auth");
+    const isLoggedIn = !(pathname === "/" || pathname.includes("/auth"));
+
+    if (wasAuth && isLoggedIn) {
+      reconnect();
+    }
+
+    prevPathRef.current = pathname;
+  }, [pathname, reconnect]);
 
   if (!mounted)
     return (
@@ -126,7 +139,6 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-transparent">
-          {/* <SidebarInset className="h-screen overflow-hidden flex flex-col bg-transparent"> */}
           <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-20">
             <SidebarTrigger className="-ml-1 text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-black" />
             <div className="flex items-center gap-3">

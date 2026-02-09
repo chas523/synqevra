@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTelemetryContext } from "@/lib/context/TelemetryContext";
-import type {
+import {
   SystemMetricsData,
   LatestSystemMetrics,
   MsgCount,
@@ -13,7 +13,7 @@ import type {
  * Automatically requests data on connection and updates in real-time.
  */
 export function useDeviceCommunicationCount() {
-  const { socket } = useTelemetryContext();
+  const { socket, isThingsboardConnected, requestMsgCount } = useTelemetryContext();
 
   const [metricsHistory, setMetricsHistory] = useState<MsgCount[]>([]);
 
@@ -21,6 +21,10 @@ export function useDeviceCommunicationCount() {
 
   useEffect(() => {
     if (!socket) return;
+
+    if (isThingsboardConnected) {
+      requestMsgCount();
+    }
 
     const handleSystemMetrics = (data: MsgCount[]) => {
       if (data.length === 0) return;
@@ -42,7 +46,7 @@ export function useDeviceCommunicationCount() {
     return () => {
       socket.off("transportMsgCountHourly", handleSystemMetrics);
     };
-  }, [socket]);
+  }, [socket, isThingsboardConnected, requestMsgCount]);
 
   return {
     metricsHistory,

@@ -26,6 +26,10 @@ export function useSystemMetrics() {
   useEffect(() => {
     if (!socket) return;
 
+    if (isThingsboardConnected) {
+      requestSystemMetrics();
+    }
+
     const handleSystemMetrics = (data: SystemMetricsData[]) => {
       if (data.length === 0) return;
 
@@ -54,7 +58,7 @@ export function useSystemMetrics() {
     return () => {
       socket.off("systemMetricsChart", handleSystemMetrics);
     };
-  }, [socket]);
+  }, [socket, isThingsboardConnected, requestSystemMetrics]);
 
   return {
     metricsHistory,

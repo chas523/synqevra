@@ -1,5 +1,7 @@
 import {
   Building2,
+  ChevronDown,
+  FolderOpen,
   Home,
   LayoutDashboard,
   PersonStanding,
@@ -22,7 +24,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "../ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const MENU_ITEMS = {
   admin: [
@@ -37,6 +47,11 @@ const MENU_ITEMS = {
       href: "/settings",
       icon: Settings,
       label: "Settings",
+    },
+    {
+      href: "/security-settings",
+      icon: Settings,
+      label: "Security Settings",
     },
   ],
   user: [
@@ -93,6 +108,29 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Resources collapsible menu */}
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <FolderOpen />
+                      <span>Resources</span>
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/resources/resource-library">
+                            <span>Resource library</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
