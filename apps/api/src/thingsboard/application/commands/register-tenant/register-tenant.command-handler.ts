@@ -52,7 +52,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_SYSADMIN_EMAIL(): string {
     return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');

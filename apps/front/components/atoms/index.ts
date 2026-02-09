@@ -18,3 +18,5 @@ export type { StatusBadgeProps } from "./StatusBadge";
 export { default as StatusBadge } from "./StatusBadge";
 export { Text } from "./Text";
 export { ErrorMessageAtom } from "./ErrorMessage";
+export { DetailPanelField } from "./DetailPanelField";
+export type { DetailPanelFieldProps } from "./DetailPanelField";

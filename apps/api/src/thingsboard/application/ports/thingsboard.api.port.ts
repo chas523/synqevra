@@ -55,6 +55,10 @@ export abstract class ThingsboardApiPort {
     tenantAdminId: string,
     sysAdminAccessToken: string,
   ): Promise<void>;
+  abstract updateTenant(
+    tenantData: UpdateTenantDto,
+    sysAdminAccessToken: string,
+  ): Promise<TenantResponse>;
 
   // User operations
   abstract createTenantAdmin(
@@ -150,4 +154,163 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: ExtendedSecuritySettingsDto,
   ): Promise<SecuritySettingsDtoResponse>;
+
+  // Tenant detail operations
+  abstract fetchTenantAttributes(
+    sysAdminAccessToken: string,
+    tenantId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<TenantAttributesResponse>;
+
+  abstract fetchEntityAlarms(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityAlarmsResponse>;
+
+  abstract fetchEntityEvents(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    eventType?: string,
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityEventsResponse>;
+
+  abstract fetchEntityRelations(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    direction: 'FROM' | 'TO',
+  ): Promise<EntityRelationsResponse>;
+
+  abstract saveEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    attributes: Record<string, unknown>,
+  ): Promise<void>;
+
+  abstract saveRelation(
+    sysAdminAccessToken: string,
+    relation: RelationInfo,
+  ): Promise<void>;
+
+  abstract deleteRelation(
+    sysAdminAccessToken: string,
+    fromId: string,
+    fromType: string,
+    relationType: string,
+    toId: string,
+    toType: string,
+  ): Promise<void>;
+}
+
+// Response types for new methods
+export interface TenantAttribute {
+  key: string;
+  value: unknown;
+  lastUpdateTs: number;
+}
+
+export type TenantAttributesResponse = TenantAttribute[];
+
+export interface AlarmInfo {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  name: string;
+  type: string;
+  originator: EntityId;
+  severity: 'CRITICAL' | 'MAJOR' | 'MINOR' | 'WARNING' | 'INDETERMINATE';
+  status: 'ACTIVE_UNACK' | 'ACTIVE_ACK' | 'CLEARED_UNACK' | 'CLEARED_ACK';
+  startTs: number;
+  endTs?: number;
+  ackTs?: number;
+  clearTs?: number;
+  propagate?: boolean;
+  details?: Record<string, unknown>;
+}
+
+export interface EntityAlarmsResponse {
+  data: AlarmInfo[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface EventInfo {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  entityId: EntityId;
+  serviceId?: string;
+  type: string;
+  uid: string;
+  body: Record<string, unknown>;
+}
+
+export interface EntityEventsResponse {
+  data: EventInfo[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface RelationInfo {
+  from: EntityId;
+  to: EntityId;
+  type: string;
+  typeGroup: string;
+  additionalInfo?: Record<string, unknown>;
+  fromName?: string;
+  toName?: string;
+}
+
+export type EntityRelationsResponse = RelationInfo[];
+
+// Tenant update types
+export interface UpdateTenantDto {
+  id: EntityId;
+  title: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  address?: string;
+  address2?: string;
+  zip?: string;
+  phone?: string;
+  email?: string;
+  region?: string;
+  tenantProfileId?: EntityId;
+  additionalInfo?: Record<string, unknown>;
+}
+
+export interface TenantResponse {
+  id: EntityId;
+  createdTime: number;
+  title: string;
+  name: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  address?: string;
+  address2?: string;
+  zip?: string;
+  phone?: string;
+  email?: string;
+  region?: string;
+  tenantProfileId?: EntityId;
+  additionalInfo?: Record<string, unknown>;
+  version?: number;
 }

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
   EntityId,
+  RelationInfo,
   ThingsboardApiPort,
   ThingsboardLoginResponse,
   UserResponse,
@@ -368,6 +369,24 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         error,
         this.logger,
       );
+    }
+  }
+
+  async updateTenant(
+    tenantData: any,
+    sysAdminAccessToken: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/tenant`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, tenantData, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error('Failed to update tenant:', error);
+      ThingsboardApiException.createException('Failed to update tenant', error);
     }
   }
 
@@ -855,5 +874,173 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       throw error;
     }
+  }
+
+  // Tenant detail operations
+  async fetchTenantAttributes(
+    sysAdminAccessToken: string,
+    tenantId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<any[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/TENANT/${tenantId}/values/attributes/${scope}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch tenant attributes (may not be available): ${error}`);
+      return [];
+    }
+  }
+
+  async fetchEntityAlarms(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      let url = `${this.THINGSBOARD_API_URL}/v2/alarm/${entityType}/${entityId}?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      if (statusList && statusList.length > 0) {
+        url += `&statusList=${statusList.join(',')}`;
+      }
+      if (severityList && severityList.length > 0) {
+        url += `&severityList=${severityList.join(',')}`;
+      }
+      if (startTime !== undefined) {
+        url += `&startTime=${startTime}`;
+      }
+      if (endTime !== undefined) {
+        url += `&endTime=${endTime}`;
+      }
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch entity alarms (may not be available): ${error}`);
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
+  async fetchEntityEvents(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    eventType?: string,
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      // ThingsBoard events API requires startTime and endTime
+      const end = endTime || Date.now();
+      const start = startTime || (end - 30 * 24 * 60 * 60 * 1000); // Last 30 days or provided
+      const type = eventType || 'LC_EVENT'; // Default to lifecycle events
+
+      const url = `${this.THINGSBOARD_API_URL}/events/${entityType}/${entityId}/${type}?tenantId=${entityId}&startTime=${start}&endTime=${end}&pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch entity events (may not be available): ${error}`);
+      // Return empty response instead of throwing - events may not exist for all entities
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
+
+  async fetchEntityRelations(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    direction: 'FROM' | 'TO',
+  ): Promise<any[]> {
+    try {
+      const param = direction === 'FROM' ? 'fromId' : 'toId';
+      const typeParam = direction === 'FROM' ? 'fromType' : 'toType';
+      const url = `${this.THINGSBOARD_API_URL}/relations/info?${param}=${entityId}&${typeParam}=${entityType}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch entity relations (may not be available): ${error}`);
+      return [];
+    }
+  }
+
+  async saveEntityAttributes(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    attributes: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/${scope}`;
+      await firstValueFrom(
+        this.httpService.post(url, attributes, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      this.logger.error(`Failed to save entity attributes: ${error}`);
+      ThingsboardApiException.createException('Failed to save entity attributes', error);
+    }
+  }
+
+
+  async saveRelation(
+    sysAdminAccessToken: string,
+    relation: RelationInfo,
+  ): Promise<void> {
+    const url = `${this.THINGSBOARD_API_URL}/relation`;
+    await firstValueFrom(
+      this.httpService.post(url, relation, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
+  }
+
+  async deleteRelation(
+    sysAdminAccessToken: string,
+    fromId: string,
+    fromType: string,
+    relationType: string,
+    toId: string,
+    toType: string,
+  ): Promise<void> {
+    const url = `${this.THINGSBOARD_API_URL}/relation`;
+    const params = new URLSearchParams({
+      fromId,
+      fromType,
+      relationType,
+      toId,
+      toType,
+    });
+
+    await firstValueFrom(
+      this.httpService.delete(`${url}?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+      }),
+    );
   }
 }

@@ -27,6 +27,10 @@ import { RefreshTokenCommandHandler } from './application/commands/refresh-token
 import { ConfirmPractitionerCommandHandler } from './application/commands/confirm-practitioner/confirm-practitioner.command-handler';
 import { DeleteTenantCommandHandler } from './application/commands/delete-tenant/delete-tenant.command-handler';
 import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
+import { UpdateTenantCommandHandler } from './application/commands/update-tenant/update-tenant.command-handler';
+import { SaveEntityAttributesCommandHandler } from './application/commands/save-entity-attributes/save-entity-attributes.command-handler';
+import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
+import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -38,11 +42,16 @@ import { FetchTenantsQueryHandler } from './application/queries/fetch-tenants/fe
 import { FetchTenantUsersQueryHandler } from './application/queries/fetch-users-by-tenant/fetch-tenant-users.query-handler';
 import { FetchTenantDevicesQueryHandler } from './application/queries/fetch-tenant-devices/fetch-tenant-devices.query-handler';
 import { FetchNotificationsQueryHandler } from './application/queries/fetch-notifications/fetch-notifications.query-handler';
+import { FetchTenantAttributesQueryHandler } from './application/queries/fetch-tenant-attributes/fetch-tenant-attributes.query-handler';
+import { FetchTenantAlarmsQueryHandler } from './application/queries/fetch-tenant-alarms/fetch-tenant-alarms.query-handler';
+import { FetchTenantEventsQueryHandler } from './application/queries/fetch-tenant-events/fetch-tenant-events.query-handler';
+import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-tenant-relations/fetch-tenant-relations.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
+import { SysAdminAuthService } from './application/services/sysadmin-auth.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -54,6 +63,10 @@ const commandHandlers = [
   RefreshTokenCommandHandler,
   ConfirmPractitionerCommandHandler,
   UpdateSecuritySettingsCommandHandler,
+  UpdateTenantCommandHandler,
+  SaveEntityAttributesCommandHandler,
+  CreateRelationCommandHandler,
+  DeleteRelationCommandHandler,
 ];
 
 const queryHandlers = [
@@ -66,6 +79,10 @@ const queryHandlers = [
   FetchTenantDevicesQueryHandler,
   FetchNotificationsQueryHandler,
   FetchSecuritySettingsQueryHandler,
+  FetchTenantAttributesQueryHandler,
+  FetchTenantAlarmsQueryHandler,
+  FetchTenantEventsQueryHandler,
+  FetchTenantRelationsQueryHandler,
 ];
 
 @Module({
@@ -95,6 +112,7 @@ const queryHandlers = [
     TelemetryService,
     TelemetryParserService,
     TelemetryGateway,
+    SysAdminAuthService,
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [
@@ -105,4 +123,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule {}
+export class ThingsboardModule { }
