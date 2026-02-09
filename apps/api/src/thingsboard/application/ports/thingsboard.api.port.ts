@@ -16,6 +16,20 @@ import { GetTenantDevicesResponse } from '../../interface/rest/dtos/response/thi
 import { GetNotificationsResponse } from '../../interface/rest/dtos/response/thingsboard-get-notifications.response.dto';
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-security-settings.response.dto';
 import { ExtendedSecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-security-settings.request.dto';
+import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-version.response.dto';
+import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-settings.response.dto';
+import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
+import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
+import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import {
+  QueueDto,
+  QueuesPageResponseDto,
+} from '../../interface/rest/dtos/response/queue.response.dto';
+import {
+  ResourceDto,
+  ResourceCreateDto,
+  ResourcesPageResponseDto,
+} from '../../interface/rest/dtos/response/resource.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -144,6 +158,9 @@ export abstract class ThingsboardApiPort {
     page: number,
     pageSize: number,
   ): Promise<GetNotificationsResponse>;
+  abstract fetchDashboardVersion(
+    sysadminAccessToken: string,
+  ): Promise<DashboardVersionResponse>;
 
   //Settings operations
   abstract fetchSecuritySettings(
@@ -154,6 +171,91 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: ExtendedSecuritySettingsDto,
   ): Promise<SecuritySettingsDtoResponse>;
+
+  // General Settings operations
+  abstract fetchGeneralSettings(
+    sysAdminAccessToken: string,
+  ): Promise<GeneralSettingsDto>;
+
+  abstract updateGeneralSettings(
+    sysAdminAccessToken: string,
+    settings: GeneralSettingsDto,
+  ): Promise<GeneralSettingsDto>;
+
+  // Connectivity Settings operations
+  abstract fetchConnectivitySettings(
+    sysAdminAccessToken: string,
+  ): Promise<ConnectivitySettingsDto>;
+
+  abstract updateConnectivitySettings(
+    sysAdminAccessToken: string,
+    settings: ConnectivitySettingsDto,
+  ): Promise<ConnectivitySettingsDto>;
+
+  // SMS Settings operations
+  abstract fetchSmsSettings(
+    sysAdminAccessToken: string,
+  ): Promise<SmsSettingsDto>;
+
+  abstract updateSmsSettings(
+    sysAdminAccessToken: string,
+    settings: SmsSettingsDto,
+  ): Promise<SmsSettingsDto>;
+
+  // Notification Settings operations
+  abstract fetchNotificationSettings(
+    sysAdminAccessToken: string,
+  ): Promise<NotificationSettingsDto>;
+
+  abstract updateNotificationSettings(
+    sysAdminAccessToken: string,
+    settings: NotificationSettingsDto,
+  ): Promise<NotificationSettingsDto>;
+
+  // Queue operations
+  abstract fetchQueues(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<QueuesPageResponseDto>;
+
+  abstract createQueue(
+    sysAdminAccessToken: string,
+    queue: QueueDto,
+  ): Promise<QueueDto>;
+
+  abstract deleteQueue(
+    sysAdminAccessToken: string,
+    queueId: string,
+  ): Promise<void>;
+
+  // Resource operations
+  abstract fetchResources(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    resourceType?: string,
+  ): Promise<ResourcesPageResponseDto>;
+
+  abstract createResource(
+    sysAdminAccessToken: string,
+    resource: ResourceCreateDto,
+  ): Promise<ResourceDto>;
+
+  abstract deleteResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+    force?: boolean,
+  ): Promise<void>;
+
+  abstract downloadResource(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<Buffer>;
 
   // Tenant detail operations
   abstract fetchTenantAttributes(
@@ -370,7 +472,6 @@ export interface TenantProfile {
     }> | null;
   };
 }
-
 
 export interface TenantProfilesResponse {
   data: TenantProfile[];

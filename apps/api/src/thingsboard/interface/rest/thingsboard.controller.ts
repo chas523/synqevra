@@ -7,6 +7,8 @@ import {
   Query,
   Param,
   Put,
+  Delete, // Added Delete
+  Res,
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
@@ -22,6 +24,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -62,6 +65,38 @@ import { SecuritySettingsDto } from './dtos/request/thingsboard-security-setting
 import { SecuritySettingsDto as SecuritySettingsDtoResponse } from './dtos/response/thingsboard-security-settings.response.dto';
 import { FetchSecuritySettingsQuery } from 'src/thingsboard/application/queries/fetch-security-settings/fetch-security-settings.query';
 import { UpdateSecuritySettingsCommand } from 'src/thingsboard/application/commands/update-security-settings/update-security-settings.command';
+import { DashboardVersionResponse } from './dtos/response/thingsboard-version.response.dto';
+import { FetchVersionQuery } from 'src/thingsboard/application/queries/fetch-version/fetch-version.query';
+import { GeneralSettingsDto } from './dtos/response/general-settings.response.dto';
+import { GeneralSettingsRequestDto } from './dtos/request/general-settings.request.dto';
+import { FetchGeneralSettingsQuery } from 'src/thingsboard/application/queries/fetch-general-settings/fetch-general-settings.query';
+import { UpdateGeneralSettingsCommand } from 'src/thingsboard/application/commands/update-general-settings/update-general-settings.command';
+import { ConnectivitySettingsDto } from './dtos/response/connectivity-settings.response.dto';
+import { ConnectivitySettingsRequestDto } from './dtos/request/connectivity-settings.request.dto';
+import { FetchConnectivitySettingsQuery } from 'src/thingsboard/application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query';
+import { UpdateConnectivitySettingsCommand } from 'src/thingsboard/application/commands/update-connectivity-settings/update-connectivity-settings.command';
+import { SmsSettingsDto } from './dtos/response/sms-settings.response.dto';
+import { FetchSmsSettingsQuery } from 'src/thingsboard/application/queries/fetch-sms-settings/fetch-sms-settings.query';
+import { UpdateSmsSettingsCommand } from 'src/thingsboard/application/commands/update-sms-settings/update-sms-settings.command';
+import { NotificationSettingsDto } from './dtos/response/notification-settings.response.dto';
+import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
+import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
+import {
+  QueueDto,
+  QueuesPageResponseDto,
+} from './dtos/response/queue.response.dto';
+import { FetchQueuesQuery } from 'src/thingsboard/application/queries/fetch-queues/fetch-queues.query';
+import { CreateQueueCommand } from 'src/thingsboard/application/commands/create-queue/create-queue.command';
+import { DeleteQueueCommand } from 'src/thingsboard/application/commands/delete-queue/delete-queue.command';
+import {
+  ResourceDto,
+  ResourceCreateDto,
+  ResourcesPageResponseDto,
+} from './dtos/response/resource.response.dto';
+import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
+import { CreateResourceCommand } from 'src/thingsboard/application/commands/create-resource/create-resource.command';
+import { DeleteResourceCommand } from 'src/thingsboard/application/commands/delete-resource/delete-resource.command';
+import { DownloadResourceQuery } from 'src/thingsboard/application/queries/download-resource/download-resource.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -535,6 +570,500 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (securityResponse: SecuritySettingsDtoResponse) => securityResponse,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/updates')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get current and newest version',
+    description:
+      'Get current and newest version of thingsboard - get updates info',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Security settings updated successfully',
+    type: DashboardVersionResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  async getCurrentVersion() {
+    const query = new FetchVersionQuery();
+    const result: Result<DashboardVersionResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (result: DashboardVersionResponse) => result,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/settings/general')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get general settings',
+    description: 'Retrieve general settings including base URL configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'General settings retrieved successfully',
+    type: GeneralSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch general settings',
+  })
+  async getGeneralSettings() {
+    const query = new FetchGeneralSettingsQuery();
+    const result: Result<GeneralSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: GeneralSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/general')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update general settings',
+    description: 'Update general settings including base URL configuration',
+  })
+  @ApiBody({
+    type: GeneralSettingsRequestDto,
+    description: 'General settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'General settings updated successfully',
+    type: GeneralSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update general settings',
+  })
+  async updateGeneralSettings(@Body() settings: GeneralSettingsRequestDto) {
+    const command = new UpdateGeneralSettingsCommand(settings);
+    const result: Result<GeneralSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: GeneralSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/settings/connectivity')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get connectivity settings',
+    description: 'Retrieve device connectivity settings for all protocols',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connectivity settings retrieved successfully',
+    type: ConnectivitySettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch connectivity settings',
+  })
+  async getConnectivitySettings() {
+    const query = new FetchConnectivitySettingsQuery();
+    const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: ConnectivitySettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/connectivity')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update connectivity settings',
+    description: 'Update device connectivity settings for all protocols',
+  })
+  @ApiBody({
+    type: ConnectivitySettingsRequestDto,
+    description: 'Connectivity settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connectivity settings updated successfully',
+    type: ConnectivitySettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update connectivity settings',
+  })
+  async updateConnectivitySettings(
+    @Body() settings: ConnectivitySettingsRequestDto,
+  ) {
+    const command = new UpdateConnectivitySettingsCommand(settings);
+    const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: ConnectivitySettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/admin/settings/sms')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get SMS settings',
+    description: 'Retrieve SMS provider settings',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'SMS settings retrieved successfully',
+    type: SmsSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch SMS settings',
+  })
+  async getSmsSettings() {
+    const query = new FetchSmsSettingsQuery();
+    const result: Result<SmsSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: SmsSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/admin/settings/sms')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update SMS settings',
+    description: 'Update SMS provider settings',
+  })
+  @ApiBody({
+    type: SmsSettingsDto,
+    description: 'SMS settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'SMS settings updated successfully',
+    type: SmsSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update SMS settings',
+  })
+  async updateSmsSettings(@Body() settings: SmsSettingsDto) {
+    const command = new UpdateSmsSettingsCommand(settings);
+    const result: Result<SmsSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: SmsSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/notification/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get notification settings',
+    description: 'Retrieve notification settings including Slack configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification settings retrieved successfully',
+    type: NotificationSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch notification settings',
+  })
+  async getNotificationSettings() {
+    const query = new FetchNotificationSettingsQuery();
+    const result: Result<NotificationSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: NotificationSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/notification/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update notification settings',
+    description: 'Update notification settings including Slack configuration',
+  })
+  @ApiBody({
+    type: NotificationSettingsDto,
+    description: 'Notification settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification settings updated successfully',
+    type: NotificationSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update notification settings',
+  })
+  async updateNotificationSettings(@Body() settings: NotificationSettingsDto) {
+    const command = new UpdateNotificationSettingsCommand(settings);
+    const result: Result<NotificationSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (settings: NotificationSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('queues')
+  @ApiOperation({ summary: 'Fetch queues' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: QueuesPageResponseDto,
+  })
+  async fetchQueues(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const query = new FetchQueuesQuery(page, pageSize, sortProperty, sortOrder);
+    const result: Result<QueuesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: QueuesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('queues')
+  @ApiOperation({ summary: 'Create or update queue' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: QueueDto,
+  })
+  async createQueue(@Body() queue: QueueDto) {
+    const command = new CreateQueueCommand(queue);
+    const result: Result<QueueDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: QueueDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('queues/:queueId')
+  @ApiOperation({ summary: 'Delete queue' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async deleteQueue(@Param('queueId') queueId: string) {
+    const command = new DeleteQueueCommand(queueId);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => {},
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // Resource endpoints
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('resources')
+  @ApiOperation({ summary: 'Fetch resources' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ResourcesPageResponseDto,
+  })
+  async fetchResources(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('resourceType') resourceType?: string,
+  ) {
+    const query = new FetchResourcesQuery(
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+      resourceType,
+    );
+    const result: Result<ResourcesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: ResourcesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('resources')
+  @ApiOperation({ summary: 'Create resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ResourceDto,
+  })
+  async createResource(@Body() resource: ResourceCreateDto) {
+    const command = new CreateResourceCommand(resource);
+    const result: Result<ResourceDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: ResourceDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('resources/:resourceId')
+  @ApiOperation({ summary: 'Delete resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async deleteResource(
+    @Param('resourceId') resourceId: string,
+    @Query('force') force: boolean = false,
+  ) {
+    const command = new DeleteResourceCommand(resourceId, force);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => {},
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('resources/:resourceId/download')
+  @ApiOperation({ summary: 'Download resource' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Resource file',
+  })
+  async downloadResource(
+    @Param('resourceId') resourceId: string,
+    @Res() res: any,
+  ) {
+    const query = new DownloadResourceQuery(resourceId);
+    const result: Result<Buffer, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (buffer: Buffer) => {
+        res.set({
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="resource"`,
+        });
+        res.send(buffer);
+      },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

@@ -23,6 +23,10 @@ export function useEntityCounts() {
   useEffect(() => {
     if (!socket) return;
 
+    if (isThingsboardConnected) {
+      requestEntityCount();
+    }
+
     const handleEntityCount = (data: EntityCountData) => {
       setCounts((prev) => {
         const updated = { ...prev };
@@ -46,7 +50,7 @@ export function useEntityCounts() {
     return () => {
       socket.off("entity-count", handleEntityCount);
     };
-  }, [socket]);
+  }, [socket, isThingsboardConnected, requestEntityCount]);
 
   return {
     tenants: counts.tenants,

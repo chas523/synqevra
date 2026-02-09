@@ -14,36 +14,29 @@ const Dashboard = () => {
   return (
     <div className="h-[calc(100vh-64px-16px-16px)] w-full grid grid-cols-1 md:grid-cols-12 md:grid-rows-10 gap-2 overflow-auto md:overflow-hidden">
       <TenantStats />
-
       <ResourceUsageStats />
-
       <TileTemplate colSpan={2} rowSpan={8}>
         <GettingStarted />
       </TileTemplate>
-
       <TileTemplate colSpan={4} rowSpan={2} gridCols={2}>
         <UserStats />
       </TileTemplate>
-
       <TileTemplate colSpan={6} rowSpan={4}>
         <SystemChart />
       </TileTemplate>
-
-      <TileTemplate colSpan={4} rowSpan={2}>
-        <Documentation />
-      </TileTemplate>
-
-      <TileTemplate colSpan={8} rowSpan={4}>
-        <DeviceCommunicationChart />
-      </TileTemplate>
-
-      <TileTemplate colSpan={2} rowSpan={2}>
-        <Version currentVersion="4.2.0" availableVersion="4.2.1.1" />
-      </TileTemplate>
-
       <TileTemplate colSpan={4} rowSpan={2}>
         <Functions />
       </TileTemplate>
+      <TileTemplate colSpan={10} rowSpan={4}>
+        <DeviceCommunicationChart />
+      </TileTemplate>
+      <TileTemplate colSpan={2} rowSpan={2}>
+        <Version />
+      </TileTemplate>
+      {/* We were advised to delete/hide <Documentation /> component for now */}
+      {/* <TileTemplate colSpan={4} rowSpan={2}>
+        <Documentation />
+      </TileTemplate> */}
     </div>
   );
 };

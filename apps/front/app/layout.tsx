@@ -4,6 +4,7 @@ import "./globals.css";
 import { MantineProvider } from "@mantine/core";
 import SidebarLayout from "@/components/organisms/SidebarLayout";
 import MedplumProviderWrapper from "@/lib/config/MedplumProviderWrapper";
+import { TelemetryProvider } from "@/lib/context/TelemetryContext";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 
@@ -40,7 +41,9 @@ export default function RootLayout({
         >
           <MedplumProviderWrapper>
             <MantineProvider>
-              <SidebarLayout>{children}</SidebarLayout>
+              <TelemetryProvider>
+                <SidebarLayout>{children}</SidebarLayout>
+              </TelemetryProvider>
               <Toaster richColors theme="system" />
             </MantineProvider>
           </MedplumProviderWrapper>

@@ -27,6 +27,14 @@ import { RefreshTokenCommandHandler } from './application/commands/refresh-token
 import { ConfirmPractitionerCommandHandler } from './application/commands/confirm-practitioner/confirm-practitioner.command-handler';
 import { DeleteTenantCommandHandler } from './application/commands/delete-tenant/delete-tenant.command-handler';
 import { UpdateSecuritySettingsCommandHandler } from './application/commands/update-security-settings/update-security-settings.command.handler';
+import { UpdateGeneralSettingsCommandHandler } from './application/commands/update-general-settings/update-general-settings.command.handler';
+import { UpdateConnectivitySettingsCommandHandler } from './application/commands/update-connectivity-settings/update-connectivity-settings.command.handler';
+import { UpdateSmsSettingsCommandHandler } from './application/commands/update-sms-settings/update-sms-settings.command.handler';
+import { UpdateNotificationSettingsCommandHandler } from './application/commands/update-notification-settings/update-notification-settings.command.handler';
+import { CreateQueueCommandHandler } from './application/commands/create-queue/create-queue.command.handler';
+import { DeleteQueueCommandHandler } from './application/commands/delete-queue/delete-queue.command.handler';
+import { CreateResourceCommandHandler } from './application/commands/create-resource/create-resource.command.handler';
+import { DeleteResourceCommandHandler } from './application/commands/delete-resource/delete-resource.command.handler';
 import { UpdateTenantCommandHandler } from './application/commands/update-tenant/update-tenant.command-handler';
 import { SaveEntityAttributesCommandHandler } from './application/commands/save-entity-attributes/save-entity-attributes.command-handler';
 import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
@@ -43,6 +51,14 @@ import { FetchTenantsQueryHandler } from './application/queries/fetch-tenants/fe
 import { FetchTenantUsersQueryHandler } from './application/queries/fetch-users-by-tenant/fetch-tenant-users.query-handler';
 import { FetchTenantDevicesQueryHandler } from './application/queries/fetch-tenant-devices/fetch-tenant-devices.query-handler';
 import { FetchNotificationsQueryHandler } from './application/queries/fetch-notifications/fetch-notifications.query-handler';
+import { FetchVersionQueryHandler } from './application/queries/fetch-version/fetch-version.query-handler';
+import { FetchGeneralSettingsQueryHandler } from './application/queries/fetch-general-settings/fetch-general-settings.query.handler';
+import { FetchConnectivitySettingsQueryHandler } from './application/queries/fetch-connectivity-settings/fetch-connectivity-settings.query.handler';
+import { FetchSmsSettingsQueryHandler } from './application/queries/fetch-sms-settings/fetch-sms-settings.query.handler';
+import { FetchNotificationSettingsQueryHandler } from './application/queries/fetch-notification-settings/fetch-notification-settings.query.handler';
+import { FetchQueuesQueryHandler } from './application/queries/fetch-queues/fetch-queues.query.handler';
+import { FetchResourcesQueryHandler } from './application/queries/fetch-resources/fetch-resources.query.handler';
+import { DownloadResourceQueryHandler } from './application/queries/download-resource/download-resource.query.handler';
 import { FetchTenantAttributesQueryHandler } from './application/queries/fetch-tenant-attributes/fetch-tenant-attributes.query-handler';
 import { FetchTenantAlarmsQueryHandler } from './application/queries/fetch-tenant-alarms/fetch-tenant-alarms.query-handler';
 import { FetchTenantEventsQueryHandler } from './application/queries/fetch-tenant-events/fetch-tenant-events.query-handler';
@@ -67,11 +83,19 @@ const commandHandlers = [
   RefreshTokenCommandHandler,
   ConfirmPractitionerCommandHandler,
   UpdateSecuritySettingsCommandHandler,
-  UpdateTenantCommandHandler,
-  SaveEntityAttributesCommandHandler,
-  CreateRelationCommandHandler,
-  DeleteRelationCommandHandler,
-  SaveTenantProfileCommandHandler,
+  UpdateGeneralSettingsCommandHandler,
+  UpdateConnectivitySettingsCommandHandler,
+  UpdateSmsSettingsCommandHandler,
+  UpdateNotificationSettingsCommandHandler,
+  CreateQueueCommandHandler,
+  DeleteQueueCommandHandler,
+  CreateResourceCommandHandler,
+  DeleteResourceCommandHandler,
+    UpdateTenantCommandHandler,
+    SaveEntityAttributesCommandHandler,
+    CreateRelationCommandHandler,
+    DeleteRelationCommandHandler,
+    SaveTenantProfileCommandHandler,
 ];
 
 const queryHandlers = [
@@ -84,13 +108,21 @@ const queryHandlers = [
   FetchTenantDevicesQueryHandler,
   FetchNotificationsQueryHandler,
   FetchSecuritySettingsQueryHandler,
-  FetchTenantAttributesQueryHandler,
-  FetchTenantAlarmsQueryHandler,
-  FetchTenantEventsQueryHandler,
-  FetchTenantRelationsQueryHandler,
-  FetchTenantProfilesQueryHandler,
-  FetchTenantProfileAttributesQueryHandler,
-  FetchTenantProfileAlarmsQueryHandler,
+  FetchVersionQueryHandler,
+  FetchGeneralSettingsQueryHandler,
+  FetchConnectivitySettingsQueryHandler,
+  FetchSmsSettingsQueryHandler,
+  FetchNotificationSettingsQueryHandler,
+  FetchQueuesQueryHandler,
+  FetchResourcesQueryHandler,
+  DownloadResourceQueryHandler,
+    FetchTenantAttributesQueryHandler,
+    FetchTenantAlarmsQueryHandler,
+    FetchTenantEventsQueryHandler,
+    FetchTenantRelationsQueryHandler,
+    FetchTenantProfilesQueryHandler,
+    FetchTenantProfileAttributesQueryHandler,
+    FetchTenantProfileAlarmsQueryHandler,
 ];
 
 @Module({
@@ -131,4 +163,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule { }
+export class ThingsboardModule {}

@@ -189,6 +189,14 @@ export class TelemetryParserService {
     }
   }
 
+  private formatDate(timestamp: number): string {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   private formatTime(timestamp: number): string {
     const date = new Date(timestamp);
     const hours = date.getHours().toString().padStart(2, '0');
@@ -196,11 +204,46 @@ export class TelemetryParserService {
     return `${hours}:${minutes}`;
   }
 
-  private formatDate(timestamp: number): string {
-    const date = new Date(timestamp);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
+
+
+  parseNotificationCount(
+    response: TelemetryResponse | any
+  ): { count: number; cmdId: number } | null {
+    try {
+      if (
+        response.cmdUpdateType === 'NOTIFICATIONS_COUNT' ||
+        (response.cmdId === 1 && typeof response.totalUnreadCount === 'number')
+      ) {
+        return {
+          count: response.totalUnreadCount,
+          cmdId: response.cmdId,
+        };
+      }
+      return null;
+    } catch (error) {
+      this.logger.error('parseNotificationCount error:', error);
+      return null;
+    }
+  }
+
+  parseNotifications(
+    response: TelemetryResponse | any
+  ): { notifications: any[]; count: number; cmdId: number } | null {
+    try {
+      if (
+        response.cmdUpdateType === 'NOTIFICATIONS' ||
+        (response.cmdId === 10 && Array.isArray(response.notifications))
+      ) {
+        return {
+          notifications: response.notifications || [],
+          count: response.totalUnreadCount, // It also returns updated count
+          cmdId: response.cmdId,
+        };
+      }
+      return null;
+    } catch (error) {
+      this.logger.error('parseNotifications error:', error);
+      return null;
+    }
   }
 }

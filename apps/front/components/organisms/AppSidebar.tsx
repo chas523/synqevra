@@ -1,4 +1,14 @@
-import { Home, PersonStanding, Settings, Stethoscope } from "lucide-react";
+import {
+  Building2,
+  ChevronDown,
+  FolderOpen,
+  Home,
+  LayoutDashboard,
+  PersonStanding,
+  Settings,
+  Stethoscope,
+  UserRoundCog,
+} from "lucide-react";
 import Image from "next/image";
 
 import Link from "next/link";
@@ -14,41 +24,48 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "../ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const MENU_ITEMS = [
-  { href: "/", icon: Home, label: "Landing Page" },
-  { href: "/devices", icon: Settings, label: "Devices" },
-  { href: "/patients", icon: PersonStanding, label: "Patients" },
-  { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
-  { href: "/dashboard", icon: PersonStanding, label: "Dashboard" },
-
-  {
-    href: "/dashboard/requestedUsers",
-    icon: PersonStanding,
-    label: "Pending Users",
-  },
-  {
-    href: "/dashboard/activeUsers",
-    icon: PersonStanding,
-    label: "Active Users",
-  },
-  {
-    href: "/settings",
-    icon: Settings,
-    label: "Settings",
-  },
-  {
-    href: "/dashboard/tenants",
-    icon: PersonStanding,
-    label: "Tenants"
-  },
-  {
-    href: "/dashboard/tenant-profiles",
-    icon: PersonStanding,
-    label: "Tenant Profiles"
-  },
-];
+const MENU_ITEMS = {
+  admin: [
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
+      {
+          href: "/dashboard/tenant-profiles",
+          icon: PersonStanding,
+          label: "Tenant Profiles"
+      },
+      {
+      href: "/dashboard/requestedUsers",
+      icon: UserRoundCog,
+      label: "Pending Users",
+    },
+    {
+      href: "/settings",
+      icon: Settings,
+      label: "Settings",
+    },
+    {
+      href: "/security-settings",
+      icon: Settings,
+      label: "Security Settings",
+    },
+  ],
+  user: [
+    { href: "/", icon: Home, label: "Landing Page" },
+    { href: "/devices", icon: Settings, label: "Devices" },
+    { href: "/patients", icon: PersonStanding, label: "Patients" },
+    { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+  ],
+};
 
 export default function AppSidebar() {
   return (
@@ -83,10 +100,51 @@ export default function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {MENU_ITEMS.map(({ href, icon: Icon, label }) => (
+              {MENU_ITEMS.admin.map(({ href, icon: Icon, label }) => (
+                <SidebarMenuItem key={href}>
+                  <SidebarMenuButton asChild>
+                    <a href={href}>
+                      <Icon />
+                      <span>{label}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              {/* Resources collapsible menu */}
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <FolderOpen />
+                      <span>Resources</span>
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/resources/resource-library">
+                            <span>Resource library</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>User</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {MENU_ITEMS.user.map(({ href, icon: Icon, label }) => (
                 <SidebarMenuItem key={href}>
                   <SidebarMenuButton asChild>
                     <Link href={href}>
