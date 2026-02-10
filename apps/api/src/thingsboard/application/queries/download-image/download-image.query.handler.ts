@@ -6,17 +6,12 @@ import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchResourcesQuery } from './fetch-resources.query';
-import { ResourcesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
+import { DownloadImageQuery } from './download-image.query';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchResourcesQuery)
-export class FetchResourcesQueryHandler
-    implements
-    IQueryHandler<
-        FetchResourcesQuery,
-        Result<ResourcesPageResponseDto, ThingsboardApiException>
-    > {
+@QueryHandler(DownloadImageQuery)
+export class DownloadImageQueryHandler
+    implements IQueryHandler<DownloadImageQuery, Result<Buffer, ThingsboardApiException>> {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
@@ -33,26 +28,19 @@ export class FetchResourcesQueryHandler
         );
     }
 
-    async execute(
-        query: FetchResourcesQuery,
-    ): Promise<Result<ResourcesPageResponseDto, ThingsboardApiException>> {
+    async execute(query: DownloadImageQuery): Promise<Result<Buffer, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const resources = await this.thingsboardApi.fetchResources(
+            const response = await this.thingsboardApi.downloadImage(
                 loginResponse.token,
-                query.page,
-                query.pageSize,
-                query.sortProperty,
-                query.sortOrder,
-                query.resourceType,
-                query.resourceSubType,
+                query.imageLink,
             );
 
-            return Ok(resources);
+            return Ok(response);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }

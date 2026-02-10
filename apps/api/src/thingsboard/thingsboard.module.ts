@@ -40,6 +40,8 @@ import { SaveEntityAttributesCommandHandler } from './application/commands/save-
 import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
 import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
+import { UploadImageCommandHandler } from './application/commands/upload-image/upload-image.command.handler';
+import { DeleteImageCommandHandler } from './application/commands/delete-image/delete-image.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -66,6 +68,9 @@ import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-te
 import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query-handler';
 import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
 import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
+import { FetchImagesQueryHandler } from './application/queries/fetch-images/fetch-images.query.handler';
+import { DownloadImageQueryHandler } from './application/queries/download-image/download-image.query.handler';
+import { ExportImageQueryHandler } from './application/queries/export-image/export-image.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -91,12 +96,16 @@ const commandHandlers = [
   DeleteQueueCommandHandler,
   CreateResourceCommandHandler,
   DeleteResourceCommandHandler,
-    UpdateTenantCommandHandler,
-    SaveEntityAttributesCommandHandler,
-    CreateRelationCommandHandler,
-    DeleteRelationCommandHandler,
-    SaveTenantProfileCommandHandler,
+  UpdateTenantCommandHandler,
+  SaveEntityAttributesCommandHandler,
+  CreateRelationCommandHandler,
+  DeleteRelationCommandHandler,
+  SaveTenantProfileCommandHandler,
+  UploadImageCommandHandler,
+  DeleteImageCommandHandler,
 ];
+
+import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
 
 const queryHandlers = [
   FetchDevicesQueryHandler,
@@ -115,14 +124,18 @@ const queryHandlers = [
   FetchNotificationSettingsQueryHandler,
   FetchQueuesQueryHandler,
   FetchResourcesQueryHandler,
+  FetchResourceInfoQueryHandler,
   DownloadResourceQueryHandler,
-    FetchTenantAttributesQueryHandler,
-    FetchTenantAlarmsQueryHandler,
-    FetchTenantEventsQueryHandler,
-    FetchTenantRelationsQueryHandler,
-    FetchTenantProfilesQueryHandler,
-    FetchTenantProfileAttributesQueryHandler,
-    FetchTenantProfileAlarmsQueryHandler,
+  FetchTenantAttributesQueryHandler,
+  FetchTenantAlarmsQueryHandler,
+  FetchTenantEventsQueryHandler,
+  FetchTenantRelationsQueryHandler,
+  FetchTenantProfilesQueryHandler,
+  FetchTenantProfileAttributesQueryHandler,
+  FetchTenantProfileAlarmsQueryHandler,
+  FetchImagesQueryHandler,
+  DownloadImageQueryHandler,
+  ExportImageQueryHandler,
 ];
 
 @Module({
@@ -163,4 +176,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule {}
+export class ThingsboardModule { }

@@ -38,12 +38,12 @@ const MENU_ITEMS = {
   admin: [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
-      {
-          href: "/dashboard/tenant-profiles",
-          icon: PersonStanding,
-          label: "Tenant Profiles"
-      },
-      {
+    {
+      href: "/dashboard/tenant-profiles",
+      icon: PersonStanding,
+      label: "Tenant Profiles"
+    },
+    {
       href: "/dashboard/requestedUsers",
       icon: UserRoundCog,
       label: "Pending Users",
@@ -132,6 +132,20 @@ export default function AppSidebar() {
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/resources/image-gallery">
+                            <span>Image gallery</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href="/resources/javascript-library">
+                            <span>JavaScript library</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -158,6 +172,6 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>
+    </Sidebar >
   );
 }
