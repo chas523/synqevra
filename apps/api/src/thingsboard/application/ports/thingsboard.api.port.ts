@@ -21,6 +21,7 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { MailSettingsDto } from '../../interface/rest/dtos/response/mail-settings.response.dto';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -377,6 +378,16 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     imageLink: string,
   ): Promise<any>;
+
+  // Mail Settings operations
+  abstract fetchMailSettings(
+    sysAdminAccessToken: string,
+  ): Promise<MailSettingsDto>;
+
+  abstract updateMailSettings(
+    sysAdminAccessToken: string,
+    settings: MailSettingsDto,
+  ): Promise<MailSettingsDto>;
 }
 
 // Response types for new methods

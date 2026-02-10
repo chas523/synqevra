@@ -42,6 +42,7 @@ import { DeleteRelationCommandHandler } from './application/commands/delete-rela
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
 import { UploadImageCommandHandler } from './application/commands/upload-image/upload-image.command.handler';
 import { DeleteImageCommandHandler } from './application/commands/delete-image/delete-image.command.handler';
+import { UpdateMailSettingsCommandHandler } from './application/commands/update-mail-settings/update-mail-settings.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -71,6 +72,7 @@ import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetc
 import { FetchImagesQueryHandler } from './application/queries/fetch-images/fetch-images.query.handler';
 import { DownloadImageQueryHandler } from './application/queries/download-image/download-image.query.handler';
 import { ExportImageQueryHandler } from './application/queries/export-image/export-image.query.handler';
+import { FetchMailSettingsQueryHandler } from './application/queries/fetch-mail-settings/fetch-mail-settings.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -103,6 +105,7 @@ const commandHandlers = [
   SaveTenantProfileCommandHandler,
   UploadImageCommandHandler,
   DeleteImageCommandHandler,
+  UpdateMailSettingsCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -136,6 +139,7 @@ const queryHandlers = [
   FetchImagesQueryHandler,
   DownloadImageQueryHandler,
   ExportImageQueryHandler,
+  FetchMailSettingsQueryHandler,
 ];
 
 @Module({

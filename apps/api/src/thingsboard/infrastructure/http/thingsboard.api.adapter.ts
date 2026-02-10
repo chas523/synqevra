@@ -39,6 +39,7 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { MailSettingsDto } from '../../interface/rest/dtos/response/mail-settings.response.dto';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -1659,6 +1660,47 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to export image',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchMailSettings(
+    sysAdminAccessToken: string,
+  ): Promise<MailSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings/mail`;
+      const response = await firstValueFrom(
+        this.httpService.get<MailSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch mail settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateMailSettings(
+    sysAdminAccessToken: string,
+    settings: MailSettingsDto,
+  ): Promise<MailSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<MailSettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update mail settings',
         error,
         this.logger,
       );

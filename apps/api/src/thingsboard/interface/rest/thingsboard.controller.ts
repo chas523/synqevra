@@ -84,6 +84,9 @@ import { UpdateSmsSettingsCommand } from 'src/thingsboard/application/commands/u
 import { NotificationSettingsDto } from './dtos/response/notification-settings.response.dto';
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
+import { MailSettingsDto } from './dtos/response/mail-settings.response.dto';
+import { FetchMailSettingsQuery } from 'src/thingsboard/application/queries/fetch-mail-settings/fetch-mail-settings.query';
+import { UpdateMailSettingsCommand } from 'src/thingsboard/application/commands/update-mail-settings/update-mail-settings.command';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -1217,6 +1220,46 @@ export class ThingsboardController {
         });
         res.send(buffer);
       },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('admin/settings/mail')
+  @ApiOperation({ summary: 'Get mail settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Mail settings',
+    type: MailSettingsDto,
+  })
+  async fetchMailSettings() {
+    const query = new FetchMailSettingsQuery();
+    const result: Result<MailSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: MailSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('admin/settings/mail')
+  @ApiOperation({ summary: 'Update mail settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Updated mail settings',
+    type: MailSettingsDto,
+  })
+  async updateMailSettings(@Body() settings: MailSettingsDto) {
+    const command = new UpdateMailSettingsCommand(settings);
+    const result: Result<MailSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (updated: MailSettingsDto) => updated,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
