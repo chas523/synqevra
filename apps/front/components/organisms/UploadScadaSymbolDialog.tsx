@@ -9,19 +9,19 @@ import { FileDropzone } from "@/components/molecules/FileDropzone";
 import { X } from "lucide-react";
 import { LoadingButton } from "@/components/atoms";
 
-interface UploadImageDialogProps {
+interface UploadScadaSymbolDialogProps {
     open: boolean;
     onClose: () => void;
     onUpload: (file: File, title: string) => Promise<void>;
     isUploading: boolean;
 }
 
-export function UploadImageDialog({
+export function UploadScadaSymbolDialog({
     open,
     onClose,
     onUpload,
     isUploading,
-}: UploadImageDialogProps) {
+}: UploadScadaSymbolDialogProps) {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [preview, setPreview] = useState<string | null>(null);
     const [title, setTitle] = useState("");
@@ -70,12 +70,12 @@ export function UploadImageDialog({
         <Dialog open={open} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Upload image</DialogTitle>
+                    <DialogTitle>Upload SCADA Symbol</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
                     <div>
-                        <Label className="text-sm text-muted-foreground">Image preview</Label>
+                        <Label className="text-sm text-muted-foreground">Symbol preview</Label>
                         <div className="mt-2 relative">
                             {preview ? (
                                 <div className="flex items-start gap-4">
@@ -95,7 +95,7 @@ export function UploadImageDialog({
                                     </div>
                                     <div className="flex-1">
                                         <FileDropzone
-                                            accept="image/*"
+                                            accept=".svg"
                                             multiple={false}
                                             onFilesSelected={handleFilesSelected}
                                             selectedFiles={[]}
@@ -105,7 +105,7 @@ export function UploadImageDialog({
                                 </div>
                             ) : (
                                 <FileDropzone
-                                    accept="image/*"
+                                    accept=".svg"
                                     multiple={false}
                                     onFilesSelected={handleFilesSelected}
                                     selectedFiles={selectedFiles}
@@ -122,7 +122,7 @@ export function UploadImageDialog({
                                 id="image-title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Enter image name"
+                                placeholder="Enter symbol name"
                             />
                         </div>
                     )}

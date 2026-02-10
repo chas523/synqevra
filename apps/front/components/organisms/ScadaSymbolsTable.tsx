@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useManageImage } from "@/hooks/thingsboard/resources/useImages";
 import { formatTenantDate } from "@/lib/utils";
 
-interface ImageGalleryTableProps {
+interface ScadaSymbolsTableProps {
     images: Image[];
     totalElements: number;
     totalPages: number;
@@ -26,7 +26,7 @@ interface ImageGalleryTableProps {
     onAdd: () => void;
 }
 
-export function ImageGalleryTable({
+export function ScadaSymbolsTable({
     images,
     totalElements,
     totalPages,
@@ -40,7 +40,7 @@ export function ImageGalleryTable({
     onEmbedClick,
     onRefresh,
     onAdd,
-}: ImageGalleryTableProps) {
+}: ScadaSymbolsTableProps) {
     const { downloadImage, exportImage, deleteImage } = useManageImage();
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -48,9 +48,10 @@ export function ImageGalleryTable({
         e.stopPropagation();
         try {
             await downloadImage(image.link, image.fileName);
-            toast.success("Image downloaded");
+            toast.success("SCADA symbol downloaded");
         } catch (error) {
-            toast.error("Failed to download image");
+            console.error("Download failed:", error);
+            toast.error("Failed to download SCADA symbol");
         }
     };
 
@@ -58,39 +59,39 @@ export function ImageGalleryTable({
         e.stopPropagation();
         try {
             await exportImage(image.link, image.fileName);
-            toast.success("Image exported to JSON");
+            toast.success("SCADA symbol exported to JSON");
         } catch (error) {
-            toast.error("Failed to export image");
+            console.error("Export failed:", error);
+            toast.error("Failed to export SCADA symbol");
         }
     };
 
-    const handleEmbed = (image: Image, e: React.MouseEvent) => {
-        e.stopPropagation();
-        onEmbedClick(image);
-    };
+
 
     const handleDelete = async (image: Image, e: React.MouseEvent) => {
         e.stopPropagation();
         setDeletingId(image.id.id);
         try {
             await deleteImage(image.link, false);
-            toast.success("Image deleted");
+            toast.success("SCADA symbol deleted");
             onRefresh();
         } catch (error: any) {
             // Check if it's a 400 error with references (indicating force delete is needed)
             if (error?.response?.status === 400 && error?.response?.data?.references) {
-                const shouldForce = window.confirm("Image is referenced by other entities. Do you want to force delete?");
+                const shouldForce = window.confirm("SCADA symbol is referenced by other entities. Do you want to force delete?");
                 if (shouldForce) {
                     try {
                         await deleteImage(image.link, true);
-                        toast.success("Image force deleted");
+                        toast.success("SCADA symbol force deleted");
                         onRefresh();
                     } catch (forceError) {
-                        toast.error("Failed to force delete image");
+                        console.error("Force delete failed:", forceError);
+                        toast.error("Failed to force delete SCADA symbol");
                     }
                 }
             } else {
-                toast.error("Failed to delete image");
+                console.error("Delete failed:", error);
+                toast.error("Failed to delete SCADA symbol");
             }
         } finally {
             setDeletingId(null);
@@ -108,15 +109,23 @@ export function ImageGalleryTable({
             key: "thumbnail",
             header: "",
             render: (image) => (
-                <div className="w-12 h-12 flex items-center justify-center">
+                <div className="w-12 h-12 flex items-center justify-center bg-muted rounded overflow-hidden">
                     <img
                         src={`/api/thingsboard/images/download/${encodeURIComponent(image.link + '/preview')}`}
                         alt={image.title}
-                        className="max-w-full max-h-full object-contain rounded"
+                        className="max-w-full max-h-full object-contain"
                         onError={(e) => {
-                            // detailed error logging
-                            toast.error(`Failed to load image: ${image.title}`);
-                            (e.target as HTMLImageElement).style.display = 'none';
+                            const img = e.currentTarget;
+                            // Set a placeholder SVG if the image fails to load
+                            const placeholderSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                    <circle cx="9" cy="9" r="2"/>
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                </svg>
+                            `)}`;
+                            img.src = placeholderSvg;
+                            img.onerror = null; // Prevent infinite loop
                         }}
                     />
                 </div>
@@ -166,7 +175,7 @@ export function ImageGalleryTable({
                 variant="ghost"
                 size="icon"
                 onClick={(e) => handleDownload(image, e)}
-                title="Download Image"
+                title="Download SCADA symbol"
             >
                 <Download className="h-4 w-4" />
             </Button>
@@ -174,17 +183,9 @@ export function ImageGalleryTable({
                 variant="ghost"
                 size="icon"
                 onClick={(e) => handleExport(image, e)}
-                title="Export Image to JSON"
+                title="Export SCADA symbol to JSON"
             >
                 <FileJson className="h-4 w-4" />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => handleEmbed(image, e)}
-                title="Embed Image"
-            >
-                <Code className="h-4 w-4" />
             </Button>
             <Button
                 variant="ghost"
@@ -201,7 +202,7 @@ export function ImageGalleryTable({
 
     return (
         <DataTable
-            title="Image gallery"
+            title="SCADA symbols"
             data={images}
             columns={columns}
             getRowId={(image) => image.id.id}
@@ -217,7 +218,9 @@ export function ImageGalleryTable({
             onAdd={onAdd}
             onRefresh={onRefresh}
             rowActions={rowActions}
-            emptyMessage="No images found."
+            emptyMessage="No SCADA symbols found."
+            addButtonLabel="Upload SCADA symbol"
+            onRowClick={(image) => window.location.href = `/resources/scada-symbols/system/${image.fileName}`}
         />
     );
 }

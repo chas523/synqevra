@@ -1561,8 +1561,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       const formData = new FormData();
       formData.append('file', file, { filename: fileName });
       formData.append('title', title);
+      formData.append('imageSubType', imageSubType);
 
-      const url = `${this.THINGSBOARD_API_URL}/image?imageSubType=${imageSubType}`;
+      const url = `${this.THINGSBOARD_API_URL}/image`;
       const response = await firstValueFrom(
         this.httpService.post(url, formData, {
           headers: {

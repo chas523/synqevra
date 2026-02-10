@@ -35,7 +35,7 @@ export const useImages = (
 export const useManageImage = () => {
     const [isUploading, setIsUploading] = useState(false);
 
-    const uploadImage = async (file: File, title: string) => {
+    const uploadImage = async (file: File, title: string, imageSubType: string = 'IMAGE') => {
         setIsUploading(true);
         try {
             // Convert file to base64
@@ -44,7 +44,7 @@ export const useManageImage = () => {
                 file: base64,
                 fileName: file.name,
                 title,
-                imageSubType: 'IMAGE',
+                imageSubType,
             };
             const result = await ImageService.uploadImage(request);
             return result;

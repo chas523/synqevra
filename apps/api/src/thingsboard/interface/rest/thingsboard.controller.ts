@@ -28,6 +28,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FetchDevicesQuery } from 'src/thingsboard/application/queries/fetch-devices/fetch-devices.query';
@@ -1181,6 +1182,7 @@ export class ThingsboardController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @SkipThrottle()
   @Get('images/download/:encodedLink')
   @ApiOperation({ summary: 'Download image' })
   @ApiResponse({
@@ -1198,9 +1200,20 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (buffer: Buffer) => {
+        let contentType = 'application/octet-stream';
+
+        // Infer content type for SVGs to ensure proper rendering
+        if (imageLink.toLowerCase().includes('.svg') || buffer.slice(0, 100).toString().toLowerCase().includes('<svg')) {
+          contentType = 'image/svg+xml';
+        } else if (buffer.slice(0, 4).toString('hex') === '89504e47') {
+          contentType = 'image/png';
+        } else if (buffer.slice(0, 3).toString('hex') === 'ffd8ff') {
+          contentType = 'image/jpeg';
+        }
+
         res.set({
-          'Content-Type': 'application/octet-stream',
-          'Content-Disposition': `attachment; filename="image"`,
+          'Content-Type': contentType,
+          'Content-Disposition': `inline; filename="image"`,
         });
         res.send(buffer);
       },
