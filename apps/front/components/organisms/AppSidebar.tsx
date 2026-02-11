@@ -8,6 +8,7 @@ import {
   Settings,
   Stethoscope,
   UserRoundCog,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -52,11 +53,6 @@ const MENU_ITEMS = {
       href: "/settings",
       icon: Settings,
       label: "Settings",
-    },
-    {
-      href: "/security-settings",
-      icon: Settings,
-      label: "Security Settings",
     },
   ],
   user: [
@@ -113,6 +109,36 @@ export default function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Security collapsible menu */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <ShieldCheck />
+                      <span>Security</span>
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/security-settings">
+                            <span>Security Settings</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/security/2fa">
+                            <span>Two-factor authentication</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
               {/* Resources collapsible menu */}
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>

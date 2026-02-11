@@ -85,6 +85,7 @@ import { NotificationSettingsDto } from './dtos/response/notification-settings.r
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
 import { MailSettingsDto } from './dtos/response/mail-settings.response.dto';
+import { SysAdminAuthService } from '../../application/services/sysadmin-auth.service';
 import { FetchMailSettingsQuery } from 'src/thingsboard/application/queries/fetch-mail-settings/fetch-mail-settings.query';
 import { UpdateMailSettingsCommand } from 'src/thingsboard/application/commands/update-mail-settings/update-mail-settings.command';
 import {
@@ -119,6 +120,10 @@ import { DeleteWidgetTypeCommand } from 'src/thingsboard/application/commands/de
 import { SaveWidgetTypeCommand } from 'src/thingsboard/application/commands/save-widget-type/save-widget-type.command';
 import { FetchWidgetTypeByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query';
 import { DownloadWidgetTypeQuery } from 'src/thingsboard/application/queries/download-widget-type/download-widget-type.query';
+import { TwoFactorAuthSettingsDto } from './dtos/response/thingsboard-2fa-settings.response.dto';
+import { TwoFactorAuthSettingsRequestDto } from './dtos/request/thingsboard-2fa-settings.request.dto';
+import { FetchTwoFaSettingsQuery } from '../../application/queries/fetch-2fa-settings/fetch-2fa-settings.query';
+import { SaveTwoFaSettingsCommand } from '../../application/commands/save-2fa-settings/save-2fa-settings.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -127,6 +132,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly sysAdminAuthService: SysAdminAuthService,
   ) { }
 
   @Public()
@@ -1494,6 +1500,79 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/2fa/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get 2FA settings',
+    description: 'Retrieve current 2FA configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '2FA settings retrieved successfully',
+    type: TwoFactorAuthSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch 2FA settings',
+  })
+  async getTwoFaSettings() {
+    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
+    const query = new FetchTwoFaSettingsQuery(sysAdminToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: TwoFactorAuthSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/2fa/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save 2FA settings',
+    description: 'Update 2FA configuration',
+  })
+  @ApiBody({
+    type: TwoFactorAuthSettingsRequestDto,
+    description: '2FA settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '2FA settings updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update 2FA settings',
+  })
+  async saveTwoFaSettings(
+    @Body() settings: TwoFactorAuthSettingsRequestDto,
+  ) {
+    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
+    const command = new SaveTwoFaSettingsCommand(sysAdminToken, settings);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

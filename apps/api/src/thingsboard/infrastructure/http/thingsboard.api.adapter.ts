@@ -50,6 +50,8 @@ import {
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
 import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
+import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-2fa-settings.request.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -1827,6 +1829,46 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to download widget type',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchTwoFaSettings(
+    sysAdminAccessToken: string,
+  ): Promise<TwoFactorAuthSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
+      const response = await firstValueFrom(
+        this.httpService.get<TwoFactorAuthSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch 2FA settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveTwoFaSettings(
+    sysAdminAccessToken: string,
+    settings: TwoFactorAuthSettingsRequestDto,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
+      await firstValueFrom(
+        this.httpService.post(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save 2FA settings',
         error,
         this.logger,
       );

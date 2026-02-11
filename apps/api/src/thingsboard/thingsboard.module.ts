@@ -78,6 +78,8 @@ import { FetchWidgetTypesQueryHandler } from './application/queries/fetch-widget
 import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query.handler';
 import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
 import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
+import { FetchTwoFaSettingsQueryHandler } from './application/queries/fetch-2fa-settings/fetch-2fa-settings.query.handler';
+import { SaveTwoFaSettingsCommandHandler } from './application/commands/save-2fa-settings/save-2fa-settings.command.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -112,6 +114,7 @@ const commandHandlers = [
   DeleteImageCommandHandler,
   UpdateMailSettingsCommandHandler,
   DeleteWidgetTypeCommandHandler,
+  SaveTwoFaSettingsCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -150,6 +153,7 @@ const queryHandlers = [
   FetchWidgetTypeByIdQueryHandler,
   SaveWidgetTypeCommandHandler,
   DownloadWidgetTypeQueryHandler,
+  FetchTwoFaSettingsQueryHandler,
 ];
 
 @Module({

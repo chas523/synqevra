@@ -11,6 +11,7 @@ import {
 import { Queue, QueuesPageResponse } from "@/types/queueTypes";
 
 import { MailSettings } from "@/types/mailSettingsTypes";
+import { TwoFactorAuthSettings } from "@/types/twoFactorAuthTypes";
 
 export class SettingsService {
   public static async getSecuritySettings(): Promise<SecuritySettingsDto> {
@@ -121,6 +122,22 @@ export class SettingsService {
   ): Promise<MailSettings> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/settings/mail",
+      settings
+    );
+    return data;
+    return data;
+  }
+
+  public static async getTwoFaSettings(): Promise<TwoFactorAuthSettings> {
+    const { data } = await proxyApi.get("thingsboard/2fa/settings");
+    return data;
+  }
+
+  public static async updateTwoFaSettings(
+    settings: TwoFactorAuthSettings
+  ): Promise<TwoFactorAuthSettings> {
+    const { data } = await proxyApi.post(
+      "thingsboard/2fa/settings",
       settings
     );
     return data;

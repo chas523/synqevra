@@ -32,6 +32,8 @@ import {
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
 import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
+import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-2fa-settings.request.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -424,7 +426,17 @@ export abstract class ThingsboardApiPort {
     widgetTypeId: string,
     includeResources?: boolean,
   ): Promise<any>;
+
+  abstract fetchTwoFaSettings(
+    sysAdminAccessToken: string,
+  ): Promise<TwoFactorAuthSettingsDto>;
+
+  abstract saveTwoFaSettings(
+    sysAdminAccessToken: string,
+    settings: TwoFactorAuthSettingsRequestDto,
+  ): Promise<void>;
 }
+
 
 // Response types for new methods
 export interface TenantAttribute {
