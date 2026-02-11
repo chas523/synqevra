@@ -8,11 +8,12 @@ Implementation of ThingsBoard and Medplum on docker containers.
 2. For initial run, you **have to** use command
 `docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=true thingsboard-ce`  
 > [!IMPORTANT] Only once!
-3. Run `docker compose up` command and wait untill containers are running
-4. Navigate to root project folder `/fpl_thingsboard` and run `pnpm install` command to install all dependencies  
-5. Copy `fpl_thingsboard/apps/api/.env.example` to `fpl_thingsboard/apps/api/.env` file and fill in the values with your own database url, jwt and refresh jwt secrets, and mailer credentials.  
-6. Copy `fpl_thingsboard/apps/front/.env.example` to `fpl_thingsboard/apps/front/.env` file.  
-7. To run project locally, you have to update `next.config.ts` file and change:
+3. Run `docker compose up` command and wait untill containers are running  
+4. Run `docker run -p 6379:6379 --name redis-bullmq -d redis:latest` command  
+5. Navigate to root project folder `/fpl_thingsboard` and run `pnpm install` command to install all dependencies  
+6. Copy `fpl_thingsboard/apps/api/.env.example` to `fpl_thingsboard/apps/api/.env` file and fill in the values with your own database url, jwt and refresh jwt secrets, and mailer credentials.  
+7. Copy `fpl_thingsboard/apps/front/.env.example` to `fpl_thingsboard/apps/front/.env` file.  
+8. To run project locally, you have to update `next.config.ts` file and change:
 ```typescript
         {
           source: "/api/:path*",
@@ -34,7 +35,7 @@ to
           destination: "http://localhost:3000/fhir/:path*", // Local
         },
 ```
-8. To run project locally, you have to update Rulechain and its location.
+9. To run project locally, you have to update Rulechain and its location.
 - Update file `apps/api/src/thingsboard/application/commands/register-tenant/register-tenant.command-handler.ts`:
 ```typescript
       const baseRuleChainPath = path.join(
@@ -64,11 +65,11 @@ to
           "restEndpointUrlPattern": "http://localhost:3000/api/proxy/telemetry",
           "requestMethod": "POST",
 ```  
-9. Run `pnpm dev` command to start dev server for frontend and backend  
-10. Check your ip address using `ipconfig` command (Windows).  
-11. Frontend app is running on `{YOUR_IP_ADDRESS}:3000` (ex. `10.0.1.35:3000`) or `localhost:3000` if you are using local machine.  
-12. To check thingsboard, go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine. You can find default SYS_ADMIN credentials in `fpl_thingsboard/apps/api/.env.example` file.  
-13. Admin app is deprecated, but for development purposes you can still use it. Copy `.env.example` to `.env` file in `fpl_thingsboard/apps/admin` folder. It's available at `{YOUR_IP_ADDRESS}:3002` (ex. `10.0.1.35:3002`) or `localhost:3002` if you are using local machine.  
+10. Run `pnpm dev` command to start dev server for frontend and backend  
+11. Check your ip address using `ipconfig` command (Windows).  
+12. Frontend app is running on `{YOUR_IP_ADDRESS}:3000` (ex. `10.0.1.35:3000`) or `localhost:3000` if you are using local machine.  
+13. To check thingsboard, go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine. You can find default SYS_ADMIN credentials in `fpl_thingsboard/apps/api/.env.example` file.  
+14. Admin app is deprecated, but for development purposes you can still use it. Copy `.env.example` to `.env` file in `fpl_thingsboard/apps/admin` folder. It's available at `{YOUR_IP_ADDRESS}:3002` (ex. `10.0.1.35:3002`) or `localhost:3002` if you are using local machine.  
 
 ### 2. After first time setup
 1. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait untill containers are running
