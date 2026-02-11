@@ -6,16 +6,16 @@ import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchResourcesQuery } from './fetch-resources.query';
-import { ResourcesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
+import { FetchResourceInfoQuery } from './fetch-resource-info.query';
+import { ResourceDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchResourcesQuery)
-export class FetchResourcesQueryHandler
+@QueryHandler(FetchResourceInfoQuery)
+export class FetchResourceInfoQueryHandler
     implements
     IQueryHandler<
-        FetchResourcesQuery,
-        Result<ResourcesPageResponseDto, ThingsboardApiException>
+        FetchResourceInfoQuery,
+        Result<ResourceDto, ThingsboardApiException>
     > {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
@@ -34,25 +34,20 @@ export class FetchResourcesQueryHandler
     }
 
     async execute(
-        query: FetchResourcesQuery,
-    ): Promise<Result<ResourcesPageResponseDto, ThingsboardApiException>> {
+        query: FetchResourceInfoQuery,
+    ): Promise<Result<ResourceDto, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const resources = await this.thingsboardApi.fetchResources(
+            const resource = await this.thingsboardApi.fetchResourceInfo(
                 loginResponse.token,
-                query.page,
-                query.pageSize,
-                query.sortProperty,
-                query.sortOrder,
-                query.resourceType,
-                query.resourceSubType,
+                query.resourceId,
             );
 
-            return Ok(resources);
+            return Ok(resource);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }

@@ -23,8 +23,12 @@ export class ThingsboardApiException extends Error {
       error instanceof AxiosError && error.response?.data?.message
         ? error.response.data.message
         : message;
+
+    // Pass the full response data as the originalError if available, so we can access 'references'
+    const errorData = error instanceof AxiosError && error.response?.data ? error.response.data : error;
+
     logger?.error(message + ' ' + apiMessage);
-    throw new ThingsboardApiException(apiMessage, statusCode, error);
+    throw new ThingsboardApiException(apiMessage, statusCode, errorData);
   }
 }
 

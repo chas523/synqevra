@@ -1,22 +1,18 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Err, Ok, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchResourcesQuery } from './fetch-resources.query';
-import { ResourcesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
+import { DeleteImageCommand } from './delete-image.command';
+import { DeleteImageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchResourcesQuery)
-export class FetchResourcesQueryHandler
-    implements
-    IQueryHandler<
-        FetchResourcesQuery,
-        Result<ResourcesPageResponseDto, ThingsboardApiException>
-    > {
+@CommandHandler(DeleteImageCommand)
+export class DeleteImageCommandHandler
+    implements ICommandHandler<DeleteImageCommand, Result<DeleteImageResponseDto, ThingsboardApiException>> {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
@@ -33,26 +29,22 @@ export class FetchResourcesQueryHandler
         );
     }
 
-    async execute(
-        query: FetchResourcesQuery,
-    ): Promise<Result<ResourcesPageResponseDto, ThingsboardApiException>> {
+    async execute(command: DeleteImageCommand): Promise<Result<DeleteImageResponseDto, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const resources = await this.thingsboardApi.fetchResources(
+            const { imageLink, force } = command;
+
+            const response = await this.thingsboardApi.deleteImage(
                 loginResponse.token,
-                query.page,
-                query.pageSize,
-                query.sortProperty,
-                query.sortOrder,
-                query.resourceType,
-                query.resourceSubType,
+                imageLink,
+                force,
             );
 
-            return Ok(resources);
+            return Ok(response);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }

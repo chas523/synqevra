@@ -77,7 +77,7 @@ export const QueueFormDialog = ({
         watch,
         formState: { errors },
     } = useForm<QueueFormValues>({
-        resolver: zodResolver(queueSchema),
+        resolver: zodResolver(queueSchema) as any,
         defaultValues: {
             name: "",
             pollInterval: 25,

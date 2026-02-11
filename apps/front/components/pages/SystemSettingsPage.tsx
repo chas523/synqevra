@@ -18,12 +18,18 @@ import {
     useNotificationSettings,
     useUpdateNotificationSettings,
 } from "@/hooks/thingsboard/settings/useNotificationSettings";
+import {
+    useMailSettings,
+    useUpdateMailSettings,
+} from "@/hooks/thingsboard/settings/useMailSettings";
 import { GeneralSettingsForm } from "@/components/organisms/GeneralSettingsForm";
 import { DeviceConnectivityForm } from "@/components/organisms/DeviceConnectivityForm";
 import { SmsProviderSettingsForm } from "@/components/organisms/SmsProviderSettingsForm";
 import { SlackSettingsForm } from "@/components/organisms/SlackSettingsForm";
+import { MailServerSettingsForm } from "@/components/organisms/MailServerSettingsForm";
 import { GeneralSettingsDto, ConnectivitySettingsDto } from "@/types/generalSettingsTypes";
 import { SmsSettings, NotificationSettings } from "@/types/notificationSettingsTypes";
+import { MailSettings } from "@/types/mailSettingsTypes";
 import LoadingOverlayInformation from "../molecules/LoadingOverlayInformation";
 import { useQueues, useManageQueue } from "@/hooks/thingsboard/settings/useQueues";
 import { Queue } from "@/types/queueTypes";
@@ -54,6 +60,11 @@ export const SystemSettingsPage = () => {
         useNotificationSettings();
     const { updateNotificationSettings, isLoading: isUpdatingNotification } =
         useUpdateNotificationSettings();
+
+    const { mailSettings, mailLoading, mailError, mutate: mutateMail } =
+        useMailSettings();
+    const { updateMailSettings, isLoading: isUpdatingMail } =
+        useUpdateMailSettings();
 
     const handleSaveGeneralSettings = async (settings: GeneralSettingsDto) => {
         try {
@@ -95,13 +106,23 @@ export const SystemSettingsPage = () => {
         }
     };
 
-    if (generalLoading || connectivityLoading) {
+    const handleSaveMailSettings = async (settings: MailSettings) => {
+        try {
+            await updateMailSettings(settings);
+            mutateMail();
+            toast.success("Mail server settings saved successfully");
+        } catch (error) {
+            toast.error("Failed to save mail server settings");
+        }
+    };
+
+    if (generalLoading || connectivityLoading || mailLoading) {
         return (
             <LoadingOverlayInformation text="Loading settings..." />
         );
     }
 
-    if (generalError || connectivityError) {
+    if (generalError || connectivityError || mailError) {
         return (
             <div className="flex items-center justify-center h-64">
                 <p className="text-destructive">
@@ -146,12 +167,11 @@ export const SystemSettingsPage = () => {
                 </TabsContent>
 
                 <TabsContent value="mail-server">
-                    <div className="flex items-center justify-center h-64 border rounded-lg bg-muted/30">
-                        <div className="text-center">
-                            <h3 className="text-lg font-medium">Mail Server Configuration</h3>
-                            <p className="text-muted-foreground mt-1">Coming soon</p>
-                        </div>
-                    </div>
+                    <MailServerSettingsForm
+                        initialSettings={mailSettings || null}
+                        onSave={handleSaveMailSettings}
+                        isSaving={isUpdatingMail}
+                    />
                 </TabsContent>
 
                 <TabsContent value="notifications" className="space-y-6">

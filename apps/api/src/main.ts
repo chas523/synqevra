@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SimpleExceptionFilter } from './utils/simple-exception.filter';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -27,6 +28,8 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.use(cookieParser());
 
   app.setGlobalPrefix('api', {

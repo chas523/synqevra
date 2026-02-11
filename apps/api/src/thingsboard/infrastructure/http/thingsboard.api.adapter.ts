@@ -39,6 +39,7 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { MailSettingsDto } from '../../interface/rest/dtos/response/mail-settings.response.dto';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -65,7 +66,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly medplum: MedplumClientPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -1404,11 +1405,15 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     sortProperty: string,
     sortOrder: 'ASC' | 'DESC',
     resourceType?: string,
+    resourceSubType?: string,
   ): Promise<ResourcesPageResponseDto> {
     try {
       let url = `${this.THINGSBOARD_API_URL}/resource?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
       if (resourceType) {
         url += `&resourceType=${resourceType}`;
+      }
+      if (resourceSubType) {
+        url += `&resourceSubType=${resourceSubType}`;
       }
       const response = await firstValueFrom(
         this.httpService.get<ResourcesPageResponseDto>(url, {
@@ -1483,6 +1488,219 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to download resource',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchResourceInfo(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<ResourceDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/resource/info/${resourceId}`;
+      const response = await firstValueFrom(
+        this.httpService.get<ResourceDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch resource info',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Image methods
+  async fetchImages(
+    sysAdminAccessToken: string,
+    page: number = 0,
+    pageSize: number = 10,
+    sortProperty: string = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    imageSubType: string = 'IMAGE',
+    includeSystemImages: boolean = false,
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        sortProperty,
+        sortOrder,
+        imageSubType,
+        includeSystemImages: includeSystemImages.toString(),
+      });
+      const url = `${this.THINGSBOARD_API_URL}/images?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch images',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async uploadImage(
+    sysAdminAccessToken: string,
+    file: Buffer,
+    fileName: string,
+    title: string,
+    imageSubType: string = 'IMAGE',
+  ): Promise<any> {
+    try {
+      const FormData = require('form-data');
+      const formData = new FormData();
+      formData.append('file', file, { filename: fileName });
+      formData.append('title', title);
+      formData.append('imageSubType', imageSubType);
+
+      const url = `${this.THINGSBOARD_API_URL}/image`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, formData, {
+          headers: {
+            Authorization: `Bearer ${sysAdminAccessToken}`,
+            ...formData.getHeaders(),
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to upload image',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+    force: boolean = false,
+  ): Promise<any> {
+    try {
+      let url = '';
+      if (imageLink.startsWith('/api')) {
+        url = `${this.configService.getOrThrow<string>('THINGSBOARD_API_URL')}${imageLink}?force=${force}`;
+      } else {
+        url = `${this.THINGSBOARD_API_URL}${imageLink}?force=${force}`;
+      }
+      const response = await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete image',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async downloadImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<Buffer> {
+    try {
+      let url = '';
+      if (imageLink.startsWith('/api')) {
+        url = `${this.configService.getOrThrow<string>('THINGSBOARD_API_URL')}${imageLink}`;
+      } else {
+        url = `${this.THINGSBOARD_API_URL}${imageLink}`;
+      }
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+          responseType: 'arraybuffer',
+        }),
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to download image',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async exportImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<any> {
+    try {
+      // Convert link like /api/images/tenant/xxx to /api/images/tenant/xxx/export
+      let exportUrl = '';
+      if (imageLink.startsWith('/api')) {
+        exportUrl = `${this.configService.getOrThrow<string>('THINGSBOARD_API_URL')}${imageLink}/export`;
+      } else {
+        exportUrl = `${this.THINGSBOARD_API_URL}${imageLink}/export`;
+      }
+
+      const response = await firstValueFrom(
+        this.httpService.get(exportUrl, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to export image',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchMailSettings(
+    sysAdminAccessToken: string,
+  ): Promise<MailSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings/mail`;
+      const response = await firstValueFrom(
+        this.httpService.get<MailSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch mail settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateMailSettings(
+    sysAdminAccessToken: string,
+    settings: MailSettingsDto,
+  ): Promise<MailSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post<MailSettingsDto>(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update mail settings',
         error,
         this.logger,
       );

@@ -1,22 +1,18 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Err, Ok, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchResourcesQuery } from './fetch-resources.query';
-import { ResourcesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
+import { UpdateMailSettingsCommand } from './update-mail-settings.command';
+import { MailSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/mail-settings.response.dto';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchResourcesQuery)
-export class FetchResourcesQueryHandler
-    implements
-    IQueryHandler<
-        FetchResourcesQuery,
-        Result<ResourcesPageResponseDto, ThingsboardApiException>
-    > {
+@CommandHandler(UpdateMailSettingsCommand)
+export class UpdateMailSettingsCommandHandler
+    implements ICommandHandler<UpdateMailSettingsCommand, Result<MailSettingsDto, ThingsboardApiException>> {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
@@ -33,26 +29,19 @@ export class FetchResourcesQueryHandler
         );
     }
 
-    async execute(
-        query: FetchResourcesQuery,
-    ): Promise<Result<ResourcesPageResponseDto, ThingsboardApiException>> {
+    async execute(command: UpdateMailSettingsCommand): Promise<Result<MailSettingsDto, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const resources = await this.thingsboardApi.fetchResources(
+            const settings = await this.thingsboardApi.updateMailSettings(
                 loginResponse.token,
-                query.page,
-                query.pageSize,
-                query.sortProperty,
-                query.sortOrder,
-                query.resourceType,
-                query.resourceSubType,
+                command.settings,
             );
 
-            return Ok(resources);
+            return Ok(settings);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }

@@ -33,6 +33,7 @@ export interface Resource {
 export interface ResourceCreateRequest {
     title: string;
     resourceType: ResourceType;
+    resourceSubType?: string;
     fileName: string;
     data: string;
 }
@@ -44,7 +45,8 @@ export interface ResourcesPageResponse {
     hasNext: boolean;
 }
 
-export type ResourceType = 'LWM2M_MODEL' | 'PKCS_12' | 'JKS';
+export type ResourceType = 'LWM2M_MODEL' | 'PKCS_12' | 'JKS' | 'JS_MODULE';
+export type ResourceSubType = 'EXTENSION' | 'MODULE';
 
 export interface ResourceTypeOption {
     value: ResourceType;

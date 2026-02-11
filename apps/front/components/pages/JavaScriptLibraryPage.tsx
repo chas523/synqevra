@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ResourcesTable } from "@/components/organisms/ResourcesTable";
-import { ResourceDetailPanel } from "@/components/organisms/ResourceDetailPanel";
-import { AddResourceDialog } from "@/components/organisms/AddResourceDialog";
+import { JavaScriptLibraryTable } from "@/components/organisms/JavaScriptLibraryTable";
+import { JavaScriptResourceDetails } from "@/components/organisms/JavaScriptResourceDetails";
+import { AddJavaScriptResourceDialog } from "@/components/organisms/AddJavaScriptResourceDialog";
 import { useResources, useManageResource } from "@/hooks/thingsboard/resources/useResources";
-import { Resource, ResourceType, ResourceCreateRequest } from "@/types/resourceTypes";
+import { Resource, ResourceCreateRequest } from "@/types/resourceTypes";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
-export const ResourceLibraryPage = () => {
+export const JavaScriptLibraryPage = () => {
     const [currentPage, setCurrentPage] = useState(0);
-    const [resourceTypeFilter, setResourceTypeFilter] = useState<ResourceType | undefined>(undefined);
+    const [resourceSubTypeFilter, setResourceSubTypeFilter] = useState<string | undefined>(undefined);
     const [sortProperty, setSortProperty] = useState("createdTime");
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -24,7 +24,8 @@ export const ResourceLibraryPage = () => {
         PAGE_SIZE,
         sortProperty,
         sortOrder,
-        resourceTypeFilter
+        "JS_MODULE", // Fixed ResourceType
+        resourceSubTypeFilter
     );
 
     const { isSaving, createResource, deleteResource, downloadResource } = useManageResource();
@@ -33,8 +34,8 @@ export const ResourceLibraryPage = () => {
         setCurrentPage(page);
     }, []);
 
-    const handleResourceTypeChange = useCallback((type: ResourceType | undefined) => {
-        setResourceTypeFilter(type);
+    const handleResourceSubTypeChange = useCallback((subType: string | undefined) => {
+        setResourceSubTypeFilter(subType);
         setCurrentPage(0);
     }, []);
 
@@ -56,11 +57,11 @@ export const ResourceLibraryPage = () => {
     const handleAdd = useCallback(async (resource: ResourceCreateRequest) => {
         try {
             await createResource(resource);
-            toast.success("Resource added successfully");
             mutate();
         } catch (error: any) {
+            // Error handled in dialog or service, but we might want to re-throw or handle here
             const errorMessage = error?.response?.data?.message || error?.message || "Failed to add resource";
-            toast.error(errorMessage);
+            // toast.error(errorMessage); // Already toasted in dialog
             throw error;
         }
     }, [createResource, mutate]);
@@ -87,6 +88,7 @@ export const ResourceLibraryPage = () => {
             }
             await deleteResource(resource.id.id);
             toast.success("Resource deleted successfully");
+            setShowDetailsDialog(false);
             mutate();
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "Failed to delete resource";
@@ -94,21 +96,25 @@ export const ResourceLibraryPage = () => {
         }
     }, [deleteResource, mutate]);
 
+    const handleUpdate = useCallback(() => {
+        mutate();
+    }, [mutate]);
+
     return (
         <div className="container mx-auto p-6">
-            <ResourcesTable
+            <JavaScriptLibraryTable
                 resources={resources}
                 isLoading={isLoading}
                 currentPage={currentPage}
                 totalPages={totalPages}
                 totalElements={totalElements}
                 pageSize={PAGE_SIZE}
-                resourceTypeFilter={resourceTypeFilter ?? "ALL"}
+                resourceSubTypeFilter={resourceSubTypeFilter ?? "ALL"}
                 sortProperty={sortProperty}
                 sortOrder={sortOrder}
                 onSortChange={handleSortChange}
                 onPageChange={handlePageChange}
-                onResourceTypeChange={handleResourceTypeChange}
+                onResourceSubTypeChange={handleResourceSubTypeChange}
                 onRefresh={handleRefresh}
                 onAdd={() => setShowAddDialog(true)}
                 onRowClick={handleRowClick}
@@ -116,15 +122,15 @@ export const ResourceLibraryPage = () => {
                 onDelete={handleDelete}
             />
 
-            <ResourceDetailPanel
+            <JavaScriptResourceDetails
                 isOpen={showDetailsDialog}
                 onClose={() => setShowDetailsDialog(false)}
                 resource={selectedResource}
-                onDownload={handleDownload}
+                onUpdate={handleUpdate}
                 onDelete={handleDelete}
             />
 
-            <AddResourceDialog
+            <AddJavaScriptResourceDialog
                 open={showAddDialog}
                 onOpenChange={setShowAddDialog}
                 onAdd={handleAdd}

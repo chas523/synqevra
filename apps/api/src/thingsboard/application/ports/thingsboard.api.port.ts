@@ -21,6 +21,7 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { MailSettingsDto } from '../../interface/rest/dtos/response/mail-settings.response.dto';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -239,6 +240,7 @@ export abstract class ThingsboardApiPort {
     sortProperty: string,
     sortOrder: 'ASC' | 'DESC',
     resourceType?: string,
+    resourceSubType?: string,
   ): Promise<ResourcesPageResponseDto>;
 
   abstract createResource(
@@ -256,6 +258,11 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     resourceId: string,
   ): Promise<Buffer>;
+
+  abstract fetchResourceInfo(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<ResourceDto>;
 
   // Tenant detail operations
   abstract fetchTenantAttributes(
@@ -336,6 +343,51 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     tenantProfile: TenantProfile,
   ): Promise<TenantProfile>;
+
+  // Image operations
+  abstract fetchImages(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    imageSubType: string,
+    includeSystemImages: boolean,
+  ): Promise<any>;
+
+  abstract uploadImage(
+    sysAdminAccessToken: string,
+    file: Buffer,
+    fileName: string,
+    title: string,
+    imageSubType: string,
+  ): Promise<any>;
+
+  abstract deleteImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+    force: boolean,
+  ): Promise<any>;
+
+  abstract downloadImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<Buffer>;
+
+  abstract exportImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<any>;
+
+  // Mail Settings operations
+  abstract fetchMailSettings(
+    sysAdminAccessToken: string,
+  ): Promise<MailSettingsDto>;
+
+  abstract updateMailSettings(
+    sysAdminAccessToken: string,
+    settings: MailSettingsDto,
+  ): Promise<MailSettingsDto>;
 }
 
 // Response types for new methods

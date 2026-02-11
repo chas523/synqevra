@@ -10,11 +10,13 @@ export const useResources = (
     pageSize: number = 10,
     sortProperty: string = 'createdTime',
     sortOrder: 'ASC' | 'DESC' = 'DESC',
-    resourceType?: ResourceType
+    resourceType?: ResourceType,
+    resourceSubType?: string
 ) => {
+    const key = ['resources', page, pageSize, sortProperty, sortOrder, resourceType, resourceSubType];
     const { data, error, isLoading, mutate } = useSWR<ResourcesPageResponse>(
-        ['resources', page, pageSize, sortProperty, sortOrder, resourceType],
-        () => ResourceService.getResources(page, pageSize, sortProperty, sortOrder, resourceType),
+        key,
+        () => ResourceService.getResources(page, pageSize, sortProperty, sortOrder, resourceType, resourceSubType),
         {
             revalidateOnFocus: false,
         }
