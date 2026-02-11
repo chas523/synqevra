@@ -49,6 +49,7 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
+import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -1701,6 +1702,131 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to update mail settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Widget Type operations
+  async fetchWidgetTypes(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<WidgetTypesPageDto> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty,
+        sortOrder,
+        tenantOnly: tenantOnly.toString(),
+        fullSearch: fullSearch.toString(),
+        scadaFirst: scadaFirst.toString(),
+        deprecatedFilter,
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/widgetTypes?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetTypesPageDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget types',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetType/${widgetTypeId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete widget type',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveWidgetType(
+    sysAdminAccessToken: string,
+    widgetType: any,
+    updateExistingByFqn: boolean = false,
+  ): Promise<WidgetTypeDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetType?updateExistingByFqn=${updateExistingByFqn}`;
+      const response = await firstValueFrom(
+        this.httpService.post<WidgetTypeDto>(url, widgetType, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save widget type',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchWidgetTypeById(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<WidgetTypeDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetType/${widgetTypeId}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetTypeDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget type by id',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async downloadWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+    includeResources: boolean = false,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetType/${widgetTypeId}?includeResources=${includeResources}`;
+      const response = await firstValueFrom(
+        this.httpService.get<any>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to download widget type',
         error,
         this.logger,
       );
