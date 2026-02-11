@@ -57,6 +57,7 @@ export interface DataTableProps<T> {
     emptyMessage?: string;
     loadingMessage?: string;
     addButtonLabel?: string;
+    customAction?: ReactNode;
 }
 
 export function DataTable<T>({
@@ -81,6 +82,7 @@ export function DataTable<T>({
     emptyMessage = "No data found.",
     loadingMessage = "Loading...",
     addButtonLabel,
+    customAction,
 }: DataTableProps<T>) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -139,6 +141,7 @@ export function DataTable<T>({
                     {filterComponent}
                 </div>
                 <div className="flex items-center space-x-2">
+                    {customAction}
                     {onAdd && (
                         <Button variant="ghost" size="sm" onClick={onAdd} className="border rounded-lg">
                             <Plus className="h-4 w-4 mr-2" />

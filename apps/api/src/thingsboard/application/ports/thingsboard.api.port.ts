@@ -31,6 +31,7 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
+import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -388,6 +389,41 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: MailSettingsDto,
   ): Promise<MailSettingsDto>;
+
+  // Widget Type operations
+  abstract fetchWidgetTypes(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<WidgetTypesPageDto>;
+
+  abstract deleteWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<void>;
+
+  abstract saveWidgetType(
+    sysAdminAccessToken: string,
+    widgetType: any,
+    updateExistingByFqn?: boolean,
+  ): Promise<WidgetTypeDto>;
+
+  abstract fetchWidgetTypeById(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<WidgetTypeDto>;
+
+  abstract downloadWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+    includeResources?: boolean,
+  ): Promise<any>;
 }
 
 // Response types for new methods

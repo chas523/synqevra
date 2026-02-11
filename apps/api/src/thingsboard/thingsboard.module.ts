@@ -43,6 +43,7 @@ import { SaveTenantProfileCommandHandler } from './application/commands/save-ten
 import { UploadImageCommandHandler } from './application/commands/upload-image/upload-image.command.handler';
 import { DeleteImageCommandHandler } from './application/commands/delete-image/delete-image.command.handler';
 import { UpdateMailSettingsCommandHandler } from './application/commands/update-mail-settings/update-mail-settings.command.handler';
+import { DeleteWidgetTypeCommandHandler } from './application/commands/delete-widget-type/delete-widget-type.command.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -73,6 +74,10 @@ import { FetchImagesQueryHandler } from './application/queries/fetch-images/fetc
 import { DownloadImageQueryHandler } from './application/queries/download-image/download-image.query.handler';
 import { ExportImageQueryHandler } from './application/queries/export-image/export-image.query.handler';
 import { FetchMailSettingsQueryHandler } from './application/queries/fetch-mail-settings/fetch-mail-settings.query.handler';
+import { FetchWidgetTypesQueryHandler } from './application/queries/fetch-widget-types/fetch-widget-types.query.handler';
+import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query.handler';
+import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
+import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -106,6 +111,7 @@ const commandHandlers = [
   UploadImageCommandHandler,
   DeleteImageCommandHandler,
   UpdateMailSettingsCommandHandler,
+  DeleteWidgetTypeCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -140,6 +146,10 @@ const queryHandlers = [
   DownloadImageQueryHandler,
   ExportImageQueryHandler,
   FetchMailSettingsQueryHandler,
+  FetchWidgetTypesQueryHandler,
+  FetchWidgetTypeByIdQueryHandler,
+  SaveWidgetTypeCommandHandler,
+  DownloadWidgetTypeQueryHandler,
 ];
 
 @Module({

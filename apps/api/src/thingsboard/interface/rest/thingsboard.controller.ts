@@ -113,6 +113,12 @@ import { UploadImageCommand } from 'src/thingsboard/application/commands/upload-
 import { DeleteImageCommand } from 'src/thingsboard/application/commands/delete-image/delete-image.command';
 import { DownloadImageQuery } from 'src/thingsboard/application/queries/download-image/download-image.query';
 import { ExportImageQuery } from 'src/thingsboard/application/queries/export-image/export-image.query';
+import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from './dtos/response/widget-types.response.dto';
+import { FetchWidgetTypesQuery } from 'src/thingsboard/application/queries/fetch-widget-types/fetch-widget-types.query';
+import { DeleteWidgetTypeCommand } from 'src/thingsboard/application/commands/delete-widget-type/delete-widget-type.command';
+import { SaveWidgetTypeCommand } from 'src/thingsboard/application/commands/save-widget-type/save-widget-type.command';
+import { FetchWidgetTypeByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query';
+import { DownloadWidgetTypeQuery } from 'src/thingsboard/application/queries/download-widget-type/download-widget-type.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -1310,6 +1316,184 @@ export class ThingsboardController {
 
     return match(result, {
       Ok: (response: DeleteImageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetTypes')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget types',
+    description: 'Fetch paginated list of widget types from ThingsBoard',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (zero-based)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sortProperty',
+    required: false,
+    type: String,
+    description: 'Property to sort by',
+    example: 'createdTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Sort order',
+    example: 'DESC',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widget types retrieved successfully',
+    type: WidgetTypesPageDto,
+  })
+  async getWidgetTypes(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+    @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+  ) {
+    const query = new FetchWidgetTypesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+      deprecatedFilter,
+    );
+    const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetTypes: WidgetTypesPageDto) => widgetTypes,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetType/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget type by ID',
+    description: 'Fetch a single widget type by its ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type retrieved successfully',
+    type: WidgetTypeDto,
+  })
+  async getWidgetTypeById(@Param('id') id: string) {
+    const query = new FetchWidgetTypeByIdQuery(id);
+    const result: Result<WidgetTypeDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetType: WidgetTypeDto) => widgetType,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/widgetType/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete widget type',
+    description: 'Delete a widget type by ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type deleted successfully',
+  })
+  async deleteWidgetType(@Param('id') id: string) {
+    const command = new DeleteWidgetTypeCommand(id);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetType')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save (create or update) widget type',
+    description: 'Save (create or update) a widget type',
+  })
+  @ApiBody({ type: CreateWidgetTypeRequestDto })
+  @ApiQuery({ name: 'updateExistingByFqn', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type saved successfully',
+    type: WidgetTypeDto,
+  })
+  async saveWidgetType(
+    @Body() widgetType: any,
+    @Query('updateExistingByFqn') updateExistingByFqn: boolean = false,
+  ) {
+    const command = new SaveWidgetTypeCommand(widgetType, updateExistingByFqn);
+    const result: Result<WidgetTypeDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: WidgetTypeDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetType/:id/download')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Download widget type',
+    description: 'Download a widget type by ID',
+  })
+  @ApiQuery({ name: 'includeResources', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type downloaded successfully',
+  })
+  async downloadWidgetType(
+    @Param('id') id: string,
+    @Query('includeResources') includeResources: boolean = false,
+  ) {
+    const query = new DownloadWidgetTypeQuery(id, includeResources);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
