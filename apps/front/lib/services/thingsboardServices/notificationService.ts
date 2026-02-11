@@ -83,4 +83,12 @@ export class NotificationService {
         );
         return data;
     }
+
+    public static async previewNotification(previewRequest: any) {
+        const { data } = await proxyApi.post(
+            "thingsboard/notification/request/preview",
+            previewRequest
+        );
+        return data;
+    }
 }

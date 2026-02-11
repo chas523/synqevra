@@ -105,6 +105,7 @@ import { SendNotificationCommand } from 'src/thingsboard/application/commands/se
 import { CreateNotificationTargetCommand } from 'src/thingsboard/application/commands/create-notification-target/create-notification-target.command';
 import { FetchNotificationTargetsQuery } from 'src/thingsboard/application/queries/fetch-notification-targets/fetch-notification-targets.query';
 import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
+import { PreviewNotificationRequestCommand } from 'src/thingsboard/application/commands/preview-notification-request/preview-notification-request.command';
 
 
 @ApiTags('ThingsBoard')
@@ -1162,6 +1163,19 @@ export class ThingsboardController {
   async fetchNotificationTargets() {
     const query = new FetchNotificationTargetsQuery();
     const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/request/preview')
+  async previewNotificationRequest(@Body() previewRequest: any) {
+    const command = new PreviewNotificationRequestCommand(previewRequest);
+    const result = await this.commandBus.execute(command);
 
     return match(result, {
       Ok: (response) => response,

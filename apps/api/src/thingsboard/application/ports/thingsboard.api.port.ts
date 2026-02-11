@@ -180,6 +180,10 @@ export abstract class ThingsboardApiPort {
   abstract fetchNotificationTargets(
     sysAdminAccessToken: string,
   ): Promise<NotificationTargetsResponse>;
+  abstract previewNotificationRequest(
+    sysAdminAccessToken: string,
+    previewRequest: any,
+  ): Promise<any>;
 
   abstract fetchDashboardVersion(
     sysadminAccessToken: string,

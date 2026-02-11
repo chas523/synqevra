@@ -42,6 +42,7 @@ import { DeleteRelationCommandHandler } from './application/commands/delete-rela
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
 import { SendNotificationCommandHandler } from './application/commands/send-notification/send-notification.command-handler';
 import { CreateNotificationTargetCommandHandler } from './application/commands/create-notification-target/create-notification-target.command-handler';
+import { PreviewNotificationRequestCommandHandler } from './application/commands/preview-notification-request/preview-notification-request.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -102,6 +103,7 @@ const commandHandlers = [
   SaveTenantProfileCommandHandler,
   SendNotificationCommandHandler,
   CreateNotificationTargetCommandHandler,
+  PreviewNotificationRequestCommandHandler,
 ];
 
 const queryHandlers = [

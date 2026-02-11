@@ -1617,4 +1617,29 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async previewNotificationRequest(
+    sysAdminAccessToken: string,
+    previewRequest: any,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/request/preview`;
+      const response = await firstValueFrom(
+        this.httpService.post<any>(url, previewRequest, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      this.logger.log('Notification preview generated successfully');
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to preview notification request: ${error.response?.data?.message || error.message}`,
+      );
+      throw new ThingsboardApiException(
+        error.response?.data?.message ||
+        'Failed to preview notification request',
+        error.response?.status || 500,
+      );
+    }
+  }
 }
