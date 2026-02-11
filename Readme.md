@@ -3,47 +3,93 @@ Implementation of ThingsBoard and Medplum on docker containers.
 
 ## Setup
 
-### 1. Setting up ThingsBoard
+### 1. First time local setup
 1. Navigate to `fpl_thingsboard/backend` folder  
-2. For initial run, you **have to** use command  
+2. For initial run, you **have to** use command
 `docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=true thingsboard-ce`  
-or    
-`docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=false thingsboard-ce`  
-if you don't want demo data.  
-3. Run `docker compose up` command and wait till initial configuration is complete  
-4. Check your ip address using `ipconfig` command (Windows). In browser go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine  
-5. Log in as sysadmin@thingsboard.org and change your password (default: sysadmin)  
-Go to `http://localhost:8088/settings/general` and set `Base URL` to `http://localhost:8088`  
-6. You can create or modify other users and their roles. We will use tenant account with Tenant Admin role  
-If you loaded demo data, then you can log in as tenant@thingsboard.org and change your password (default: tenant)  
-If you didn't load demo data, as sysadmin create new tenant by navigating to Tenants → `+` in top right corner → add name "Tenant" > 
-Manage tenant admins → `+` in top right corner → add email "tenant@thingsboard.org" and follow the link to set password  
-7. Go to: Entities → Gateways → add new Gateway  (`+` in top right corner) > Name: `ThingsBoard IoT Gateway` → Type: `DEFAULT` → click `Create`  
-You don't have to download generated file, just go to `General configuration` on created gateway and copy `Access Token`  
-> [!IMPORTANT]
-> In newer versions of ThingsBoard, you don't have to copy Access Token, we can edit the Access Token of the gateway directly (see step 3).
+> [!IMPORTANT] Only once!
+3. Run `docker compose up` command and wait untill containers are running  
+4. Run `docker run -p 6379:6379 --name redis-bullmq -d redis:latest` command  
+5. Navigate to root project folder `/fpl_thingsboard` and run `pnpm install` command to install all dependencies  
+6. Copy `fpl_thingsboard/apps/api/.env.example` to `fpl_thingsboard/apps/api/.env` file and fill in the values with your own database url, jwt and refresh jwt secrets, and mailer credentials.  
+7. Copy `fpl_thingsboard/apps/front/.env.example` to `fpl_thingsboard/apps/front/.env` file.  
+8. To run project locally, you have to update `next.config.ts` file and change:
+```typescript
+        {
+          source: "/api/:path*",
+          destination: "http://api:3003/api/:path*", // Internal K8s DNS
+        },
+        {
+          source: "/fhir/:path*",
+          destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
+        },
+```
+to 
+```typescript
+        {
+          source: "/api/:path*",
+          destination: "http://localhost:3000/api/:path*", // Local
+        },
+        {
+          source: "/fhir/:path*",
+          destination: "http://localhost:3000/fhir/:path*", // Local
+        },
+```
+9. To run project locally, you have to update Rulechain and its location.
+- Update file `apps/api/src/thingsboard/application/commands/register-tenant/register-tenant.command-handler.ts`:
+```typescript
+      const baseRuleChainPath = path.join(
+        process.cwd(),
+        'dist',
+        'base_rule_chain.json',
+      );
+```
+to
+```typescript
+      const baseRuleChainPath = path.join(
+        process.cwd(),
+        'src',
+        'thingsboard',
+        'base_rule_chain.json',
+      );
+```
+- Update file `apps/api/src/thingsboard/base_rule_chain.json`
+```json
+"configuration": {
+          "restEndpointUrlPattern": "http://api:3003/api/proxy/telemetry",
+          "requestMethod": "POST",
+```
+to 
+```json
+"configuration": {
+          "restEndpointUrlPattern": "http://localhost:3000/api/proxy/telemetry",
+          "requestMethod": "POST",
+```  
+10. Run `pnpm dev` command to start dev server for frontend and backend  
+11. Check your ip address using `ipconfig` command (Windows).  
+12. Frontend app is running on `{YOUR_IP_ADDRESS}:3000` (ex. `10.0.1.35:3000`) or `localhost:3000` if you are using local machine.  
+13. To check thingsboard, go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine. You can find default SYS_ADMIN credentials in `fpl_thingsboard/apps/api/.env.example` file.  
+14. Admin app is deprecated, but for development purposes you can still use it. Copy `.env.example` to `.env` file in `fpl_thingsboard/apps/admin` folder. It's available at `{YOUR_IP_ADDRESS}:3002` (ex. `10.0.1.35:3002`) or `localhost:3002` if you are using local machine.  
 
-### 2. Setting up Medplum
-1. Make sure that docker is running. Navigate to `http://localhost:3001/` in your browser.  
-2. Log in as admin. Default credentials are:
-- Email: `admin@example.com`
-- Password: `medplum_admin`  
+### 2. After first time setup
+1. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait untill containers are running
+2. Go to `fpl_thingsboard` folder and run `pnpm dev` command to start dev server for frontend and backend  
 
-You can then create new user here: `http://localhost:3001/User/new`
 
-### 3. Setting up ThingsBoard Gateway
+### 3. Setting up ThingsBoard Gateway - OPTIONAL!
 If you're using our prepared Docker setup, you can use instructions for Option A.
 
+
 #### Option A — Newer ThingsBoard (edit token in UI)
-1. Open the ThingsBoard UI and navigate to: Gateway → Gateway List → select created gateway → `General Configuration`
-2. In `Access Token`, paste the value of `GATEWAY_ACCESSTOKEN_ENV` from the `fpl_thingsboard/gateway/.env` file
+1. Open the ThingsBoard UI (`{YOUR_IP_ADDRESS}:8088`) and navigate to: Gateway → Gateway List → select created gateway → `General Configuration`
+2. In `Access Token`, paste the value of `GATEWAY_ACCESSTOKEN_ENV` from the `fpl_thingsboard/backend/gateway/.env` file
 
 #### Option B — Older ThingsBoard (cannot edit token in UI)
-1. Navigate to the `fpl_thingsboard/gateway` folder
+1. Navigate to the `fpl_thingsboard/backend/gateway` folder
 2. Edit the `.env` file and set: `GATEWAY_ACCESSTOKEN_ENV=<Access Token copied earlier from backend>`
 
 #### Apply changes and run
-1. Navigate to the `fpl_thingsboard/gateway` folder
+1. Navigate to the `fpl_thingsboard/backend/gateway` folder
 2. Run the Gateway using `docker compose up`
 3. Wait until the initial configuration is complete
 4. The Gateway status should change from “Inactive” to “Active”
@@ -53,33 +99,4 @@ If you're using our prepared Docker setup, you can use instructions for Option A
 1. Click on created gateway > General Configuration > Logs and enable Remote logs with log level `DEBUG`  
 2. Go back and click on Connectors configuration and add new connector (ex. Type: MQTT, Name: MQTT, Logging level: `DEBUG`)  
 3. Use Advanced configuration for created connector, go to General section and enable remote logging (make sure to set same log level as in General Configuration)  
-4. Now go to Configuration section and copy content of `fpl_thingsboard/gateway/default-connector-config.json` file and paste it here  
-
-### 4. Frontend app
-1. Navigate to the `fpl_thingsboard/frontend` folder
-2. If you didn't change anything in docker configuration for backend, you don't need to adjust .env, otherwise please make update specific values
-3. To run the app for development, just use `npm run dev` command. Remember to use biome to format your code before committing
-
-### ~~5. Scripts to test configuration~~ Deprecated!
-**NOTE: This part is deprecated, you can still use it to test your configuration, but it's no longer maintained and is not required for ThingsBoard and Medplum to work. Be wary of potential bugs or not up-to-date information!**
-
-Navigate to `fpl_thingsboard/scripts` folder  
-If you want to use: 
-1. MQTT  
-Edit `mqtt.sh` file and change `AC_TOKEN` to Access Token to your device (`Access Token`)  
-Change `MESSAGE` to modify message that will be sent to the device
-2. COAP  
-Edit `coap.sh` file and change `COAP_TOKEN` to Access Token to your device (`Access Token`)  
-Modify `coap-data.json` file and change data to send to device
-3. HTTP  
-Edit `http.sh` file and change `HTTP_TOKEN` to Access Token to your device (`Access Token`)  
-Change `HTTP_MESSAGE` to modify message that will be sent to the device
-4. LWM2M  
-Check `fpl_thingsboard/scripts/lwm2m-registry/Readme.md` and configure ThingsBoard backend  
-Edit `lwm2m.sh` file and change `lwm2m-client` to your unique `Endpoint Client Name` that you just created  
-
-Run `docker compose up --build` command and wait till initial configuration is complete  
-Open CMD or Terminal and using `docker exec -it tb-client /bin/bash` command go into container  
-You can now run any scripts that you configured (ex. `/mqtt.sh`)  
-To check if scripts are working you can open browser and go to `{YOUR_IP_ADDRESS}:8088` > Devices > Your Gateway > Latest Telemetry  
-To test connector, navigate to Devices > Demo Device > Latest Telemetry and from docker container run `/mqtt_connector.sh` few times to be able to see changes (since prepared MQTT Broker sends random data every second and single use of the script could be missed)
+4. Now go to Configuration section and copy content of `fpl_thingsboard/backend/gateway/default-connector-config.json` file and paste it here  
