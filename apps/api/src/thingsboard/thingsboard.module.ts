@@ -40,6 +40,8 @@ import { SaveEntityAttributesCommandHandler } from './application/commands/save-
 import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
 import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
+import { SendNotificationCommandHandler } from './application/commands/send-notification/send-notification.command-handler';
+import { CreateNotificationTargetCommandHandler } from './application/commands/create-notification-target/create-notification-target.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -66,6 +68,8 @@ import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-te
 import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query-handler';
 import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
 import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
+import { FetchDeliveryMethodsQueryHandler } from './application/queries/fetch-delivery-methods/fetch-delivery-methods.query-handler';
+import { FetchNotificationTargetsQueryHandler } from './application/queries/fetch-notification-targets/fetch-notification-targets.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -91,11 +95,13 @@ const commandHandlers = [
   DeleteQueueCommandHandler,
   CreateResourceCommandHandler,
   DeleteResourceCommandHandler,
-    UpdateTenantCommandHandler,
-    SaveEntityAttributesCommandHandler,
-    CreateRelationCommandHandler,
-    DeleteRelationCommandHandler,
-    SaveTenantProfileCommandHandler,
+  UpdateTenantCommandHandler,
+  SaveEntityAttributesCommandHandler,
+  CreateRelationCommandHandler,
+  DeleteRelationCommandHandler,
+  SaveTenantProfileCommandHandler,
+  SendNotificationCommandHandler,
+  CreateNotificationTargetCommandHandler,
 ];
 
 const queryHandlers = [
@@ -116,13 +122,15 @@ const queryHandlers = [
   FetchQueuesQueryHandler,
   FetchResourcesQueryHandler,
   DownloadResourceQueryHandler,
-    FetchTenantAttributesQueryHandler,
-    FetchTenantAlarmsQueryHandler,
-    FetchTenantEventsQueryHandler,
-    FetchTenantRelationsQueryHandler,
-    FetchTenantProfilesQueryHandler,
-    FetchTenantProfileAttributesQueryHandler,
-    FetchTenantProfileAlarmsQueryHandler,
+  FetchTenantAttributesQueryHandler,
+  FetchTenantAlarmsQueryHandler,
+  FetchTenantEventsQueryHandler,
+  FetchTenantRelationsQueryHandler,
+  FetchTenantProfilesQueryHandler,
+  FetchTenantProfileAttributesQueryHandler,
+  FetchTenantProfileAlarmsQueryHandler,
+  FetchDeliveryMethodsQueryHandler,
+  FetchNotificationTargetsQueryHandler,
 ];
 
 @Module({
@@ -163,4 +171,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule {}
+export class ThingsboardModule { }

@@ -8,8 +8,10 @@ import {
     XCircle,
     Clock,
     AlertCircle,
+    Send,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { LoadingCard, Pagination } from "../molecules";
 import {
     EmptyState,
@@ -35,6 +37,7 @@ interface NotificationsListPageProps {
     sortOptions: readonly { value: string; label: string }[];
     onNextPage: () => void;
     onPrevPage: () => void;
+    onSendNotification?: () => void;
 }
 
 const getStatusIcon = (status?: string) => {
@@ -73,6 +76,7 @@ export function NotificationsListPage({
     sortOptions,
     onNextPage,
     onPrevPage,
+    onSendNotification,
 }: NotificationsListPageProps) {
     if (error) {
         return (
@@ -122,6 +126,18 @@ export function NotificationsListPage({
                 count={data?.total || 0}
                 isLoading={isLoading}
                 onRefresh={onRefresh}
+                action={
+                    onSendNotification && (
+                        <Button
+                            onClick={onSendNotification}
+                            className="gap-2"
+                            size="sm"
+                        >
+                            <Send className="h-4 w-4" />
+                            Send Notification
+                        </Button>
+                    )
+                }
             />
 
             <CardContent className="space-y-4">

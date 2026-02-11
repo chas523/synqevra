@@ -97,6 +97,15 @@ import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-r
 import { CreateResourceCommand } from 'src/thingsboard/application/commands/create-resource/create-resource.command';
 import { DeleteResourceCommand } from 'src/thingsboard/application/commands/delete-resource/delete-resource.command';
 import { DownloadResourceQuery } from 'src/thingsboard/application/queries/download-resource/download-resource.query';
+import { SendNotificationRequestDto } from './dtos/request/send-notification.request.dto';
+import { DeliveryMethodsResponse } from './dtos/response/delivery-methods.response.dto';
+import { NotificationRequestResponse } from './dtos/response/notification-request.response.dto';
+import { FetchDeliveryMethodsQuery } from 'src/thingsboard/application/queries/fetch-delivery-methods/fetch-delivery-methods.query';
+import { SendNotificationCommand } from 'src/thingsboard/application/commands/send-notification/send-notification.command';
+import { CreateNotificationTargetCommand } from 'src/thingsboard/application/commands/create-notification-target/create-notification-target.command';
+import { FetchNotificationTargetsQuery } from 'src/thingsboard/application/queries/fetch-notification-targets/fetch-notification-targets.query';
+import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
+
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -105,7 +114,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -955,7 +964,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1033,7 +1042,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1064,6 +1073,98 @@ export class ThingsboardController {
         });
         res.send(buffer);
       },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('/notification/deliveryMethods')
+  @ApiOperation({
+    summary: 'Get available notification delivery methods',
+    description:
+      'Retrieve list of available delivery methods for notifications (Web, Email, SMS, etc.)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Delivery methods retrieved successfully',
+    type: DeliveryMethodsResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch delivery methods',
+  })
+  async getDeliveryMethods() {
+    const query = new FetchDeliveryMethodsQuery();
+    const result: Result<DeliveryMethodsResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: DeliveryMethodsResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/notification/send')
+  @ApiOperation({
+    summary: 'Send a notification',
+    description:
+      'Send a notification to specified targets using ThingsBoard notification system',
+  })
+  @ApiBody({
+    type: SendNotificationRequestDto,
+    description: 'Notification request data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification sent successfully',
+    type: NotificationRequestResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to send notification',
+  })
+  async sendNotification(@Body() notificationRequest: SendNotificationRequestDto) {
+    const command = new SendNotificationCommand(notificationRequest);
+    const result: Result<NotificationRequestResponse, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: NotificationRequestResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/target')
+  async createNotificationTarget(
+    @Body() request: CreateNotificationTargetRequestDto,
+  ) {
+    const command = new CreateNotificationTargetCommand(request);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (target) => target,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/targets')
+  async fetchNotificationTargets() {
+    const query = new FetchNotificationTargetsQuery();
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },

@@ -30,6 +30,14 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
+import { DeliveryMethodsResponse } from '../../interface/rest/dtos/response/delivery-methods.response.dto';
+import { NotificationRequestResponse } from '../../interface/rest/dtos/response/notification-request.response.dto';
+import { SendNotificationRequestDto } from '../../interface/rest/dtos/request/send-notification.request.dto';
+import { CreateNotificationTargetRequestDto } from '../../interface/rest/dtos/request/create-notification-target.request.dto';
+import {
+  NotificationTargetDto,
+  NotificationTargetsResponse,
+} from '../../interface/rest/dtos/response/notification-target.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -158,6 +166,21 @@ export abstract class ThingsboardApiPort {
     page: number,
     pageSize: number,
   ): Promise<GetNotificationsResponse>;
+  abstract fetchDeliveryMethods(
+    sysAdminAccessToken: string,
+  ): Promise<DeliveryMethodsResponse>;
+  abstract sendNotification(
+    sysAdminAccessToken: string,
+    notificationRequest: SendNotificationRequestDto,
+  ): Promise<NotificationRequestResponse>;
+  abstract createNotificationTarget(
+    sysAdminAccessToken: string,
+    request: CreateNotificationTargetRequestDto,
+  ): Promise<NotificationTargetDto>;
+  abstract fetchNotificationTargets(
+    sysAdminAccessToken: string,
+  ): Promise<NotificationTargetsResponse>;
+
   abstract fetchDashboardVersion(
     sysadminAccessToken: string,
   ): Promise<DashboardVersionResponse>;
