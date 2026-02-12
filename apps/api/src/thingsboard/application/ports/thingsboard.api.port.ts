@@ -435,6 +435,29 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     settings: TwoFactorAuthSettingsRequestDto,
   ): Promise<void>;
+
+  abstract getWidgetsBundles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<any>;
+
+  abstract getWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+  ): Promise<any>;
+
+  abstract saveWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+    fqns: string[],
+  ): Promise<any>;
 }
 
 

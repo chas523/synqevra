@@ -1874,4 +1874,92 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async getWidgetsBundles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<any> {
+    try {
+      // Constructing URL with query parameters.
+      // Note: Handling boolean/string conversion might be needed if values are not strings.
+      // Assuming query params are handled correctly by the caller or stringified here.
+      const queryParams = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty: sortProperty,
+        sortOrder: sortOrder,
+        tenantOnly: String(tenantOnly),
+        fullSearch: String(fullSearch),
+        scadaFirst: String(scadaFirst),
+        deprecatedFilter: deprecatedFilter,
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundles?${queryParams.toString()}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundles from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+  ): Promise<any> {
+    try {
+      // User provided endpoint: GET /api/widgetTypeFqns?widgetsBundleId={uuid}
+      const url = `${this.THINGSBOARD_API_URL}/widgetTypeFqns?widgetsBundleId=${widgetsBundleId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget type FQNs from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+    fqns: string[],
+  ): Promise<any> {
+    try {
+      // User provided endpoint: POST /widgetsBundle/{uuid}/widgetTypeFqns
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, fqns, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save widget type FQNs to ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
 }

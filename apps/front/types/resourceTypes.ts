@@ -45,7 +45,7 @@ export interface ResourcesPageResponse {
     hasNext: boolean;
 }
 
-export type ResourceType = 'LWM2M_MODEL' | 'PKCS_12' | 'JKS' | 'JS_MODULE';
+export type ResourceType = 'LWM2M_MODEL' | 'PKCS_12' | 'JKS' | 'JS_MODULE' | 'IMAGE';
 export type ResourceSubType = 'EXTENSION' | 'MODULE';
 
 export interface ResourceTypeOption {

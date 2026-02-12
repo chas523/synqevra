@@ -27,6 +27,7 @@ export class WidgetService {
     }
 
     public static async saveWidgetType(request: any, updateExistingByFqn: boolean = false): Promise<WidgetType> {
+        console.log('Outputting WidgetService.saveWidgetType payload:', JSON.stringify(request, null, 2));
         const { data } = await proxyApi.post(`thingsboard/widgetType?updateExistingByFqn=${updateExistingByFqn}`, request);
         return data;
     }
@@ -44,6 +45,40 @@ export class WidgetService {
         const { data } = await proxyApi.get(`thingsboard/widgetType/${widgetTypeId}/download?includeResources=${includeResources}`, {
             responseType: 'blob',
         });
+        return data;
+    }
+
+    public static async getWidgetsBundles(
+        page: number = 0,
+        pageSize: number = 10,
+        sortProperty: string = 'createdTime',
+        sortOrder: 'ASC' | 'DESC' = 'DESC',
+        tenantOnly: boolean = false,
+        fullSearch: boolean = false,
+        scadaFirst: boolean = false,
+        deprecatedFilter: string = 'ALL'
+    ): Promise<any> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            pageSize: pageSize.toString(),
+            sortProperty,
+            sortOrder,
+            tenantOnly: tenantOnly.toString(),
+            fullSearch: fullSearch.toString(),
+            scadaFirst: scadaFirst.toString(),
+            deprecatedFilter,
+        });
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundles?${params.toString()}`);
+        return data;
+    }
+
+    public static async getWidgetTypeFqns(widgetsBundleId: string): Promise<string[]> {
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`);
+        return data;
+    }
+
+    public static async saveWidgetTypeFqns(widgetsBundleId: string, fqns: string[]): Promise<any> {
+        const { data } = await proxyApi.post(`thingsboard/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`, fqns);
         return data;
     }
 }

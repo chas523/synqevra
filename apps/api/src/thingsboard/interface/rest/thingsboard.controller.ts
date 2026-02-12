@@ -124,6 +124,9 @@ import { TwoFactorAuthSettingsDto } from './dtos/response/thingsboard-2fa-settin
 import { TwoFactorAuthSettingsRequestDto } from './dtos/request/thingsboard-2fa-settings.request.dto';
 import { FetchTwoFaSettingsQuery } from '../../application/queries/fetch-2fa-settings/fetch-2fa-settings.query';
 import { SaveTwoFaSettingsCommand } from '../../application/commands/save-2fa-settings/save-2fa-settings.command';
+import { FetchWidgetsBundlesQuery } from '../../application/queries/fetch-widgets-bundles/fetch-widgets-bundles.query';
+import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.query';
+import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -1578,5 +1581,135 @@ export class ThingsboardController {
       },
     });
   }
-}
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widgets bundles',
+    description: 'Fetch paginated list of widgets bundles from ThingsBoard',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (zero-based)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sortProperty',
+    required: false,
+    type: String,
+    description: 'Property to sort by',
+    example: 'createdTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Sort order',
+    example: 'DESC',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widgets bundles retrieved successfully',
+  })
+  async getWidgetsBundles(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+    @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+  ) {
+    const query = new FetchWidgetsBundlesQuery(
+      accessToken,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+      deprecatedFilter,
+    );
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetsBundles: any) => widgetsBundles,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget type FQNs',
+    description: 'Fetch widget type FQNs for a specific widgets bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type FQNs retrieved successfully',
+  })
+  async getWidgetTypeFqns(
+    @TbAccessToken() accessToken: string,
+    @Param('widgetsBundleId') widgetsBundleId: string,
+  ) {
+    const query = new FetchWidgetTypeFqnsQuery(accessToken, widgetsBundleId);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (fqns: any) => fqns,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save widget type FQNs',
+    description: 'Save widget type FQNs for a specific widgets bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type FQNs saved successfully',
+  })
+  async saveWidgetTypeFqns(
+    @TbAccessToken() accessToken: string,
+    @Param('widgetsBundleId') widgetsBundleId: string,
+    @Body() fqns: string[],
+  ) {
+    const command = new SaveWidgetTypeFqnsCommand(
+      accessToken,
+      widgetsBundleId,
+      fqns,
+    );
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+}
