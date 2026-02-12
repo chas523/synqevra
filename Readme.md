@@ -28,11 +28,11 @@ to
 ```typescript
         {
           source: "/api/:path*",
-          destination: "http://localhost:3000/api/:path*", // Local
+          destination: "http://localhost:3003/api/:path*", // Local
         },
         {
           source: "/fhir/:path*",
-          destination: "http://localhost:3000/fhir/:path*", // Local
+          destination: "http://localhost:3003/fhir/:path*", // Local
         },
 ```
 9. To run project locally, you have to update Rulechain and its location.
@@ -62,7 +62,7 @@ to
 to 
 ```json
 "configuration": {
-          "restEndpointUrlPattern": "http://localhost:3000/api/proxy/telemetry",
+          "restEndpointUrlPattern": "http://localhost:3003/api/proxy/telemetry",
           "requestMethod": "POST",
 ```  
 10. Run `pnpm dev` command to start dev server for frontend and backend  
