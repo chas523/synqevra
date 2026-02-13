@@ -23,15 +23,15 @@ pipelines:
             - docker
           script:
             # Set image TAG
-            - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
+            # - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
 
             # Build and push backend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/api/Dockerfile -t registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG .
-            - docker push registry.digitalocean.com/medboard-registry/api:$IMAGE_TAG
+            - docker build -f apps/api/Dockerfile -t registry.digitalocean.com/medboard-registry/front:2.0.0 .
+            - docker push registry.digitalocean.com/medboard-registry/front:2.0.0
 
             # Update API tag
-            - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/api:\).*#\1$IMAGE_TAG#g" k8s/30-api.yaml
+            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/api:\).*#\1$IMAGE_TAG#g" k8s/30-api.yaml
 
             # Deploy backend
             - pipe: atlassian/kubectl-run:3.12.0
@@ -39,6 +39,12 @@ pipelines:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
                 RESOURCE_PATH: 'k8s/30-api.yaml'
+
+            - pipe: atlassian/kubectl-run:3.12.0
+              variables:
+                KUBE_CONFIG: $KUBE_CONFIG
+                KUBECTL_COMMAND: 'rollout'
+                KUBECTL_ARGS: 'restart deployment/api -n medboard'
 
       - step:
           size: 2x
@@ -51,16 +57,16 @@ pipelines:
             - docker
           script:
             # Set image TAG
-            - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
+            # - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
 
             # Build and push frontend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/front/Dockerfile -t registry.digitalocean.com/medboard-registry/front:$IMAGE_TAG .
-            - docker push registry.digitalocean.com/medboard-registry/front:$IMAGE_TAG
+            - docker build -f apps/front/Dockerfile -t registry.digitalocean.com/medboard-registry/front:1.0.0 .
+            - docker push registry.digitalocean.com/medboard-registry/front:1.0.0
 
             # Update Frontend tag
-            - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/32-frontend.yaml
-            - grep -n "image:" k8s/32-frontend.yaml
+            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/32-frontend.yaml
+            # - grep -n "image:" k8s/32-frontend.yaml
 
             # Deploy frontend
             - pipe: atlassian/kubectl-run:3.12.0
@@ -68,7 +74,11 @@ pipelines:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
                 RESOURCE_PATH: 'k8s/32-frontend.yaml'
-
+            - pipe: atlassian/kubectl-run:3.12.0
+              variables:
+                KUBE_CONFIG: $KUBE_CONFIG
+                KUBECTL_COMMAND: 'rollout'
+                KUBECTL_ARGS: 'restart deployment/frontend -n medboard'
       - step:
           name: Deploy Kubernetes changes excluding frontend/api
           condition:
@@ -79,6 +89,7 @@ pipelines:
             # Remove local job copies of frontend and api yaml files to avoid redeployment
             - rm -f k8s/30-api.yaml
             - rm -f k8s/32-frontend.yaml
+            - rm -f k8s/31-admin.yaml
 
             # Deploy other k8s resources
             - pipe: atlassian/kubectl-run:3.12.0
