@@ -2,6 +2,7 @@ import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Err, Ok, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
+import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
 import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
@@ -17,27 +18,15 @@ export class FetchWidgetBundleByIdQueryHandler
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
         private readonly configService: ConfigService,
+        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(query: FetchWidgetBundleByIdQuery): Promise<Result<WidgetBundleDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
+            const token = await this.sysAdminAuthService.getAccessToken();
 
             const widgetBundle = await this.thingsboardApi.fetchWidgetBundleById(
-                loginResponse.token,
+                token,
                 query.bundleId,
             );
 

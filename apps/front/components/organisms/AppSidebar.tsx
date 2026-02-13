@@ -47,7 +47,7 @@ const MENU_ITEMS = {
     {
       href: "/dashboard/notifications",
       icon: BellIcon,
-      label: "Tenant Profiles"
+      label: "Notification Center"
     },
     {
       href: "/settings",

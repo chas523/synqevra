@@ -65,6 +65,11 @@ export class WidgetService {
         return data;
     }
 
+    public static async getWidgetBundleById(widgetBundleId: string): Promise<WidgetBundle> {
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundle/${widgetBundleId}`);
+        return data;
+    }
+
     public static async downloadWidgetType(widgetTypeId: string, includeResources: boolean = true): Promise<Blob> {
         const { data } = await proxyApi.get(`thingsboard/widgetType/${widgetTypeId}/download?includeResources=${includeResources}`, {
             responseType: 'blob',

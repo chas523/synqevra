@@ -19,11 +19,6 @@ export default function SentNotificationsPage() {
         sortOrder,
     });
 
-    // Debug: Log the data structure
-    if (requests && requests.length > 0) {
-        console.log('First notification request:', JSON.stringify(requests[0], null, 2));
-    }
-
     const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
     }, []);
