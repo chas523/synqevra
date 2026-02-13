@@ -35,7 +35,7 @@ export class TelemetryService {
   async connect(accessToken: string): Promise<void> {
     // after implementing admin dashboard remove const token = await this.connectAsSysadmin();
     const token = await this.connectAsSysadmin();
-    const result = await this.telemetryPort.connect(accessToken);
+    const result = await this.telemetryPort.connect(token);
     if (result.isErr()) {
       throw result.unwrapErr();
     }
