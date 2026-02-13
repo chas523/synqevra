@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
 
   const publicForGuests = ["/auth/login", "/auth/activate"];
 
-  const alwaysPublic = ["/"];
+  const alwaysPublic = ["/", "/dashboard/requestedUsers"];
 
   const isGuestRoute = publicForGuests.some((route) =>
     pathname.startsWith(route)
