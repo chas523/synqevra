@@ -30,6 +30,16 @@ export function IconPickerDialog({
     const [isLoading, setIsLoading] = useState(false);
     const [selectedIcon, setSelectedIcon] = useState(currentIcon || "notifications");
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const iconsPerPage = 56; // 7 rows x 8 columns
+
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredIcons.length / iconsPerPage);
+    const startIndex = (currentPage - 1) * iconsPerPage;
+    const endIndex = startIndex + iconsPerPage;
+    const paginatedIcons = filteredIcons.slice(startIndex, endIndex);
+
     useEffect(() => {
         if (open && icons.length === 0) {
             loadIcons();
@@ -46,19 +56,37 @@ export function IconPickerDialog({
                 )
             );
         }
+        // Reset to page 1 when search changes
+        setCurrentPage(1);
     }, [searchQuery, icons]);
 
     const loadIcons = async () => {
         setIsLoading(true);
         try {
-            // Fetch from ThingsBoard's material icons metadata
-            const response = await fetch(
-                "http://localhost:8088/assets/metadata/material-icons.json"
-            );
+            // Fetch from ThingsBoard via Next.js rewrite proxy
+            const response = await fetch("/tb-assets/metadata/material-icons.json");
             const data = await response.json();
+
+            // Material icons JSON contains objects with {name, tags}, extract and validate names
+            const iconsArray = Array.isArray(data)
+                ? data
+                    .map((icon: any) => typeof icon === 'string' ? icon : icon.name)
+                    .filter((name: string, index: number, self: string[]) => {
+                        // Support both Material Icons (Google font) and MDI (SVG files)
+                        // Ensure uniqueness to avoid duplicate key errors
+                        return name && self.indexOf(name) === index;
+                    })
+                : [];
+
+            if (iconsArray.length === 0) {
+                console.warn("No icons received from backend, using fallback");
+                throw new Error("Empty icons array");
+            }
+
+            console.log(`Loaded ${iconsArray.length} valid Material Icons`);
             // The JSON contains an array of icon names
-            setIcons(data);
-            setFilteredIcons(data);
+            setIcons(iconsArray);
+            setFilteredIcons(iconsArray);
         } catch (error) {
             console.error("Failed to load icons:", error);
             // Fallback to common icons if loading fails
@@ -84,6 +112,28 @@ export function IconPickerDialog({
     const handleSelect = () => {
         onSelectIcon(selectedIcon);
         onOpenChange(false);
+    };
+
+    // Render icon based on type (Material Icons font or MDI SVG)
+    const renderIcon = (iconName: string) => {
+        if (iconName.startsWith('mdi:')) {
+            // MDI icons are SVG files from ThingsBoard
+            const svgName = iconName.substring(4); // Remove 'mdi:' prefix
+            return (
+                <img
+                    src={`/tb-assets/mdi/${svgName}.svg`}
+                    alt={svgName}
+                    className="w-6 h-6"
+                />
+            );
+        } else {
+            // Material Icons use Google's icon font
+            return (
+                <span className="material-icons text-2xl text-gray-700 dark:text-gray-300">
+                    {iconName}
+                </span>
+            );
+        }
     };
 
     return (
@@ -112,7 +162,7 @@ export function IconPickerDialog({
                 ) : (
                     <div className="flex-1 overflow-y-auto border rounded-md p-3">
                         <div className="grid grid-cols-8 gap-2">
-                            {filteredIcons.map((icon) => (
+                            {paginatedIcons.map((icon) => (
                                 <button
                                     key={icon}
                                     onClick={() => setSelectedIcon(icon)}
@@ -127,12 +177,36 @@ export function IconPickerDialog({
                                     `}
                                     title={icon}
                                 >
-                                    <span className="material-icons text-2xl text-gray-700 dark:text-gray-300">
-                                        {icon}
-                                    </span>
+                                    {renderIcon(icon)}
                                 </button>
                             ))}
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </Button>
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
+
                         {filteredIcons.length === 0 && (
                             <p className="text-center text-gray-500 py-8">
                                 No icons found matching "{searchQuery}"

@@ -19,4 +19,5 @@ export interface NotificationTargetDto {
 export interface NotificationTargetsResponse {
     targets: NotificationTargetDto[];
     totalElements: number;
+    totalPages: number;
 }

@@ -6,6 +6,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreateRecipientGroupDialog } from "./CreateRecipientGroupDialog";
 import { IconPickerDialog } from "@/components/molecules/IconPickerDialog";
 import { ColorPicker } from "@/components/molecules/ColorPicker";
+import { NotificationComposer } from "@/components/organisms/NotificationComposer";
 
 interface SendNotificationDialogProps {
     open: boolean;
@@ -54,6 +56,7 @@ export const SendNotificationDialog = ({
     const [currentStep, setCurrentStep] = useState<Step>(1);
 
     // Step 1: Setup
+    const [notificationType, setNotificationType] = useState<"SCRATCH" | "TEMPLATE">("SCRATCH");
     const [recipientGroups, setRecipientGroups] = useState<NotificationTarget[]>([]);
     const [selectedRecipientIds, setSelectedRecipientIds] = useState<string[]>([]);
     const [isLoadingTargets, setIsLoadingTargets] = useState(false);
@@ -61,6 +64,11 @@ export const SendNotificationDialog = ({
     const [deliveryMethods, setDeliveryMethods] = useState<Record<string, boolean>>({});
     const [availableMethods, setAvailableMethods] = useState<string[]>([]);
     const [isLoadingMethods, setIsLoadingMethods] = useState(false);
+
+    // Template state
+    const [templates, setTemplates] = useState<any[]>([]);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+    const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
 
     // Step 2: Compose
     const [subject, setSubject] = useState("");
@@ -72,6 +80,11 @@ export const SendNotificationDialog = ({
     const [actionButtonEnabled, setActionButtonEnabled] = useState(false);
     const [actionButtonText, setActionButtonText] = useState("");
     const [actionButtonLink, setActionButtonLink] = useState("");
+    const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+    const [newTemplateName, setNewTemplateName] = useState("");
+    const [scheduleLater, setScheduleLater] = useState(false);
+    const [timezone, setTimezone] = useState("");
+    const [scheduledTime, setScheduledTime] = useState("");
 
     // Step 3: Review
     const [preview, setPreview] = useState<any>(null);
@@ -81,11 +94,37 @@ export const SendNotificationDialog = ({
     useEffect(() => {
         if (open) {
             loadDeliveryMethods();
-            loadRecipient Groups();
+            loadRecipientGroups();
+            loadTemplates();
             // Reset to step 1
             setCurrentStep(1);
+            // Set default timezone
+            try {
+                setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+            } catch (e) {
+                console.error("Failed to get timezone", e);
+            }
         }
     }, [open]);
+
+    const loadTemplates = async () => {
+        setIsLoadingTemplates(true);
+        try {
+            const response = await NotificationService.getNotificationTemplates({
+                pageSize: 100,
+                sortProperty: 'createdTime',
+                sortOrder: 'DESC',
+                notificationTypes: "GENERAL"
+            });
+            console.log("Templates response:", response);
+            setTemplates(response.templates || []);
+        } catch (error) {
+            console.error("Failed to load templates:", error);
+            toast.error("Failed to load templates");
+        } finally {
+            setIsLoadingTemplates(false);
+        }
+    };
 
     const loadDeliveryMethods = async () => {
         setIsLoadingMethods(true);
@@ -112,11 +151,15 @@ export const SendNotificationDialog = ({
         setIsLoadingTargets(true);
         try {
             const response = await NotificationService.getNotificationTargets();
-            // Filter out "Affected tenant's administrators"
-            const filtered = (response.targets || []).filter(
-                (target: NotificationTarget) =>
-                    !target.name.toLowerCase().includes("affected tenant")
-            );
+            // Filter out "Affected tenant's administrators" and sort alphabetically
+            const filtered = (response.targets || [])
+                .filter(
+                    (target: NotificationTarget) =>
+                        !target.name.toLowerCase().includes("affected tenant")
+                )
+                .sort((a: NotificationTarget, b: NotificationTarget) =>
+                    a.name.localeCompare(b.name)
+                );
             setRecipientGroups(filtered);
         } catch (error) {
             console.error("Failed to load recipient groups:", error);
@@ -140,6 +183,13 @@ export const SendNotificationDialog = ({
         setActionButtonText("");
         setActionButtonLink("");
         setPreview(null);
+        setNotificationType("SCRATCH");
+        setSelectedTemplateId("");
+        setSaveAsTemplate(false);
+        setSaveAsTemplate(false);
+        setNewTemplateName("");
+        setScheduleLater(false);
+        setScheduledTime("");
         onOpenChange(false);
     };
 
@@ -154,49 +204,57 @@ export const SendNotificationDialog = ({
     const generatePreview = async () => {
         setIsLoadingPreview(true);
         try {
-            const enabledMethods = Object.entries(deliveryMethods)
-                .filter(([_, enabled]) => enabled)
-                .map(([method]) => method);
-
-            // Build payload matching ThingsBoard format
-            const deliveryMethodsTemplates: Record<string, any> = {};
-            enabledMethods.forEach((method) => {
-                deliveryMethodsTemplates[method] = {
-                    subject: subject,
-                    body: message,
-                    additionalConfig: {
-                        icon: {
-                            enabled: iconEnabled,
-                            icon: iconName,
-                            color: iconColor,
-                        },
-                        actionButtonConfig: {
-                            enabled: actionButtonEnabled,
-                            ...(actionButtonEnabled && {
-                                text: actionButtonText,
-                                linkType: "LINK",
-                                link: actionButtonLink,
-                            }),
-                        },
-                    },
-                    enabled: true,
-                    method: method,
-                };
-            });
-
-            const previewRequest = {
+            let previewRequest: any = {
                 targets: selectedRecipientIds,
-                template: {
+                additionalConfig: {
+                    sendingDelayInSec: 0,
+                },
+            };
+
+            if (notificationType === "TEMPLATE") {
+                previewRequest.templateId = {
+                    id: selectedTemplateId,
+                    entityType: "NOTIFICATION_TEMPLATE"
+                };
+            } else {
+                const enabledMethods = Object.entries(deliveryMethods)
+                    .filter(([_, enabled]) => enabled)
+                    .map(([method]) => method);
+
+                // Build payload matching ThingsBoard format
+                const deliveryMethodsTemplates: Record<string, any> = {};
+                enabledMethods.forEach((method) => {
+                    deliveryMethodsTemplates[method] = {
+                        subject: subject,
+                        body: message,
+                        additionalConfig: {
+                            icon: {
+                                enabled: iconEnabled,
+                                icon: iconName,
+                                color: iconColor,
+                            },
+                            actionButtonConfig: {
+                                enabled: actionButtonEnabled,
+                                ...(actionButtonEnabled && {
+                                    text: actionButtonText,
+                                    linkType: "LINK",
+                                    link: actionButtonLink,
+                                }),
+                            },
+                        },
+                        enabled: true,
+                        method: method,
+                    };
+                });
+
+                previewRequest.template = {
                     name: `temp-${Date.now()}`,
                     notificationType: "GENERAL",
                     configuration: {
                         deliveryMethodsTemplates,
                     },
-                },
-                additionalConfig: {
-                    sendingDelayInSec: 0,
-                },
-            };
+                };
+            }
 
             const result = await NotificationService.previewNotification(previewRequest);
             setPreview(result);
@@ -210,16 +268,27 @@ export const SendNotificationDialog = ({
 
     const handleNextStep = async () => {
         if (currentStep === 1) {
+            if (notificationType === "TEMPLATE" && !selectedTemplateId) {
+                toast.error("Please select a template");
+                return;
+            }
             if (selectedRecipientIds.length === 0) {
                 toast.error("Please select at least one recipient group");
                 return;
             }
-            const enabledMethods = Object.values(deliveryMethods).some((v) => v);
-            if (!enabledMethods) {
-                toast.error("Please select at least one delivery method");
-                return;
+
+            if (notificationType === "SCRATCH") {
+                const enabledMethods = Object.values(deliveryMethods).some((v) => v);
+                if (!enabledMethods) {
+                    toast.error("Please select at least one delivery method");
+                    return;
+                }
+                setCurrentStep(2);
+            } else {
+                // If using template, skip compose step and go to review
+                setCurrentStep(3);
+                await generatePreview();
             }
-            setCurrentStep(2);
         } else if (currentStep === 2) {
             if (!subject.trim() || !message.trim()) {
                 toast.error("Please fill in subject and message");
@@ -232,55 +301,132 @@ export const SendNotificationDialog = ({
 
     const handleBackStep = () => {
         if (currentStep > 1) {
-            setCurrentStep((currentStep - 1) as Step);
+            // If using template and we are at step 3, go back to step 1 (skipping step 2)
+            if (notificationType === "TEMPLATE" && currentStep === 3) {
+                setCurrentStep(1);
+            } else {
+                setCurrentStep((currentStep - 1) as Step);
+            }
         }
     };
 
     const handleSend = async () => {
         setIsSending(true);
         try {
-            const enabledMethods = Object.entries(deliveryMethods)
-                .filter(([_, enabled]) => enabled)
-                .map(([method]) => method);
-
-            const deliveryMethodsTemplates: Record<string, any> = {};
-            enabledMethods.forEach((method) => {
-                deliveryMethodsTemplates[method] = {
-                    subject: subject,
-                    body: message,
-                    additionalConfig: {
-                        icon: {
-                            enabled: iconEnabled,
-                            icon: iconName,
-                            color: iconColor,
-                        },
-                        actionButtonConfig: {
-                            enabled: actionButtonEnabled,
-                            ...(actionButtonEnabled && {
-                                text: actionButtonText,
-                                linkType: "LINK",
-                                link: actionButtonLink,
-                            }),
-                        },
-                    },
-                    enabled: true,
-                    method: method,
-                };
-            });
-
-            const request = {
+            let request: any = {
                 targets: selectedRecipientIds,
-                template: {
+                additionalConfig: {
+                    sendingDelayInSec: 0,
+                },
+            };
+
+            if (scheduleLater && scheduledTime) {
+                const now = new Date();
+                const target = new Date(scheduledTime);
+                const delayInSec = Math.floor((target.getTime() - now.getTime()) / 1000);
+
+                if (delayInSec < 0) {
+                    toast.error("Scheduled time must be in the future");
+                    setIsSending(false);
+                    return;
+                }
+
+                request.additionalConfig.sendingDelayInSec = delayInSec;
+                request.sendingDelayInSec = delayInSec;
+            }
+
+            if (notificationType === "TEMPLATE") {
+                request.templateId = {
+                    id: selectedTemplateId,
+                    entityType: "NOTIFICATION_TEMPLATE"
+                };
+            } else {
+                const enabledMethods = Object.entries(deliveryMethods)
+                    .filter(([_, enabled]) => enabled)
+                    .map(([method]) => method);
+
+                const deliveryMethodsTemplates: Record<string, any> = {};
+                enabledMethods.forEach((method) => {
+                    deliveryMethodsTemplates[method] = {
+                        subject: subject,
+                        body: message,
+                        additionalConfig: {
+                            icon: {
+                                enabled: iconEnabled,
+                                icon: iconName,
+                                color: iconColor,
+                            },
+                            actionButtonConfig: {
+                                enabled: actionButtonEnabled,
+                                ...(actionButtonEnabled && {
+                                    text: actionButtonText,
+                                    linkType: "LINK",
+                                    link: actionButtonLink,
+                                }),
+                            },
+                        },
+                        enabled: true,
+                        method: method,
+                    };
+                });
+
+                request.template = {
                     name: `notification-${Date.now()}`,
                     notificationType: "GENERAL",
                     configuration: {
                         deliveryMethodsTemplates,
                     },
-                },
-                additionalConfig: {
-                    sendingDelayInSec: 0,
-                },
-            };
+                };
+            }
+
+            if (saveAsTemplate && notificationType === 'SCRATCH' && newTemplateName) {
+                try {
+                    const enabledMethods = Object.entries(deliveryMethods)
+                        .filter(([_, enabled]) => enabled)
+                        .map(([method]) => method);
+
+                    const deliveryMethodsTemplates: Record<string, any> = {};
+                    enabledMethods.forEach((method) => {
+                        deliveryMethodsTemplates[method] = {
+                            subject: subject,
+                            body: message,
+                            additionalConfig: {
+                                icon: {
+                                    enabled: iconEnabled,
+                                    icon: iconName,
+                                    color: iconColor,
+                                },
+                                actionButtonConfig: {
+                                    enabled: actionButtonEnabled,
+                                    ...(actionButtonEnabled && {
+                                        text: actionButtonText,
+                                        linkType: "LINK",
+                                        link: actionButtonLink,
+                                    }),
+                                },
+                            },
+                            enabled: true,
+                            method: method,
+                        };
+                    });
+
+                    await NotificationService.createNotificationTemplate({
+                        name: newTemplateName,
+                        notificationType: "GENERAL",
+                        configuration: {
+                            deliveryMethodsTemplates,
+                        }
+                    });
+                    toast.success("Template saved successfully");
+                    // Refresh templates list
+                    loadTemplates();
+                } catch (error) {
+                    console.error("Failed to save template:", error);
+                    toast.error("Failed to save template");
+                    // Don't stop sending if template save fails? Or maybe stop?
+                    // Let's continue sending but warn user.
+                }
+            }
 
             await NotificationService.sendNotification(request);
             toast.success("Notification sent successfully");
@@ -308,6 +454,9 @@ export const SendNotificationDialog = ({
                             <Bell className="h-5 w-5" />
                             New notification
                         </DialogTitle>
+                        <DialogDescription>
+                            Send a notification to selected recipients.
+                        </DialogDescription>
                     </DialogHeader>
 
                     {/* Stepper */}
@@ -323,6 +472,12 @@ export const SendNotificationDialog = ({
                     <div className="flex-1 overflow-y-auto py-4 space-y-4">
                         {currentStep === 1 && (
                             <Step1Setup
+                                notificationType={notificationType}
+                                onNotificationTypeChange={setNotificationType}
+                                templates={templates}
+                                selectedTemplateId={selectedTemplateId}
+                                onTemplateChange={setSelectedTemplateId}
+                                isLoadingTemplates={isLoadingTemplates}
                                 recipientGroupsArray={recipientGroupsArray}
                                 selectedRecipientIds={selectedRecipientIds}
                                 isLoadingTargets={isLoadingTargets}
@@ -331,12 +486,18 @@ export const SendNotificationDialog = ({
                                 deliveryMethods={deliveryMethods}
                                 availableMethods={availableMethods}
                                 isLoadingMethods={isLoadingMethods}
-                                onToggleDeliveryMethod={(method, enabled) =>
+                                onToggleDeliveryMethod={(method: string, enabled: boolean) =>
                                     setDeliveryMethods((prev) => ({
                                         ...prev,
                                         [method]: enabled,
                                     }))
                                 }
+                                scheduleLater={scheduleLater}
+                                onScheduleLaterChange={setScheduleLater}
+                                timezone={timezone}
+                                onTimezoneChange={setTimezone}
+                                scheduledTime={scheduledTime}
+                                onScheduledTimeChange={setScheduledTime}
                             />
                         )}
 
@@ -363,10 +524,23 @@ export const SendNotificationDialog = ({
 
                         {currentStep === 3 && (
                             <Step3Review
-                                preview={preview}
                                 isLoadingPreview={isLoadingPreview}
                                 selectedRecipients={selectedRecipients}
                                 deliveryMethods={deliveryMethods}
+                                iconEnabled={iconEnabled}
+                                iconName={iconName}
+                                iconColor={iconColor}
+                                subject={subject}
+                                message={message}
+                                actionButtonEnabled={actionButtonEnabled}
+                                actionButtonText={actionButtonText}
+                                actionButtonLink={actionButtonLink}
+                                notificationType={notificationType}
+                                preview={preview}
+                                saveAsTemplate={saveAsTemplate}
+                                onSaveAsTemplateChange={setSaveAsTemplate}
+                                newTemplateName={newTemplateName}
+                                onNewTemplateNameChange={setNewTemplateName}
                             />
                         )}
                     </div>
@@ -466,6 +640,12 @@ function StepIndicator({
 
 // Step 1: Setup
 function Step1Setup({
+    notificationType,
+    onNotificationTypeChange,
+    templates,
+    selectedTemplateId,
+    onTemplateChange,
+    isLoadingTemplates,
     recipientGroupsArray,
     selectedRecipientIds,
     isLoadingTargets,
@@ -475,9 +655,71 @@ function Step1Setup({
     availableMethods,
     isLoadingMethods,
     onToggleDeliveryMethod,
+    scheduleLater,
+    onScheduleLaterChange,
+    timezone,
+    onTimezoneChange,
+    scheduledTime,
+    onScheduledTimeChange,
 }: any) {
+    const timezones = Intl.supportedValuesOf('timeZone');
+
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            {/* Toggle Mode */}
+            <div className="flex justify-center">
+                <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    <button
+                        type="button"
+                        onClick={() => onNotificationTypeChange("SCRATCH")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${notificationType === "SCRATCH"
+                            ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                            }`}
+                    >
+                        Start from scratch
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onNotificationTypeChange("TEMPLATE")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${notificationType === "TEMPLATE"
+                            ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                            }`}
+                    >
+                        Use template
+                    </button>
+                </div>
+            </div>
+
+            {/* Template Selection */}
+            {notificationType === "TEMPLATE" && (
+                <div className="space-y-2">
+                    <Label>Template*</Label>
+                    {isLoadingTemplates ? (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading templates...
+                        </div>
+                    ) : (
+                        <div className="flex gap-2">
+                            <select
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                value={selectedTemplateId}
+                                onChange={(e) => onTemplateChange(e.target.value)}
+                            >
+                                <option value="" disabled>Select a template</option>
+                                {templates.map((template: any) => (
+                                    <option key={template.id.id} value={template.id.id}>
+                                        {template.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Recipients */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -525,33 +767,77 @@ function Step1Setup({
                 )}
             </div>
 
-            {/* Delivery Methods */}
-            <div className="space-y-2">
-                <Label>Delivery Methods*</Label>
-                {isLoadingMethods ? (
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Loading delivery methods...
-                    </div>
-                ) : (
-                    <div className="space-y-2 border rounded-lg p-3">
-                        {availableMethods.map((method: string) => (
-                            <div key={method} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={method}
-                                    checked={deliveryMethods[method] || false}
-                                    onCheckedChange={(checked) =>
-                                        onToggleDeliveryMethod(method, checked === true)
-                                    }
-                                />
-                                <label
-                                    htmlFor={method}
-                                    className="text-sm cursor-pointer"
-                                >
-                                    {DELIVERY_METHOD_LABELS[method] || method}
-                                </label>
-                            </div>
-                        ))}
+            {/* Delivery Methods - Only for SCRATCH */}
+            {notificationType === "SCRATCH" && (
+                <div className="space-y-2">
+                    <Label>Delivery Methods*</Label>
+                    {isLoadingMethods ? (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Loading delivery methods...
+                        </div>
+                    ) : (
+                        <div className="space-y-2 border rounded-lg p-3">
+                            {availableMethods.map((method: string) => (
+                                <div key={method} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={method}
+                                        checked={deliveryMethods[method] || false}
+                                        onCheckedChange={(checked) =>
+                                            onToggleDeliveryMethod(method, checked === true)
+                                        }
+                                    />
+                                    <label
+                                        htmlFor={method}
+                                        className="text-sm cursor-pointer"
+                                    >
+                                        {DELIVERY_METHOD_LABELS[method] || method}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Schedule for later toggle */}
+            <div className="space-y-4 pt-2 border-t">
+                <div className="flex items-center gap-2">
+                    <Checkbox
+                        id="schedule-later"
+                        checked={scheduleLater}
+                        onCheckedChange={(checked) => onScheduleLaterChange(checked === true)}
+                    />
+                    <Label htmlFor="schedule-later" className="cursor-pointer">
+                        Schedule for later
+                    </Label>
+                </div>
+
+                {scheduleLater && (
+                    <div className="pl-6 space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2">
+                            <Label>Time zone*</Label>
+                            <select
+                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                value={timezone}
+                                onChange={(e) => onTimezoneChange(e.target.value)}
+                            >
+                                {timezones.map((tz) => (
+                                    <option key={tz} value={tz}>
+                                        {tz}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Time*</Label>
+                            <Input
+                                type="datetime-local"
+                                value={scheduledTime}
+                                onChange={(e) => onScheduledTimeChange(e.target.value)}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
@@ -560,181 +846,194 @@ function Step1Setup({
 }
 
 // Step 2: Compose
-function Step2Compose({
-    subject,
-    onSubjectChange,
-    message,
-    onMessageChange,
-    iconEnabled,
-    onIconEnabledChange,
-    iconName,
-    iconColor,
-    onIconClick,
-    onColorChange,
-    actionButtonEnabled,
-    onActionButtonEnabledChange,
-    actionButtonText,
-    onActionButtonTextChange,
-    actionButtonLink,
-    onActionButtonLinkChange,
-}: any) {
-    return (
-        <div className="space-y-4">
-            <h3 className="font-semibold">Customize messages</h3>
-
-            {/* Web Method Section */}
-            <div className="border rounded-lg p-4 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                    <Bell className="h-4 w-4" />
-                    Web
-                </div>
-
-                {/* Subject */}
-                <div className="space-y-2">
-                    <Label>Subject*</Label>
-                    <Input
-                        value={subject}
-                        onChange={(e) => onSubjectChange(e.target.value)}
-                        placeholder="Enter subject"
-                    />
-                </div>
-
-                {/* Message */}
-                <div className="space-y-2">
-                    <Label>Message*</Label>
-                    <Textarea
-                        value={message}
-                        onChange={(e) => onMessageChange(e.target.value)}
-                        placeholder="Enter message"
-                        className="min-h-[100px]"
-                    />
-                </div>
-
-                {/* Icon Section */}
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Checkbox
-                            id="icon-enabled"
-                            checked={iconEnabled}
-                            onCheckedChange={(checked) => onIconEnabledChange(checked === true)}
-                        />
-                        <Label htmlFor="icon-enabled" className="cursor-pointer">
-                            Icon
-                        </Label>
-                    </div>
-
-                    {iconEnabled && (
-                        <div className="flex items-center gap-2 pl-6">
-                            <button
-                                onClick={onIconClick}
-                                className="flex items-center justify-center w-10 h-10 rounded border hover:bg-gray-100"
-                            >
-                                <span
-                                    className="material-icons"
-                                    style={{ color: iconColor }}
-                                >
-                                    {iconName}
-                                </span>
-                            </button>
-                            <div className="flex-1">
-                                <ColorPicker value={iconColor} onChange={onColorChange} />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Action Button Section */}
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <Checkbox
-                            id="action-button-enabled"
-                            checked={actionButtonEnabled}
-                            onCheckedChange={(checked) =>
-                                onActionButtonEnabledChange(checked === true)
-                            }
-                        />
-                        <Label htmlFor="action-button-enabled" className="cursor-pointer">
-                            Action button
-                        </Label>
-                    </div>
-
-                    {actionButtonEnabled && (
-                        <div className="space-y-2 pl-6">
-                            <div>
-                                <Label>Button text*</Label>
-                                <Input
-                                    value={actionButtonText}
-                                    onChange={(e) => onActionButtonTextChange(e.target.value)}
-                                    placeholder="Enter button text"
-                                />
-                            </div>
-                            <div>
-                                <Label>Link*</Label>
-                                <Input
-                                    value={actionButtonLink}
-                                    onChange={(e) => onActionButtonLinkChange(e.target.value)}
-                                    placeholder="Enter link URL"
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
+function Step2Compose(props: any) {
+    return <NotificationComposer {...props} />;
 }
 
 // Step 3: Review
 function Step3Review({
-    preview,
     isLoadingPreview,
     selectedRecipients,
     deliveryMethods,
+    iconEnabled,
+    iconName,
+    iconColor,
+    subject,
+    message,
+    actionButtonEnabled,
+    actionButtonText,
+    actionButtonLink,
+    notificationType,
+    preview,
+    saveAsTemplate,
+    onSaveAsTemplateChange,
+    newTemplateName,
+    onNewTemplateNameChange,
 }: any) {
+
+    // If we have a preview from API (especially for templates), use it
+    const recipientsPreview = preview?.recipientsPreview || [];
+    const totalRecipients = preview?.totalRecipientsCount || 0;
+
+    // Extract template processing info if available
+    const processedTemplate = preview?.processedTemplates?.WEB; // Assuming WEB for now or first available
+
     const enabledMethods = Object.entries(deliveryMethods)
         .filter(([_, enabled]) => enabled)
         .map(([method]) => DELIVERY_METHOD_LABELS[method] || method);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            {notificationType === 'SCRATCH' && (
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border space-y-4">
+                    <div className="flex items-center gap-2">
+                        <Checkbox
+                            id="save-template"
+                            checked={saveAsTemplate}
+                            onCheckedChange={(checked) => onSaveAsTemplateChange(checked === true)}
+                        />
+                        <Label htmlFor="save-template" className="cursor-pointer font-medium">
+                            Save as template
+                        </Label>
+                    </div>
+
+                    {saveAsTemplate && (
+                        <div className="pl-6 animate-in fade-in slide-in-from-top-2">
+                            <Label className="text-sm">Template Name*</Label>
+                            <Input
+                                value={newTemplateName}
+                                onChange={(e) => onNewTemplateNameChange(e.target.value)}
+                                placeholder="Enter template name"
+                                className="mt-1"
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
             {isLoadingPreview ? (
                 <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
             ) : (
                 <>
-                    {/* Preview */}
-                    {preview && (
-                        <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-                            <h4 className="font-semibold mb-2">Preview</h4>
-                            <pre className="text-sm whitespace-pre-wrap">
-                                {JSON.stringify(preview, null, 2)}
-                            </pre>
+                    {/* Stats summary */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="border rounded-lg p-3">
+                            <div className="text-sm text-gray-500">Recipients Count</div>
+                            <div className="text-xl font-bold">{totalRecipients}</div>
+                        </div>
+                        {/* We can add more stats here based on preview data */}
+                    </div>
+
+                    {/* Notification Preview Card */}
+                    <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+                        <h3 className="text-sm font-medium mb-3">Notification Preview</h3>
+
+                        <div className="flex gap-4 items-start bg-white dark:bg-gray-800 p-4 rounded-md border">
+                            {/* Icon Logic: Use preview data if available, otherwise local state */}
+                            {((processedTemplate?.additionalConfig?.icon?.enabled) || (notificationType === "SCRATCH" && iconEnabled)) && (
+                                <div className="flex-shrink-0">
+                                    {/* Handle icon rendering logic here - might need to read from processedTemplate if in template mode */}
+                                    {(notificationType === "TEMPLATE") ? (
+                                        <Bell className="h-10 w-10 text-gray-500" /> // Simplified for template preview for now or parse mdi/material from config
+                                    ) : (
+                                        iconName.startsWith('mdi:') ? (
+                                            <div style={{
+                                                WebkitMaskImage: `url(/tb-assets/mdi/${iconName.substring(4)}.svg)`,
+                                                maskImage: `url(/tb-assets/mdi/${iconName.substring(4)}.svg)`,
+                                                WebkitMaskSize: 'contain',
+                                                maskSize: 'contain',
+                                                WebkitMaskRepeat: 'no-repeat',
+                                                maskRepeat: 'no-repeat',
+                                                WebkitMaskPosition: 'center',
+                                                maskPosition: 'center',
+                                                backgroundColor: iconColor,
+                                                width: '40px',
+                                                height: '40px'
+                                            }} />
+                                        ) : (
+                                            <span
+                                                className="material-icons text-4xl"
+                                                style={{ color: iconColor }}
+                                            >
+                                                {iconName}
+                                            </span>
+                                        )
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-base mb-1">
+                                    {processedTemplate?.subject || subject || "(No subject)"}
+                                </h4>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                                    {processedTemplate?.body || message || "(No message)"}
+                                </p>
+
+                                {/* Action Button Preview */}
+                                {((processedTemplate?.additionalConfig?.actionButtonConfig?.enabled) || (notificationType === "SCRATCH" && actionButtonEnabled && actionButtonText)) && (
+                                    <div className="mt-3">
+                                        <Button
+                                            variant="default"
+                                            size="sm"
+                                            className="pointer-events-none"
+                                        >
+                                            {processedTemplate?.additionalConfig?.actionButtonConfig?.text || actionButtonText}
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Button Link */}
+                    {((processedTemplate?.additionalConfig?.actionButtonConfig?.enabled && processedTemplate?.additionalConfig?.actionButtonConfig?.link) || (notificationType === "SCRATCH" && actionButtonEnabled && actionButtonLink)) && (
+                        <div className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900">
+                            <h3 className="text-sm font-medium mb-1">Action Button Link</h3>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 break-all">
+                                {processedTemplate?.additionalConfig?.actionButtonConfig?.link || actionButtonLink}
+                            </p>
                         </div>
                     )}
 
-                    {/* Summary */}
+                    {/* Recipients */}
                     <div className="space-y-2">
-                        <div>
-                            <Label>Recipients ({selectedRecipients.length})</Label>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {selectedRecipients.map((recipient: NotificationTarget) => (
-                                    <Badge key={recipient.id.id} variant="secondary">
-                                        {recipient.name}
-                                    </Badge>
-                                ))}
-                            </div>
+                        <h3 className="text-sm font-medium">
+                            Recipients ({selectedRecipients.length})
+                        </h3>
+                        <div className="border rounded-md max-h-[200px] overflow-y-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0">
+                                    <tr>
+                                        <th className="text-left p-2 font-medium">Recipient</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {selectedRecipients.map((recipient: NotificationTarget, idx: number) => (
+                                        <tr key={recipient.id.id || idx} className="border-t">
+                                            <td className="p-2">{recipient.name}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
+                    </div>
 
-                        <div>
-                            <Label>Delivery Methods</Label>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {enabledMethods.map((method) => (
-                                    <Badge key={method} variant="secondary">
-                                        {method}
-                                    </Badge>
-                                ))}
-                            </div>
+                    {/* Delivery Methods */}
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-medium">Delivery Methods</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {enabledMethods.map((method) => (
+                                <span
+                                    key={method}
+                                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                                >
+                                    {method}
+                                </span>
+                            ))}
                         </div>
                     </div>
                 </>

@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
           source: "/fhir/:path*",
           destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
         },
+        {
+          source: "/tb-assets/:path*",
+          destination: "http://localhost:8088/assets/:path*", // ThingsBoard static assets
+        },
       ],
     };
   },

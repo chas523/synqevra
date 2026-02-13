@@ -42,6 +42,8 @@ import { DeleteRelationCommandHandler } from './application/commands/delete-rela
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
 import { SendNotificationCommandHandler } from './application/commands/send-notification/send-notification.command-handler';
 import { CreateNotificationTargetCommandHandler } from './application/commands/create-notification-target/create-notification-target.command-handler';
+import { CreateNotificationTemplateCommandHandler } from './application/commands/create-notification-template/create-notification-template.command-handler';
+import { CreateNotificationRuleCommandHandler } from './application/commands/create-notification-rule/create-notification-rule.command-handler';
 import { PreviewNotificationRequestCommandHandler } from './application/commands/preview-notification-request/preview-notification-request.command-handler';
 
 // Query Handlers
@@ -70,7 +72,11 @@ import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-ten
 import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
 import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
 import { FetchDeliveryMethodsQueryHandler } from './application/queries/fetch-delivery-methods/fetch-delivery-methods.query-handler';
+import { FetchNotificationRequestsQueryHandler } from './application/queries/fetch-notification-requests/fetch-notification-requests.query-handler';
 import { FetchNotificationTargetsQueryHandler } from './application/queries/fetch-notification-targets/fetch-notification-targets.query-handler';
+import { FetchNotificationTemplatesQueryHandler } from './application/queries/fetch-notification-templates/fetch-notification-templates.query-handler';
+import { FetchNotificationRulesQueryHandler } from './application/queries/fetch-notification-rules/fetch-notification-rules.query-handler';
+import { FetchMaterialIconsQueryHandler } from './application/queries/fetch-material-icons/fetch-material-icons.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -103,6 +109,8 @@ const commandHandlers = [
   SaveTenantProfileCommandHandler,
   SendNotificationCommandHandler,
   CreateNotificationTargetCommandHandler,
+  CreateNotificationTemplateCommandHandler,
+  CreateNotificationRuleCommandHandler,
   PreviewNotificationRequestCommandHandler,
 ];
 
@@ -132,7 +140,11 @@ const queryHandlers = [
   FetchTenantProfileAttributesQueryHandler,
   FetchTenantProfileAlarmsQueryHandler,
   FetchDeliveryMethodsQueryHandler,
+  FetchNotificationRequestsQueryHandler,
   FetchNotificationTargetsQueryHandler,
+  FetchNotificationTemplatesQueryHandler,
+  FetchNotificationRulesQueryHandler,
+  FetchMaterialIconsQueryHandler,
 ];
 
 @Module({

@@ -14,7 +14,7 @@ const PRESET_COLORS = [
     "#673AB7", "#9C27B0", "#E91E63", "#6D1B7B",
     "#9E9E9E", "#FF8A80", "#FFD180", "#FFF9C4",
     "#C5E1A5", "#A5D6A7", "#80CBC4", "#81D4FA",
-    "#B39DDB", "#CE93D8", "#F48FB1", "#CE93D8",
+    "#B39DDB", "#CE93D8", "#F48FB1", "#BA68C8",
 ];
 
 export function ColorPicker({ value, onChange }: ColorPickerProps) {

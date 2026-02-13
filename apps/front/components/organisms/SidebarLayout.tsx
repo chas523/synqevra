@@ -77,6 +77,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                 height={32}
                 width={100}
                 className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity dark:hidden"
+                priority
+                style={{ width: "auto", height: "auto" }}
               />
               <Image
                 src={logoWhite}
@@ -84,6 +86,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
                 height={32}
                 width={100}
                 className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity hidden dark:block"
+                priority
+                style={{ width: "auto", height: "auto" }}
               />
             </Link>
 

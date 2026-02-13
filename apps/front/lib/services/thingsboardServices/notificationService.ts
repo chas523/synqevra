@@ -17,6 +17,20 @@ export interface SendNotificationRequest {
         id: string;
     };
     template?: {
+        name?: string;
+        notificationType?: string;
+        configuration?: {
+            deliveryMethodsTemplates?: {
+                [key: string]: {
+                    enabled: boolean;
+                    subject?: string;
+                    body?: string;
+                    additionalConfig?: Record<string, any>;
+                    method?: string;
+                };
+            };
+        };
+        // Legacy format support
         deliveryMethodsTemplates?: {
             [key: string]: {
                 enabled: boolean;
@@ -77,17 +91,128 @@ export class NotificationService {
         return data;
     }
 
-    public static async getNotificationTargets() {
-        const { data } = await proxyApi.get(
-            "thingsboard/notification/targets"
+    public static async createNotificationTemplate(request: {
+        name: string;
+        notificationType: string;
+        configuration: {
+            deliveryMethodsTemplates: Record<string, {
+                enabled: boolean;
+                subject?: string;
+                body?: string;
+                additionalConfig?: Record<string, any>;
+            }>;
+        };
+    }) {
+        const { data } = await proxyApi.post(
+            "thingsboard/notification/template",
+            request
         );
         return data;
     }
 
-    public static async previewNotification(previewRequest: any) {
+    public static async getNotificationRequests(options: {
+        pageSize?: number;
+        page?: number;
+        sortProperty?: string;
+        sortOrder?: string;
+    }) {
+        const params = new URLSearchParams();
+        if (options.pageSize) params.append("pageSize", options.pageSize.toString());
+        if (options.page !== undefined) params.append("page", options.page.toString());
+        if (options.sortProperty) params.append("sortProperty", options.sortProperty);
+        if (options.sortOrder) params.append("sortOrder", options.sortOrder);
+
+        const { data } = await proxyApi.get(
+            `thingsboard/notification/requests?${params.toString()}`
+        );
+        return data;
+    }
+
+
+    public static async getNotificationTargets(options: {
+        pageSize?: number;
+        page?: number;
+        sortProperty?: string;
+        sortOrder?: string;
+    } = {}) {
+        const params = new URLSearchParams();
+        if (options.pageSize) params.append("pageSize", options.pageSize.toString());
+        if (options.page !== undefined) params.append("page", options.page.toString());
+        if (options.sortProperty) params.append("sortProperty", options.sortProperty);
+        if (options.sortOrder) params.append("sortOrder", options.sortOrder);
+
+        const { data } = await proxyApi.get(
+            `thingsboard/notification/targets?${params.toString()}`
+        );
+        return data;
+    }
+
+    public static async getNotificationTemplates(options: {
+        pageSize?: number;
+        page?: number;
+        sortProperty?: string;
+        sortOrder?: string;
+        notificationTypes?: string;
+    }) {
+        const params = new URLSearchParams();
+        if (options.pageSize) params.append("pageSize", options.pageSize.toString());
+        if (options.page !== undefined) params.append("page", options.page.toString());
+        if (options.sortProperty) params.append("sortProperty", options.sortProperty);
+        if (options.sortOrder) params.append("sortOrder", options.sortOrder);
+        if (options.notificationTypes) params.append("notificationTypes", options.notificationTypes);
+
+        const { data } = await proxyApi.get(
+            `thingsboard/notification/templates?${params.toString()}`
+        );
+        return data;
+    }
+
+    public static async getNotificationRules(options: {
+        pageSize?: number;
+        page?: number;
+        sortProperty?: string;
+        sortOrder?: string;
+    }) {
+        const params = new URLSearchParams();
+        if (options.pageSize) params.append("pageSize", options.pageSize.toString());
+        if (options.page !== undefined) params.append("page", options.page.toString());
+        if (options.sortProperty) params.append("sortProperty", options.sortProperty);
+        if (options.sortOrder) params.append("sortOrder", options.sortOrder);
+
+        const { data } = await proxyApi.get(
+            `thingsboard/notification/rules?${params.toString()}`
+        );
+        return data;
+    }
+
+    public static async previewNotification(request: SendNotificationRequest) {
         const { data } = await proxyApi.post(
             "thingsboard/notification/request/preview",
-            previewRequest
+            request
+        );
+        return data;
+    }
+
+    public static async createNotificationRule(request: {
+        name: string;
+        enabled: boolean;
+        templateId?: {
+            entityType: string;
+            id: string;
+        };
+        triggerType: string;
+        triggerConfig: Record<string, any>;
+        recipientsConfig: {
+            targets: string[];
+            triggerType: string;
+        };
+        additionalConfig?: {
+            description?: string;
+        };
+    }) {
+        const { data } = await proxyApi.post(
+            "thingsboard/notification/rule",
+            request
         );
         return data;
     }

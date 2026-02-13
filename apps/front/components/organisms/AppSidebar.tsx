@@ -38,12 +38,12 @@ const MENU_ITEMS = {
   admin: [
     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
-      {
-          href: "/dashboard/tenant-profiles",
-          icon: PersonStanding,
-          label: "Tenant Profiles"
-      },
-      {
+    {
+      href: "/dashboard/tenant-profiles",
+      icon: PersonStanding,
+      label: "Tenant Profiles"
+    },
+    {
       href: "/dashboard/requestedUsers",
       icon: UserRoundCog,
       label: "Pending Users",

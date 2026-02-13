@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsObject, IsOptional, ValidateNested } from 'class-validator';
+import { IsArray, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class EntityIdDto {
@@ -68,4 +68,13 @@ export class SendNotificationRequestDto {
     @IsOptional()
     @IsObject()
     additionalConfig?: Record<string, any>;
+
+    @ApiProperty({
+        description: 'Delay in seconds before sending the notification',
+        required: false,
+        example: 0,
+    })
+    @IsOptional()
+    @IsNumber()
+    sendingDelayInSec?: number;
 }

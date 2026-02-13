@@ -273,9 +273,86 @@ export interface Notification {
 
 export interface NotificationsRequestOptions extends Record<string, unknown> {
   sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: string;
   limit?: number;
+  cursor?: string;
+}
+
+export interface NotificationRequest {
+  id: EntityId;
+  createdTime: number;
+  targets: string[] | Record<string, string[]>; // Can be array or object like {WEB: [...]}
+  template: {
+    name?: string;
+    configuration?: {
+      deliveryMethodsTemplates?: Record<string, any>;
+    };
+  };
+  stats?: {
+    sent?: number | Record<string, number>; // Can be number or object like {WEB: 7}
+    error?: number | null;
+    errors?: Record<string, number>; // Object like {WEB: 2}
+    totalErrors?: number;
+    total?: number;
+  };
+  status?: string;
+  rule?: {
+    id: EntityId;
+    name: string;
+  };
+  additionalConfig?: Record<string, any>;
+}
+
+export interface NotificationRequestsOptions extends Record<string, unknown> {
+  sortProperty?: string;
+  sortOrder?: string;
+  pageSize?: number;
   page?: number;
   afterRef?: string;
   beforeRef?: string;
+}
+
+export interface NotificationTarget {
+  id: EntityId;
+  createdTime: number;
+  name: string;
+  configuration: {
+    type: string;
+    description?: string;
+  };
+}
+
+export interface NotificationTemplate {
+  id: EntityId;
+  createdTime: number;
+  name: string;
+  notificationType: string;
+  configuration: {
+    deliveryMethodsTemplates: Record<string, {
+      method: string;
+      enabled: boolean;
+      body?: string;
+      subject?: string;
+    }>;
+  };
+}
+
+export interface NotificationRule {
+  id: {
+    entityType: string;
+    id: string;
+  };
+  createdTime: number;
+  name: string;
+  enabled: boolean;
+  templateName?: string;
+  triggerType: string;
+  triggerConfig: Record<string, any>;
+  recipientsConfig: {
+    targets: string[];
+    triggerType?: string;
+  };
+  additionalConfig?: {
+    description?: string;
+  };
 }

@@ -23,6 +23,9 @@ import {
   ApiBody,
   ApiQuery,
   ApiBearerAuth,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
@@ -43,6 +46,11 @@ import {
 import { Device } from './dtos/response/thingsboard-created-device.response.dto';
 import type { CurrentUser } from 'src/auth/types/current-user';
 import { CreateDeviceRequest } from './dtos/request/thingsboard-device.request.dto';
+import { CreateNotificationTemplateRequestDto } from './dtos/request/create-notification-template.request.dto';
+import { CreateNotificationRuleRequestDto } from './dtos/request/create-notification-rule.request.dto';
+import { CreateNotificationRuleCommand } from '../../application/commands/create-notification-rule/create-notification-rule.command';
+import { CreateNotificationTemplateCommand } from '../../application/commands/create-notification-template/create-notification-template.command';
+import { NotificationTemplateDto } from './dtos/response/notification-template.response.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { GetUserQuery } from 'src/thingsboard/application/queries/get-user/get-user.query';
 import { ThingsboardLoginCommand } from 'src/thingsboard/application/commands/thingsboard-login/thingsboard-login.command';
@@ -104,8 +112,12 @@ import { FetchDeliveryMethodsQuery } from 'src/thingsboard/application/queries/f
 import { SendNotificationCommand } from 'src/thingsboard/application/commands/send-notification/send-notification.command';
 import { CreateNotificationTargetCommand } from 'src/thingsboard/application/commands/create-notification-target/create-notification-target.command';
 import { FetchNotificationTargetsQuery } from 'src/thingsboard/application/queries/fetch-notification-targets/fetch-notification-targets.query';
+import { FetchNotificationTemplatesQuery } from 'src/thingsboard/application/queries/fetch-notification-templates/fetch-notification-templates.query';
+import { FetchNotificationRulesQuery } from 'src/thingsboard/application/queries/fetch-notification-rules/fetch-notification-rules.query';
 import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
 import { PreviewNotificationRequestCommand } from 'src/thingsboard/application/commands/preview-notification-request/preview-notification-request.command';
+import { FetchMaterialIconsQuery } from 'src/thingsboard/application/queries/fetch-material-icons/fetch-material-icons.query';
+import { FetchNotificationRequestsQuery } from 'src/thingsboard/application/queries/fetch-notification-requests/fetch-notification-requests.query';
 
 
 @ApiTags('ThingsBoard')
@@ -1175,6 +1187,222 @@ export class ThingsboardController {
   @Post('notification/request/preview')
   async previewNotificationRequest(@Body() previewRequest: any) {
     const command = new PreviewNotificationRequestCommand(previewRequest);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('material-icons')
+  async fetchMaterialIcons() {
+    const query = new FetchMaterialIconsQuery();
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (icons) => icons,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/requests')
+  @ApiOperation({
+    summary: 'Get notification requests',
+    description:
+      'Retrieve paginated list of sent notification requests with stats',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification requests',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification requests',
+  })
+  async getNotificationRequests(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationRequestsQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/templates')
+  @ApiOperation({
+    summary: 'Get notification templates',
+    description: 'Retrieve paginated list of notification templates',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification templates',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification templates',
+  })
+  async getNotificationTemplates(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('notificationTypes') notificationTypes?: string,
+  ) {
+    const query = new FetchNotificationTemplatesQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+      notificationTypes,
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/rules')
+  @ApiOperation({
+    summary: 'Get notification rules',
+    description: 'Retrieve paginated list of notification rules',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification rules',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification rules',
+  })
+  async getNotificationRules(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationRulesQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/targets')
+  @ApiOperation({
+    summary: 'Get notification targets',
+    description: 'Retrieve paginated list of notification targets',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification targets',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification targets',
+  })
+  async getNotificationTargets(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationTargetsQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/template')
+  @ApiOperation({
+    summary: 'Create notification template',
+    description: 'Create a new notification template',
+  })
+  @ApiOkResponse({
+    description: 'Successfully created notification template',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to create notification template',
+  })
+  async createNotificationTemplate(
+    @Body() templateData: CreateNotificationTemplateRequestDto,
+  ) {
+    const command = new CreateNotificationTemplateCommand(templateData);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/rule')
+  @ApiOperation({
+    summary: 'Create notification rule',
+    description: 'Create a new notification rule',
+  })
+  @ApiOkResponse({
+    description: 'Successfully created notification rule',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to create notification rule',
+  })
+  async createNotificationRule(
+    @Body() rule: CreateNotificationRuleRequestDto,
+  ) {
+    const command = new CreateNotificationRuleCommand(rule);
     const result = await this.commandBus.execute(command);
 
     return match(result, {

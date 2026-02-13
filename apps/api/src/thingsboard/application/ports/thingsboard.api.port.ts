@@ -38,6 +38,16 @@ import {
   NotificationTargetDto,
   NotificationTargetsResponse,
 } from '../../interface/rest/dtos/response/notification-target.response.dto';
+import { CreateNotificationTemplateRequestDto } from '../../interface/rest/dtos/request/create-notification-template.request.dto';
+import { CreateNotificationRuleRequestDto } from '../../interface/rest/dtos/request/create-notification-rule.request.dto';
+import {
+  NotificationTemplateDto,
+  NotificationTemplatesResponse,
+} from '../../interface/rest/dtos/response/notification-template.response.dto';
+import {
+  NotificationRulesResponse,
+  NotificationRuleDto,
+} from '../../interface/rest/dtos/response/notification-rule.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -73,16 +83,26 @@ export abstract class ThingsboardApiPort {
     tenantId: string,
     sysAdminAccessToken: string,
   ): Promise<void>;
-  abstract deleteTenantAdmin(
-    tenantAdminId: string,
-    sysAdminAccessToken: string,
-  ): Promise<void>;
   abstract updateTenant(
     tenantData: UpdateTenantDto,
     sysAdminAccessToken: string,
   ): Promise<TenantResponse>;
+  abstract deleteTenantAdmin(
+    tenantAdminId: string,
+    sysAdminAccessToken: string,
+  ): Promise<void>;
 
-  // User operations
+  abstract createNotificationTarget(
+    sysAdminAccessToken: string,
+    targetData: CreateNotificationTargetRequestDto,
+  ): Promise<NotificationTargetDto>;
+
+  abstract createNotificationTemplate(
+    sysAdminAccessToken: string,
+    templateData: CreateNotificationTemplateRequestDto,
+  ): Promise<NotificationTemplateDto>;
+
+  // Notification operations
   abstract createTenantAdmin(
     userData: CreateTenantAdminRequestDto,
     tenantId: EntityId,
@@ -169,21 +189,61 @@ export abstract class ThingsboardApiPort {
   abstract fetchDeliveryMethods(
     sysAdminAccessToken: string,
   ): Promise<DeliveryMethodsResponse>;
+  abstract fetchNotificationRequests(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<any>;
   abstract sendNotification(
     sysAdminAccessToken: string,
     notificationRequest: SendNotificationRequestDto,
   ): Promise<NotificationRequestResponse>;
-  abstract createNotificationTarget(
-    sysAdminAccessToken: string,
-    request: CreateNotificationTargetRequestDto,
-  ): Promise<NotificationTargetDto>;
   abstract fetchNotificationTargets(
     sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
   ): Promise<NotificationTargetsResponse>;
   abstract previewNotificationRequest(
     sysAdminAccessToken: string,
     previewRequest: any,
   ): Promise<any>;
+  abstract fetchMaterialIcons(
+    sysAdminAccessToken: string,
+  ): Promise<string[]>;
+
+  abstract fetchNotificationTemplates(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+      notificationTypes?: string;
+    },
+  ): Promise<NotificationTemplatesResponse>;
+
+  abstract fetchNotificationRules(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<NotificationRulesResponse>;
+
+  abstract saveNotificationRule(
+    sysAdminAccessToken: string,
+    rule: CreateNotificationRuleRequestDto,
+  ): Promise<NotificationRuleDto>;
 
   abstract fetchDashboardVersion(
     sysadminAccessToken: string,
