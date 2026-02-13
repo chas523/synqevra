@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useLocalStorage } from "@mantine/hooks";
 import {
   Building2,
   ChevronDown,
@@ -55,15 +59,29 @@ const MENU_ITEMS = {
       label: "Settings",
     },
   ],
-  user: [
-    { href: "/", icon: Home, label: "Landing Page" },
-    { href: "/devices", icon: Settings, label: "Devices" },
+  // user: [
+  //   { href: "/", icon: Home, label: "Landing Page" },
+  //   { href: "/devices", icon: Settings, label: "Devices" },
+  //   { href: "/patients", icon: PersonStanding, label: "Patients" },
+  //   { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+  // ],
+  medplum: [
     { href: "/patients", icon: PersonStanding, label: "Patients" },
     { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
   ],
 };
 
 export default function AppSidebar() {
+  const [medplumEnabled] = useLocalStorage({
+    key: 'medplum-enabled',
+    defaultValue: false,
+  });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <Sidebar
       collapsible="icon"
@@ -194,7 +212,7 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel>User</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -210,7 +228,26 @@ export default function AppSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> */}
+        {mounted && medplumEnabled && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Medplum</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {MENU_ITEMS.medplum.map(({ href, icon: Icon, label }) => (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton asChild>
+                      <Link href={href}>
+                        <Icon />
+                        <span>{label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar >
   );
