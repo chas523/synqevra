@@ -105,4 +105,19 @@ export class WidgetService {
         const { data } = await proxyApi.post(`thingsboard/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`, fqns);
         return data;
     }
+
+    public static async saveWidgetBundle(bundle: SaveWidgetBundleRequest): Promise<WidgetBundle> {
+        const { data } = await proxyApi.post('thingsboard/widgetsBundle', bundle);
+        return data;
+    }
+
+    public static async getWidgetBundleById(widgetBundleId: string): Promise<WidgetBundle> {
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundle/${widgetBundleId}`);
+        return data;
+    }
+
+    public static async createWidgetType(request: CreateWidgetTypeRequest): Promise<WidgetType> {
+        const { data } = await proxyApi.post('thingsboard/widgetType', request);
+        return data;
+    }
 }

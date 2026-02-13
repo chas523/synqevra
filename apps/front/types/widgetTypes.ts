@@ -23,6 +23,7 @@ export interface WidgetType {
     tags: string[];
     scada: boolean;
     deprecated: boolean;
+    fqn?: string;
 }
 
 export interface WidgetTypesPage {

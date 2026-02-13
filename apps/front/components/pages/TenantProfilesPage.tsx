@@ -44,7 +44,7 @@ export const TenantProfilesPage = () => {
             onRefresh={mutate}
             options={options}
             onSortChange={(value) => handleSortChange(options, value)}
-            sortOptions={SORT_OPTIONS.TENANT_PROFILES}
+            sortOptions={SORT_OPTIONS.TENANT_PROFILES as any}
             onNextPage={() =>
                 handleNextPage(
                     options,

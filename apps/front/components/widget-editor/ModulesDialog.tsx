@@ -150,7 +150,7 @@ export function ModulesDialog({ open, onOpenChange, modules, onChange }: Modules
                                 </Combobox.Target>
 
                                 <Combobox.Dropdown>
-                                    <Combobox.Options maxHeight={200} className="overflow-y-auto">
+                                    <Combobox.Options style={{ maxHeight: 200 }} className="overflow-y-auto">
                                         {filteredResources.length > 0 ? (
                                             filteredResources.map(res => (
                                                 <Combobox.Option value={res.link || ''} key={res.id?.id}>

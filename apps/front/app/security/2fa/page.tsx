@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm, useWatch, Controller } from "react-hook-form";
+import { useForm, useWatch, Controller, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -52,7 +52,7 @@ export default function TwoFactorAuthPage() {
     const [isSaving, setIsSaving] = useState(false);
 
     const form = useForm<SettingsFormValues>({
-        resolver: zodResolver(settingsSchema),
+        resolver: zodResolver(settingsSchema) as Resolver<SettingsFormValues>,
         defaultValues: {
             providers: [], // Will be populated
             minVerificationCodeSendPeriod: 30,

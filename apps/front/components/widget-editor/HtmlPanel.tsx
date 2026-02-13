@@ -217,8 +217,6 @@ function ResourcesTab() {
                                 classNames={{
                                     label: 'text-gray-700 dark:text-gray-300',
                                     input: 'bg-white dark:bg-slate-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500',
-                                    dropdown: 'bg-white dark:bg-slate-900 border-gray-300 dark:border-gray-700',
-                                    option: 'hover:bg-gray-100 dark:hover:bg-slate-800'
                                 }}
                             />
                         </Combobox.Target>
