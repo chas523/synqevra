@@ -68,6 +68,9 @@ import {
   NotificationRuleDto,
 } from 'src/thingsboard/interface/rest/dtos/response/notification-rule.response.dto';
 import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { WidgetBundleDto, WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
+import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -1972,6 +1975,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     fullSearch: boolean,
     scadaFirst: boolean,
     deprecatedFilter: string,
+    widgetsBundleId: string = '',
   ): Promise<WidgetTypesPageDto> {
     try {
       const params = new URLSearchParams({
@@ -1984,6 +1988,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         scadaFirst: scadaFirst.toString(),
         deprecatedFilter,
       });
+
+      if (widgetsBundleId) {
+        params.append('widgetsBundleId', widgetsBundleId);
+      }
 
       const url = `${this.THINGSBOARD_API_URL}/widgetTypes?${params.toString()}`;
       const response = await firstValueFrom(
@@ -2179,6 +2187,85 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         error.response?.data?.message ||
         'Failed to fetch material icons',
         error.response?.status || 500,
+      );
+    }
+  }
+
+  async fetchWidgetBundles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+  ): Promise<WidgetBundlesPageDto> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty,
+        sortOrder,
+        tenantOnly: tenantOnly.toString(),
+        fullSearch: fullSearch.toString(),
+        scadaFirst: scadaFirst.toString(),
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundles?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetBundlesPageDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundles',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchWidgetBundleById(
+    sysAdminAccessToken: string,
+    widgetsBundleId: string,
+  ): Promise<WidgetBundleDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle/${widgetsBundleId}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetBundleDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundle by id',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveWidgetBundle(
+    sysAdminAccessToken: string,
+    widgetBundle: SaveWidgetBundleRequestDto,
+  ): Promise<WidgetBundleDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle`;
+      const response = await firstValueFrom(
+        this.httpService.post<WidgetBundleDto>(url, widgetBundle, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save widget bundle',
+        error,
+        this.logger,
       );
     }
   }

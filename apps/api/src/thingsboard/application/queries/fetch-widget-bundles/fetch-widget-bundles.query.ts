@@ -1,6 +1,6 @@
 import { IQuery } from '@nestjs/cqrs';
 
-export class FetchWidgetTypesQuery implements IQuery {
+export class FetchWidgetBundlesQuery implements IQuery {
     constructor(
         public readonly page: number,
         public readonly pageSize: number,
@@ -9,7 +9,5 @@ export class FetchWidgetTypesQuery implements IQuery {
         public readonly tenantOnly: boolean,
         public readonly fullSearch: boolean,
         public readonly scadaFirst: boolean,
-        public readonly deprecatedFilter: string,
-        public readonly widgetsBundleId: string = '',
     ) { }
 }

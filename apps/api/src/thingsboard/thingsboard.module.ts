@@ -88,7 +88,10 @@ import { FetchMailSettingsQueryHandler } from './application/queries/fetch-mail-
 import { FetchWidgetTypesQueryHandler } from './application/queries/fetch-widget-types/fetch-widget-types.query.handler';
 import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query.handler';
 import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
+import { SaveWidgetBundleCommandHandler } from './application/commands/save-widget-bundle/save-widget-bundle.command.handler';
 import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
+import { FetchWidgetBundlesQueryHandler } from './application/queries/fetch-widget-bundles/fetch-widget-bundles.query.handler';
+import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -172,6 +175,8 @@ const queryHandlers = [
   FetchNotificationTemplatesQueryHandler,
   FetchNotificationRulesQueryHandler,
   FetchMaterialIconsQueryHandler,
+  FetchWidgetBundlesQueryHandler,
+  FetchWidgetBundleByIdQueryHandler,
 ];
 
 @Module({

@@ -138,6 +138,11 @@ import { FetchNotificationTemplatesQuery } from 'src/thingsboard/application/que
 import { FetchNotificationRulesQuery } from 'src/thingsboard/application/queries/fetch-notification-rules/fetch-notification-rules.query';
 import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
 import { PreviewNotificationRequestCommand } from 'src/thingsboard/application/commands/preview-notification-request/preview-notification-request.command';
+import { FetchWidgetBundlesQuery } from 'src/thingsboard/application/queries/fetch-widget-bundles/fetch-widget-bundles.query';
+import { WidgetBundleDto, WidgetBundlesPageDto } from './dtos/response/widget-bundles.response.dto';
+import { SaveWidgetBundleCommand } from 'src/thingsboard/application/commands/save-widget-bundle/save-widget-bundle.command';
+import { SaveWidgetBundleRequestDto } from './dtos/request/save-widget-bundle.request.dto';
+import { FetchWidgetBundleByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query';
 import { FetchMaterialIconsQuery } from 'src/thingsboard/application/queries/fetch-material-icons/fetch-material-icons.query';
 import { FetchNotificationRequestsQuery } from 'src/thingsboard/application/queries/fetch-notification-requests/fetch-notification-requests.query';
 
@@ -1458,49 +1463,6 @@ export class ThingsboardController {
     });
   }
 
-  // Image endpoints
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get('images')
-  @ApiOperation({ summary: 'Get images' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number })
-  @ApiQuery({ name: 'sortProperty', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiQuery({ name: 'imageSubType', required: false, type: String })
-  @ApiQuery({ name: 'includeSystemImages', required: false, type: Boolean })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    type: ImagesPageResponseDto,
-  })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getImages(
-    @Query('page') page: number = 0,
-    @Query('pageSize') pageSize: number = 10,
-    @Query('sortProperty') sortProperty: string = 'createdTime',
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
-    @Query('imageSubType') imageSubType: string = 'IMAGE',
-    @Query('includeSystemImages') includeSystemImages: boolean = false,
-  ) {
-    const query = new FetchImagesQuery(
-      page,
-      pageSize,
-      sortProperty,
-      sortOrder,
-      imageSubType,
-      includeSystemImages,
-    );
-    const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
-      await this.queryBus.execute(query);
-
-    return match(result, {
-      Ok: (response: ImagesPageResponseDto) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
-  }
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -1714,6 +1676,7 @@ export class ThingsboardController {
     @Query('fullSearch') fullSearch = false,
     @Query('scadaFirst') scadaFirst = false,
     @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+    @Query('widgetsBundleId') widgetsBundleId = '',
   ) {
     const query = new FetchWidgetTypesQuery(
       Number(page),
@@ -1724,6 +1687,7 @@ export class ThingsboardController {
       fullSearch === true || String(fullSearch) === 'true',
       scadaFirst === true || String(scadaFirst) === 'true',
       deprecatedFilter,
+      widgetsBundleId,
     );
     const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1842,5 +1806,137 @@ export class ThingsboardController {
       },
     });
   }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/images')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get images',
+    description: 'Fetch paginated list of images',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of images retrieved successfully',
+    type: ImagesPageResponseDto,
+  })
+  async getImages(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('imageSubType') imageSubType = 'IMAGE',
+    @Query('includeSystemImages') includeSystemImages = false,
+  ) {
+    const query = new FetchImagesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      imageSubType,
+      includeSystemImages === true || String(includeSystemImages) === 'true',
+    );
+    const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (images: ImagesPageResponseDto) => images,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget bundles',
+    description: 'Fetch paginated list of widget bundles',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widget bundles retrieved successfully',
+    type: WidgetBundlesPageDto,
+  })
+  async getWidgetBundles(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'title',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+  ) {
+    const query = new FetchWidgetBundlesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+    );
+    const result: Result<WidgetBundlesPageDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (items: WidgetBundlesPageDto) => items,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundle/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget bundle by id',
+    description: 'Fetch widget bundle details by id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget bundle retrieved successfully',
+    type: WidgetBundleDto,
+  })
+  async getWidgetBundleById(@Param('id') id: string) {
+    const query = new FetchWidgetBundleByIdQuery(id);
+    const result: Result<WidgetBundleDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (item: WidgetBundleDto) => item,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetsBundle')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save widget bundle',
+    description: 'Create or update a widget bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Widget bundle saved successfully',
+  })
+  async saveWidgetBundle(
+    @Body() saveWidgetBundleRequest: SaveWidgetBundleRequestDto,
+  ) {
+    const command = new SaveWidgetBundleCommand(saveWidgetBundleRequest);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
 }
+
 

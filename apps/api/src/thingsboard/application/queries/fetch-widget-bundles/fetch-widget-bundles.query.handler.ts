@@ -6,13 +6,13 @@ import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchWidgetTypesQuery } from './fetch-widget-types.query';
-import { WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { FetchWidgetBundlesQuery } from './fetch-widget-bundles.query';
+import { WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchWidgetTypesQuery)
-export class FetchWidgetTypesQueryHandler
-    implements IQueryHandler<FetchWidgetTypesQuery, Result<WidgetTypesPageDto, ThingsboardApiException>> {
+@QueryHandler(FetchWidgetBundlesQuery)
+export class FetchWidgetBundlesQueryHandler
+    implements IQueryHandler<FetchWidgetBundlesQuery, Result<WidgetBundlesPageDto, ThingsboardApiException>> {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
@@ -29,14 +29,14 @@ export class FetchWidgetTypesQueryHandler
         );
     }
 
-    async execute(query: FetchWidgetTypesQuery): Promise<Result<WidgetTypesPageDto, ThingsboardApiException>> {
+    async execute(query: FetchWidgetBundlesQuery): Promise<Result<WidgetBundlesPageDto, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const widgetTypes = await this.thingsboardApi.fetchWidgetTypes(
+            const widgetBundles = await this.thingsboardApi.fetchWidgetBundles(
                 loginResponse.token,
                 query.page,
                 query.pageSize,
@@ -45,11 +45,9 @@ export class FetchWidgetTypesQueryHandler
                 query.tenantOnly,
                 query.fullSearch,
                 query.scadaFirst,
-                query.deprecatedFilter,
-                query.widgetsBundleId,
             );
 
-            return Ok(widgetTypes);
+            return Ok(widgetBundles);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }

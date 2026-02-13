@@ -50,6 +50,10 @@ import {
   NotificationRuleDto,
 } from '../../interface/rest/dtos/response/notification-rule.response.dto';
 import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { WidgetBundleDto, WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
+import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
+
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -433,15 +437,7 @@ export abstract class ThingsboardApiPort {
   ): Promise<TenantProfile>;
 
   // Image operations
-  abstract fetchImages(
-    sysAdminAccessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty: string,
-    sortOrder: 'ASC' | 'DESC',
-    imageSubType: string,
-    includeSystemImages: boolean,
-  ): Promise<any>;
+
 
   abstract uploadImage(
     sysAdminAccessToken: string,
@@ -488,6 +484,7 @@ export abstract class ThingsboardApiPort {
     fullSearch: boolean,
     scadaFirst: boolean,
     deprecatedFilter: string,
+    widgetsBundleId?: string,
   ): Promise<WidgetTypesPageDto>;
 
   abstract deleteWidgetType(
@@ -506,12 +503,44 @@ export abstract class ThingsboardApiPort {
     widgetTypeId: string,
   ): Promise<WidgetTypeDto>;
 
+  abstract fetchWidgetBundleById(
+    sysAdminAccessToken: string,
+    widgetsBundleId: string,
+  ): Promise<WidgetBundleDto>;
+
   abstract downloadWidgetType(
     sysAdminAccessToken: string,
     widgetTypeId: string,
     includeResources?: boolean,
   ): Promise<any>;
+
+  abstract fetchWidgetBundles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+  ): Promise<WidgetBundlesPageDto>;
+
+  abstract fetchImages(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    imageSubType: string,
+    includeSystemImages: boolean,
+  ): Promise<ImagesPageResponseDto>;
+
+  abstract saveWidgetBundle(
+    sysAdminAccessToken: string,
+    widgetBundle: SaveWidgetBundleRequestDto,
+  ): Promise<WidgetBundleDto>;
 }
+
 
 // Response types for new methods
 export interface TenantAttribute {

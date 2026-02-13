@@ -6,13 +6,13 @@ import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { FetchWidgetTypesQuery } from './fetch-widget-types.query';
-import { WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { FetchWidgetBundleByIdQuery } from './fetch-widget-bundle-by-id.query';
+import { WidgetBundleDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
 import { ConfigService } from '@nestjs/config';
 
-@QueryHandler(FetchWidgetTypesQuery)
-export class FetchWidgetTypesQueryHandler
-    implements IQueryHandler<FetchWidgetTypesQuery, Result<WidgetTypesPageDto, ThingsboardApiException>> {
+@QueryHandler(FetchWidgetBundleByIdQuery)
+export class FetchWidgetBundleByIdQueryHandler
+    implements IQueryHandler<FetchWidgetBundleByIdQuery, Result<WidgetBundleDto, ThingsboardApiException>> {
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
@@ -29,27 +29,19 @@ export class FetchWidgetTypesQueryHandler
         );
     }
 
-    async execute(query: FetchWidgetTypesQuery): Promise<Result<WidgetTypesPageDto, ThingsboardApiException>> {
+    async execute(query: FetchWidgetBundleByIdQuery): Promise<Result<WidgetBundleDto, ThingsboardApiException>> {
         try {
             const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
                 this.THINGSBOARD_SYSADMIN_EMAIL,
                 this.THINGSBOARD_SYSADMIN_PASSWORD,
             );
 
-            const widgetTypes = await this.thingsboardApi.fetchWidgetTypes(
+            const widgetBundle = await this.thingsboardApi.fetchWidgetBundleById(
                 loginResponse.token,
-                query.page,
-                query.pageSize,
-                query.sortProperty,
-                query.sortOrder,
-                query.tenantOnly,
-                query.fullSearch,
-                query.scadaFirst,
-                query.deprecatedFilter,
-                query.widgetsBundleId,
+                query.bundleId,
             );
 
-            return Ok(widgetTypes);
+            return Ok(widgetBundle);
         } catch (error) {
             return Err(error as ThingsboardApiException);
         }
