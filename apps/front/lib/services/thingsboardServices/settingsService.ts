@@ -10,6 +10,8 @@ import {
 } from "@/types/notificationSettingsTypes";
 import { Queue, QueuesPageResponse } from "@/types/queueTypes";
 
+import { MailSettings } from "@/types/mailSettingsTypes";
+
 export class SettingsService {
   public static async getSecuritySettings(): Promise<SecuritySettingsDto> {
     const { data } = await proxyApi.get("thingsboard/admin/securitySettings");
@@ -107,6 +109,21 @@ export class SettingsService {
 
   public static async deleteQueue(queueId: string): Promise<void> {
     await proxyApi.delete(`thingsboard/queues/${queueId}`);
+  }
+
+  public static async getMailSettings(): Promise<MailSettings> {
+    const { data } = await proxyApi.get("thingsboard/admin/settings/mail");
+    return data;
+  }
+
+  public static async updateMailSettings(
+    settings: MailSettings
+  ): Promise<MailSettings> {
+    const { data } = await proxyApi.post(
+      "thingsboard/admin/settings/mail",
+      settings
+    );
+    return data;
   }
 }
 

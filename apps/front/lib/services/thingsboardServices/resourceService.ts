@@ -7,13 +7,22 @@ export class ResourceService {
         pageSize: number = 10,
         sortProperty: string = 'createdTime',
         sortOrder: 'ASC' | 'DESC' = 'DESC',
-        resourceType?: string
+        resourceType?: string,
+        resourceSubType?: string
     ): Promise<ResourcesPageResponse> {
         let url = `thingsboard/resources?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
         if (resourceType) {
             url += `&resourceType=${resourceType}`;
         }
+        if (resourceSubType) {
+            url += `&resourceSubType=${resourceSubType}`;
+        }
         const { data } = await proxyApi.get(url);
+        return data;
+    }
+
+    public static async getResourceInfo(resourceId: string): Promise<Resource> {
+        const { data } = await proxyApi.get(`thingsboard/resource/info/${resourceId}`);
         return data;
     }
 

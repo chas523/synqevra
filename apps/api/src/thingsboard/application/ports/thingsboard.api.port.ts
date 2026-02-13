@@ -21,6 +21,7 @@ import { GeneralSettingsDto } from '../../interface/rest/dtos/response/general-s
 import { ConnectivitySettingsDto } from '../../interface/rest/dtos/response/connectivity-settings.response.dto';
 import { SmsSettingsDto } from '../../interface/rest/dtos/response/sms-settings.response.dto';
 import { NotificationSettingsDto } from '../../interface/rest/dtos/response/notification-settings.response.dto';
+import { MailSettingsDto } from '../../interface/rest/dtos/response/mail-settings.response.dto';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -48,6 +49,7 @@ import {
   NotificationRulesResponse,
   NotificationRuleDto,
 } from '../../interface/rest/dtos/response/notification-rule.response.dto';
+import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -326,6 +328,7 @@ export abstract class ThingsboardApiPort {
     sortProperty: string,
     sortOrder: 'ASC' | 'DESC',
     resourceType?: string,
+    resourceSubType?: string,
   ): Promise<ResourcesPageResponseDto>;
 
   abstract createResource(
@@ -343,6 +346,11 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     resourceId: string,
   ): Promise<Buffer>;
+
+  abstract fetchResourceInfo(
+    sysAdminAccessToken: string,
+    resourceId: string,
+  ): Promise<ResourceDto>;
 
   // Tenant detail operations
   abstract fetchTenantAttributes(
@@ -423,6 +431,86 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     tenantProfile: TenantProfile,
   ): Promise<TenantProfile>;
+
+  // Image operations
+  abstract fetchImages(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    imageSubType: string,
+    includeSystemImages: boolean,
+  ): Promise<any>;
+
+  abstract uploadImage(
+    sysAdminAccessToken: string,
+    file: Buffer,
+    fileName: string,
+    title: string,
+    imageSubType: string,
+  ): Promise<any>;
+
+  abstract deleteImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+    force: boolean,
+  ): Promise<any>;
+
+  abstract downloadImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<Buffer>;
+
+  abstract exportImage(
+    sysAdminAccessToken: string,
+    imageLink: string,
+  ): Promise<any>;
+
+  // Mail Settings operations
+  abstract fetchMailSettings(
+    sysAdminAccessToken: string,
+  ): Promise<MailSettingsDto>;
+
+  abstract updateMailSettings(
+    sysAdminAccessToken: string,
+    settings: MailSettingsDto,
+  ): Promise<MailSettingsDto>;
+
+  // Widget Type operations
+  abstract fetchWidgetTypes(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<WidgetTypesPageDto>;
+
+  abstract deleteWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<void>;
+
+  abstract saveWidgetType(
+    sysAdminAccessToken: string,
+    widgetType: any,
+    updateExistingByFqn?: boolean,
+  ): Promise<WidgetTypeDto>;
+
+  abstract fetchWidgetTypeById(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+  ): Promise<WidgetTypeDto>;
+
+  abstract downloadWidgetType(
+    sysAdminAccessToken: string,
+    widgetTypeId: string,
+    includeResources?: boolean,
+  ): Promise<any>;
 }
 
 // Response types for new methods

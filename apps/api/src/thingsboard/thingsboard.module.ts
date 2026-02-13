@@ -40,6 +40,10 @@ import { SaveEntityAttributesCommandHandler } from './application/commands/save-
 import { CreateRelationCommandHandler } from './application/commands/create-relation/create-relation.command-handler';
 import { DeleteRelationCommandHandler } from './application/commands/delete-relation/delete-relation.command-handler';
 import { SaveTenantProfileCommandHandler } from './application/commands/save-tenant-profile/save-tenant-profile.command-handler';
+import { UploadImageCommandHandler } from './application/commands/upload-image/upload-image.command.handler';
+import { DeleteImageCommandHandler } from './application/commands/delete-image/delete-image.command.handler';
+import { UpdateMailSettingsCommandHandler } from './application/commands/update-mail-settings/update-mail-settings.command.handler';
+import { DeleteWidgetTypeCommandHandler } from './application/commands/delete-widget-type/delete-widget-type.command.handler';
 import { SendNotificationCommandHandler } from './application/commands/send-notification/send-notification.command-handler';
 import { CreateNotificationTargetCommandHandler } from './application/commands/create-notification-target/create-notification-target.command-handler';
 import { CreateNotificationTemplateCommandHandler } from './application/commands/create-notification-template/create-notification-template.command-handler';
@@ -77,6 +81,14 @@ import { FetchNotificationTargetsQueryHandler } from './application/queries/fetc
 import { FetchNotificationTemplatesQueryHandler } from './application/queries/fetch-notification-templates/fetch-notification-templates.query-handler';
 import { FetchNotificationRulesQueryHandler } from './application/queries/fetch-notification-rules/fetch-notification-rules.query-handler';
 import { FetchMaterialIconsQueryHandler } from './application/queries/fetch-material-icons/fetch-material-icons.query-handler';
+import { FetchImagesQueryHandler } from './application/queries/fetch-images/fetch-images.query.handler';
+import { DownloadImageQueryHandler } from './application/queries/download-image/download-image.query.handler';
+import { ExportImageQueryHandler } from './application/queries/export-image/export-image.query.handler';
+import { FetchMailSettingsQueryHandler } from './application/queries/fetch-mail-settings/fetch-mail-settings.query.handler';
+import { FetchWidgetTypesQueryHandler } from './application/queries/fetch-widget-types/fetch-widget-types.query.handler';
+import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query.handler';
+import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
+import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -112,7 +124,13 @@ const commandHandlers = [
   CreateNotificationTemplateCommandHandler,
   CreateNotificationRuleCommandHandler,
   PreviewNotificationRequestCommandHandler,
+  UploadImageCommandHandler,
+  DeleteImageCommandHandler,
+  UpdateMailSettingsCommandHandler,
+  DeleteWidgetTypeCommandHandler,
 ];
+
+import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
 
 const queryHandlers = [
   FetchDevicesQueryHandler,
@@ -131,6 +149,7 @@ const queryHandlers = [
   FetchNotificationSettingsQueryHandler,
   FetchQueuesQueryHandler,
   FetchResourcesQueryHandler,
+  FetchResourceInfoQueryHandler,
   DownloadResourceQueryHandler,
   FetchTenantAttributesQueryHandler,
   FetchTenantAlarmsQueryHandler,
@@ -139,6 +158,14 @@ const queryHandlers = [
   FetchTenantProfilesQueryHandler,
   FetchTenantProfileAttributesQueryHandler,
   FetchTenantProfileAlarmsQueryHandler,
+  FetchImagesQueryHandler,
+  DownloadImageQueryHandler,
+  ExportImageQueryHandler,
+  FetchMailSettingsQueryHandler,
+  FetchWidgetTypesQueryHandler,
+  FetchWidgetTypeByIdQueryHandler,
+  SaveWidgetTypeCommandHandler,
+  DownloadWidgetTypeQueryHandler,
   FetchDeliveryMethodsQueryHandler,
   FetchNotificationRequestsQueryHandler,
   FetchNotificationTargetsQueryHandler,

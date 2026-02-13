@@ -11,9 +11,17 @@ export const useSmsSettings = () => {
         error: smsError,
         isLoading: smsLoading,
         mutate,
-    } = useSWR<SmsSettings>("sms-settings", () =>
-        SettingsService.getSmsSettings()
-    );
+    } = useSWR<SmsSettings | null>("sms-settings", async () => {
+        try {
+            return await SettingsService.getSmsSettings();
+        } catch (error: any) {
+            // Error code 32: "No Administration settings found for key: sms"
+            if (error?.response?.status === 404 && error?.response?.data?.errorCode === 32) {
+                return null;
+            }
+            throw error;
+        }
+    });
 
     return { smsSettings, smsError, smsLoading, mutate };
 };

@@ -49,6 +49,7 @@ export class FetchResourcesQueryHandler
                 query.sortProperty,
                 query.sortOrder,
                 query.resourceType,
+                query.resourceSubType,
             );
 
             return Ok(resources);

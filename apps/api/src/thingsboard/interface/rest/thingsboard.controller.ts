@@ -31,9 +31,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { SkipThrottle } from '@nestjs/throttler';
 
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FetchDevicesQuery } from 'src/thingsboard/application/queries/fetch-devices/fetch-devices.query';
+import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
+import { FetchResourceInfoQuery } from 'src/thingsboard/application/queries/fetch-resource-info/fetch-resource-info.query';
 import { match, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import { FetchDeviceByIdQuery } from 'src/thingsboard/application/queries/fetch-device-by-id/fetch-device-by-id.query';
@@ -89,6 +92,9 @@ import { UpdateSmsSettingsCommand } from 'src/thingsboard/application/commands/u
 import { NotificationSettingsDto } from './dtos/response/notification-settings.response.dto';
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
+import { MailSettingsDto } from './dtos/response/mail-settings.response.dto';
+import { FetchMailSettingsQuery } from 'src/thingsboard/application/queries/fetch-mail-settings/fetch-mail-settings.query';
+import { UpdateMailSettingsCommand } from 'src/thingsboard/application/commands/update-mail-settings/update-mail-settings.command';
 import {
   QueueDto,
   QueuesPageResponseDto,
@@ -101,10 +107,26 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from './dtos/response/resource.response.dto';
-import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
 import { CreateResourceCommand } from 'src/thingsboard/application/commands/create-resource/create-resource.command';
 import { DeleteResourceCommand } from 'src/thingsboard/application/commands/delete-resource/delete-resource.command';
 import { DownloadResourceQuery } from 'src/thingsboard/application/queries/download-resource/download-resource.query';
+import {
+  ImageDto,
+  ImagesPageResponseDto,
+  ImageExportDto,
+  DeleteImageResponseDto,
+} from './dtos/response/image.response.dto';
+import { FetchImagesQuery } from 'src/thingsboard/application/queries/fetch-images/fetch-images.query';
+import { UploadImageCommand } from 'src/thingsboard/application/commands/upload-image/upload-image.command';
+import { DeleteImageCommand } from 'src/thingsboard/application/commands/delete-image/delete-image.command';
+import { DownloadImageQuery } from 'src/thingsboard/application/queries/download-image/download-image.query';
+import { ExportImageQuery } from 'src/thingsboard/application/queries/export-image/export-image.query';
+import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from './dtos/response/widget-types.response.dto';
+import { FetchWidgetTypesQuery } from 'src/thingsboard/application/queries/fetch-widget-types/fetch-widget-types.query';
+import { DeleteWidgetTypeCommand } from 'src/thingsboard/application/commands/delete-widget-type/delete-widget-type.command';
+import { SaveWidgetTypeCommand } from 'src/thingsboard/application/commands/save-widget-type/save-widget-type.command';
+import { FetchWidgetTypeByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query';
+import { DownloadWidgetTypeQuery } from 'src/thingsboard/application/queries/download-widget-type/download-widget-type.query';
 import { SendNotificationRequestDto } from './dtos/request/send-notification.request.dto';
 import { DeliveryMethodsResponse } from './dtos/response/delivery-methods.response.dto';
 import { NotificationRequestResponse } from './dtos/response/notification-request.response.dto';
@@ -999,6 +1021,7 @@ export class ThingsboardController {
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('resourceType') resourceType?: string,
+    @Query('resourceSubType') resourceSubType?: string,
   ) {
     const query = new FetchResourcesQuery(
       page,
@@ -1006,12 +1029,34 @@ export class ThingsboardController {
       sortProperty,
       sortOrder,
       resourceType,
+      resourceSubType,
     );
     const result: Result<ResourcesPageResponseDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (response: ResourcesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('resource/info/:resourceId')
+  @ApiOperation({ summary: 'Get resource info' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ResourceDto,
+  })
+  async getResourceInfo(@Param('resourceId') resourceId: string) {
+    const query = new FetchResourceInfoQuery(resourceId);
+    const result: Result<ResourceDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: ResourceDto) => response,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1412,4 +1457,390 @@ export class ThingsboardController {
       },
     });
   }
+
+  // Image endpoints
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('images')
+  @ApiOperation({ summary: 'Get images' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'sortProperty', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'imageSubType', required: false, type: String })
+  @ApiQuery({ name: 'includeSystemImages', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ImagesPageResponseDto,
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getImages(
+    @Query('page') page: number = 0,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('sortProperty') sortProperty: string = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('imageSubType') imageSubType: string = 'IMAGE',
+    @Query('includeSystemImages') includeSystemImages: boolean = false,
+  ) {
+    const query = new FetchImagesQuery(
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+      imageSubType,
+      includeSystemImages,
+    );
+    const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: ImagesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('images')
+  @ApiOperation({ summary: 'Upload image' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ImageDto,
+  })
+  async uploadImage(
+    @Body() body: { file: string; fileName: string; title: string; imageSubType?: string },
+  ) {
+    // Convert base64 file to Buffer
+    const fileBuffer = Buffer.from(body.file, 'base64');
+    const command = new UploadImageCommand(
+      fileBuffer,
+      body.fileName,
+      body.title,
+      body.imageSubType || 'IMAGE',
+    );
+    const result: Result<ImageDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: ImageDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @SkipThrottle()
+  @Get('images/download/:encodedLink')
+  @ApiOperation({ summary: 'Download image' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Image file',
+  })
+  async downloadImage(
+    @Param('encodedLink') encodedLink: string,
+    @Res() res: any,
+  ) {
+    const imageLink = decodeURIComponent(encodedLink);
+    const query = new DownloadImageQuery(imageLink);
+    const result: Result<Buffer, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (buffer: Buffer) => {
+        let contentType = 'application/octet-stream';
+
+        // Infer content type for SVGs to ensure proper rendering
+        if (imageLink.toLowerCase().includes('.svg') || buffer.slice(0, 100).toString().toLowerCase().includes('<svg')) {
+          contentType = 'image/svg+xml';
+        } else if (buffer.slice(0, 4).toString('hex') === '89504e47') {
+          contentType = 'image/png';
+        } else if (buffer.slice(0, 3).toString('hex') === 'ffd8ff') {
+          contentType = 'image/jpeg';
+        }
+
+        res.set({
+          'Content-Type': contentType,
+          'Content-Disposition': `inline; filename="image"`,
+        });
+        res.send(buffer);
+      },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('admin/settings/mail')
+  @ApiOperation({ summary: 'Get mail settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Mail settings',
+    type: MailSettingsDto,
+  })
+  async fetchMailSettings() {
+    const query = new FetchMailSettingsQuery();
+    const result: Result<MailSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: MailSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('admin/settings/mail')
+  @ApiOperation({ summary: 'Update mail settings' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Updated mail settings',
+    type: MailSettingsDto,
+  })
+  async updateMailSettings(@Body() settings: MailSettingsDto) {
+    const command = new UpdateMailSettingsCommand(settings);
+    const result: Result<MailSettingsDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (updated: MailSettingsDto) => updated,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('images/export/:encodedLink')
+  @ApiOperation({ summary: 'Export image to JSON' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ImageExportDto,
+  })
+  async exportImage(
+    @Param('encodedLink') encodedLink: string,
+  ) {
+    const imageLink = decodeURIComponent(encodedLink);
+    const query = new ExportImageQuery(imageLink);
+    const result: Result<ImageExportDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: ImageExportDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('images/:encodedLink')
+  @ApiOperation({ summary: 'Delete image' })
+  @ApiQuery({ name: 'force', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: DeleteImageResponseDto,
+  })
+  async deleteImage(
+    @Param('encodedLink') encodedLink: string,
+    @Query('force') force: boolean = false,
+  ) {
+    const imageLink = decodeURIComponent(encodedLink);
+    const command = new DeleteImageCommand(imageLink, force);
+    const result: Result<DeleteImageResponseDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: DeleteImageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetTypes')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget types',
+    description: 'Fetch paginated list of widget types from ThingsBoard',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (zero-based)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sortProperty',
+    required: false,
+    type: String,
+    description: 'Property to sort by',
+    example: 'createdTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Sort order',
+    example: 'DESC',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widget types retrieved successfully',
+    type: WidgetTypesPageDto,
+  })
+  async getWidgetTypes(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+    @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+  ) {
+    const query = new FetchWidgetTypesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+      deprecatedFilter,
+    );
+    const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetTypes: WidgetTypesPageDto) => widgetTypes,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetType/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget type by ID',
+    description: 'Fetch a single widget type by its ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type retrieved successfully',
+    type: WidgetTypeDto,
+  })
+  async getWidgetTypeById(@Param('id') id: string) {
+    const query = new FetchWidgetTypeByIdQuery(id);
+    const result: Result<WidgetTypeDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetType: WidgetTypeDto) => widgetType,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/widgetType/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete widget type',
+    description: 'Delete a widget type by ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type deleted successfully',
+  })
+  async deleteWidgetType(@Param('id') id: string) {
+    const command = new DeleteWidgetTypeCommand(id);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetType')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save (create or update) widget type',
+    description: 'Save (create or update) a widget type',
+  })
+  @ApiBody({ type: CreateWidgetTypeRequestDto })
+  @ApiQuery({ name: 'updateExistingByFqn', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type saved successfully',
+    type: WidgetTypeDto,
+  })
+  async saveWidgetType(
+    @Body() widgetType: any,
+    @Query('updateExistingByFqn') updateExistingByFqn: boolean = false,
+  ) {
+    const command = new SaveWidgetTypeCommand(widgetType, updateExistingByFqn);
+    const result: Result<WidgetTypeDto, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: WidgetTypeDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetType/:id/download')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Download widget type',
+    description: 'Download a widget type by ID',
+  })
+  @ApiQuery({ name: 'includeResources', required: false, type: Boolean })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type downloaded successfully',
+  })
+  async downloadWidgetType(
+    @Param('id') id: string,
+    @Query('includeResources') includeResources: boolean = false,
+  ) {
+    const query = new DownloadWidgetTypeQuery(id, includeResources);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
 }
+

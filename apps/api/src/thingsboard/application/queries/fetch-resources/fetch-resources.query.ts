@@ -13,6 +13,7 @@ export class FetchResourcesQuery extends Query<
         public readonly sortProperty: string = 'createdTime',
         public readonly sortOrder: 'ASC' | 'DESC' = 'DESC',
         public readonly resourceType?: string,
+        public readonly resourceSubType?: string,
     ) {
         super();
     }

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { ResourcesTable } from "@/components/organisms/ResourcesTable";
-import { ResourceDetailsDialog } from "@/components/organisms/ResourceDetailsDialog";
+import { ResourceDetailPanel } from "@/components/organisms/ResourceDetailPanel";
 import { AddResourceDialog } from "@/components/organisms/AddResourceDialog";
 import { useResources, useManageResource } from "@/hooks/thingsboard/resources/useResources";
 import { Resource, ResourceType, ResourceCreateRequest } from "@/types/resourceTypes";
@@ -116,9 +116,9 @@ export const ResourceLibraryPage = () => {
                 onDelete={handleDelete}
             />
 
-            <ResourceDetailsDialog
-                open={showDetailsDialog}
-                onOpenChange={setShowDetailsDialog}
+            <ResourceDetailPanel
+                isOpen={showDetailsDialog}
+                onClose={() => setShowDetailsDialog(false)}
                 resource={selectedResource}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
