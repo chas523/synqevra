@@ -17,15 +17,15 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: "/api/:path*",
-          destination: "http://localhost:3003/api/:path*", // Internal K8s DNS
+          destination: "http://api:3003/api/:path*", // Internal K8s DNS
         },
         {
           source: "/fhir/:path*",
-          destination: "http://localhost:3003/fhir/:path*", // Internal K8s DNS
+          destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
         },
         {
           source: "/tb-assets/:path*",
-          destination: "http://localhost:8088/assets/:path*", // ThingsBoard static assets
+          destination: "http://thingsboard:8080/assets/:path*", // ThingsBoard static assets
         },
       ],
     };

@@ -23,6 +23,10 @@ Implementation of ThingsBoard and Medplum on docker containers.
           source: "/fhir/:path*",
           destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
         },
+        {
+          source: "/tb-assets/:path*",
+          destination: "http://thingsboard:8080/assets/:path*", // ThingsBoard static assets
+        },
 ```
 to 
 ```typescript
@@ -33,6 +37,10 @@ to
         {
           source: "/fhir/:path*",
           destination: "http://localhost:3003/fhir/:path*", // Local
+        },
+        {
+          source: "/tb-assets/:path*",
+          destination: "http://localhost:8088/assets/:path*", // ThingsBoard static assets
         },
 ```
 9. To run project locally, you have to update Rulechain and its location.
