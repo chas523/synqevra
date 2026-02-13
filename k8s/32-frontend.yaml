@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: registry.digitalocean.com/medboard-registry/front:1.1.2
+          image: registry.digitalocean.com/medboard-registry/front:1.0.0
           imagePullPolicy: Always
 
           ports:
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-np
+  name: frontend
   namespace: medboard
 spec:
   selector:

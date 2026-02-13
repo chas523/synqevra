@@ -1,5 +1,5 @@
 import { proxyApi } from "@/lib/api/api";
-import { CreateWidgetTypeRequest, WidgetType, WidgetTypesPage, WidgetBundlesPage, SaveWidgetBundleRequest, WidgetBundle } from "@/types/widgetTypes";
+import type { CreateWidgetTypeRequest, WidgetType, WidgetTypesPage, WidgetBundlesPage, SaveWidgetBundleRequest, WidgetBundle } from "@/types/widgetTypes";
 
 export class WidgetService {
     public static async getWidgetTypes(
@@ -113,11 +113,6 @@ export class WidgetService {
 
     public static async saveWidgetBundle(bundle: SaveWidgetBundleRequest): Promise<WidgetBundle> {
         const { data } = await proxyApi.post('thingsboard/widgetsBundle', bundle);
-        return data;
-    }
-
-    public static async getWidgetBundleById(widgetBundleId: string): Promise<WidgetBundle> {
-        const { data } = await proxyApi.get(`thingsboard/widgetsBundle/${widgetBundleId}`);
         return data;
     }
 
