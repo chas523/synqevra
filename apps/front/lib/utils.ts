@@ -6,6 +6,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const getImagePreviewUrl = (link?: string): string => {
+  if (!link) return '';
+  if (link.startsWith('data:') || link.startsWith('http')) return link;
+
+  // Handle ThingsBoard specific prefix
+  let cleanLink = link;
+  if (link.startsWith('tb-image;')) {
+    cleanLink = link.replace('tb-image;', '');
+  }
+
+  // Use the frontend proxy route that handles image downloads and previews correctly
+  // Pattern taken from ScadaSymbolsTable.tsx and ImageGalleryTable.tsx
+  const previewLink = cleanLink.endsWith('/preview') ? cleanLink : `${cleanLink}/preview`;
+  return `/api/thingsboard/images/download/${encodeURIComponent(previewLink)}`;
+};
+
 /**
  * Extracts error message from various error types (Axios, Error, unknown)
  * Provides consistent error handling across the application

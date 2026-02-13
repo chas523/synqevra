@@ -93,6 +93,7 @@ import { NotificationSettingsDto } from './dtos/response/notification-settings.r
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
 import { MailSettingsDto } from './dtos/response/mail-settings.response.dto';
+import { SysAdminAuthService } from '../../application/services/sysadmin-auth.service';
 import { FetchMailSettingsQuery } from 'src/thingsboard/application/queries/fetch-mail-settings/fetch-mail-settings.query';
 import { UpdateMailSettingsCommand } from 'src/thingsboard/application/commands/update-mail-settings/update-mail-settings.command';
 import {
@@ -121,7 +122,11 @@ import { UploadImageCommand } from 'src/thingsboard/application/commands/upload-
 import { DeleteImageCommand } from 'src/thingsboard/application/commands/delete-image/delete-image.command';
 import { DownloadImageQuery } from 'src/thingsboard/application/queries/download-image/download-image.query';
 import { ExportImageQuery } from 'src/thingsboard/application/queries/export-image/export-image.query';
-import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from './dtos/response/widget-types.response.dto';
+import {
+  CreateWidgetTypeRequestDto,
+  WidgetTypeDto,
+  WidgetTypesPageDto,
+} from './dtos/response/widget-types.response.dto';
 import { FetchWidgetTypesQuery } from 'src/thingsboard/application/queries/fetch-widget-types/fetch-widget-types.query';
 import { DeleteWidgetTypeCommand } from 'src/thingsboard/application/commands/delete-widget-type/delete-widget-type.command';
 import { SaveWidgetTypeCommand } from 'src/thingsboard/application/commands/save-widget-type/save-widget-type.command';
@@ -139,13 +144,22 @@ import { FetchNotificationRulesQuery } from 'src/thingsboard/application/queries
 import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
 import { PreviewNotificationRequestCommand } from 'src/thingsboard/application/commands/preview-notification-request/preview-notification-request.command';
 import { FetchWidgetBundlesQuery } from 'src/thingsboard/application/queries/fetch-widget-bundles/fetch-widget-bundles.query';
-import { WidgetBundleDto, WidgetBundlesPageDto } from './dtos/response/widget-bundles.response.dto';
+import {
+  WidgetBundleDto,
+  WidgetBundlesPageDto,
+} from './dtos/response/widget-bundles.response.dto';
 import { SaveWidgetBundleCommand } from 'src/thingsboard/application/commands/save-widget-bundle/save-widget-bundle.command';
 import { SaveWidgetBundleRequestDto } from './dtos/request/save-widget-bundle.request.dto';
 import { FetchWidgetBundleByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query';
 import { FetchMaterialIconsQuery } from 'src/thingsboard/application/queries/fetch-material-icons/fetch-material-icons.query';
 import { FetchNotificationRequestsQuery } from 'src/thingsboard/application/queries/fetch-notification-requests/fetch-notification-requests.query';
-
+import { TwoFactorAuthSettingsDto } from './dtos/response/thingsboard-2fa-settings.response.dto';
+import { TwoFactorAuthSettingsRequestDto } from './dtos/request/thingsboard-2fa-settings.request.dto';
+import { FetchTwoFaSettingsQuery } from '../../application/queries/fetch-2fa-settings/fetch-2fa-settings.query';
+import { SaveTwoFaSettingsCommand } from '../../application/commands/save-2fa-settings/save-2fa-settings.command';
+import { FetchWidgetsBundlesQuery } from '../../application/queries/fetch-widgets-bundles/fetch-widgets-bundles.query';
+import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.query';
+import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -154,7 +168,8 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+    private readonly sysAdminAuthService: SysAdminAuthService,
+  ) {}
 
   @Public()
   @Post('/login')
@@ -1004,7 +1019,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1105,7 +1120,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1193,7 +1208,9 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to send notification',
   })
-  async sendNotification(@Body() notificationRequest: SendNotificationRequestDto) {
+  async sendNotification(
+    @Body() notificationRequest: SendNotificationRequestDto,
+  ) {
     const command = new SendNotificationCommand(notificationRequest);
     const result: Result<NotificationRequestResponse, ThingsboardApiException> =
       await this.commandBus.execute(command);
@@ -1449,9 +1466,7 @@ export class ThingsboardController {
   @ApiInternalServerErrorResponse({
     description: 'Failed to create notification rule',
   })
-  async createNotificationRule(
-    @Body() rule: CreateNotificationRuleRequestDto,
-  ) {
+  async createNotificationRule(@Body() rule: CreateNotificationRuleRequestDto) {
     const command = new CreateNotificationRuleCommand(rule);
     const result = await this.commandBus.execute(command);
 
@@ -1463,7 +1478,6 @@ export class ThingsboardController {
     });
   }
 
-
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('images')
@@ -1473,7 +1487,13 @@ export class ThingsboardController {
     type: ImageDto,
   })
   async uploadImage(
-    @Body() body: { file: string; fileName: string; title: string; imageSubType?: string },
+    @Body()
+    body: {
+      file: string;
+      fileName: string;
+      title: string;
+      imageSubType?: string;
+    },
   ) {
     // Convert base64 file to Buffer
     const fileBuffer = Buffer.from(body.file, 'base64');
@@ -1517,7 +1537,10 @@ export class ThingsboardController {
         let contentType = 'application/octet-stream';
 
         // Infer content type for SVGs to ensure proper rendering
-        if (imageLink.toLowerCase().includes('.svg') || buffer.slice(0, 100).toString().toLowerCase().includes('<svg')) {
+        if (
+          imageLink.toLowerCase().includes('.svg') ||
+          buffer.slice(0, 100).toString().toLowerCase().includes('<svg')
+        ) {
           contentType = 'image/svg+xml';
         } else if (buffer.slice(0, 4).toString('hex') === '89504e47') {
           contentType = 'image/png';
@@ -1585,9 +1608,7 @@ export class ThingsboardController {
     status: HttpStatus.OK,
     type: ImageExportDto,
   })
-  async exportImage(
-    @Param('encodedLink') encodedLink: string,
-  ) {
+  async exportImage(@Param('encodedLink') encodedLink: string) {
     const imageLink = decodeURIComponent(encodedLink);
     const query = new ExportImageQuery(imageLink);
     const result: Result<ImageExportDto, ThingsboardApiException> =
@@ -1937,6 +1958,205 @@ export class ThingsboardController {
       },
     });
   }
+  @Get('/2fa/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get 2FA settings',
+    description: 'Retrieve current 2FA configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '2FA settings retrieved successfully',
+    type: TwoFactorAuthSettingsDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch 2FA settings',
+  })
+  async getTwoFaSettings() {
+    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
+    const query = new FetchTwoFaSettingsQuery(sysAdminToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (settings: TwoFactorAuthSettingsDto) => settings,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/2fa/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save 2FA settings',
+    description: 'Update 2FA configuration',
+  })
+  @ApiBody({
+    type: TwoFactorAuthSettingsRequestDto,
+    description: '2FA settings to update',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '2FA settings updated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to update 2FA settings',
+  })
+  async saveTwoFaSettings(@Body() settings: TwoFactorAuthSettingsRequestDto) {
+    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
+    const command = new SaveTwoFaSettingsCommand(sysAdminToken, settings);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widgets bundles',
+    description: 'Fetch paginated list of widgets bundles from ThingsBoard',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (zero-based)',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sortProperty',
+    required: false,
+    type: String,
+    description: 'Property to sort by',
+    example: 'createdTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    description: 'Sort order',
+    example: 'DESC',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widgets bundles retrieved successfully',
+  })
+  async getWidgetsBundles(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+    @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+  ) {
+    const query = new FetchWidgetsBundlesQuery(
+      accessToken,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+      deprecatedFilter,
+    );
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (widgetsBundles: any) => widgetsBundles,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget type FQNs',
+    description: 'Fetch widget type FQNs for a specific widgets bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type FQNs retrieved successfully',
+  })
+  async getWidgetTypeFqns(
+    @TbAccessToken() accessToken: string,
+    @Param('widgetsBundleId') widgetsBundleId: string,
+  ) {
+    const query = new FetchWidgetTypeFqnsQuery(accessToken, widgetsBundleId);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (fqns: any) => fqns,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save widget type FQNs',
+    description: 'Save widget type FQNs for a specific widgets bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget type FQNs saved successfully',
+  })
+  async saveWidgetTypeFqns(
+    @TbAccessToken() accessToken: string,
+    @Param('widgetsBundleId') widgetsBundleId: string,
+    @Body() fqns: string[],
+  ) {
+    const command = new SaveWidgetTypeFqnsCommand(
+      accessToken,
+      widgetsBundleId,
+      fqns,
+    );
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
 }
-
-

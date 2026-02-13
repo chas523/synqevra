@@ -8,6 +8,7 @@ import {
   Settings,
   Stethoscope,
   UserRoundCog,
+  ShieldCheck, BellIcon,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -44,9 +45,9 @@ const MENU_ITEMS = {
       label: "Tenant Profiles"
     },
     {
-      href: "/dashboard/requestedUsers",
-      icon: UserRoundCog,
-      label: "Pending Users",
+      href: "/dashboard/notifications",
+      icon: BellIcon,
+      label: "Tenant Profiles"
     },
     {
       href: "/settings",
@@ -54,9 +55,9 @@ const MENU_ITEMS = {
       label: "Settings",
     },
     {
-      href: "/security-settings",
-      icon: Settings,
-      label: "Security Settings",
+      href: "/dashboard/requestedUsers",
+      icon: UserRoundCog,
+      label: "Pending Users",
     },
   ],
   user: [
@@ -158,6 +159,36 @@ export default function AppSidebar() {
                           <a href="/resources/resource-library">
                             <span>Resource library</span>
                           </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+              {/* Security collapsible menu */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <ShieldCheck />
+                      <span>Security</span>
+                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/security-settings">
+                            <span>Security Settings</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href="/security/2fa">
+                            <span>Two-factor authentication</span>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>

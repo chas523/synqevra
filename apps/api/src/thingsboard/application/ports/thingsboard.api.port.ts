@@ -49,11 +49,19 @@ import {
   NotificationRulesResponse,
   NotificationRuleDto,
 } from '../../interface/rest/dtos/response/notification-rule.response.dto';
-import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
-import { WidgetBundleDto, WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import {
+  CreateWidgetTypeRequestDto,
+  WidgetTypeDto,
+  WidgetTypesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import {
+  WidgetBundleDto,
+  WidgetBundlesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
 import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
 import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
-
+import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
+import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-2fa-settings.request.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -221,9 +229,7 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     previewRequest: any,
   ): Promise<any>;
-  abstract fetchMaterialIcons(
-    sysAdminAccessToken: string,
-  ): Promise<string[]>;
+  abstract fetchMaterialIcons(sysAdminAccessToken: string): Promise<string[]>;
 
   abstract fetchNotificationTemplates(
     sysAdminAccessToken: string,
@@ -438,7 +444,6 @@ export abstract class ThingsboardApiPort {
 
   // Image operations
 
-
   abstract uploadImage(
     sysAdminAccessToken: string,
     file: Buffer,
@@ -539,8 +544,38 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     widgetBundle: SaveWidgetBundleRequestDto,
   ): Promise<WidgetBundleDto>;
-}
+  abstract fetchTwoFaSettings(
+    sysAdminAccessToken: string,
+  ): Promise<TwoFactorAuthSettingsDto>;
 
+  abstract saveTwoFaSettings(
+    sysAdminAccessToken: string,
+    settings: TwoFactorAuthSettingsRequestDto,
+  ): Promise<void>;
+
+  abstract getWidgetsBundles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<any>;
+
+  abstract getWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+  ): Promise<any>;
+
+  abstract saveWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+    fqns: string[],
+  ): Promise<any>;
+}
 
 // Response types for new methods
 export interface TenantAttribute {

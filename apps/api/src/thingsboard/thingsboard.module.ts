@@ -90,6 +90,11 @@ import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-wid
 import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
 import { SaveWidgetBundleCommandHandler } from './application/commands/save-widget-bundle/save-widget-bundle.command.handler';
 import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
+import { FetchTwoFaSettingsQueryHandler } from './application/queries/fetch-2fa-settings/fetch-2fa-settings.query.handler';
+import { SaveTwoFaSettingsCommandHandler } from './application/commands/save-2fa-settings/save-2fa-settings.command.handler';
+import { FetchWidgetsBundlesHandler } from './application/queries/fetch-widgets-bundles/fetch-widgets-bundles.handler';
+import { FetchWidgetTypeFqnsHandler } from './application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.handler';
+import { SaveWidgetTypeFqnsHandler } from './application/commands/save-widget-type-fqns/save-widget-type-fqns.handler';
 import { FetchWidgetBundlesQueryHandler } from './application/queries/fetch-widget-bundles/fetch-widget-bundles.query.handler';
 import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query-handler';
 
@@ -127,10 +132,13 @@ const commandHandlers = [
   CreateNotificationTemplateCommandHandler,
   CreateNotificationRuleCommandHandler,
   PreviewNotificationRequestCommandHandler,
+  SaveWidgetBundleCommandHandler,
   UploadImageCommandHandler,
   DeleteImageCommandHandler,
   UpdateMailSettingsCommandHandler,
   DeleteWidgetTypeCommandHandler,
+  SaveTwoFaSettingsCommandHandler,
+  SaveWidgetTypeFqnsHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -177,6 +185,9 @@ const queryHandlers = [
   FetchMaterialIconsQueryHandler,
   FetchWidgetBundlesQueryHandler,
   FetchWidgetBundleByIdQueryHandler,
+  FetchTwoFaSettingsQueryHandler,
+  FetchWidgetsBundlesHandler,
+  FetchWidgetTypeFqnsHandler,
 ];
 
 @Module({
@@ -217,4 +228,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule { }
+export class ThingsboardModule {}
