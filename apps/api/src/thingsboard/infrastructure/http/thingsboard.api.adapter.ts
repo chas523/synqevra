@@ -49,7 +49,28 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
+import { DeliveryMethodsResponse } from '../../interface/rest/dtos/response/delivery-methods.response.dto';
+import { NotificationRequestResponse } from '../../interface/rest/dtos/response/notification-request.response.dto';
+import { SendNotificationRequestDto } from '../../interface/rest/dtos/request/send-notification.request.dto';
+import { CreateNotificationTargetRequestDto } from '../../interface/rest/dtos/request/create-notification-target.request.dto';
+import {
+  NotificationTargetDto,
+  NotificationTargetsResponse,
+} from '../../interface/rest/dtos/response/notification-target.response.dto';
+import { CreateNotificationTemplateRequestDto } from '../../interface/rest/dtos/request/create-notification-template.request.dto';
+import { CreateNotificationRuleRequestDto } from '../../interface/rest/dtos/request/create-notification-rule.request.dto';
+import {
+  NotificationTemplateDto,
+  NotificationTemplatesResponse,
+} from '../../interface/rest/dtos/response/notification-template.response.dto';
+import {
+  NotificationRulesResponse,
+  NotificationRuleDto,
+} from 'src/thingsboard/interface/rest/dtos/response/notification-rule.response.dto';
 import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { WidgetBundleDto, WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
+import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
 
 interface JwtPayload {
   customerId: string;
@@ -725,6 +746,241 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         this.logger,
       );
     }
+  }
+
+  async fetchDeliveryMethods(
+    sysAdminAccessToken: string,
+  ): Promise<DeliveryMethodsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/deliveryMethods`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      // Transform the array of delivery method strings to the expected format
+      const deliveryMethods = response.data.map((method) => ({
+        method,
+        name: this.formatDeliveryMethodName(method),
+        enabled: true,
+      }));
+
+      return { deliveryMethods };
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch delivery methods',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchNotificationRequests(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<any> {
+    try {
+      const searchParams = new URLSearchParams();
+      if (params.pageSize) searchParams.append('pageSize', params.pageSize.toString());
+      if (params.page !== undefined) searchParams.append('page', params.page.toString());
+      if (params.sortProperty) searchParams.append('sortProperty', params.sortProperty);
+      if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
+
+      const url = `${this.THINGSBOARD_API_URL}/notification/requests?${searchParams.toString()}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch notification requests',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async sendNotification(
+    sysAdminAccessToken: string,
+    notificationRequest: SendNotificationRequestDto,
+  ): Promise<NotificationRequestResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/request`;
+      const response = await firstValueFrom(
+        this.httpService.post<NotificationRequestResponse>(url, notificationRequest, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to send notification',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchNotificationTargets(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<NotificationTargetsResponse> {
+    try {
+      const {
+        pageSize = 10,
+        page = 0,
+        sortProperty = 'createdTime',
+        sortOrder = 'DESC',
+      } = params;
+
+      const url = `${this.THINGSBOARD_API_URL}/notification/targets?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      const { data, totalElements, totalPages } = response.data;
+      return {
+        targets: data,
+        totalElements,
+        totalPages,
+      };
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch notification targets',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchNotificationTemplates(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+      notificationTypes?: string;
+    },
+  ): Promise<NotificationTemplatesResponse> {
+    try {
+      const {
+        pageSize = 10,
+        page = 0,
+        sortProperty = 'createdTime',
+        sortOrder = 'DESC',
+        notificationTypes,
+      } = params;
+
+      let url = `${this.THINGSBOARD_API_URL}/notification/templates?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      if (notificationTypes) {
+        url += `&notificationTypes=${notificationTypes}`;
+      }
+
+      this.logger.log(`Fetching templates with URL: ${url}`);
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      const { data, totalElements, totalPages } = response.data;
+      this.logger.log(`Fetched ${data?.length || 0} templates from ThingsBoard`);
+      return {
+        templates: data,
+        totalElements,
+        totalPages,
+      };
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch notification templates',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchNotificationRules(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<NotificationRulesResponse> {
+    try {
+      const {
+        pageSize = 10,
+        page = 0,
+        sortProperty = 'createdTime',
+        sortOrder = 'DESC',
+      } = params;
+
+      const url = `${this.THINGSBOARD_API_URL}/notification/rules?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch notification rules',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveNotificationRule(
+    sysAdminAccessToken: string,
+    rule: CreateNotificationRuleRequestDto,
+  ): Promise<NotificationRuleDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/rule`;
+      const response = await firstValueFrom(
+        this.httpService.post<NotificationRuleDto>(url, rule, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save notification rule',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  private formatDeliveryMethodName(method: string): string {
+    // Convert MOBILE_APP to Mobile App, WEB to Web, etc.
+    return method
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   async fetchTenants(
@@ -1719,6 +1975,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     fullSearch: boolean,
     scadaFirst: boolean,
     deprecatedFilter: string,
+    widgetsBundleId: string = '',
   ): Promise<WidgetTypesPageDto> {
     try {
       const params = new URLSearchParams({
@@ -1731,6 +1988,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         scadaFirst: scadaFirst.toString(),
         deprecatedFilter,
       });
+
+      if (widgetsBundleId) {
+        params.append('widgetsBundleId', widgetsBundleId);
+      }
 
       const url = `${this.THINGSBOARD_API_URL}/widgetTypes?${params.toString()}`;
       const response = await firstValueFrom(
@@ -1827,6 +2088,182 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to download widget type',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createNotificationTarget(
+    sysAdminAccessToken: string,
+    request: CreateNotificationTargetRequestDto,
+  ): Promise<NotificationTargetDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/target`;
+      const response = await firstValueFrom(
+        this.httpService.post<NotificationTargetDto>(url, request, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+
+      this.logger.log(
+        `Created notification target: ${response.data.name} (ID: ${response.data.id.id})`,
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to create notification target: ${error.response?.data?.message || error.message}`,
+      );
+      throw new ThingsboardApiException(
+        error.response?.data?.message || 'Failed to create notification target',
+        error.response?.status || 500,
+      );
+    }
+  }
+
+
+  async previewNotificationRequest(
+    sysAdminAccessToken: string,
+    previewRequest: any,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/request/preview`;
+      const response = await firstValueFrom(
+        this.httpService.post<any>(url, previewRequest, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      this.logger.log('Notification preview generated successfully');
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to preview notification request: ${error.response?.data?.message || error.message}`,
+      );
+      throw new ThingsboardApiException(
+        error.response?.data?.message ||
+        'Failed to preview notification request',
+        error.response?.status || 500,
+      );
+    }
+  }
+
+  async createNotificationTemplate(
+    sysAdminAccessToken: string,
+    templateData: CreateNotificationTemplateRequestDto,
+  ): Promise<NotificationTemplateDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/notification/template`;
+      const response = await firstValueFrom(
+        this.httpService.post<NotificationTemplateDto>(url, templateData, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create notification template',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchMaterialIcons(
+    sysAdminAccessToken: string,
+  ): Promise<string[]> {
+    try {
+      // Material icons JSON is a public static asset, doesn't require authentication
+      const url = `${this.THINGSBOARD_API_URL}/assets/metadata/material-icons.json`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url),
+      );
+      this.logger.log(`Fetched ${response.data?.length || 0} material icons`);
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch material icons: ${error.response?.data?.message || error.message}`,
+      );
+      throw new ThingsboardApiException(
+        error.response?.data?.message ||
+        'Failed to fetch material icons',
+        error.response?.status || 500,
+      );
+    }
+  }
+
+  async fetchWidgetBundles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+  ): Promise<WidgetBundlesPageDto> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty,
+        sortOrder,
+        tenantOnly: tenantOnly.toString(),
+        fullSearch: fullSearch.toString(),
+        scadaFirst: scadaFirst.toString(),
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundles?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetBundlesPageDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundles',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchWidgetBundleById(
+    sysAdminAccessToken: string,
+    widgetsBundleId: string,
+  ): Promise<WidgetBundleDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle/${widgetsBundleId}`;
+      const response = await firstValueFrom(
+        this.httpService.get<WidgetBundleDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundle by id',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveWidgetBundle(
+    sysAdminAccessToken: string,
+    widgetBundle: SaveWidgetBundleRequestDto,
+  ): Promise<WidgetBundleDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle`;
+      const response = await firstValueFrom(
+        this.httpService.post<WidgetBundleDto>(url, widgetBundle, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save widget bundle',
         error,
         this.logger,
       );

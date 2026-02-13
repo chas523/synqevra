@@ -10,6 +10,7 @@ interface ListHeaderProps {
   count: number;
   isLoading: boolean;
   onRefresh: () => void;
+  action?: React.ReactNode;
 }
 
 export const ListHeader = ({
@@ -19,6 +20,7 @@ export const ListHeader = ({
   count,
   isLoading,
   onRefresh,
+  action,
 }: ListHeaderProps) => {
   return (
     <CardHeader className="pb-4">
@@ -33,16 +35,19 @@ export const ListHeader = ({
           </CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onRefresh}
-          disabled={isLoading}
-          className="gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          {action}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            disabled={isLoading}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
     </CardHeader>
   );

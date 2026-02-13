@@ -46,6 +46,7 @@ export class FetchWidgetTypesQueryHandler
                 query.fullSearch,
                 query.scadaFirst,
                 query.deprecatedFilter,
+                query.widgetsBundleId,
             );
 
             return Ok(widgetTypes);

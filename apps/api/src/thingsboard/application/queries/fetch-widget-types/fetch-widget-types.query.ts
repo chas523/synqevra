@@ -10,5 +10,6 @@ export class FetchWidgetTypesQuery implements IQuery {
         public readonly fullSearch: boolean,
         public readonly scadaFirst: boolean,
         public readonly deprecatedFilter: string,
+        public readonly widgetsBundleId: string = '',
     ) { }
 }

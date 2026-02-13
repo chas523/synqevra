@@ -1,5 +1,5 @@
 import { proxyApi } from "@/lib/api/api";
-import { CreateWidgetTypeRequest, WidgetType, WidgetTypesPage } from "@/types/widgetTypes";
+import { CreateWidgetTypeRequest, WidgetType, WidgetTypesPage, WidgetBundlesPage, SaveWidgetBundleRequest, WidgetBundle } from "@/types/widgetTypes";
 
 export class WidgetService {
     public static async getWidgetTypes(
@@ -10,7 +10,8 @@ export class WidgetService {
         tenantOnly: boolean = false,
         fullSearch: boolean = false,
         scadaFirst: boolean = false,
-        deprecatedFilter: string = 'ALL'
+        deprecatedFilter: string = 'ALL',
+        widgetsBundleId: string = ''
     ): Promise<WidgetTypesPage> {
         const params = new URLSearchParams({
             page: page.toString(),
@@ -21,8 +22,31 @@ export class WidgetService {
             fullSearch: fullSearch.toString(),
             scadaFirst: scadaFirst.toString(),
             deprecatedFilter,
+            widgetsBundleId,
         });
         const { data } = await proxyApi.get(`thingsboard/widgetTypes?${params.toString()}`);
+        return data;
+    }
+
+    public static async getWidgetBundles(
+        page: number = 0,
+        pageSize: number = 10,
+        sortProperty: string = 'title',
+        sortOrder: 'ASC' | 'DESC' = 'ASC',
+        tenantOnly: boolean = false,
+        fullSearch: boolean = false,
+        scadaFirst: boolean = false,
+    ): Promise<WidgetBundlesPage> {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            pageSize: pageSize.toString(),
+            sortProperty,
+            sortOrder,
+            tenantOnly: tenantOnly.toString(),
+            fullSearch: fullSearch.toString(),
+            scadaFirst: scadaFirst.toString(),
+        });
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundles?${params.toString()}`);
         return data;
     }
 
@@ -44,6 +68,16 @@ export class WidgetService {
         const { data } = await proxyApi.get(`thingsboard/widgetType/${widgetTypeId}/download?includeResources=${includeResources}`, {
             responseType: 'blob',
         });
+        return data;
+    }
+
+    public static async saveWidgetBundle(request: SaveWidgetBundleRequest): Promise<WidgetBundle> {
+        const { data } = await proxyApi.post("thingsboard/widgetsBundle", request);
+        return data;
+    }
+
+    public static async getWidgetBundleById(bundleId: string): Promise<WidgetBundle> {
+        const { data } = await proxyApi.get(`thingsboard/widgetsBundle/${bundleId}`);
         return data;
     }
 }
