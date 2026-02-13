@@ -62,7 +62,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   // Public routes - show header with logo
-  if (pathname === "/" || pathname.includes("/auth")) {
+  if (pathname === "/" || pathname.includes("/auth") || pathname.includes("/dashboard/requestedUsers")) {
     return (
       <div
         suppressHydrationWarning

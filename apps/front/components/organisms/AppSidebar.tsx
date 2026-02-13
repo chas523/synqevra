@@ -54,11 +54,6 @@ const MENU_ITEMS = {
       icon: Settings,
       label: "Settings",
     },
-    {
-      href: "/dashboard/requestedUsers",
-      icon: UserRoundCog,
-      label: "Pending Users",
-    },
   ],
   user: [
     { href: "/", icon: Home, label: "Landing Page" },
