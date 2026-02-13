@@ -7,7 +7,11 @@ import { SelectWidgetTypeDialog } from "@/components/organisms/SelectWidgetTypeD
 import { ImportWidgetDialog } from "@/components/organisms/ImportWidgetDialog";
 import { AddWidgetMenu } from "@/components/organisms/AddWidgetMenu";
 import { useWidgetTypes, useManageWidgetType } from "@/hooks/thingsboard/widgets/useWidgetTypes";
-import { WidgetType, CreateWidgetTypeRequest } from "@/types/widgetTypes";
+import { useWidgetBundles } from "@/hooks/thingsboard/widgets/useWidgetBundles";
+import { WidgetBundlesTable } from "@/components/organisms/WidgetBundlesTable";
+import { CreateWidgetBundleDialog } from "@/components/organisms/CreateWidgetBundleDialog";
+import { WidgetType, CreateWidgetTypeRequest, WidgetBundle } from "@/types/widgetTypes";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -24,6 +28,7 @@ export const WidgetLibraryPage = () => {
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
     const [showSelectTypeDialog, setShowSelectTypeDialog] = useState(false);
     const [showImportDialog, setShowImportDialog] = useState(false);
+    const [showCreateBundleDialog, setShowCreateBundleDialog] = useState(false);
 
     const { widgetTypes, totalPages, totalElements, isLoading, mutate } = useWidgetTypes(
         currentPage,
@@ -35,6 +40,39 @@ export const WidgetLibraryPage = () => {
         false, // scadaFirst
         deprecatedFilter
     );
+
+
+    // Widget Bundles State
+    const [bundlesPage, setBundlesPage] = useState(0);
+    const [bundlesSortProperty, setBundlesSortProperty] = useState("title");
+    const [bundlesSortOrder, setBundlesSortOrder] = useState<"ASC" | "DESC">("ASC");
+
+    const {
+        widgetBundles,
+        totalPages: bundlesTotalPages,
+        totalElements: bundlesTotalElements,
+        isLoading: isBundlesLoading,
+        mutate: mutateBundles
+    } = useWidgetBundles(
+        bundlesPage,
+        PAGE_SIZE,
+        bundlesSortProperty,
+        bundlesSortOrder
+    );
+
+    const handleBundlesPageChange = useCallback((page: number) => {
+        setBundlesPage(page);
+    }, []);
+
+    const handleBundlesSortChange = useCallback((property: string, order: "ASC" | "DESC") => {
+        setBundlesSortProperty(property);
+        setBundlesSortOrder(order);
+        setBundlesPage(0);
+    }, []);
+
+    const handleBundlesRefresh = useCallback(() => {
+        mutateBundles();
+    }, [mutateBundles]);
 
     const { isCreating, createWidgetType, deleteWidgetType } = useManageWidgetType();
 
@@ -71,6 +109,10 @@ export const WidgetLibraryPage = () => {
 
     const handleRowClick = useCallback((widgetType: WidgetType) => {
         router.push(`/resources/widgets-library/widget-types/${widgetType.id.id}`);
+    }, [router]);
+
+    const handleBundleRowClick = useCallback((bundle: WidgetBundle) => {
+        router.push(`/resources/widgets-library/widgets-bundles/${bundle.id.id}`);
     }, [router]);
 
     return (
@@ -113,15 +155,26 @@ export const WidgetLibraryPage = () => {
                         }
                     />
                 </TabsContent>
-                <TabsContent value="widget-bundles">
-                    <div className="flex flex-col items-center justify-center min-h-[400px] border rounded-lg bg-muted/10 border-dashed">
-                        <div className="flex flex-col items-center gap-2 text-center">
-                            <h3 className="text-lg font-semibold">Widget Bundles</h3>
-                            <p className="text-sm text-muted-foreground w-[300px]">
-                                Widget bundles management is coming soon.
-                            </p>
-                        </div>
-                    </div>
+                <TabsContent value="widget-bundles" className="space-y-4">
+                    <WidgetBundlesTable
+                        widgetBundles={widgetBundles}
+                        isLoading={isBundlesLoading}
+                        currentPage={bundlesPage}
+                        totalPages={bundlesTotalPages}
+                        totalElements={bundlesTotalElements}
+                        pageSize={PAGE_SIZE}
+                        sortProperty={bundlesSortProperty}
+                        sortOrder={bundlesSortOrder}
+                        onSortChange={handleBundlesSortChange}
+                        onPageChange={handleBundlesPageChange}
+                        onRefresh={handleBundlesRefresh}
+                        onRowClick={handleBundleRowClick}
+                        customAction={
+                            <Button onClick={() => setShowCreateBundleDialog(true)} size="sm">
+                                Add Widget Bundle
+                            </Button>
+                        }
+                    />
                 </TabsContent>
             </Tabs>
 
@@ -166,6 +219,14 @@ export const WidgetLibraryPage = () => {
                 onOpenChange={setShowImportDialog}
                 onImportSuccess={() => {
                     mutate();
+                }}
+            />
+
+            <CreateWidgetBundleDialog
+                open={showCreateBundleDialog}
+                onOpenChange={setShowCreateBundleDialog}
+                onSuccess={() => {
+                    mutateBundles();
                 }}
             />
         </div>

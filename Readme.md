@@ -23,16 +23,24 @@ Implementation of ThingsBoard and Medplum on docker containers.
           source: "/fhir/:path*",
           destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
         },
+        {
+          source: "/tb-assets/:path*",
+          destination: "http://thingsboard:8080/assets/:path*", // ThingsBoard static assets
+        },
 ```
 to 
 ```typescript
         {
           source: "/api/:path*",
-          destination: "http://localhost:3000/api/:path*", // Local
+          destination: "http://localhost:3003/api/:path*", // Local
         },
         {
           source: "/fhir/:path*",
-          destination: "http://localhost:3000/fhir/:path*", // Local
+          destination: "http://localhost:3003/fhir/:path*", // Local
+        },
+        {
+          source: "/tb-assets/:path*",
+          destination: "http://localhost:8088/assets/:path*", // ThingsBoard static assets
         },
 ```
 9. To run project locally, you have to update Rulechain and its location.
@@ -62,7 +70,7 @@ to
 to 
 ```json
 "configuration": {
-          "restEndpointUrlPattern": "http://localhost:3000/api/proxy/telemetry",
+          "restEndpointUrlPattern": "http://localhost:3003/api/proxy/telemetry",
           "requestMethod": "POST",
 ```  
 10. Run `pnpm dev` command to start dev server for frontend and backend  

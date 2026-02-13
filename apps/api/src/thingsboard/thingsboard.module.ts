@@ -44,6 +44,11 @@ import { UploadImageCommandHandler } from './application/commands/upload-image/u
 import { DeleteImageCommandHandler } from './application/commands/delete-image/delete-image.command.handler';
 import { UpdateMailSettingsCommandHandler } from './application/commands/update-mail-settings/update-mail-settings.command.handler';
 import { DeleteWidgetTypeCommandHandler } from './application/commands/delete-widget-type/delete-widget-type.command.handler';
+import { SendNotificationCommandHandler } from './application/commands/send-notification/send-notification.command-handler';
+import { CreateNotificationTargetCommandHandler } from './application/commands/create-notification-target/create-notification-target.command-handler';
+import { CreateNotificationTemplateCommandHandler } from './application/commands/create-notification-template/create-notification-template.command-handler';
+import { CreateNotificationRuleCommandHandler } from './application/commands/create-notification-rule/create-notification-rule.command-handler';
+import { PreviewNotificationRequestCommandHandler } from './application/commands/preview-notification-request/preview-notification-request.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -70,6 +75,12 @@ import { FetchTenantRelationsQueryHandler } from './application/queries/fetch-te
 import { FetchTenantProfilesQueryHandler } from './application/queries/fetch-tenant-profiles/fetch-tenant-profiles.query-handler';
 import { FetchTenantProfileAttributesQueryHandler } from './application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query-handler';
 import { FetchTenantProfileAlarmsQueryHandler } from './application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query-handler';
+import { FetchDeliveryMethodsQueryHandler } from './application/queries/fetch-delivery-methods/fetch-delivery-methods.query-handler';
+import { FetchNotificationRequestsQueryHandler } from './application/queries/fetch-notification-requests/fetch-notification-requests.query-handler';
+import { FetchNotificationTargetsQueryHandler } from './application/queries/fetch-notification-targets/fetch-notification-targets.query-handler';
+import { FetchNotificationTemplatesQueryHandler } from './application/queries/fetch-notification-templates/fetch-notification-templates.query-handler';
+import { FetchNotificationRulesQueryHandler } from './application/queries/fetch-notification-rules/fetch-notification-rules.query-handler';
+import { FetchMaterialIconsQueryHandler } from './application/queries/fetch-material-icons/fetch-material-icons.query-handler';
 import { FetchImagesQueryHandler } from './application/queries/fetch-images/fetch-images.query.handler';
 import { DownloadImageQueryHandler } from './application/queries/download-image/download-image.query.handler';
 import { ExportImageQueryHandler } from './application/queries/export-image/export-image.query.handler';
@@ -77,12 +88,15 @@ import { FetchMailSettingsQueryHandler } from './application/queries/fetch-mail-
 import { FetchWidgetTypesQueryHandler } from './application/queries/fetch-widget-types/fetch-widget-types.query.handler';
 import { FetchWidgetTypeByIdQueryHandler } from './application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query.handler';
 import { SaveWidgetTypeCommandHandler } from './application/commands/save-widget-type/save-widget-type.command.handler';
+import { SaveWidgetBundleCommandHandler } from './application/commands/save-widget-bundle/save-widget-bundle.command.handler';
 import { DownloadWidgetTypeQueryHandler } from './application/queries/download-widget-type/download-widget-type.query.handler';
 import { FetchTwoFaSettingsQueryHandler } from './application/queries/fetch-2fa-settings/fetch-2fa-settings.query.handler';
 import { SaveTwoFaSettingsCommandHandler } from './application/commands/save-2fa-settings/save-2fa-settings.command.handler';
 import { FetchWidgetsBundlesHandler } from './application/queries/fetch-widgets-bundles/fetch-widgets-bundles.handler';
 import { FetchWidgetTypeFqnsHandler } from './application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.handler';
 import { SaveWidgetTypeFqnsHandler } from './application/commands/save-widget-type-fqns/save-widget-type-fqns.handler';
+import { FetchWidgetBundlesQueryHandler } from './application/queries/fetch-widget-bundles/fetch-widget-bundles.query.handler';
+import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -113,6 +127,12 @@ const commandHandlers = [
   CreateRelationCommandHandler,
   DeleteRelationCommandHandler,
   SaveTenantProfileCommandHandler,
+  SendNotificationCommandHandler,
+  CreateNotificationTargetCommandHandler,
+  CreateNotificationTemplateCommandHandler,
+  CreateNotificationRuleCommandHandler,
+  PreviewNotificationRequestCommandHandler,
+  SaveWidgetBundleCommandHandler,
   UploadImageCommandHandler,
   DeleteImageCommandHandler,
   UpdateMailSettingsCommandHandler,
@@ -157,6 +177,14 @@ const queryHandlers = [
   FetchWidgetTypeByIdQueryHandler,
   SaveWidgetTypeCommandHandler,
   DownloadWidgetTypeQueryHandler,
+  FetchDeliveryMethodsQueryHandler,
+  FetchNotificationRequestsQueryHandler,
+  FetchNotificationTargetsQueryHandler,
+  FetchNotificationTemplatesQueryHandler,
+  FetchNotificationRulesQueryHandler,
+  FetchMaterialIconsQueryHandler,
+  FetchWidgetBundlesQueryHandler,
+  FetchWidgetBundleByIdQueryHandler,
   FetchTwoFaSettingsQueryHandler,
   FetchWidgetsBundlesHandler,
   FetchWidgetTypeFqnsHandler,
@@ -200,4 +228,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule { }
+export class ThingsboardModule {}

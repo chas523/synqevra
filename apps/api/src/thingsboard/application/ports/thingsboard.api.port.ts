@@ -31,7 +31,35 @@ import {
   ResourceCreateDto,
   ResourcesPageResponseDto,
 } from '../../interface/rest/dtos/response/resource.response.dto';
-import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import { DeliveryMethodsResponse } from '../../interface/rest/dtos/response/delivery-methods.response.dto';
+import { NotificationRequestResponse } from '../../interface/rest/dtos/response/notification-request.response.dto';
+import { SendNotificationRequestDto } from '../../interface/rest/dtos/request/send-notification.request.dto';
+import { CreateNotificationTargetRequestDto } from '../../interface/rest/dtos/request/create-notification-target.request.dto';
+import {
+  NotificationTargetDto,
+  NotificationTargetsResponse,
+} from '../../interface/rest/dtos/response/notification-target.response.dto';
+import { CreateNotificationTemplateRequestDto } from '../../interface/rest/dtos/request/create-notification-template.request.dto';
+import { CreateNotificationRuleRequestDto } from '../../interface/rest/dtos/request/create-notification-rule.request.dto';
+import {
+  NotificationTemplateDto,
+  NotificationTemplatesResponse,
+} from '../../interface/rest/dtos/response/notification-template.response.dto';
+import {
+  NotificationRulesResponse,
+  NotificationRuleDto,
+} from '../../interface/rest/dtos/response/notification-rule.response.dto';
+import {
+  CreateWidgetTypeRequestDto,
+  WidgetTypeDto,
+  WidgetTypesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import {
+  WidgetBundleDto,
+  WidgetBundlesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
+import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
 import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
 import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-2fa-settings.request.dto';
 
@@ -69,16 +97,26 @@ export abstract class ThingsboardApiPort {
     tenantId: string,
     sysAdminAccessToken: string,
   ): Promise<void>;
-  abstract deleteTenantAdmin(
-    tenantAdminId: string,
-    sysAdminAccessToken: string,
-  ): Promise<void>;
   abstract updateTenant(
     tenantData: UpdateTenantDto,
     sysAdminAccessToken: string,
   ): Promise<TenantResponse>;
+  abstract deleteTenantAdmin(
+    tenantAdminId: string,
+    sysAdminAccessToken: string,
+  ): Promise<void>;
 
-  // User operations
+  abstract createNotificationTarget(
+    sysAdminAccessToken: string,
+    targetData: CreateNotificationTargetRequestDto,
+  ): Promise<NotificationTargetDto>;
+
+  abstract createNotificationTemplate(
+    sysAdminAccessToken: string,
+    templateData: CreateNotificationTemplateRequestDto,
+  ): Promise<NotificationTemplateDto>;
+
+  // Notification operations
   abstract createTenantAdmin(
     userData: CreateTenantAdminRequestDto,
     tenantId: EntityId,
@@ -162,6 +200,63 @@ export abstract class ThingsboardApiPort {
     page: number,
     pageSize: number,
   ): Promise<GetNotificationsResponse>;
+  abstract fetchDeliveryMethods(
+    sysAdminAccessToken: string,
+  ): Promise<DeliveryMethodsResponse>;
+  abstract fetchNotificationRequests(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<any>;
+  abstract sendNotification(
+    sysAdminAccessToken: string,
+    notificationRequest: SendNotificationRequestDto,
+  ): Promise<NotificationRequestResponse>;
+  abstract fetchNotificationTargets(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<NotificationTargetsResponse>;
+  abstract previewNotificationRequest(
+    sysAdminAccessToken: string,
+    previewRequest: any,
+  ): Promise<any>;
+  abstract fetchMaterialIcons(sysAdminAccessToken: string): Promise<string[]>;
+
+  abstract fetchNotificationTemplates(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+      notificationTypes?: string;
+    },
+  ): Promise<NotificationTemplatesResponse>;
+
+  abstract fetchNotificationRules(
+    sysAdminAccessToken: string,
+    params: {
+      pageSize?: number;
+      page?: number;
+      sortProperty?: string;
+      sortOrder?: string;
+    },
+  ): Promise<NotificationRulesResponse>;
+
+  abstract saveNotificationRule(
+    sysAdminAccessToken: string,
+    rule: CreateNotificationRuleRequestDto,
+  ): Promise<NotificationRuleDto>;
+
   abstract fetchDashboardVersion(
     sysadminAccessToken: string,
   ): Promise<DashboardVersionResponse>;
@@ -348,15 +443,6 @@ export abstract class ThingsboardApiPort {
   ): Promise<TenantProfile>;
 
   // Image operations
-  abstract fetchImages(
-    sysAdminAccessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty: string,
-    sortOrder: 'ASC' | 'DESC',
-    imageSubType: string,
-    includeSystemImages: boolean,
-  ): Promise<any>;
 
   abstract uploadImage(
     sysAdminAccessToken: string,
@@ -403,6 +489,7 @@ export abstract class ThingsboardApiPort {
     fullSearch: boolean,
     scadaFirst: boolean,
     deprecatedFilter: string,
+    widgetsBundleId?: string,
   ): Promise<WidgetTypesPageDto>;
 
   abstract deleteWidgetType(
@@ -421,12 +508,42 @@ export abstract class ThingsboardApiPort {
     widgetTypeId: string,
   ): Promise<WidgetTypeDto>;
 
+  abstract fetchWidgetBundleById(
+    sysAdminAccessToken: string,
+    widgetsBundleId: string,
+  ): Promise<WidgetBundleDto>;
+
   abstract downloadWidgetType(
     sysAdminAccessToken: string,
     widgetTypeId: string,
     includeResources?: boolean,
   ): Promise<any>;
 
+  abstract fetchWidgetBundles(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+  ): Promise<WidgetBundlesPageDto>;
+
+  abstract fetchImages(
+    sysAdminAccessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    imageSubType: string,
+    includeSystemImages: boolean,
+  ): Promise<ImagesPageResponseDto>;
+
+  abstract saveWidgetBundle(
+    sysAdminAccessToken: string,
+    widgetBundle: SaveWidgetBundleRequestDto,
+  ): Promise<WidgetBundleDto>;
   abstract fetchTwoFaSettings(
     sysAdminAccessToken: string,
   ): Promise<TwoFactorAuthSettingsDto>;
@@ -459,7 +576,6 @@ export abstract class ThingsboardApiPort {
     fqns: string[],
   ): Promise<any>;
 }
-
 
 // Response types for new methods
 export interface TenantAttribute {

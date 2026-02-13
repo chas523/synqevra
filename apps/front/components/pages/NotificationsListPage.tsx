@@ -8,8 +8,10 @@ import {
     XCircle,
     Clock,
     AlertCircle,
+    Send,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { LoadingCard, Pagination } from "../molecules";
 import {
     EmptyState,
@@ -35,6 +37,7 @@ interface NotificationsListPageProps {
     sortOptions: readonly { value: string; label: string }[];
     onNextPage: () => void;
     onPrevPage: () => void;
+    onSendNotification?: () => void;
 }
 
 const getStatusIcon = (status?: string) => {
@@ -63,6 +66,49 @@ const getStatusColor = (status?: string) => {
     }
 };
 
+const NotificationIcon = ({ notification }: { notification: Notification }) => {
+    const iconConfig = notification.additionalConfig?.icon;
+
+    if (!iconConfig?.enabled) {
+        return <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0" />;
+    }
+
+    const { icon, color } = iconConfig;
+
+    if (icon.startsWith('mdi:')) {
+        return (
+            <div
+                className="mt-1 flex-shrink-0"
+                style={{
+                    WebkitMaskImage: `url(/tb-assets/mdi/${icon.substring(4)}.svg)`,
+                    maskImage: `url(/tb-assets/mdi/${icon.substring(4)}.svg)`,
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    maskPosition: 'center',
+                    backgroundColor: color || '#6B7280',
+                    width: '20px',
+                    height: '20px'
+                }}
+            />
+        );
+    }
+
+    return (
+        <span
+            className="material-icons mt-1 flex-shrink-0 select-none"
+            style={{
+                color: color || '#6B7280',
+                fontSize: '20px'
+            }}
+        >
+            {icon}
+        </span>
+    );
+};
+
 export function NotificationsListPage({
     data,
     error,
@@ -73,6 +119,7 @@ export function NotificationsListPage({
     sortOptions,
     onNextPage,
     onPrevPage,
+    onSendNotification,
 }: NotificationsListPageProps) {
     if (error) {
         return (
@@ -122,6 +169,18 @@ export function NotificationsListPage({
                 count={data?.total || 0}
                 isLoading={isLoading}
                 onRefresh={onRefresh}
+                action={
+                    onSendNotification && (
+                        <Button
+                            onClick={onSendNotification}
+                            className="gap-2"
+                            size="sm"
+                        >
+                            <Send className="h-4 w-4" />
+                            Send Notification
+                        </Button>
+                    )
+                }
             />
 
             <CardContent className="space-y-4">
@@ -149,7 +208,7 @@ export function NotificationsListPage({
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-start gap-3 flex-1">
-                                        <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0" />
+                                        <NotificationIcon notification={notification} />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <h3 className="font-medium text-gray-900 dark:text-gray-100">
@@ -173,6 +232,26 @@ export function NotificationsListPage({
                                                     {notification.text}
                                                 </p>
                                             )}
+
+                                            {/* Action Button */}
+                                            {notification.additionalConfig?.actionButtonConfig?.enabled &&
+                                                notification.additionalConfig?.actionButtonConfig?.text && (
+                                                    <div className="mb-2">
+                                                        <Button
+                                                            variant="default"
+                                                            size="sm"
+                                                            asChild
+                                                        >
+                                                            <a
+                                                                href={notification.additionalConfig.actionButtonConfig.link}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {notification.additionalConfig.actionButtonConfig.text}
+                                                            </a>
+                                                        </Button>
+                                                    </div>
+                                                )}
 
                                             <div className="mt-2 space-y-1">
                                                 {notification.deliveryMethod && (

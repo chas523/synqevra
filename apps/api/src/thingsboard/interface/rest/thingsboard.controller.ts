@@ -23,6 +23,9 @@ import {
   ApiBody,
   ApiQuery,
   ApiBearerAuth,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
@@ -46,6 +49,11 @@ import {
 import { Device } from './dtos/response/thingsboard-created-device.response.dto';
 import type { CurrentUser } from 'src/auth/types/current-user';
 import { CreateDeviceRequest } from './dtos/request/thingsboard-device.request.dto';
+import { CreateNotificationTemplateRequestDto } from './dtos/request/create-notification-template.request.dto';
+import { CreateNotificationRuleRequestDto } from './dtos/request/create-notification-rule.request.dto';
+import { CreateNotificationRuleCommand } from '../../application/commands/create-notification-rule/create-notification-rule.command';
+import { CreateNotificationTemplateCommand } from '../../application/commands/create-notification-template/create-notification-template.command';
+import { NotificationTemplateDto } from './dtos/response/notification-template.response.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { GetUserQuery } from 'src/thingsboard/application/queries/get-user/get-user.query';
 import { ThingsboardLoginCommand } from 'src/thingsboard/application/commands/thingsboard-login/thingsboard-login.command';
@@ -114,12 +122,37 @@ import { UploadImageCommand } from 'src/thingsboard/application/commands/upload-
 import { DeleteImageCommand } from 'src/thingsboard/application/commands/delete-image/delete-image.command';
 import { DownloadImageQuery } from 'src/thingsboard/application/queries/download-image/download-image.query';
 import { ExportImageQuery } from 'src/thingsboard/application/queries/export-image/export-image.query';
-import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from './dtos/response/widget-types.response.dto';
+import {
+  CreateWidgetTypeRequestDto,
+  WidgetTypeDto,
+  WidgetTypesPageDto,
+} from './dtos/response/widget-types.response.dto';
 import { FetchWidgetTypesQuery } from 'src/thingsboard/application/queries/fetch-widget-types/fetch-widget-types.query';
 import { DeleteWidgetTypeCommand } from 'src/thingsboard/application/commands/delete-widget-type/delete-widget-type.command';
 import { SaveWidgetTypeCommand } from 'src/thingsboard/application/commands/save-widget-type/save-widget-type.command';
 import { FetchWidgetTypeByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-type-by-id/fetch-widget-type-by-id.query';
 import { DownloadWidgetTypeQuery } from 'src/thingsboard/application/queries/download-widget-type/download-widget-type.query';
+import { SendNotificationRequestDto } from './dtos/request/send-notification.request.dto';
+import { DeliveryMethodsResponse } from './dtos/response/delivery-methods.response.dto';
+import { NotificationRequestResponse } from './dtos/response/notification-request.response.dto';
+import { FetchDeliveryMethodsQuery } from 'src/thingsboard/application/queries/fetch-delivery-methods/fetch-delivery-methods.query';
+import { SendNotificationCommand } from 'src/thingsboard/application/commands/send-notification/send-notification.command';
+import { CreateNotificationTargetCommand } from 'src/thingsboard/application/commands/create-notification-target/create-notification-target.command';
+import { FetchNotificationTargetsQuery } from 'src/thingsboard/application/queries/fetch-notification-targets/fetch-notification-targets.query';
+import { FetchNotificationTemplatesQuery } from 'src/thingsboard/application/queries/fetch-notification-templates/fetch-notification-templates.query';
+import { FetchNotificationRulesQuery } from 'src/thingsboard/application/queries/fetch-notification-rules/fetch-notification-rules.query';
+import { CreateNotificationTargetRequestDto } from './dtos/request/create-notification-target.request.dto';
+import { PreviewNotificationRequestCommand } from 'src/thingsboard/application/commands/preview-notification-request/preview-notification-request.command';
+import { FetchWidgetBundlesQuery } from 'src/thingsboard/application/queries/fetch-widget-bundles/fetch-widget-bundles.query';
+import {
+  WidgetBundleDto,
+  WidgetBundlesPageDto,
+} from './dtos/response/widget-bundles.response.dto';
+import { SaveWidgetBundleCommand } from 'src/thingsboard/application/commands/save-widget-bundle/save-widget-bundle.command';
+import { SaveWidgetBundleRequestDto } from './dtos/request/save-widget-bundle.request.dto';
+import { FetchWidgetBundleByIdQuery } from 'src/thingsboard/application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query';
+import { FetchMaterialIconsQuery } from 'src/thingsboard/application/queries/fetch-material-icons/fetch-material-icons.query';
+import { FetchNotificationRequestsQuery } from 'src/thingsboard/application/queries/fetch-notification-requests/fetch-notification-requests.query';
 import { TwoFactorAuthSettingsDto } from './dtos/response/thingsboard-2fa-settings.response.dto';
 import { TwoFactorAuthSettingsRequestDto } from './dtos/request/thingsboard-2fa-settings.request.dto';
 import { FetchTwoFaSettingsQuery } from '../../application/queries/fetch-2fa-settings/fetch-2fa-settings.query';
@@ -136,7 +169,7 @@ export class ThingsboardController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly sysAdminAuthService: SysAdminAuthService,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -986,7 +1019,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1087,7 +1120,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1124,44 +1157,321 @@ export class ThingsboardController {
     });
   }
 
-  // Image endpoints
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  @Get('images')
-  @ApiOperation({ summary: 'Get images' })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'pageSize', required: false, type: Number })
-  @ApiQuery({ name: 'sortProperty', required: false, type: String })
-  @ApiQuery({ name: 'sortOrder', required: false, enum: ['ASC', 'DESC'] })
-  @ApiQuery({ name: 'imageSubType', required: false, type: String })
-  @ApiQuery({ name: 'includeSystemImages', required: false, type: Boolean })
+  @Get('/notification/deliveryMethods')
+  @ApiOperation({
+    summary: 'Get available notification delivery methods',
+    description:
+      'Retrieve list of available delivery methods for notifications (Web, Email, SMS, etc.)',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ImagesPageResponseDto,
+    description: 'Delivery methods retrieved successfully',
+    type: DeliveryMethodsResponse,
   })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getImages(
-    @Query('page') page: number = 0,
-    @Query('pageSize') pageSize: number = 10,
-    @Query('sortProperty') sortProperty: string = 'createdTime',
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
-    @Query('imageSubType') imageSubType: string = 'IMAGE',
-    @Query('includeSystemImages') includeSystemImages: boolean = false,
-  ) {
-    const query = new FetchImagesQuery(
-      page,
-      pageSize,
-      sortProperty,
-      sortOrder,
-      imageSubType,
-      includeSystemImages,
-    );
-    const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch delivery methods',
+  })
+  async getDeliveryMethods() {
+    const query = new FetchDeliveryMethodsQuery();
+    const result: Result<DeliveryMethodsResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
     return match(result, {
-      Ok: (response: ImagesPageResponseDto) => response,
+      Ok: (response: DeliveryMethodsResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('/notification/send')
+  @ApiOperation({
+    summary: 'Send a notification',
+    description:
+      'Send a notification to specified targets using ThingsBoard notification system',
+  })
+  @ApiBody({
+    type: SendNotificationRequestDto,
+    description: 'Notification request data',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Notification sent successfully',
+    type: NotificationRequestResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to send notification',
+  })
+  async sendNotification(
+    @Body() notificationRequest: SendNotificationRequestDto,
+  ) {
+    const command = new SendNotificationCommand(notificationRequest);
+    const result: Result<NotificationRequestResponse, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: NotificationRequestResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/target')
+  async createNotificationTarget(
+    @Body() request: CreateNotificationTargetRequestDto,
+  ) {
+    const command = new CreateNotificationTargetCommand(request);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (target) => target,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/targets')
+  async fetchNotificationTargets() {
+    const query = new FetchNotificationTargetsQuery();
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/request/preview')
+  async previewNotificationRequest(@Body() previewRequest: any) {
+    const command = new PreviewNotificationRequestCommand(previewRequest);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('material-icons')
+  async fetchMaterialIcons() {
+    const query = new FetchMaterialIconsQuery();
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (icons) => icons,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/requests')
+  @ApiOperation({
+    summary: 'Get notification requests',
+    description:
+      'Retrieve paginated list of sent notification requests with stats',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification requests',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification requests',
+  })
+  async getNotificationRequests(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationRequestsQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/templates')
+  @ApiOperation({
+    summary: 'Get notification templates',
+    description: 'Retrieve paginated list of notification templates',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification templates',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification templates',
+  })
+  async getNotificationTemplates(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('notificationTypes') notificationTypes?: string,
+  ) {
+    const query = new FetchNotificationTemplatesQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+      notificationTypes,
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/rules')
+  @ApiOperation({
+    summary: 'Get notification rules',
+    description: 'Retrieve paginated list of notification rules',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification rules',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification rules',
+  })
+  async getNotificationRules(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationRulesQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Get('notification/targets')
+  @ApiOperation({
+    summary: 'Get notification targets',
+    description: 'Retrieve paginated list of notification targets',
+  })
+  @ApiOkResponse({
+    description: 'Successfully fetched notification targets',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to fetch notification targets',
+  })
+  async getNotificationTargets(
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchNotificationTargetsQuery({
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: sortOrder || 'DESC',
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/template')
+  @ApiOperation({
+    summary: 'Create notification template',
+    description: 'Create a new notification template',
+  })
+  @ApiOkResponse({
+    description: 'Successfully created notification template',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to create notification template',
+  })
+  async createNotificationTemplate(
+    @Body() templateData: CreateNotificationTemplateRequestDto,
+  ) {
+    const command = new CreateNotificationTemplateCommand(templateData);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Post('notification/rule')
+  @ApiOperation({
+    summary: 'Create notification rule',
+    description: 'Create a new notification rule',
+  })
+  @ApiOkResponse({
+    description: 'Successfully created notification rule',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid parameters',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Failed to create notification rule',
+  })
+  async createNotificationRule(@Body() rule: CreateNotificationRuleRequestDto) {
+    const command = new CreateNotificationRuleCommand(rule);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1177,7 +1487,13 @@ export class ThingsboardController {
     type: ImageDto,
   })
   async uploadImage(
-    @Body() body: { file: string; fileName: string; title: string; imageSubType?: string },
+    @Body()
+    body: {
+      file: string;
+      fileName: string;
+      title: string;
+      imageSubType?: string;
+    },
   ) {
     // Convert base64 file to Buffer
     const fileBuffer = Buffer.from(body.file, 'base64');
@@ -1221,7 +1537,10 @@ export class ThingsboardController {
         let contentType = 'application/octet-stream';
 
         // Infer content type for SVGs to ensure proper rendering
-        if (imageLink.toLowerCase().includes('.svg') || buffer.slice(0, 100).toString().toLowerCase().includes('<svg')) {
+        if (
+          imageLink.toLowerCase().includes('.svg') ||
+          buffer.slice(0, 100).toString().toLowerCase().includes('<svg')
+        ) {
           contentType = 'image/svg+xml';
         } else if (buffer.slice(0, 4).toString('hex') === '89504e47') {
           contentType = 'image/png';
@@ -1289,9 +1608,7 @@ export class ThingsboardController {
     status: HttpStatus.OK,
     type: ImageExportDto,
   })
-  async exportImage(
-    @Param('encodedLink') encodedLink: string,
-  ) {
+  async exportImage(@Param('encodedLink') encodedLink: string) {
     const imageLink = decodeURIComponent(encodedLink);
     const query = new ExportImageQuery(imageLink);
     const result: Result<ImageExportDto, ThingsboardApiException> =
@@ -1380,6 +1697,7 @@ export class ThingsboardController {
     @Query('fullSearch') fullSearch = false,
     @Query('scadaFirst') scadaFirst = false,
     @Query('deprecatedFilter') deprecatedFilter = 'ALL',
+    @Query('widgetsBundleId') widgetsBundleId = '',
   ) {
     const query = new FetchWidgetTypesQuery(
       Number(page),
@@ -1390,6 +1708,7 @@ export class ThingsboardController {
       fullSearch === true || String(fullSearch) === 'true',
       scadaFirst === true || String(scadaFirst) === 'true',
       deprecatedFilter,
+      widgetsBundleId,
     );
     const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1509,6 +1828,136 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/images')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get images',
+    description: 'Fetch paginated list of images',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of images retrieved successfully',
+    type: ImagesPageResponseDto,
+  })
+  async getImages(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('imageSubType') imageSubType = 'IMAGE',
+    @Query('includeSystemImages') includeSystemImages = false,
+  ) {
+    const query = new FetchImagesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      imageSubType,
+      includeSystemImages === true || String(includeSystemImages) === 'true',
+    );
+    const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (images: ImagesPageResponseDto) => images,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget bundles',
+    description: 'Fetch paginated list of widget bundles',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of widget bundles retrieved successfully',
+    type: WidgetBundlesPageDto,
+  })
+  async getWidgetBundles(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'title',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('tenantOnly') tenantOnly = false,
+    @Query('fullSearch') fullSearch = false,
+    @Query('scadaFirst') scadaFirst = false,
+  ) {
+    const query = new FetchWidgetBundlesQuery(
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      tenantOnly === true || String(tenantOnly) === 'true',
+      fullSearch === true || String(fullSearch) === 'true',
+      scadaFirst === true || String(scadaFirst) === 'true',
+    );
+    const result: Result<WidgetBundlesPageDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (items: WidgetBundlesPageDto) => items,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/widgetsBundle/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get widget bundle by id',
+    description: 'Fetch widget bundle details by id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Widget bundle retrieved successfully',
+    type: WidgetBundleDto,
+  })
+  async getWidgetBundleById(@Param('id') id: string) {
+    const query = new FetchWidgetBundleByIdQuery(id);
+    const result: Result<WidgetBundleDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (item: WidgetBundleDto) => item,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/widgetsBundle')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save widget bundle',
+    description: 'Create or update a widget bundle',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Widget bundle saved successfully',
+  })
+  async saveWidgetBundle(
+    @Body() saveWidgetBundleRequest: SaveWidgetBundleRequestDto,
+  ) {
+    const command = new SaveWidgetBundleCommand(saveWidgetBundleRequest);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
   @Get('/2fa/settings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -1567,9 +2016,7 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update 2FA settings',
   })
-  async saveTwoFaSettings(
-    @Body() settings: TwoFactorAuthSettingsRequestDto,
-  ) {
+  async saveTwoFaSettings(@Body() settings: TwoFactorAuthSettingsRequestDto) {
     const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
     const command = new SaveTwoFaSettingsCommand(sysAdminToken, settings);
     const result = await this.commandBus.execute(command);
