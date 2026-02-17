@@ -1,5 +1,5 @@
-import { WidgetLibraryPage } from "@/components/pages/WidgetLibraryPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-    return <WidgetLibraryPage />;
+    redirect("/resources/widgets-library/widget-types");
 }
