@@ -4,6 +4,7 @@ import { TimeRangeFilter, type TimeRange } from "../molecules/TimeRangeFilter";
 import { EventFilters, type EventType } from "../molecules/EventFilters";
 import { AddRelationDialog } from "../molecules/AddRelationDialog";
 import Select from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Tenant } from "@/lib/types/dashboardTypes";
@@ -543,6 +544,79 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
     );
 }
 
+function MedplumTabContent({ tenantId }: { tenantId: string }) {
+    const [medplumEnabled, setMedplumEnabled] = useState<boolean | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchStatus = useCallback(async () => {
+        try {
+            setLoading(true);
+            const status = await TenantService.getTenantConnectionStatus(tenantId);
+            setMedplumEnabled(status.medplum === true);
+            setError(null);
+        } catch (err) {
+            setError("Failed to fetch Medplum status");
+        } finally {
+            setLoading(false);
+        }
+    }, [tenantId]);
+
+    useEffect(() => {
+        fetchStatus();
+    }, [fetchStatus]);
+
+    const handleToggle = async (checked: boolean) => {
+        // If we are trying to turn it on
+        if (checked) {
+            try {
+                setProcessing(true);
+                await TenantService.createMedplumTenant(tenantId);
+                toast.success("Medplum integration enabled successfully");
+                setMedplumEnabled(true);
+            } catch (err) {
+                toast.error("Failed to enable Medplum integration");
+                // Revert the switch if it was visually toggled (depends on UI library behavior, but state drives it)
+            } finally {
+                setProcessing(false);
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                Loading Medplum status...
+            </div>
+        );
+    }
+
+    if (error) {
+        return <div className="text-center py-8 text-red-500">{error}</div>;
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <div className="space-y-0.5">
+                    <label className="text-sm font-medium text-slate-900 dark:text-white">
+                        Medplum Integration
+                    </label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Enable Medplum integration for this tenant.
+                    </p>
+                </div>
+                <Switch
+                    checked={medplumEnabled === true}
+                    onCheckedChange={handleToggle}
+                    disabled={medplumEnabled === true || processing}
+                />
+            </div>
+        </div>
+    );
+}
+
 interface EditFormState {
     title: string;
     country: string;
@@ -757,6 +831,11 @@ export function TenantDetailPanel({
                     </DetailPanelSection>
                 </div>
             ),
+        },
+        {
+            id: "medplum",
+            label: "Medplum",
+            content: <MedplumTabContent tenantId={tenant.id.id} />,
         },
         {
             id: "attributes",
