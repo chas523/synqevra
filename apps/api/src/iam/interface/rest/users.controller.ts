@@ -22,7 +22,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UserRepository,
     private readonly getUserByTokenUseCase: GetUserByTokenUseCase,
-  ) {}
+  ) { }
 
   @Get('profile')
   @ApiBearerAuth()
@@ -48,8 +48,10 @@ export class UsersController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or missing authentication token',
   })
-  getProfileById(@Req() req: Request & { user: CurrentUser }) {
-    return this.usersService.getUserByIdNoToken(req.user.id);
+  async getProfileById(@Req() req: Request & { user: CurrentUser }) {
+    const role = req.user.connectionRole;
+    const user = await this.usersService.getUserByIdNoToken(req.user.id);
+    return { ...user, role };
   }
 
   @Roles(Role.ADMIN)

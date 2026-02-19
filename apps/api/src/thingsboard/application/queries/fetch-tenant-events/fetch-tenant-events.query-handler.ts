@@ -22,19 +22,17 @@ export class FetchTenantEventsQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchTenantEventsQuery,
     ): Promise<Result<EntityEventsResponse, TBAdminGetError>> {
-        const { tenantId, page, pageSize, eventType, startTime, endTime } = query;
+        const { tenantId, page, pageSize, eventType, startTime, endTime, accessToken } = query;
 
         try {
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             const response = await this.thingsboardApi.fetchEntityEvents(
-                accessToken,
+                accessToken!,
                 'TENANT',
                 tenantId,
                 page,

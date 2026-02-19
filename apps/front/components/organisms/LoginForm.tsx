@@ -1,7 +1,9 @@
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { useState } from "react";
 import { useLogin } from "@/hooks/auth/useAuth";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 import type { LoginFormData } from "@/types/authTypes";
 import { LoadingButton } from "../atoms";
 import { ErrorMessage, FormField } from "../molecules";
@@ -16,7 +18,9 @@ import {
 
 const LoginForm = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { login, isLoading, error } = useLogin();
+
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -37,9 +41,15 @@ const LoginForm = () => {
     if (!formData.email || !formData.password) return;
     if (!formData.email.includes("@")) return;
 
+    const role = pathname.endsWith('/admin') ? 'ADMIN' : 'USER';
+
     try {
-      await login(formData);
-      router.push("/devices");
+      await login(formData, role);
+      if (role === 'ADMIN') {
+        router.push("/dashboard");
+      } else {
+        router.push("/devices");
+      }
     } catch (err) {
       console.error(err);
     }

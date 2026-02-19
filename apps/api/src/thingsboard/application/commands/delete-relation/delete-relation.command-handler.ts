@@ -17,16 +17,14 @@ export class DeleteRelationCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: DeleteRelationCommand,
     ): Promise<Result<void, TBAdminGetError>> {
-        const { fromId, fromType, relationType, toId, toType } = command;
+        const { fromId, fromType, relationType, toId, toType, accessToken } = command;
 
         try {
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             await this.thingsboardApi.deleteRelation(
                 accessToken,

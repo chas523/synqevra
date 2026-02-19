@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -36,6 +37,8 @@ import { LoginResult } from '../../application/dto/login.result';
 import { LogoutResult } from '../../application/dto/logout.result';
 import { RefreshTokensResult } from '../../application/dto/refresh-token.result';
 import { InvitePractitionerResult } from '../../application/dto/invite-practitioner.result';
+import { GetUserProfileUseCase } from 'src/iam/application/use-cases/get-user-profile.use-case';
+import { UserProfileResult } from './dto/response/get-user-profile.response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -46,7 +49,8 @@ export class AuthController {
     private readonly logoutUserUseCase: LogoutUserUseCase,
     private readonly refreshTokensUseCase: RefreshTokensUseCase,
     private readonly invitePractitionerUseCase: InvitePractitionerUseCase,
-  ) {}
+    private readonly getUserProfileUseCase: GetUserProfileUseCase,
+  ) { }
 
   @Public()
   @HttpCode(HttpStatus.CREATED)
@@ -218,5 +222,24 @@ export class AuthController {
       ...invitePractitionerDto,
       currentUser: user,
     });
+  }
+
+  @Get('profile')
+  @ApiOperation({
+    summary: 'Get user profile',
+    description: 'Get the profile of the authenticated user',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User profile retrieved successfully',
+    type: UserProfileResult,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or missing authentication token',
+  })
+  async getProfile(@ActiveUser() user: CurrentUser) {
+    const userProfile = await this.getUserProfileUseCase.execute(user.id, user.connectionRole) as UserProfileResult;
+    return userProfile;
   }
 }

@@ -160,6 +160,8 @@ import { SaveTwoFaSettingsCommand } from '../../application/commands/save-2fa-se
 import { FetchWidgetsBundlesQuery } from '../../application/queries/fetch-widgets-bundles/fetch-widgets-bundles.query';
 import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.query';
 import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/iam/domain/enums/role.enum';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -169,7 +171,7 @@ export class ThingsboardController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly sysAdminAuthService: SysAdminAuthService,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -297,6 +299,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices')
   @ApiBearerAuth()
@@ -352,6 +355,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id')
   @ApiBearerAuth()
@@ -392,6 +396,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/devices')
   @ApiBearerAuth()
@@ -439,6 +444,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id/attributes')
   @ApiBearerAuth()
@@ -496,6 +502,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Put('/devices/:id/attributes')
   @ApiBearerAuth()
@@ -567,6 +574,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/securitySettings')
   @ApiBearerAuth()
@@ -600,6 +608,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
   @Post('/admin/securitySettings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -640,6 +649,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/updates')
   @ApiBearerAuth()
   @ApiOperation({
@@ -656,8 +667,8 @@ export class ThingsboardController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or expired access token',
   })
-  async getCurrentVersion() {
-    const query = new FetchVersionQuery();
+  async getCurrentVersion(@TbAccessToken() accessToken: string) {
+    const query = new FetchVersionQuery(accessToken);
     const result: Result<DashboardVersionResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -668,6 +679,7 @@ export class ThingsboardController {
       },
     });
   }
+
 
   @Get('/admin/settings/general')
   @ApiBearerAuth()
@@ -700,6 +712,7 @@ export class ThingsboardController {
       },
     });
   }
+
 
   @Post('/admin/settings/general')
   @ApiBearerAuth()
@@ -741,6 +754,7 @@ export class ThingsboardController {
     });
   }
 
+
   @Get('/admin/settings/connectivity')
   @ApiBearerAuth()
   @ApiOperation({
@@ -772,6 +786,7 @@ export class ThingsboardController {
       },
     });
   }
+
 
   @Post('/admin/settings/connectivity')
   @ApiBearerAuth()
@@ -1019,7 +1034,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1120,7 +1135,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1698,6 +1713,7 @@ export class ThingsboardController {
     @Query('scadaFirst') scadaFirst = false,
     @Query('deprecatedFilter') deprecatedFilter = 'ALL',
     @Query('widgetsBundleId') widgetsBundleId = '',
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchWidgetTypesQuery(
       Number(page),
@@ -1709,6 +1725,7 @@ export class ThingsboardController {
       scadaFirst === true || String(scadaFirst) === 'true',
       deprecatedFilter,
       widgetsBundleId,
+      accessToken
     );
     const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1828,6 +1845,8 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/images')
   @ApiBearerAuth()
@@ -1847,6 +1866,7 @@ export class ThingsboardController {
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('imageSubType') imageSubType = 'IMAGE',
     @Query('includeSystemImages') includeSystemImages = false,
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchImagesQuery(
       Number(page),
@@ -1855,6 +1875,7 @@ export class ThingsboardController {
       sortOrder,
       imageSubType,
       includeSystemImages === true || String(includeSystemImages) === 'true',
+      accessToken,
     );
     const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
       await this.queryBus.execute(query);

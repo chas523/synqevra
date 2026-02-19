@@ -6,5 +6,6 @@ export class FetchTenantEventsQuery {
         public readonly eventType?: string,
         public readonly startTime?: number,
         public readonly endTime?: number,
+        public readonly accessToken?: string,
     ) { }
 }

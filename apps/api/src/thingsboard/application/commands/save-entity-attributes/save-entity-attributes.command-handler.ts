@@ -18,17 +18,15 @@ export class SaveEntityAttributesCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: SaveEntityAttributesCommand,
     ): Promise<Result<void, TBAdminGetError>> {
-        const { entityType, entityId, scope, attributes } = command;
+        const { entityType, entityId, scope, attributes, accessToken } = command;
 
         try {
             this.logger.log(`Saving attributes for ${entityType}/${entityId}`);
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             await this.thingsboardApi.saveEntityAttributes(
                 accessToken,

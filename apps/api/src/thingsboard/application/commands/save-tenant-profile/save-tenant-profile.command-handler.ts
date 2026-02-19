@@ -22,7 +22,6 @@ export class SaveTenantProfileCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
@@ -33,12 +32,9 @@ export class SaveTenantProfileCommandHandler
                 `Saving tenant profile: ${command.tenantProfile.id.id}`,
             );
 
-            // Get sys admin access token
-            const accessToken = await this.sysAdminAuth.getAccessToken();
-
             // Save the tenant profile
             const savedProfile = await this.thingsboardApi.saveTenantProfile(
-                accessToken,
+                command.accessToken,
                 command.tenantProfile,
             );
 

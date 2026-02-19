@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { UsersController } from './interface/rest/users.controller';
+import { AdminController } from './interface/rest/admin.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './infrastructure/persistance/user.entity';
 import { Admin } from './infrastructure/persistance/admin.entity';
@@ -32,6 +33,7 @@ import { LoginAdminUseCase } from './application/use-cases/login-admin.use-case'
 import { LogoutAdminUseCase } from './application/use-cases/logout-admin.use-case';
 import { AdminRepository } from './domain/repositories/admin.repository';
 import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repository.adapter';
+import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.use-case';
 
 @Module({
   imports: [
@@ -42,7 +44,7 @@ import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repos
     ThingsboardModule,
     forwardRef(() => ConnectionModule),
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, AdminController],
   providers: [
     AuthService,
 
@@ -56,6 +58,7 @@ import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repos
     RefreshTokensUseCase,
     InvitePractitionerUseCase,
     GetUserByTokenUseCase,
+    GetUserProfileUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },
@@ -79,4 +82,4 @@ import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repos
     ActivationLinkRepository,
   ],
 })
-export class IamModule {}
+export class IamModule { }

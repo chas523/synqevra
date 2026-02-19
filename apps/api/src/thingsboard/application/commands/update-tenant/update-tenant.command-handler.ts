@@ -22,17 +22,15 @@ export class UpdateTenantCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: UpdateTenantCommand,
     ): Promise<Result<TenantResponse, TBAdminGetError>> {
-        const { tenantData } = command;
+        const { tenantData, accessToken } = command;
 
         try {
             this.logger.log(`Updating tenant: ${tenantData.id.id}`);
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             const response = await this.thingsboardApi.updateTenant(
                 tenantData,

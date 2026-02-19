@@ -20,19 +20,17 @@ export class FetchTenantRelationsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly sysAdminAuth: SysAdminAuthService,
-  ) {}
+  ) { }
 
   async execute(
     query: FetchTenantRelationsQuery,
   ): Promise<Result<EntityRelationsResponse, TBAdminGetError>> {
-    const { tenantId, direction } = query;
+    const { tenantId, direction, accessToken } = query;
 
     try {
-      const accessToken = await this.sysAdminAuth.getAccessToken();
 
       const response = await this.thingsboardApi.fetchEntityRelations(
-        accessToken,
+        accessToken!,
         'TENANT',
         tenantId,
         direction,

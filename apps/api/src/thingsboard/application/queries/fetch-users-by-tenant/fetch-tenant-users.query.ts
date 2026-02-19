@@ -15,11 +15,13 @@ export class FetchTenantUsersQuery extends Query<
   public readonly tenantId: string;
   public readonly page: number;
   public readonly pageSize: number;
+  public readonly accessToken: string;
 
-  constructor(props: FetchTenantUsersProps) {
+  constructor(props: FetchTenantUsersProps, accessToken: string) {
     super();
     this.tenantId = props.tenantId;
     this.page = props.page ?? 0;
     this.pageSize = props.pageSize ?? 10;
+    this.accessToken = accessToken;
   }
 }

@@ -228,4 +228,4 @@ const queryHandlers = [
     TelemetryService,
   ],
 })
-export class ThingsboardModule {}
+export class ThingsboardModule { }

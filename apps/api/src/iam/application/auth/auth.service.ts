@@ -1,4 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Role } from '../../domain/enums/role.enum';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { AuthJwtPayload } from '../../../auth/types/auth-jwtPayload';
@@ -30,15 +31,15 @@ export class AuthService {
     private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
     @Inject(refreshJwtConfig.KEY)
     private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
-  ) {}
+  ) { }
 
-  async generateAccessToken(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+  async generateAccessToken(userId: number, role: Role) {
+    const payload: AuthJwtPayload = { sub: userId, role };
     return await this.jwtService.signAsync(payload);
   }
 
-  async generateRefreshToken(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+  async generateRefreshToken(userId: number, role: Role) {
+    const payload: AuthJwtPayload = { sub: userId, role };
     return await this.jwtService.signAsync(payload, this.refreshTokenConfig);
   }
 
@@ -117,13 +118,12 @@ export class AuthService {
 
   async validateJwtUser(userId: number) {
     const user = await this.userRepository.getUserById(userId);
-    if (!user || !user.id) throw new UnauthorizedException('User not found');
+    if (!user || !user.id) return null;
 
     // Pobierz role z connection
     const connection =
       await this.connectionRepository.getConnectionByUserId(userId);
-    if (!connection || !connection.role)
-      throw new UnauthorizedException('User role not found');
+    if (!connection || !connection.role) return null;
 
     const currentUser: CurrentUser = {
       id: user.id,
@@ -135,7 +135,7 @@ export class AuthService {
 
   async validateJwtAdmin(adminId: number) {
     const admin = await this.adminRepository.getAdminById(adminId);
-    if (!admin || !admin.id) throw new UnauthorizedException('User not found');
+    if (!admin || !admin.id) return null;
 
     const currentAdmin: CurrentUser = {
       id: admin.id,

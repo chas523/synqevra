@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { match, Result } from 'oxide.ts';
@@ -48,6 +49,10 @@ import {
 import type { UpdateTenantDto } from '../../application/ports/thingsboard.api.port';
 import { FetchTenantProfileAttributesQuery } from '../../application/queries/fetch-tenant-profile-attributes/fetch-tenant-profile-attributes.query';
 import { FetchTenantProfileAlarmsQuery } from '../../application/queries/fetch-tenant-profile-alarms/fetch-tenant-profile-alarms.query';
+import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
+import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/iam/domain/enums/role.enum';
 
 @Controller('dashboard')
 export class DashboardController {
@@ -56,12 +61,14 @@ export class DashboardController {
     private readonly commandBus: CommandBus,
   ) { }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants')
-  async getTenants(@Query('page') page = 0, @Query('pageSize') pageSize = 20) {
+  async getTenants(@Query('page') page = 0, @Query('pageSize') pageSize = 20, @TbAccessToken() accessToken: string) {
     const query = new FetchTenantsQuery({
       page: Number(page),
       pageSize: Number(pageSize),
-    });
+    }, accessToken);
     const result: Result<GetTenantsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
 
@@ -73,10 +80,13 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenant-profiles')
   async getTenantProfiles(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
+    @TbAccessToken() accessToken: string,
     @Query('sortProperty') sortProperty?: string,
     @Query('sortOrder') sortOrder?: string,
     @Query('textSearch') textSearch?: string,
@@ -87,6 +97,7 @@ export class DashboardController {
       sortProperty,
       sortOrder,
       textSearch,
+      accessToken,
     );
     const result: Result<TenantProfilesResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
@@ -99,13 +110,16 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('tenant-profiles/:id')
   @HttpCode(HttpStatus.OK)
   async saveTenantProfile(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Body() tenantProfile: any,
   ): Promise<any> {
-    const command = new SaveTenantProfileCommand(tenantProfile);
+    const command = new SaveTenantProfileCommand(tenantProfile, accessToken);
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -119,12 +133,15 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('tenant-profiles/:id/attributes')
   async getTenantProfileAttributes(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('scope') scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
   ) {
-    const query = new FetchTenantProfileAttributesQuery(id, scope);
+    const query = new FetchTenantProfileAttributesQuery(id, scope, accessToken);
     const result: Result<TenantAttributesResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
 
@@ -136,13 +153,16 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('tenant-profiles/:id/attributes')
   async saveTenantProfileAttributes(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Body() body: { scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE'; attributes: Record<string, unknown> },
   ) {
     const scope = body.scope || 'SERVER_SCOPE';
-    const command = new SaveEntityAttributesCommand('TENANT_PROFILE', id, scope, body.attributes);
+    const command = new SaveEntityAttributesCommand('TENANT_PROFILE', id, scope, body.attributes, accessToken);
     const result: Result<void, TBAdminGetError> =
       await this.commandBus.execute(command);
 
@@ -154,9 +174,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('tenant-profiles/:id/alarms')
   async getTenantProfileAlarms(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
     @Query('statusList') statusList?: string,
@@ -176,6 +199,7 @@ export class DashboardController {
       severityArray,
       startTimeNum,
       endTimeNum,
+      accessToken,
     );
     const result: Result<EntityAlarmsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
@@ -189,17 +213,20 @@ export class DashboardController {
   }
 
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/users')
   async getTenantUsers(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchTenantUsersQuery({
       tenantId: id,
       page: Number(page),
       pageSize: Number(pageSize),
-    });
+    }, accessToken);
     const result: Result<GetTenantUsersResponse, TBAdminGetTenantsUsersError> =
       await this.queryBus.execute(query);
 
@@ -211,17 +238,20 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/devices')
   async getTenantDevices(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchTenantDevicesQuery({
       tenantId: id,
       page: Number(page),
       pageSize: Number(pageSize),
-    });
+    }, accessToken);
     const result: Result<
       GetTenantDevicesResponse,
       TBAdminGetTenantDevicesError
@@ -235,15 +265,17 @@ export class DashboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/notifications')
   async getNotifications(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchNotificationsQuery({
       page: Number(page),
       pageSize: Number(pageSize),
-    });
+    }, accessToken);
 
     const result: Result<
       GetNotificationsResponse,
@@ -258,12 +290,15 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/attributes')
   async getTenantAttributes(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('scope') scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
   ) {
-    const query = new FetchTenantAttributesQuery(id, scope);
+    const query = new FetchTenantAttributesQuery(id, scope, accessToken);
     const result: Result<TenantAttributesResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
 
@@ -275,9 +310,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/alarms')
   async getTenantAlarms(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
     @Query('statusList') statusList?: string,
@@ -297,6 +335,7 @@ export class DashboardController {
       severityArray,
       startTimeNum,
       endTimeNum,
+      accessToken,
     );
     const result: Result<EntityAlarmsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
@@ -309,9 +348,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/events')
   async getTenantEvents(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
     @Query('eventType') eventType?: string,
@@ -328,6 +370,7 @@ export class DashboardController {
       eventType,
       start,
       end,
+      accessToken,
     );
     const result: Result<EntityEventsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
@@ -340,12 +383,15 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/relations')
   async getTenantRelations(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('direction') direction: 'FROM' | 'TO' = 'FROM',
   ) {
-    const query = new FetchTenantRelationsQuery(id, direction);
+    const query = new FetchTenantRelationsQuery(id, direction, accessToken);
     const result: Result<EntityRelationsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
 
@@ -357,9 +403,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Put('/tenants/:id')
   async updateTenant(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Body() tenantData: UpdateTenantDto,
   ) {
     // Make sure the ID matches
@@ -367,7 +416,7 @@ export class DashboardController {
       ...tenantData,
       id: { entityType: 'TENANT', id },
     };
-    const command = new UpdateTenantCommand(dataWithId);
+    const command = new UpdateTenantCommand(dataWithId, accessToken);
     const result: Result<TenantResponse, TBAdminGetError> =
       await this.commandBus.execute(command);
 
@@ -379,13 +428,16 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/tenants/:id/attributes')
   async saveTenantAttributes(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Body() body: { scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE'; attributes: Record<string, unknown> },
   ) {
     const scope = body.scope || 'SERVER_SCOPE';
-    const command = new SaveEntityAttributesCommand('TENANT', id, scope, body.attributes);
+    const command = new SaveEntityAttributesCommand('TENANT', id, scope, body.attributes, accessToken);
     const result: Result<void, TBAdminGetError> =
       await this.commandBus.execute(command);
 
@@ -397,9 +449,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/tenants/:id/relations')
   async saveTenantRelation(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Body() relation: any,
   ) {
     const command = new CreateRelationCommand(
@@ -409,6 +464,7 @@ export class DashboardController {
       relation.to.entityType,
       relation.type,
       relation.additionalInfo,
+      accessToken,
     );
 
     const result = await this.commandBus.execute(command);
@@ -421,9 +477,12 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Delete('/tenants/:id/relations')
   async deleteTenantRelation(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('fromId') fromId: string,
     @Query('fromType') fromType: string,
     @Query('relationType') relationType: string,
@@ -436,6 +495,7 @@ export class DashboardController {
       relationType,
       toId,
       toType,
+      accessToken,
     );
 
     const result = await this.commandBus.execute(command);

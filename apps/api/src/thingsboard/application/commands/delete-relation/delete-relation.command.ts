@@ -5,5 +5,6 @@ export class DeleteRelationCommand {
         public readonly relationType: string,
         public readonly toId: string,
         public readonly toType: string,
+        public readonly accessToken: string,
     ) { }
 }

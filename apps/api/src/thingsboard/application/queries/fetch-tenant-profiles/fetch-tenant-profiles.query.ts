@@ -5,5 +5,6 @@ export class FetchTenantProfilesQuery {
         public readonly sortProperty?: string,
         public readonly sortOrder?: string,
         public readonly textSearch?: string,
+        public readonly accessToken?: string,
     ) { }
 }
