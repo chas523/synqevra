@@ -29,6 +29,7 @@ import { HL7Controller } from './interface/rest/hl7.controller';
       connection: {
         host: process.env.REDIS_HOST,
         port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        password: process.env.BULLMQ_PASSWORD || 'bullmq',
       },
     }),
   ],
@@ -47,4 +48,4 @@ import { HL7Controller } from './interface/rest/hl7.controller';
   exports: [BullModule],
   controllers: [HL7Controller],
 })
-export class Hl7Module {}
+export class Hl7Module { }

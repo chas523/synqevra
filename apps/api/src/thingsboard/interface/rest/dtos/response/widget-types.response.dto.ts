@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EntityIdDto, TenantIdDto } from './general-settings.response.dto';
 
-export class WidgetBundleDto {
+export class WidgetBundleRefDto {
     @ApiProperty({ type: EntityIdDto })
     id: EntityIdDto;
 
@@ -46,8 +46,8 @@ export class WidgetTypeDto {
     @ApiProperty()
     widgetType: string;
 
-    @ApiProperty({ type: [WidgetBundleDto] })
-    bundles: WidgetBundleDto[];
+    @ApiProperty({ type: [WidgetBundleRefDto] })
+    bundles: WidgetBundleRefDto[];
 }
 
 export class WidgetTypesPageDto {

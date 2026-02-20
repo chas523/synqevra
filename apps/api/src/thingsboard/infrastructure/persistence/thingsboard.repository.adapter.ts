@@ -13,7 +13,7 @@ export class ThingsboardRepositoryAdapter implements ThingsboardRepositoryPort {
   constructor(
     @InjectRepository(Thingsboard)
     private readonly repository: Repository<Thingsboard>,
-  ) {}
+  ) { }
 
   withManager(manager: EntityManager): ThingsboardRepositoryAdapter {
     const repository = manager.getRepository(Thingsboard);
@@ -41,6 +41,14 @@ export class ThingsboardRepositoryAdapter implements ThingsboardRepositoryPort {
     const ormEntity = ThingsboardMapper.toOrm(thingsboard);
     const updated = await this.repository.save(ormEntity);
     return ThingsboardMapper.toDomain(updated);
+  }
+
+  async findByTenantId(tenantId: string): Promise<ThingsboardModel | null> {
+    const ormEntity = await this.repository.findOne({
+      where: { tenantId },
+      relations: { connection: true },
+    });
+    return ormEntity ? ThingsboardMapper.toDomain(ormEntity) : null;
   }
 
   async getTokens(userId: number): Promise<ThingsboardModel | null> {

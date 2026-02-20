@@ -67,7 +67,6 @@ export function useEstablishConnection(token: string) {
         "Connection not established"
       );
       setError(errorMessage);
-      throw err; // Propagate original error to component
     } finally {
       setLoading(false);
     }
@@ -107,7 +106,6 @@ export function useConfiguratePractitioner(token: string) {
         "Failed to configure practitioner"
       );
       setError(errorMessage);
-      throw err;
     } finally {
       setLoading(false);
     }

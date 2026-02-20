@@ -30,18 +30,16 @@ interface TenantDetailsPageProps {
 export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
   const router = useRouter();
 
-  // Pobranie danych tenanta
-  const { data: tenantsData } = useTenants({ limit: 100 });
+  const { data: tenantsData, isLoading: tenantLoading } = useTenants({ limit: 100 });
   const tenant = tenantsData?.data.find((t) => t.id.id === tenantId);
 
-  // Opcje dla użytkowników
   const [usersOptions, setUsersOptions] = useState<TenantsRequestOptions>({
     sortBy: "createdTime",
     sortOrder: "desc",
     limit: 20,
   });
 
-  // Pobranie użytkowników tenanta
+  // Fetch tenant users
   const {
     data: usersData,
     error: usersError,
@@ -72,6 +70,10 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
       !!usersData?.pagination.hasPrev,
       usersData?.pagination.prevCursor,
     );
+
+  if (tenantLoading) {
+    return <LoadingCard count={2} />;
+  }
 
   if (!tenant) {
     return (
@@ -172,7 +174,7 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
           />
 
           <div className="space-y-3">
-            {usersError ? (
+            {usersError && !usersLoading ? (
               <ErrorState
                 title="Error Loading Users"
                 message={usersError.message}

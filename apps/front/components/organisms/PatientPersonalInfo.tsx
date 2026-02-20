@@ -44,7 +44,7 @@ const PatientPersonalInfo = ({
       {patient.birthDate && (
         <PatientInfoItem
           label="Birth Date"
-          value={new Date(patient.birthDate).toLocaleDateString("pl-PL", {
+          value={new Date(patient.birthDate).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "long",
             year: "numeric",

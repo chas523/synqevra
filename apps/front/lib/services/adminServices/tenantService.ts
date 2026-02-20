@@ -505,7 +505,7 @@ export class TenantService {
   ): Promise<{ medplum: boolean | null }> {
     try {
       const response = await proxyApi.get<{ medplum: boolean | null }>(
-        `/api/connection/get-status/${tenantId}`,
+        `/connection/get-status/${tenantId}`,
       );
       return response.data;
     } catch (err: unknown) {
@@ -515,13 +515,15 @@ export class TenantService {
     }
   }
 
-  public static async createMedplumTenant(tenantId: string): Promise<void> {
+  public static async createMedplumTenant(dto: {
+    tenantId: string;
+  }): Promise<void> {
     try {
-      await proxyApi.post(`/api/medplum/create/`, { tenantId });
+      await proxyApi.post(`/medplum/create`, dto);
     } catch (err: unknown) {
       const message = extractErrorMessage(
         err,
-        `Failed to create Medplum tenant for ${tenantId}`,
+        `Failed to create Medplum tenant for ${dto.tenantId}`,
       );
       throw new Error(message);
     }

@@ -115,8 +115,8 @@ export function TenantsListPage({
       <Card className="w-full">
         <ListHeader
           icon={<Building2 className="h-5 w-5" />}
-          title="Tenanci"
-          description="Przeglądaj i zarządzaj wszystkimi tenantami"
+          title="Tenants"
+          description="Browse and manage all tenants"
           count={data?.total || 0}
           isLoading={isLoading}
           onRefresh={onRefresh}
@@ -136,8 +136,8 @@ export function TenantsListPage({
             ) : !data?.data || data.data.length === 0 ? (
               <EmptyState
                 icon={<Building2 className="h-12 w-12" />}
-                title="Nie znaleziono tenantów"
-                description="Spróbuj dostosować filtry"
+                title="No tenants found"
+                description="Try adjusting the filters"
               />
             ) : (
               data.data.map((tenant) => {

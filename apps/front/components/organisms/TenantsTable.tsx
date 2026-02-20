@@ -24,7 +24,7 @@ export interface TenantsTableProps {
 function formatDate(timestamp?: number): string {
     if (!timestamp) return "—";
     const date = new Date(timestamp);
-    return date.toLocaleString("pl-PL", {
+    return date.toLocaleString("en-GB", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",

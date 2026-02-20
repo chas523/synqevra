@@ -549,6 +549,8 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -556,7 +558,7 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
             const status = await TenantService.getTenantConnectionStatus(tenantId);
             setMedplumEnabled(status.medplum === true);
             setError(null);
-        } catch (err) {
+        } catch {
             setError("Failed to fetch Medplum status");
         } finally {
             setLoading(false);
@@ -567,21 +569,33 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
         fetchStatus();
     }, [fetchStatus]);
 
-    const handleToggle = async (checked: boolean) => {
-        // If we are trying to turn it on
-        if (checked) {
-            try {
-                setProcessing(true);
-                await TenantService.createMedplumTenant(tenantId);
-                toast.success("Medplum integration enabled successfully");
-                setMedplumEnabled(true);
-            } catch (err) {
-                toast.error("Failed to enable Medplum integration");
-                // Revert the switch if it was visually toggled (depends on UI library behavior, but state drives it)
-            } finally {
-                setProcessing(false);
-            }
+    const handleToggle = (checked: boolean) => {
+        if (checked && !medplumEnabled) {
+            setShowConfirm(true);
+            setFormError(null);
         }
+    };
+
+    const handleConfirm = async () => {
+        try {
+            setProcessing(true);
+            setFormError(null);
+            await TenantService.createMedplumTenant({ tenantId });
+            toast.success("Medplum integration enabled successfully");
+            setMedplumEnabled(true);
+            setShowConfirm(false);
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "Failed to enable Medplum integration";
+            toast.error(msg);
+            setFormError(msg);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setShowConfirm(false);
+        setFormError(null);
     };
 
     if (loading) {
@@ -604,18 +618,52 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
                         Medplum Integration
                     </label>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Enable Medplum integration for this tenant.
+                        {medplumEnabled
+                            ? "Medplum integration is active for this tenant."
+                            : "Enable Medplum integration for this tenant."}
                     </p>
                 </div>
                 <Switch
-                    checked={medplumEnabled === true}
+                    checked={medplumEnabled === true || showConfirm}
                     onCheckedChange={handleToggle}
                     disabled={medplumEnabled === true || processing}
                 />
             </div>
+
+            {showConfirm && (
+                <div className="p-4 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 space-y-3">
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        ⚠ This action is irreversible
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                        Clicking <strong>Accept</strong> will create a Medplum project for this tenant.
+                        This action cannot be undone. An admin password will be generated automatically.
+                    </p>
+                    {formError && <p className="text-xs text-red-500">{formError}</p>}
+                    <div className="flex gap-2 pt-1">
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={processing}
+                            className="flex-1 rounded bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm py-1.5 font-medium transition-colors"
+                        >
+                            {processing ? "Enabling..." : "Accept"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={processing}
+                            className="flex-1 rounded border border-slate-300 dark:border-slate-600 text-sm py-1.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
+
 
 interface EditFormState {
     title: string;

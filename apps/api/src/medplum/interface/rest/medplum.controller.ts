@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Param,
   Post,
   Put,
@@ -27,6 +28,8 @@ import { GetPractitionerListUseCase } from 'src/medplum/application/use-cases/ge
 import { CreateDeviceRequestDto } from './dto/create-device.request.dto';
 import { AssignPatientToDeviceResponseDto } from './dto/assign-patient-to-device.response.dto';
 import { Device } from '@medplum/fhirtypes';
+import { CreateMedplumTenantOrchestrator } from '../../application/create-medplum-tenant.orchestrator';
+import { CreateMedplumRequestDto } from './dto/create-medplum.request.dto';
 
 @ApiTags('Medplum')
 @ApiBearerAuth()
@@ -37,7 +40,45 @@ export class MedplumController {
     private readonly patientUseCase: PatientUseCase,
     private readonly getPractitionerListUseCase: GetPractitionerListUseCase,
     private readonly getPractitionerByIdUseCase: GetPractitionerByIdUseCase,
-  ) {}
+    private readonly createMedplumTenantOrchestrator: CreateMedplumTenantOrchestrator,
+  ) { }
+
+  private readonly logger = new Logger(MedplumController.name);
+
+  @Post('create')
+  @ApiOperation({
+    summary: 'Enable Medplum integration for a tenant',
+    description:
+      'Creates a Medplum project for the given tenant and stores the credentials transactionally.',
+  })
+  @ApiBody({
+    type: CreateMedplumRequestDto,
+    description: 'Tenant ID and admin credentials for Medplum project creation',
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Medplum integration enabled successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Medplum already enabled or invalid data',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Tenant connection not found',
+  })
+  async createMedplumTenant(@Body() dto: CreateMedplumRequestDto) {
+    this.logger.log(`[createMedplumTenant] tenantId=${dto.tenantId}`);
+    try {
+      return await this.createMedplumTenantOrchestrator.run(dto);
+    } catch (err) {
+      this.logger.error(
+        `[createMedplumTenant] FAILED for tenantId=${dto.tenantId}: ${err?.message ?? err}`,
+        err?.stack,
+      );
+      throw err;
+    }
+  }
 
   @Get('device/:deviceId')
   @ApiOperation({

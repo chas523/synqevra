@@ -12,9 +12,7 @@ import { CreateUserUseCase } from '../../../iam/application/use-cases/create-use
 import { CreateUserCommand } from '../../../iam/application/dto/create-user.command';
 import { Role } from '../../../iam/domain/enums/role.enum';
 import { UnitOfWork } from '../../infrastructure/transaction/unit-of-work';
-import { CreateProjectDto } from '../../../medplum/interface/rest/dto/createProjectDto';
 import { ThingsboardRollbackData } from '../../../thingsboard/thingsboard.types';
-import { RegisterMedplumUseCase } from '../../../medplum/application/use-cases/register-medplum.use-case';
 import { CommandBus } from '@nestjs/cqrs';
 import { RegisterTenantCommand } from '../../../thingsboard/application/commands/register-tenant/register-tenant.command';
 import { RegisterTenantResponseDto } from '../../../thingsboard/interface/rest/dtos/response/register-tenant.response.dto';
@@ -41,10 +39,8 @@ export class InitialConnectionUseCase {
   constructor(
     private readonly validateTokenUseCase: ValidateTokenUseCase,
     private readonly createUserUseCase: CreateUserUseCase,
-    private readonly registerMedplumUseCase: RegisterMedplumUseCase,
-
     private readonly commandBus: CommandBus,
-  ) {}
+  ) { }
 
   async execute(
     command: InitialConnectionCommand,
@@ -107,24 +103,6 @@ export class InitialConnectionUseCase {
       );
 
       thingsboardRollbackData = thingsboardResult.rollbackData ?? null;
-
-      // medplum
-      const projectName = command.tenantFields.title;
-      const createProject: CreateProjectDto = {
-        firstName: firstName || 'Unknown Name',
-        lastName: lastName || 'Unknown Lastname',
-        password,
-        email: userEmail,
-        project: projectName,
-      };
-
-      await this.registerMedplumUseCase.execute(
-        createProject,
-        newUser.id!,
-        uow,
-      );
-
-      this.logger.debug('Created Medplum project: ' + projectName);
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { rollbackData, ...resultWithoutRollback } = thingsboardResult;
