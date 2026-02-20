@@ -8,7 +8,6 @@ import {
 } from '../../ports/thingsboard.api.port';
 import { FetchImagesQuery } from './fetch-images.query';
 import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
-import { ConfigService } from '@nestjs/config';
 
 @QueryHandler(FetchImagesQuery)
 export class FetchImagesQueryHandler
@@ -16,28 +15,12 @@ export class FetchImagesQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(query: FetchImagesQuery): Promise<Result<ImagesPageResponseDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
             const response = await this.thingsboardApi.fetchImages(
-                loginResponse.token,
+                query.accessToken,
                 query.page,
                 query.pageSize,
                 query.sortProperty,

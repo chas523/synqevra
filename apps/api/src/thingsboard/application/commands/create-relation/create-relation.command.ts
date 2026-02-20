@@ -6,5 +6,6 @@ export class CreateRelationCommand {
         public readonly toType: string,
         public readonly relationType: string,
         public readonly additionalInfo: any = null,
+        public readonly accessToken: string,
     ) { }
 }

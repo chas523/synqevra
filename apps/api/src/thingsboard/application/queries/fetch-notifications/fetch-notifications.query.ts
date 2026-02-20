@@ -13,10 +13,12 @@ export class FetchNotificationsQuery extends Query<
 > {
   public readonly page: number;
   public readonly pageSize: number;
+  public readonly accessToken: string;
 
-  constructor(props: FetchNotificationsProps) {
+  constructor(props: FetchNotificationsProps, accessToken: string) {
     super();
     this.page = props.page ?? 0;
     this.pageSize = props.pageSize ?? 10;
+    this.accessToken = accessToken;
   }
 }

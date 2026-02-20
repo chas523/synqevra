@@ -34,7 +34,6 @@ export function ScadaSymbolsPage() {
             toast.success("SCADA symbol uploaded successfully");
             mutate();
         } catch (error) {
-            console.error("Upload failed", error);
             toast.error("Failed to upload SCADA symbol");
             throw error;
         }

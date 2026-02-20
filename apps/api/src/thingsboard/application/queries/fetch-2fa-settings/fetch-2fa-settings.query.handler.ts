@@ -24,7 +24,7 @@ export class FetchTwoFaSettingsQueryHandler
     ): Promise<Result<TwoFactorAuthSettingsDto, ThingsboardApiException>> {
         try {
             const result = await this.thingsboardApiPort.fetchTwoFaSettings(
-                query.sysAdminAccessToken,
+                query.accessToken,
             );
             return Ok(result);
         } catch (error) {

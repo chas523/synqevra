@@ -125,6 +125,7 @@ export class TelemetryGateway
     @WsTbAccessToken() accessToken: string,
     @ConnectedSocket() client: Socket,
   ) {
+    console.log('connectted to tb with token: ', accessToken);
     try {
       if (this.isThingsboardConnected) {
         client.emit('thingsboard-connected', { success: true });

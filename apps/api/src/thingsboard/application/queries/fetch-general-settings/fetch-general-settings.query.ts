@@ -7,7 +7,7 @@ import { GeneralSettingsDto } from 'src/thingsboard/interface/rest/dtos/response
 export class FetchGeneralSettingsQuery extends Query<
     Result<GeneralSettingsDto, ThingsboardApiException>
 > {
-    constructor() {
+    constructor(public readonly accessToken: string) {
         super();
     }
 }

@@ -5,4 +5,8 @@ import { DashboardVersionResponse } from 'src/thingsboard/interface/rest/dtos/re
 
 export class FetchVersionQuery extends Query<
   Result<DashboardVersionResponse, ThingsboardApiException>
-> {}
+> {
+  constructor(public readonly accessToken: string) {
+    super();
+  }
+}

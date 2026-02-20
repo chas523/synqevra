@@ -8,6 +8,7 @@ export class SendNotificationCommand extends Command<
     Result<NotificationRequestResponse, ThingsboardApiException>
 > {
     constructor(
+        public readonly accessToken: string,
         public readonly notificationRequest: SendNotificationRequestDto,
     ) {
         super();

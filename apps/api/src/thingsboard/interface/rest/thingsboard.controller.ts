@@ -93,7 +93,7 @@ import { NotificationSettingsDto } from './dtos/response/notification-settings.r
 import { FetchNotificationSettingsQuery } from 'src/thingsboard/application/queries/fetch-notification-settings/fetch-notification-settings.query';
 import { UpdateNotificationSettingsCommand } from 'src/thingsboard/application/commands/update-notification-settings/update-notification-settings.command';
 import { MailSettingsDto } from './dtos/response/mail-settings.response.dto';
-import { SysAdminAuthService } from '../../application/services/sysadmin-auth.service';
+
 import { FetchMailSettingsQuery } from 'src/thingsboard/application/queries/fetch-mail-settings/fetch-mail-settings.query';
 import { UpdateMailSettingsCommand } from 'src/thingsboard/application/commands/update-mail-settings/update-mail-settings.command';
 import {
@@ -160,6 +160,8 @@ import { SaveTwoFaSettingsCommand } from '../../application/commands/save-2fa-se
 import { FetchWidgetsBundlesQuery } from '../../application/queries/fetch-widgets-bundles/fetch-widgets-bundles.query';
 import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget-type-fqns/fetch-widget-type-fqns.query';
 import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/iam/domain/enums/role.enum';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -168,8 +170,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-    private readonly sysAdminAuthService: SysAdminAuthService,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -297,6 +298,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices')
   @ApiBearerAuth()
@@ -352,6 +354,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id')
   @ApiBearerAuth()
@@ -392,6 +395,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/devices')
   @ApiBearerAuth()
@@ -439,6 +443,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id/attributes')
   @ApiBearerAuth()
@@ -496,6 +501,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Put('/devices/:id/attributes')
   @ApiBearerAuth()
@@ -567,6 +573,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/securitySettings')
   @ApiBearerAuth()
@@ -587,8 +594,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch security settings',
   })
-  async getSecuritySettings() {
-    const query = new FetchSecuritySettingsQuery();
+  async getSecuritySettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchSecuritySettingsQuery(accessToken);
     const result: Result<SecuritySettingsDtoResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -600,6 +607,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/admin/securitySettings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -627,8 +636,11 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update security settings',
   })
-  async updateSecuritySettings(@Body() settings: SecuritySettingsDto) {
-    const command = new UpdateSecuritySettingsCommand(settings);
+  async updateSecuritySettings(
+    @Body() settings: SecuritySettingsDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new UpdateSecuritySettingsCommand(settings, accessToken);
     const result: Result<SecuritySettingsDtoResponse, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -640,6 +652,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/updates')
   @ApiBearerAuth()
   @ApiOperation({
@@ -656,8 +670,8 @@ export class ThingsboardController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Invalid or expired access token',
   })
-  async getCurrentVersion() {
-    const query = new FetchVersionQuery();
+  async getCurrentVersion(@TbAccessToken() accessToken: string) {
+    const query = new FetchVersionQuery(accessToken);
     const result: Result<DashboardVersionResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -669,6 +683,9 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/settings/general')
   @ApiBearerAuth()
   @ApiOperation({
@@ -688,8 +705,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch general settings',
   })
-  async getGeneralSettings() {
-    const query = new FetchGeneralSettingsQuery();
+  async getGeneralSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchGeneralSettingsQuery(accessToken);
     const result: Result<GeneralSettingsDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -701,6 +718,9 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/admin/settings/general')
   @ApiBearerAuth()
   @ApiOperation({
@@ -728,8 +748,11 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update general settings',
   })
-  async updateGeneralSettings(@Body() settings: GeneralSettingsRequestDto) {
-    const command = new UpdateGeneralSettingsCommand(settings);
+  async updateGeneralSettings(
+    @Body() settings: GeneralSettingsRequestDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new UpdateGeneralSettingsCommand(settings, accessToken);
     const result: Result<GeneralSettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -741,6 +764,9 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/settings/connectivity')
   @ApiBearerAuth()
   @ApiOperation({
@@ -760,8 +786,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch connectivity settings',
   })
-  async getConnectivitySettings() {
-    const query = new FetchConnectivitySettingsQuery();
+  async getConnectivitySettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchConnectivitySettingsQuery(accessToken);
     const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -773,6 +799,9 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/admin/settings/connectivity')
   @ApiBearerAuth()
   @ApiOperation({
@@ -802,8 +831,9 @@ export class ThingsboardController {
   })
   async updateConnectivitySettings(
     @Body() settings: ConnectivitySettingsRequestDto,
+    @TbAccessToken() accessToken: string,
   ) {
-    const command = new UpdateConnectivitySettingsCommand(settings);
+    const command = new UpdateConnectivitySettingsCommand(settings, accessToken);
     const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -815,6 +845,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/settings/sms')
   @ApiBearerAuth()
   @ApiOperation({
@@ -834,8 +866,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch SMS settings',
   })
-  async getSmsSettings() {
-    const query = new FetchSmsSettingsQuery();
+  async getSmsSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchSmsSettingsQuery(accessToken);
     const result: Result<SmsSettingsDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -847,6 +879,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/admin/settings/sms')
   @ApiBearerAuth()
   @ApiOperation({
@@ -874,8 +908,11 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update SMS settings',
   })
-  async updateSmsSettings(@Body() settings: SmsSettingsDto) {
-    const command = new UpdateSmsSettingsCommand(settings);
+  async updateSmsSettings(
+    @Body() settings: SmsSettingsDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new UpdateSmsSettingsCommand(settings, accessToken);
     const result: Result<SmsSettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -887,6 +924,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/notification/settings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -906,8 +945,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch notification settings',
   })
-  async getNotificationSettings() {
-    const query = new FetchNotificationSettingsQuery();
+  async getNotificationSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchNotificationSettingsQuery(accessToken);
     const result: Result<NotificationSettingsDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -919,6 +958,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/notification/settings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -946,8 +987,11 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update notification settings',
   })
-  async updateNotificationSettings(@Body() settings: NotificationSettingsDto) {
-    const command = new UpdateNotificationSettingsCommand(settings);
+  async updateNotificationSettings(
+    @Body() settings: NotificationSettingsDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new UpdateNotificationSettingsCommand(settings, accessToken);
     const result: Result<NotificationSettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -960,7 +1004,8 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('queues')
   @ApiOperation({ summary: 'Fetch queues' })
   @ApiResponse({
@@ -968,12 +1013,19 @@ export class ThingsboardController {
     type: QueuesPageResponseDto,
   })
   async fetchQueues(
+    @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
   ) {
-    const query = new FetchQueuesQuery(page, pageSize, sortProperty, sortOrder);
+    const query = new FetchQueuesQuery(
+      accessToken,
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+    );
     const result: Result<QueuesPageResponseDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -986,15 +1038,19 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('queues')
   @ApiOperation({ summary: 'Create or update queue' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: QueueDto,
   })
-  async createQueue(@Body() queue: QueueDto) {
-    const command = new CreateQueueCommand(queue);
+  async createQueue(
+    @Body() queue: QueueDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new CreateQueueCommand(queue, accessToken);
     const result: Result<QueueDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1007,19 +1063,23 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Delete('queues/:queueId')
   @ApiOperation({ summary: 'Delete queue' })
   @ApiResponse({
     status: HttpStatus.OK,
   })
-  async deleteQueue(@Param('queueId') queueId: string) {
-    const command = new DeleteQueueCommand(queueId);
+  async deleteQueue(
+    @Param('queueId') queueId: string,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new DeleteQueueCommand(queueId, accessToken);
     const result: Result<void, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1028,7 +1088,8 @@ export class ThingsboardController {
 
   // Resource endpoints
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('resources')
   @ApiOperation({ summary: 'Fetch resources' })
   @ApiResponse({
@@ -1036,6 +1097,7 @@ export class ThingsboardController {
     type: ResourcesPageResponseDto,
   })
   async fetchResources(
+    @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'createdTime',
@@ -1044,6 +1106,7 @@ export class ThingsboardController {
     @Query('resourceSubType') resourceSubType?: string,
   ) {
     const query = new FetchResourcesQuery(
+      accessToken,
       page,
       pageSize,
       sortProperty,
@@ -1063,15 +1126,19 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('resource/info/:resourceId')
   @ApiOperation({ summary: 'Get resource info' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ResourceDto,
   })
-  async getResourceInfo(@Param('resourceId') resourceId: string) {
-    const query = new FetchResourceInfoQuery(resourceId);
+  async getResourceInfo(
+    @Param('resourceId') resourceId: string,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchResourceInfoQuery(resourceId, accessToken);
     const result: Result<ResourceDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1084,15 +1151,19 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('resources')
   @ApiOperation({ summary: 'Create resource' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ResourceDto,
   })
-  async createResource(@Body() resource: ResourceCreateDto) {
-    const command = new CreateResourceCommand(resource);
+  async createResource(
+    @Body() resource: ResourceCreateDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new CreateResourceCommand(resource, accessToken);
     const result: Result<ResourceDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1105,7 +1176,8 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Delete('resources/:resourceId')
   @ApiOperation({ summary: 'Delete resource' })
   @ApiResponse({
@@ -1113,14 +1185,15 @@ export class ThingsboardController {
   })
   async deleteResource(
     @Param('resourceId') resourceId: string,
+    @TbAccessToken() accessToken: string,
     @Query('force') force: boolean = false,
   ) {
-    const command = new DeleteResourceCommand(resourceId, force);
+    const command = new DeleteResourceCommand(resourceId, accessToken, force);
     const result: Result<void, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1128,7 +1201,8 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('resources/:resourceId/download')
   @ApiOperation({ summary: 'Download resource' })
   @ApiResponse({
@@ -1137,9 +1211,10 @@ export class ThingsboardController {
   })
   async downloadResource(
     @Param('resourceId') resourceId: string,
+    @TbAccessToken() accessToken: string,
     @Res() res: any,
   ) {
-    const query = new DownloadResourceQuery(resourceId);
+    const query = new DownloadResourceQuery(resourceId, accessToken);
     const result: Result<Buffer, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1157,6 +1232,8 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @Get('/notification/deliveryMethods')
   @ApiOperation({
     summary: 'Get available notification delivery methods',
@@ -1172,8 +1249,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch delivery methods',
   })
-  async getDeliveryMethods() {
-    const query = new FetchDeliveryMethodsQuery();
+  async getDeliveryMethods(@TbAccessToken() accessToken: string) {
+    const query = new FetchDeliveryMethodsQuery(accessToken);
     const result: Result<DeliveryMethodsResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1185,6 +1262,8 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @Post('/notification/send')
   @ApiOperation({
     summary: 'Send a notification',
@@ -1210,8 +1289,9 @@ export class ThingsboardController {
   })
   async sendNotification(
     @Body() notificationRequest: SendNotificationRequestDto,
+    @TbAccessToken() accessToken: string,
   ) {
-    const command = new SendNotificationCommand(notificationRequest);
+    const command = new SendNotificationCommand(accessToken, notificationRequest);
     const result: Result<NotificationRequestResponse, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1223,11 +1303,14 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @Post('notification/target')
   async createNotificationTarget(
     @Body() request: CreateNotificationTargetRequestDto,
+    @TbAccessToken() accessToken: string,
   ) {
-    const command = new CreateNotificationTargetCommand(request);
+    const command = new CreateNotificationTargetCommand(accessToken, request);
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -1238,9 +1321,11 @@ export class ThingsboardController {
     });
   }
 
-  @Get('notification/targets')
-  async fetchNotificationTargets() {
-    const query = new FetchNotificationTargetsQuery();
+  @UseGuards(ThingsboardAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @Get('notification/targets/legacy')
+  async fetchNotificationTargets(@TbAccessToken() accessToken: string) {
+    const query = new FetchNotificationTargetsQuery(accessToken);
     const result = await this.queryBus.execute(query);
 
     return match(result, {
@@ -1251,9 +1336,17 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @Post('notification/request/preview')
-  async previewNotificationRequest(@Body() previewRequest: any) {
-    const command = new PreviewNotificationRequestCommand(previewRequest);
+  async previewNotificationRequest(
+    @Body() previewRequest: any,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new PreviewNotificationRequestCommand(
+      accessToken,
+      previewRequest,
+    );
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -1264,9 +1357,10 @@ export class ThingsboardController {
     });
   }
 
+  @UseGuards(ThingsboardAuthGuard)
   @Get('material-icons')
-  async fetchMaterialIcons() {
-    const query = new FetchMaterialIconsQuery();
+  async fetchMaterialIcons(@TbAccessToken() accessToken: string) {
+    const query = new FetchMaterialIconsQuery(accessToken);
     const result = await this.queryBus.execute(query);
 
     return match(result, {
@@ -1277,6 +1371,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('notification/requests')
   @ApiOperation({
     summary: 'Get notification requests',
@@ -1293,12 +1389,13 @@ export class ThingsboardController {
     description: 'Failed to fetch notification requests',
   })
   async getNotificationRequests(
+    @TbAccessToken() accessToken: string,
     @Query('pageSize') pageSize?: string,
     @Query('page') page?: string,
     @Query('sortProperty') sortProperty?: string,
     @Query('sortOrder') sortOrder?: string,
   ) {
-    const query = new FetchNotificationRequestsQuery({
+    const query = new FetchNotificationRequestsQuery(accessToken, {
       pageSize: pageSize ? parseInt(pageSize, 10) : 10,
       page: page ? parseInt(page, 10) : 0,
       sortProperty: sortProperty || 'createdTime',
@@ -1314,6 +1411,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('notification/templates')
   @ApiOperation({
     summary: 'Get notification templates',
@@ -1329,13 +1428,14 @@ export class ThingsboardController {
     description: 'Failed to fetch notification templates',
   })
   async getNotificationTemplates(
+    @TbAccessToken() accessToken: string,
     @Query('pageSize') pageSize?: string,
     @Query('page') page?: string,
     @Query('sortProperty') sortProperty?: string,
     @Query('sortOrder') sortOrder?: string,
     @Query('notificationTypes') notificationTypes?: string,
   ) {
-    const query = new FetchNotificationTemplatesQuery({
+    const query = new FetchNotificationTemplatesQuery(accessToken, {
       pageSize: pageSize ? parseInt(pageSize, 10) : 10,
       page: page ? parseInt(page, 10) : 0,
       sortProperty: sortProperty || 'createdTime',
@@ -1352,6 +1452,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('notification/rules')
   @ApiOperation({
     summary: 'Get notification rules',
@@ -1367,12 +1469,13 @@ export class ThingsboardController {
     description: 'Failed to fetch notification rules',
   })
   async getNotificationRules(
+    @TbAccessToken() accessToken: string,
     @Query('pageSize') pageSize?: string,
     @Query('page') page?: string,
     @Query('sortProperty') sortProperty?: string,
     @Query('sortOrder') sortOrder?: string,
   ) {
-    const query = new FetchNotificationRulesQuery({
+    const query = new FetchNotificationRulesQuery(accessToken, {
       pageSize: pageSize ? parseInt(pageSize, 10) : 10,
       page: page ? parseInt(page, 10) : 0,
       sortProperty: sortProperty || 'createdTime',
@@ -1388,6 +1491,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('notification/targets')
   @ApiOperation({
     summary: 'Get notification targets',
@@ -1403,12 +1508,13 @@ export class ThingsboardController {
     description: 'Failed to fetch notification targets',
   })
   async getNotificationTargets(
+    @TbAccessToken() accessToken: string,
     @Query('pageSize') pageSize?: string,
     @Query('page') page?: string,
     @Query('sortProperty') sortProperty?: string,
     @Query('sortOrder') sortOrder?: string,
   ) {
-    const query = new FetchNotificationTargetsQuery({
+    const query = new FetchNotificationTargetsQuery(accessToken, {
       pageSize: pageSize ? parseInt(pageSize, 10) : 10,
       page: page ? parseInt(page, 10) : 0,
       sortProperty: sortProperty || 'createdTime',
@@ -1424,6 +1530,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('notification/template')
   @ApiOperation({
     summary: 'Create notification template',
@@ -1440,8 +1548,12 @@ export class ThingsboardController {
   })
   async createNotificationTemplate(
     @Body() templateData: CreateNotificationTemplateRequestDto,
+    @TbAccessToken() accessToken: string,
   ) {
-    const command = new CreateNotificationTemplateCommand(templateData);
+    const command = new CreateNotificationTemplateCommand(
+      accessToken,
+      templateData,
+    );
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -1452,6 +1564,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('notification/rule')
   @ApiOperation({
     summary: 'Create notification rule',
@@ -1466,8 +1580,11 @@ export class ThingsboardController {
   @ApiInternalServerErrorResponse({
     description: 'Failed to create notification rule',
   })
-  async createNotificationRule(@Body() rule: CreateNotificationRuleRequestDto) {
-    const command = new CreateNotificationRuleCommand(rule);
+  async createNotificationRule(
+    @Body() rule: CreateNotificationRuleRequestDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new CreateNotificationRuleCommand(rule, accessToken);
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -1479,7 +1596,8 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('images')
   @ApiOperation({ summary: 'Upload image' })
   @ApiResponse({
@@ -1494,6 +1612,7 @@ export class ThingsboardController {
       title: string;
       imageSubType?: string;
     },
+    @TbAccessToken() accessToken: string,
   ) {
     // Convert base64 file to Buffer
     const fileBuffer = Buffer.from(body.file, 'base64');
@@ -1501,6 +1620,7 @@ export class ThingsboardController {
       fileBuffer,
       body.fileName,
       body.title,
+      accessToken,
       body.imageSubType || 'IMAGE',
     );
     const result: Result<ImageDto, ThingsboardApiException> =
@@ -1515,7 +1635,8 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @SkipThrottle()
   @Get('images/download/:encodedLink')
   @ApiOperation({ summary: 'Download image' })
@@ -1525,10 +1646,11 @@ export class ThingsboardController {
   })
   async downloadImage(
     @Param('encodedLink') encodedLink: string,
+    @TbAccessToken() accessToken: string,
     @Res() res: any,
   ) {
     const imageLink = decodeURIComponent(encodedLink);
-    const query = new DownloadImageQuery(imageLink);
+    const query = new DownloadImageQuery(imageLink, accessToken);
     const result: Result<Buffer, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1560,6 +1682,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('admin/settings/mail')
   @ApiOperation({ summary: 'Get mail settings' })
   @ApiResponse({
@@ -1567,8 +1691,8 @@ export class ThingsboardController {
     description: 'Mail settings',
     type: MailSettingsDto,
   })
-  async fetchMailSettings() {
-    const query = new FetchMailSettingsQuery();
+  async fetchMailSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchMailSettingsQuery(accessToken);
     const result: Result<MailSettingsDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1580,6 +1704,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('admin/settings/mail')
   @ApiOperation({ summary: 'Update mail settings' })
   @ApiResponse({
@@ -1587,8 +1713,11 @@ export class ThingsboardController {
     description: 'Updated mail settings',
     type: MailSettingsDto,
   })
-  async updateMailSettings(@Body() settings: MailSettingsDto) {
-    const command = new UpdateMailSettingsCommand(settings);
+  async updateMailSettings(
+    @Body() settings: MailSettingsDto,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new UpdateMailSettingsCommand(settings, accessToken);
     const result: Result<MailSettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1600,17 +1729,21 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('images/export/:encodedLink')
   @ApiOperation({ summary: 'Export image to JSON' })
   @ApiResponse({
     status: HttpStatus.OK,
     type: ImageExportDto,
   })
-  async exportImage(@Param('encodedLink') encodedLink: string) {
+  async exportImage(
+    @Param('encodedLink') encodedLink: string,
+    @TbAccessToken() accessToken: string,
+  ) {
     const imageLink = decodeURIComponent(encodedLink);
-    const query = new ExportImageQuery(imageLink);
+    const query = new ExportImageQuery(imageLink, accessToken);
     const result: Result<ImageExportDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1622,8 +1755,9 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(ThingsboardAuthGuard)
   @Delete('images/:encodedLink')
   @ApiOperation({ summary: 'Delete image' })
   @ApiQuery({ name: 'force', required: false, type: Boolean })
@@ -1633,10 +1767,11 @@ export class ThingsboardController {
   })
   async deleteImage(
     @Param('encodedLink') encodedLink: string,
+    @TbAccessToken() accessToken: string,
     @Query('force') force: boolean = false,
   ) {
     const imageLink = decodeURIComponent(encodedLink);
-    const command = new DeleteImageCommand(imageLink, force);
+    const command = new DeleteImageCommand(imageLink, accessToken, force);
     const result: Result<DeleteImageResponseDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1648,6 +1783,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/widgetTypes')
   @ApiBearerAuth()
@@ -1698,6 +1834,7 @@ export class ThingsboardController {
     @Query('scadaFirst') scadaFirst = false,
     @Query('deprecatedFilter') deprecatedFilter = 'ALL',
     @Query('widgetsBundleId') widgetsBundleId = '',
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchWidgetTypesQuery(
       Number(page),
@@ -1709,6 +1846,7 @@ export class ThingsboardController {
       scadaFirst === true || String(scadaFirst) === 'true',
       deprecatedFilter,
       widgetsBundleId,
+      accessToken
     );
     const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1721,6 +1859,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/widgetType/:id')
   @ApiBearerAuth()
@@ -1733,8 +1872,11 @@ export class ThingsboardController {
     description: 'Widget type retrieved successfully',
     type: WidgetTypeDto,
   })
-  async getWidgetTypeById(@Param('id') id: string) {
-    const query = new FetchWidgetTypeByIdQuery(id);
+  async getWidgetTypeById(
+    @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchWidgetTypeByIdQuery(id, accessToken);
     const result: Result<WidgetTypeDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1746,6 +1888,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Delete('/widgetType/:id')
   @ApiBearerAuth()
@@ -1757,8 +1900,11 @@ export class ThingsboardController {
     status: HttpStatus.OK,
     description: 'Widget type deleted successfully',
   })
-  async deleteWidgetType(@Param('id') id: string) {
-    const command = new DeleteWidgetTypeCommand(id);
+  async deleteWidgetType(
+    @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const command = new DeleteWidgetTypeCommand(id, accessToken);
     const result: Result<void, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1770,6 +1916,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/widgetType')
   @ApiBearerAuth()
@@ -1786,9 +1933,14 @@ export class ThingsboardController {
   })
   async saveWidgetType(
     @Body() widgetType: any,
+    @TbAccessToken() accessToken: string,
     @Query('updateExistingByFqn') updateExistingByFqn: boolean = false,
   ) {
-    const command = new SaveWidgetTypeCommand(widgetType, updateExistingByFqn);
+    const command = new SaveWidgetTypeCommand(
+      widgetType,
+      accessToken,
+      updateExistingByFqn,
+    );
     const result: Result<WidgetTypeDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1800,6 +1952,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/widgetType/:id/download')
   @ApiBearerAuth()
@@ -1814,9 +1967,10 @@ export class ThingsboardController {
   })
   async downloadWidgetType(
     @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
     @Query('includeResources') includeResources: boolean = false,
   ) {
-    const query = new DownloadWidgetTypeQuery(id, includeResources);
+    const query = new DownloadWidgetTypeQuery(id, accessToken, includeResources);
     const result: Result<any, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1828,6 +1982,8 @@ export class ThingsboardController {
     });
   }
 
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/images')
   @ApiBearerAuth()
@@ -1847,6 +2003,7 @@ export class ThingsboardController {
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('imageSubType') imageSubType = 'IMAGE',
     @Query('includeSystemImages') includeSystemImages = false,
+    @TbAccessToken() accessToken: string,
   ) {
     const query = new FetchImagesQuery(
       Number(page),
@@ -1855,6 +2012,7 @@ export class ThingsboardController {
       sortOrder,
       imageSubType,
       includeSystemImages === true || String(includeSystemImages) === 'true',
+      accessToken,
     );
     const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1867,8 +2025,9 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Get('/widgetsBundles')
+  @Get('/widgetBundles')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get widget bundles',
@@ -1884,6 +2043,7 @@ export class ThingsboardController {
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'title',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @TbAccessToken() accessToken: string,
     @Query('tenantOnly') tenantOnly = false,
     @Query('fullSearch') fullSearch = false,
     @Query('scadaFirst') scadaFirst = false,
@@ -1896,6 +2056,7 @@ export class ThingsboardController {
       tenantOnly === true || String(tenantOnly) === 'true',
       fullSearch === true || String(fullSearch) === 'true',
       scadaFirst === true || String(scadaFirst) === 'true',
+      accessToken,
     );
     const result: Result<WidgetBundlesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1908,8 +2069,9 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Get('/widgetsBundle/:id')
+  @Get('/widgetBundle/:id')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get widget bundle by id',
@@ -1920,8 +2082,11 @@ export class ThingsboardController {
     description: 'Widget bundle retrieved successfully',
     type: WidgetBundleDto,
   })
-  async getWidgetBundleById(@Param('id') id: string) {
-    const query = new FetchWidgetBundleByIdQuery(id);
+  async getWidgetBundleById(
+    @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchWidgetBundleByIdQuery(id, accessToken);
     const result: Result<WidgetBundleDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1933,8 +2098,9 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Post('/widgetsBundle')
+  @Post('/widgetBundle')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Save widget bundle',
@@ -1946,8 +2112,12 @@ export class ThingsboardController {
   })
   async saveWidgetBundle(
     @Body() saveWidgetBundleRequest: SaveWidgetBundleRequestDto,
+    @TbAccessToken() accessToken: string,
   ) {
-    const command = new SaveWidgetBundleCommand(saveWidgetBundleRequest);
+    const command = new SaveWidgetBundleCommand(
+      saveWidgetBundleRequest,
+      accessToken,
+    );
     const result: Result<any, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1958,6 +2128,8 @@ export class ThingsboardController {
       },
     });
   }
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/2fa/settings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -1977,9 +2149,8 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to fetch 2FA settings',
   })
-  async getTwoFaSettings() {
-    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
-    const query = new FetchTwoFaSettingsQuery(sysAdminToken);
+  async getTwoFaSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchTwoFaSettingsQuery(accessToken);
     const result = await this.queryBus.execute(query);
 
     return match(result, {
@@ -1990,6 +2161,8 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/2fa/settings')
   @ApiBearerAuth()
   @ApiOperation({
@@ -2016,9 +2189,11 @@ export class ThingsboardController {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Failed to update 2FA settings',
   })
-  async saveTwoFaSettings(@Body() settings: TwoFactorAuthSettingsRequestDto) {
-    const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
-    const command = new SaveTwoFaSettingsCommand(sysAdminToken, settings);
+  async saveTwoFaSettings(
+    @TbAccessToken() accessToken: string,
+    @Body() settings: TwoFactorAuthSettingsRequestDto,
+  ) {
+    const command = new SaveTwoFaSettingsCommand(accessToken, settings);
     const result = await this.commandBus.execute(command);
 
     return match(result, {
@@ -2029,6 +2204,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/widgetsBundles')
   @ApiBearerAuth()
@@ -2101,6 +2277,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
   @ApiBearerAuth()
@@ -2128,6 +2305,7 @@ export class ThingsboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/widgetsBundle/:widgetsBundleId/widgetTypeFqns')
   @ApiBearerAuth()

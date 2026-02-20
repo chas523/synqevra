@@ -7,5 +7,6 @@ export class FetchTenantProfileAlarmsQuery {
         public readonly severityList?: string[],
         public readonly startTime?: number,
         public readonly endTime?: number,
+        public readonly accessToken?: string,
     ) { }
 }

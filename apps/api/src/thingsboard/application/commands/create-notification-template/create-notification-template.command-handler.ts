@@ -5,7 +5,7 @@ import {
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { Inject, Logger } from '@nestjs/common';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { Err, Ok, Result } from 'oxide.ts';
 import { NotificationTemplateDto } from 'src/thingsboard/interface/rest/dtos/response/notification-template.response.dto';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
@@ -18,16 +18,14 @@ export class CreateNotificationTemplateCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApiPort: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         command: CreateNotificationTemplateCommand,
     ): Promise<Result<NotificationTemplateDto, ThingsboardApiException>> {
         try {
-            const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
             const template = await this.thingsboardApiPort.createNotificationTemplate(
-                sysAdminToken,
+                command.accessToken,
                 command.templateData,
             );
             this.logger.log(`Created notification template: ${template.name}`);

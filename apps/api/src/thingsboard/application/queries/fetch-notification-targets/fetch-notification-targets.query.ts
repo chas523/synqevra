@@ -13,7 +13,10 @@ export interface NotificationTargetsQueryParams {
 export class FetchNotificationTargetsQuery extends Query<
     Result<NotificationTargetsResponse, ThingsboardApiException>
 > {
-    constructor(public readonly params: NotificationTargetsQueryParams = {}) {
+    constructor(
+        public readonly accessToken: string,
+        public readonly params: NotificationTargetsQueryParams = {},
+    ) {
         super();
     }
 }

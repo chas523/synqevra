@@ -7,6 +7,7 @@ export class DeleteResourceCommand extends Command<
 > {
     constructor(
         public readonly resourceId: string,
+        public readonly accessToken: string,
         public readonly force: boolean = false,
     ) {
         super();

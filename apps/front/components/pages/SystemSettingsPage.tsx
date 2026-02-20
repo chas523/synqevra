@@ -27,6 +27,7 @@ import { DeviceConnectivityForm } from "@/components/organisms/DeviceConnectivit
 import { SmsProviderSettingsForm } from "@/components/organisms/SmsProviderSettingsForm";
 import { SlackSettingsForm } from "@/components/organisms/SlackSettingsForm";
 import { MailServerSettingsForm } from "@/components/organisms/MailServerSettingsForm";
+import { MedplumSettings } from "@/components/organisms/MedplumSettings";
 import { GeneralSettingsDto, ConnectivitySettingsDto } from "@/types/generalSettingsTypes";
 import { SmsSettings, NotificationSettings } from "@/types/notificationSettingsTypes";
 import { MailSettings } from "@/types/mailSettingsTypes";
@@ -150,6 +151,7 @@ export const SystemSettingsPage = () => {
                 </TabsList>
 
                 <TabsContent value="general" className="space-y-6">
+                    <MedplumSettings />
                     {generalSettings && (
                         <GeneralSettingsForm
                             initialSettings={generalSettings}
@@ -164,6 +166,7 @@ export const SystemSettingsPage = () => {
                             isSaving={isUpdatingConnectivity}
                         />
                     )}
+
                 </TabsContent>
 
                 <TabsContent value="mail-server">

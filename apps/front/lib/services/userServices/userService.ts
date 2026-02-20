@@ -1,13 +1,14 @@
-import {proxyApi} from "@/lib/api/api";
+import { proxyApi } from "@/lib/api/api";
+import { User } from "@/lib/redux/slices/userSlice/userSlice";
 import type {
   ActiveUsersRequestOptions,
+  AdminPanelUser,
   MailRecipient,
   PaginatedResponse,
   PendingUser,
   RequestedAccessUsersRequestOptions,
-  User
 } from "@/lib/types/dashboardTypes";
-import {buildQueryParams, extractErrorMessage} from "@/lib/utils";
+import { buildQueryParams, extractErrorMessage } from "@/lib/utils";
 
 
 // Mock data for testing
@@ -86,7 +87,7 @@ const mockPendingUsers: PendingUser[] = [
   },
 ];
 
-const mockActiveUsers: User[] = [
+const mockActiveUsers: AdminPanelUser[] = [
   {
     id: "a1",
     email: "admin@company.com",
@@ -174,7 +175,7 @@ export class UserService {
 
   public static async getActiveUsers(
     _requestOptions: ActiveUsersRequestOptions,
-  ): Promise<PaginatedResponse<User>> {
+  ): Promise<PaginatedResponse<AdminPanelUser>> {
     return {
       data: mockActiveUsers,
       total: mockActiveUsers.length,
@@ -184,15 +185,25 @@ export class UserService {
         hasPrev: false,
       },
     };
-
-    // const params = buildQueryParams(requestOptions as Record<string, unknown>);
-    // try {
-    //   const response = await proxyApi.get(
-    //     `/api/users/active?${params.toString()}`,
-    //   );
-    //   return response.data;
-    // } catch (err) {
-    //   throw new Error(extractErrorMessage(err));
-    // }
   }
+
+  public static async getProfile(): Promise<User> {
+    try {
+      const response = await proxyApi.get("/auth/profile");
+      return response.data;
+    } catch (err) {
+      throw new Error(extractErrorMessage(err));
+    }
+  }
+
+  // const params = buildQueryParams(requestOptions as Record<string, unknown>);
+  // try {
+  //   const response = await proxyApi.get(
+  //     `/api/users/active?${params.toString()}`,
+  //   );
+  //   return response.data;
+  // } catch (err) {
+  //   throw new Error(extractErrorMessage(err));
+  // }
+
 }

@@ -6,7 +6,10 @@ import { QueueDto } from 'src/thingsboard/interface/rest/dtos/response/queue.res
 export class CreateQueueCommand extends Command<
     Result<QueueDto, ThingsboardApiException>
 > {
-    constructor(public readonly queue: QueueDto) {
+    constructor(
+        public readonly queue: QueueDto,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

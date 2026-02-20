@@ -98,6 +98,16 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     );
   }
 
+  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
+    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
+  }
+
+  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
+    return this.configService.getOrThrow<string>(
+      'THINGSBOARD_SYSADMIN_PASSWORD',
+    );
+  }
+
   async fetchDevices(
     accessToken: string,
     page: number,
@@ -268,22 +278,19 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async loginToSysadminAccount(
-    username: string,
-    password: string,
-  ): Promise<ThingsboardLoginResponse> {
+  async loginToSysadminAccount(username: string, password: string): Promise<ThingsboardLoginResponse> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/auth/login`;
       const response = await firstValueFrom(
         this.httpService.post<ThingsboardLoginResponse>(url, {
-          username,
-          password,
+          username: this.THINGSBOARD_SYSADMIN_EMAIL,
+          password: this.THINGSBOARD_SYSADMIN_PASSWORD,
         }),
       );
       return response.data;
     } catch (error) {
       ThingsboardApiException.createException(
-        'Failed to login to ThingsBoard',
+        'Failed to login to ThingsBoard as sysadmin',
         error,
         this.logger,
       );

@@ -76,8 +76,8 @@ export abstract class ThingsboardApiPort {
     password: string,
   ): Promise<ThingsboardLoginResponse>;
   abstract loginToSysadminAccount(
-    username: string,
-    password: string,
+    username?: string,
+    password?: string,
   ): Promise<ThingsboardLoginResponse>;
   abstract getUser(accessToken: string): Promise<UserResponse>;
   abstract refreshToken(

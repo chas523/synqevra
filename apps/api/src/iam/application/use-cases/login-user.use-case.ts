@@ -10,13 +10,13 @@ export class LoginUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly tokenService: AuthService,
-  ) {}
+  ) { }
 
   async execute(command: LoginCommand): Promise<LoginResult> {
     const { userId, role, response } = command;
 
-    const accessToken = await this.tokenService.generateAccessToken(userId);
-    const refreshToken = await this.tokenService.generateRefreshToken(userId);
+    const accessToken = await this.tokenService.generateAccessToken(userId, role);
+    const refreshToken = await this.tokenService.generateRefreshToken(userId, role);
     const hashedRt = await argon2.hash(refreshToken);
 
     await this.userRepository.updateHashedRt(userId, hashedRt);

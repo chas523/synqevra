@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SaveEntityAttributesCommand } from './save-entity-attributes.command';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
     THINGSBOARD_API_PORT,
@@ -18,17 +18,15 @@ export class SaveEntityAttributesCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: SaveEntityAttributesCommand,
     ): Promise<Result<void, TBAdminGetError>> {
-        const { entityType, entityId, scope, attributes } = command;
+        const { entityType, entityId, scope, attributes, accessToken } = command;
 
         try {
             this.logger.log(`Saving attributes for ${entityType}/${entityId}`);
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             await this.thingsboardApi.saveEntityAttributes(
                 accessToken,

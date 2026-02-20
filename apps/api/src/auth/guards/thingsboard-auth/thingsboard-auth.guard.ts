@@ -21,6 +21,9 @@ import {
   ThingsboardConnectionNotFoundError,
   TokenRefreshError,
 } from '../../../thingsboard/domain/errors/thingsboard.errors';
+import { CurrentUser } from 'src/auth/types/current-user';
+import { Role } from 'src/iam/domain/enums/role.enum';
+import { THINGSBOARD_API_PORT, ThingsboardApiPort } from 'src/thingsboard/application/ports/thingsboard.api.port';
 
 export interface RequestWithTbToken extends Request {
   tbAccessToken?: string;
@@ -31,8 +34,10 @@ export class ThingsboardAuthGuard implements CanActivate {
   constructor(
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly repositoryPort: ThingsboardRepositoryPort,
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApiPort: ThingsboardApiPort,
     private readonly commandBus: CommandBus,
-  ) {}
+  ) { }
 
   //skew sec - we treat token as expired 45 seconds before it actually expires
   private isExpiredOrNear(exp?: number, skewSec = 45): boolean {
@@ -43,11 +48,26 @@ export class ThingsboardAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithTbToken>();
-    const user = req.user as { id: number } | undefined;
+    console.log("USER: ", req.user)
+    const user = req.user as CurrentUser
     if (!user?.id) throw new UnauthorizedException('User not authenticated');
     //get token from our db
-    const tokens = await this.repositoryPort.getTokens(user.id);
-    let accessToken = tokens?.getAccessToken();
+    const role = user.connectionRole
+
+    let accessToken;
+    if (role === Role.MODERATOR || role === Role.USER) {
+      const tokens = await this.repositoryPort.getTokens(user.id);
+      accessToken = tokens?.getAccessToken();
+      //if admin then we'll never need to refresh token, because we always call loginToSysadmin, so we're refreshing it this way.
+    } else if (role === Role.ADMIN) {
+      const tokens = await this.thingsboardApiPort.loginToSysadminAccount();
+      accessToken = tokens.token;
+      req.tbAccessToken = accessToken;
+      req.user = { id: user.id, role: user.connectionRole };
+      return true;
+    }
+
+
 
     //check expiration time (coded with jwt)
     const decoded: any = accessToken ? jwt.decode(accessToken) : null;

@@ -19,23 +19,12 @@ export class UpdateSecuritySettingsCommandHandler implements ICommandHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly configService: ConfigService,
-  ) {}
-
-  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-  }
-
-  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-    return this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_PASSWORD',
-    );
-  }
+  ) { }
 
   async execute(
     command: UpdateSecuritySettingsCommand,
   ): Promise<Result<SecuritySettingsDto, ThingsboardApiException>> {
-    const { settings } = command;
+    const { settings, accessToken } = command;
     const settingsObject = {
       ...settings,
       passwordPolicy: {
@@ -45,13 +34,8 @@ export class UpdateSecuritySettingsCommandHandler implements ICommandHandler<
       },
     };
     try {
-      const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-        this.THINGSBOARD_SYSADMIN_EMAIL,
-        this.THINGSBOARD_SYSADMIN_PASSWORD,
-      );
-
       const updatedSettings = await this.thingsboardApi.updateSecuritySettings(
-        loginResponse.token,
+        accessToken,
         settingsObject,
       );
 

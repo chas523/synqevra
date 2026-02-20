@@ -2,7 +2,7 @@ import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/
 
 export class SaveTwoFaSettingsCommand {
     constructor(
-        public readonly sysAdminAccessToken: string,
+        public readonly accessToken: string,
         public readonly settings: TwoFactorAuthSettingsRequestDto,
     ) { }
 }

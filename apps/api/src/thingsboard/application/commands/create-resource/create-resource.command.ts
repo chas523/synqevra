@@ -6,7 +6,10 @@ import { ResourceDto, ResourceCreateDto } from 'src/thingsboard/interface/rest/d
 export class CreateResourceCommand extends Command<
     Result<ResourceDto, ThingsboardApiException>
 > {
-    constructor(public readonly resource: ResourceCreateDto) {
+    constructor(
+        public readonly resource: ResourceCreateDto,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

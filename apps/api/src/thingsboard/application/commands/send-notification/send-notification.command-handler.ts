@@ -8,7 +8,7 @@ import {
 } from '../../ports/thingsboard.api.port';
 import { SendNotificationCommand } from './send-notification.command';
 import { NotificationRequestResponse } from 'src/thingsboard/interface/rest/dtos/response/notification-request.response.dto';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @CommandHandler(SendNotificationCommand)
 export class SendNotificationCommandHandler
@@ -22,18 +22,14 @@ export class SendNotificationCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         command: SendNotificationCommand,
     ): Promise<Result<NotificationRequestResponse, ThingsboardApiException>> {
         try {
-            const sysAdminAccessToken =
-                await this.sysAdminAuthService.getAccessToken();
-
             const result = await this.thingsboardApi.sendNotification(
-                sysAdminAccessToken,
+                command.accessToken,
                 command.notificationRequest,
             );
 

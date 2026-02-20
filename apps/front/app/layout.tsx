@@ -7,6 +7,7 @@ import MedplumProviderWrapper from "@/lib/config/MedplumProviderWrapper";
 import { TelemetryProvider } from "@/lib/context/TelemetryContext";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
+import StoreProvider from "./StoreProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,21 +40,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          <MedplumProviderWrapper>
-            <MantineProvider>
-              <TelemetryProvider>
-                <SidebarLayout>{children}</SidebarLayout>
-              </TelemetryProvider>
-              <Toaster richColors theme="system" />
-            </MantineProvider>
-          </MedplumProviderWrapper>
-        </ThemeProvider>
+        <StoreProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <MedplumProviderWrapper>
+              <MantineProvider>
+                <TelemetryProvider>
+                  <SidebarLayout>{children}</SidebarLayout>
+                </TelemetryProvider>
+                <Toaster richColors theme="system" />
+              </MantineProvider>
+            </MedplumProviderWrapper>
+          </ThemeProvider>
+        </StoreProvider>
       </body>
     </html>
   );

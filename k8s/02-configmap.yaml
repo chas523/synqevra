@@ -8,15 +8,15 @@ data:
   NODE_ENV: "production"
   PORT: "3003"
   BCRYPT_ROUNDS: "8"
-  FRONTEND_BASE_URL: "http://167.172.178.76:30000"
+  FRONTEND_BASE_URL: "http://206.81.28.28:30000"
   ORIGIN_URL: "http://medplum:8103"
   # JWT
   JWT_EXPIRES_IN: "3600"
   REFRESH_JWT_EXPIRES_IN: "604800"
 
   # ThingsBoard (internal K8s Service address)
-  THINGSBOARD_API_URL: "http://167.172.178.76:30008"
-  TB_URL: "http://167.172.178.76:30008/entities/devices/"
+  THINGSBOARD_API_URL: "http://206.81.28.28:30008"
+  TB_URL: "http://206.81.28.28:30008/entities/devices/"
 
   # Medplum (internal K8s Service address)
   MEDPLUM_URL: "http://medplum:8103"

@@ -7,7 +7,7 @@ import { SmsSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/sms
 export class FetchSmsSettingsQuery extends Query<
     Result<SmsSettingsDto, ThingsboardApiException>
 > {
-    constructor() {
+    constructor(public readonly accessToken: string) {
         super();
     }
 }

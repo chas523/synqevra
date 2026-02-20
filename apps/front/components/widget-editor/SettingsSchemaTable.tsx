@@ -130,7 +130,11 @@ export function SettingsSchemaTable({ schemaJson, onChange }: SettingsSchemaTabl
                             <th className="px-4 py-2">Id</th>
                             <th className="px-4 py-2">Name</th>
                             <th className="px-4 py-2">Type</th>
-                            <th className="px-4 py-2 w-24 text-center"><FileJson size={16} title="Actions" className="mx-auto" /></th>
+                            <th className="px-4 py-2 w-24 text-center">
+                                <div title="Actions" className="mx-auto inline-block">
+                                    <FileJson size={16} />
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">

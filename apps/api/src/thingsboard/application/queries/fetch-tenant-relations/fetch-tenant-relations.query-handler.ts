@@ -3,7 +3,7 @@ import { FetchTenantRelationsQuery } from './fetch-tenant-relations.query';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
 import { EntityRelationsResponse } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
   THINGSBOARD_API_PORT,
@@ -20,19 +20,17 @@ export class FetchTenantRelationsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly sysAdminAuth: SysAdminAuthService,
-  ) {}
+  ) { }
 
   async execute(
     query: FetchTenantRelationsQuery,
   ): Promise<Result<EntityRelationsResponse, TBAdminGetError>> {
-    const { tenantId, direction } = query;
+    const { tenantId, direction, accessToken } = query;
 
     try {
-      const accessToken = await this.sysAdminAuth.getAccessToken();
 
       const response = await this.thingsboardApi.fetchEntityRelations(
-        accessToken,
+        accessToken!,
         'TENANT',
         tenantId,
         direction,
