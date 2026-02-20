@@ -44,7 +44,11 @@ pipelines:
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'rollout'
-                KUBECTL_ARGS: 'restart deployment/api -n medboard'
+                KUBECTL_ARGS:
+                  - 'restart'
+                  - 'deployment/api'
+                  - '-n'
+                  - 'medboard'
 
       - step:
           size: 2x
@@ -78,7 +82,11 @@ pipelines:
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'rollout'
-                KUBECTL_ARGS: 'restart deployment/frontend -n medboard'
+                KUBECTL_ARGS:
+                  - 'restart'
+                  - 'deployment/frontend'
+                  - '-n'
+                  - 'medboard'
       - step:
           name: Deploy Kubernetes changes excluding frontend/api
           condition:
