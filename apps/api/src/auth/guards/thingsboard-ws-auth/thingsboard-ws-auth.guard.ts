@@ -9,7 +9,6 @@ import * as jwt from 'jsonwebtoken';
 import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
-
 } from '../../../thingsboard/application/ports/thingsboard.repository.port';
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenCommand } from '../../../thingsboard/application/commands/refresh-token/refresh-token.command';
@@ -34,7 +33,7 @@ export class ThingsboardWsAuthGuard implements CanActivate {
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,
     private readonly commandBus: CommandBus,
-  ) { }
+  ) {}
 
   private isExpiredOrNear(exp?: number, skewSec = 45): boolean {
     if (!exp) return true;
@@ -68,10 +67,10 @@ export class ThingsboardWsAuthGuard implements CanActivate {
     const userId = payload.sub;
     const role = payload.role;
 
-    console.log("payload", payload)
+    console.log('payload', payload);
     // Get token from DB
     let freshAccessToken;
-    if (role === Role.MODERATOR || role === Role.USER) {
+    if (role === Role.MODERATOR || role === Role.PRACTITIONER) {
       const tokens = await this.repositoryPort.getTokens(userId);
       freshAccessToken = tokens?.getAccessToken();
       //if admin then we'll never need to refresh token, because we always call loginToSysadmin, so we're refreshing it this way.
@@ -82,7 +81,6 @@ export class ThingsboardWsAuthGuard implements CanActivate {
       client.user = { id: userId, role: payload.role };
       return true;
     }
-
 
     // Check expiration
     const decodedDb: any = freshAccessToken

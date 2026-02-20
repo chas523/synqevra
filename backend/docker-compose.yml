@@ -78,6 +78,18 @@ services:
       timeout: 5s
       retries: 5
 
+  redis-bullmq:
+    image: redis:7
+    restart: always
+    ports: 
+      - "6379:6379"
+    command: redis-server --requirepass bullmq
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "bullmq", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   medplum-server:
     image: medplum/medplum-server:4.3.15
     restart: always

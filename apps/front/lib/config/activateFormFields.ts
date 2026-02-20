@@ -13,7 +13,7 @@ export interface FieldConfig {
 export const tenantFields: FieldConfig[] = [
   {
     name: "title",
-    label: "Company Name*",
+    label: "Company Name",
     required: true,
     placeholder: "Enter company name",
   },
@@ -73,7 +73,7 @@ export const tenantFields: FieldConfig[] = [
 export const userFields: FieldConfig[] = [
   {
     name: "userEmail",
-    label: "Email*",
+    label: "Email",
     type: "email",
     required: true,
     placeholder: "your@email.com",
@@ -104,14 +104,14 @@ export const userFields: FieldConfig[] = [
   },
   {
     name: "password",
-    label: "Password*",
+    label: "Password",
     type: "password",
     required: true,
     placeholder: "••••••••",
   },
   {
     name: "confirmPassword",
-    label: "Confirm Password*",
+    label: "Confirm Password",
     type: "password",
     required: true,
     placeholder: "••••••••",

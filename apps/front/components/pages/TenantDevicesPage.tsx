@@ -36,7 +36,7 @@ interface TenantDevicesPageProps {
 
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleDateString("pl-PL", {
+  return date.toLocaleDateString("en-GB", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -48,7 +48,7 @@ const formatDate = (timestamp: number): string => {
 export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
   const router = useRouter();
 
-  const { data: tenantsData } = useTenants({ limit: 100 });
+  const { data: tenantsData, isLoading: tenantLoading } = useTenants({ limit: 100 });
   const tenant = tenantsData?.data.find((t) => t.id.id === tenantId);
 
   const [devicesOptions, setDevicesOptions] = useState<TenantsRequestOptions>({
@@ -87,6 +87,10 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
       !!devicesData?.pagination.hasPrev,
       devicesData?.pagination.prevCursor,
     );
+
+  if (tenantLoading) {
+    return <LoadingCard count={2} />;
+  }
 
   if (!tenant) {
     return (
@@ -189,7 +193,7 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
           />
 
           <div className="space-y-3">
-            {devicesError ? (
+            {devicesError && !devicesLoading ? (
               <ErrorState
                 title="Error Loading Devices"
                 message={devicesError.message}

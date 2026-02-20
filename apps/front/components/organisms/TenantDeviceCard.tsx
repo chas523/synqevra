@@ -8,7 +8,7 @@ interface TenantDeviceCardProps {
 
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleDateString("pl-PL", {
+  return date.toLocaleDateString("en-GB", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -30,11 +30,10 @@ export function TenantDeviceCard({ device }: TenantDeviceCardProps) {
               <h3 className="font-medium text-gray-900">{device.name}</h3>
               {device.active !== undefined && (
                 <div
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    device.active
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${device.active
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                    }`}
                 >
                   {device.active ? (
                     <Wifi className="h-3 w-3" />

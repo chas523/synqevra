@@ -1998,11 +1998,12 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         deprecatedFilter,
       });
 
+      let url = `${this.THINGSBOARD_API_URL}/widgetTypes?${params.toString()}`;
+
       if (widgetsBundleId) {
         params.append('widgetsBundleId', widgetsBundleId);
+        url = `${this.THINGSBOARD_API_URL}/widgetTypesInfos?${params.toString()}`;
       }
-
-      const url = `${this.THINGSBOARD_API_URL}/widgetTypes?${params.toString()}`;
       const response = await firstValueFrom(
         this.httpService.get<WidgetTypesPageDto>(url, {
           headers: { Authorization: `Bearer ${sysAdminAccessToken}` },

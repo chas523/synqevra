@@ -3,7 +3,7 @@ import { ConnectionRepository } from '../../domain/repositories/connection.repos
 import { ConnectionModel } from 'src/connection/domain/entities/connection.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection } from './connection.entity';
-import { EntityManager, Repository, Not, IsNull } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { ConnectionMapper } from './connection.mapper';
 
 @Injectable()
@@ -70,7 +70,6 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
         thingsboard: {
           tenantId: tenantId,
         },
-        medplum: Not(IsNull()),
       },
       relations: ['thingsboard', 'medplum'],
     });

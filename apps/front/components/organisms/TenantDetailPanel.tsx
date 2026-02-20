@@ -4,6 +4,7 @@ import { TimeRangeFilter, type TimeRange } from "../molecules/TimeRangeFilter";
 import { EventFilters, type EventType } from "../molecules/EventFilters";
 import { AddRelationDialog } from "../molecules/AddRelationDialog";
 import Select from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Tenant } from "@/lib/types/dashboardTypes";
@@ -543,6 +544,127 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
     );
 }
 
+function MedplumTabContent({ tenantId }: { tenantId: string }) {
+    const [medplumEnabled, setMedplumEnabled] = useState<boolean | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
+
+    const fetchStatus = useCallback(async () => {
+        try {
+            setLoading(true);
+            const status = await TenantService.getTenantConnectionStatus(tenantId);
+            setMedplumEnabled(status.medplum === true);
+            setError(null);
+        } catch {
+            setError("Failed to fetch Medplum status");
+        } finally {
+            setLoading(false);
+        }
+    }, [tenantId]);
+
+    useEffect(() => {
+        fetchStatus();
+    }, [fetchStatus]);
+
+    const handleToggle = (checked: boolean) => {
+        if (checked && !medplumEnabled) {
+            setShowConfirm(true);
+            setFormError(null);
+        }
+    };
+
+    const handleConfirm = async () => {
+        try {
+            setProcessing(true);
+            setFormError(null);
+            await TenantService.createMedplumTenant({ tenantId });
+            toast.success("Medplum integration enabled successfully");
+            setMedplumEnabled(true);
+            setShowConfirm(false);
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : "Failed to enable Medplum integration";
+            toast.error(msg);
+            setFormError(msg);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setShowConfirm(false);
+        setFormError(null);
+    };
+
+    if (loading) {
+        return (
+            <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                Loading Medplum status...
+            </div>
+        );
+    }
+
+    if (error) {
+        return <div className="text-center py-8 text-red-500">{error}</div>;
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <div className="space-y-0.5">
+                    <label className="text-sm font-medium text-slate-900 dark:text-white">
+                        Medplum Integration
+                    </label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {medplumEnabled
+                            ? "Medplum integration is active for this tenant."
+                            : "Enable Medplum integration for this tenant."}
+                    </p>
+                </div>
+                <Switch
+                    checked={medplumEnabled === true || showConfirm}
+                    onCheckedChange={handleToggle}
+                    disabled={medplumEnabled === true || processing}
+                />
+            </div>
+
+            {showConfirm && (
+                <div className="p-4 rounded-lg border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 space-y-3">
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        ⚠ This action is irreversible
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                        Clicking <strong>Accept</strong> will create a Medplum project for this tenant.
+                        This action cannot be undone. An admin password will be generated automatically.
+                    </p>
+                    {formError && <p className="text-xs text-red-500">{formError}</p>}
+                    <div className="flex gap-2 pt-1">
+                        <button
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={processing}
+                            className="flex-1 rounded bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm py-1.5 font-medium transition-colors"
+                        >
+                            {processing ? "Enabling..." : "Accept"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={processing}
+                            className="flex-1 rounded border border-slate-300 dark:border-slate-600 text-sm py-1.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
 interface EditFormState {
     title: string;
     country: string;
@@ -757,6 +879,11 @@ export function TenantDetailPanel({
                     </DetailPanelSection>
                 </div>
             ),
+        },
+        {
+            id: "medplum",
+            label: "Medplum",
+            content: <MedplumTabContent tenantId={tenant.id.id} />,
         },
         {
             id: "attributes",

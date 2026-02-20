@@ -499,6 +499,35 @@ export class TenantService {
       throw new Error(message);
     }
   }
+
+  public static async getTenantConnectionStatus(
+    tenantId: string,
+  ): Promise<{ medplum: boolean | null }> {
+    try {
+      const response = await proxyApi.get<{ medplum: boolean | null }>(
+        `/connection/get-status/${tenantId}`,
+      );
+      return response.data;
+    } catch (err: unknown) {
+      console.warn(`Failed to fetch connection status for tenant ${tenantId}`, err);
+      // Return null or default state on failure, or rethrow if critical
+      return { medplum: null };
+    }
+  }
+
+  public static async createMedplumTenant(dto: {
+    tenantId: string;
+  }): Promise<void> {
+    try {
+      await proxyApi.post(`/medplum/create`, dto);
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to create Medplum tenant for ${dto.tenantId}`,
+      );
+      throw new Error(message);
+    }
+  }
 }
 
 export interface UpdateTenantRequest {

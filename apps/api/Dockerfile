@@ -28,7 +28,7 @@ RUN adduser --system --uid 1001 nestjs
 
 # Kopiuj TYLKO zbudowany kod i package. json
 COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/src/thingsboard/base_rule_chain.json ./dist/
+COPY --from=builder /app/apps/api/src/thingsboard/base_rule_chain.json ./src/thingsboard/base_rule_chain.json
 COPY --from=builder /app/apps/api/package.json ./
 
 # npm install TYLKO produkcyjne zależności (bez devDeps)

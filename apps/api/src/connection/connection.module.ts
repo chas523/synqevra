@@ -13,10 +13,9 @@ import { InitialConnectionOrchestrator } from './application/initial-connection.
 import { ConfirmPractitionerUseCase } from './application/use-cases/confirm-practitioner.use-case';
 import { UnitOfWorkFactory } from './infrastructure/transaction/unit-of-work.factory';
 import { ConnectionRepositoryAdapter } from './infrastructure/persistance/connection.repository.adapter';
-import { RegisterMedplumUseCase } from '../medplum/application/use-cases/register-medplum.use-case';
-import { MedplumRegistrationService } from '../medplum/application/services/medplum-registration.service';
 import { ConnectionRepository } from './domain/repositories/connection.repository';
 import { ConfirmPractitionerOrchestrator } from './application/confirm-practitioner.orchestrator';
+import { GetConnectionStatusUseCase } from './application/use-cases/get-connection-status.use-case';
 
 @Module({
   imports: [
@@ -29,12 +28,10 @@ import { ConfirmPractitionerOrchestrator } from './application/confirm-practitio
   ],
   controllers: [ConnectionController],
   providers: [
-    MedplumRegistrationService,
-
     ValidateTokenUseCase,
     InitialConnectionUseCase,
     ConfirmPractitionerUseCase,
-    RegisterMedplumUseCase,
+    GetConnectionStatusUseCase,
 
     InitialConnectionOrchestrator,
     ConfirmPractitionerOrchestrator,
@@ -54,4 +51,4 @@ import { ConfirmPractitionerOrchestrator } from './application/confirm-practitio
     ConnectionRepository,
   ],
 })
-export class ConnectionModule {}
+export class ConnectionModule { }

@@ -6,6 +6,7 @@ import {
   InternalServerErrorException,
   Post,
   Query,
+  Param,
   HttpStatus,
 } from '@nestjs/common';
 import {
@@ -14,6 +15,7 @@ import {
   ApiResponse,
   ApiQuery,
   ApiBody,
+  ApiParam,
 } from '@nestjs/swagger';
 import { Public } from 'src/auth/decorators/public.decorator';
 import {
@@ -31,6 +33,7 @@ import { ConfirmPractitionerUseCase } from 'src/connection/application/use-cases
 import { ConfirmPractitionerOrchestrator } from 'src/connection/application/confirm-practitioner.orchestrator';
 import { InitialConnectionResult } from '../../application/dto/initial-connection.result';
 import { ConfirmPractitionerResult } from '../../application/dto/confirm-practitioner.result';
+import { GetConnectionStatusUseCase } from '../../application/use-cases/get-connection-status.use-case';
 
 @ApiTags('Connection')
 @Controller('connection')
@@ -41,7 +44,8 @@ export class ConnectionController {
     private readonly confirmPractitionerOrchestrator: ConfirmPractitionerOrchestrator,
     private readonly medplum: MedplumClientFactory,
     private readonly confirmPractitionerUseCase: ConfirmPractitionerUseCase,
-  ) {}
+    private readonly getConnectionStatusUseCase: GetConnectionStatusUseCase,
+  ) { }
 
   @Public()
   @Post('/connect')
@@ -79,6 +83,33 @@ export class ConnectionController {
     @Query('token') token: string,
   ) {
     return await this.initialConnectionOrchestrator.run(formData, token);
+  }
+
+  @Public()
+  @Get('/get-status/:id')
+  @ApiOperation({
+    summary: 'Get connection status for a tenant',
+    description:
+      'Returns the Medplum connection status for a given Thingsboard tenantId.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    required: true,
+    description: 'Thingsboard tenant ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connection status retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        medplum: { type: 'boolean', nullable: true },
+      },
+    },
+  })
+  async getConnectionStatus(@Param('id') tenantId: string) {
+    return this.getConnectionStatusUseCase.execute(tenantId);
   }
 
   @Public()
