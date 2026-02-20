@@ -1,13 +1,12 @@
 import useSWR from "swr";
 import type {
-  ActiveUsersRequestOptions,
+  ActiveUsersRequestOptions, AdminPanelUser,
   PaginatedResponse,
-  User,
 } from "@/lib/types/dashboardTypes";
 import { UserService } from "@/lib/services/userServices/userService";
 
 interface UseActiveUsersResult {
-  data: PaginatedResponse<User> | undefined;
+  data: PaginatedResponse<AdminPanelUser> | undefined;
   error: Error | undefined;
   isLoading: boolean;
   mutate: () => void;
