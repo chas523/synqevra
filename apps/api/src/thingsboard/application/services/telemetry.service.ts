@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+
 
 import {
   TelemetryCommand,
@@ -24,8 +24,6 @@ export class TelemetryService {
 
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-
-    private readonly configService: ConfigService,
   ) { }
 
   setMessageHandler(handler: (msg: TelemetryResponse) => void): void {
@@ -37,22 +35,6 @@ export class TelemetryService {
     if (result.isErr()) {
       throw result.unwrapErr();
     }
-  }
-
-  async connectAsSysadmin(): Promise<string> {
-    const email = this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_EMAIL',
-    );
-    const password = this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_PASSWORD',
-    );
-
-    const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-      email,
-      password,
-    );
-
-    return loginResponse.token;
   }
 
   disconnect(): void {

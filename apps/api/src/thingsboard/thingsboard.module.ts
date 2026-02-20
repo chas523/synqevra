@@ -102,7 +102,7 @@ import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-w
 import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
-import { SysAdminAuthService } from './application/services/sysadmin-auth.service';
+
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -217,7 +217,7 @@ const queryHandlers = [
     TelemetryService,
     TelemetryParserService,
     TelemetryGateway,
-    SysAdminAuthService,
+
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [

@@ -3,7 +3,7 @@ import { FetchTenantAttributesQuery } from './fetch-tenant-attributes.query';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger } from '@nestjs/common';
 import { TenantAttributesResponse } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import { Inject } from '@nestjs/common';
 import {

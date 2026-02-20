@@ -7,7 +7,7 @@ import {
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { FetchMaterialIconsQuery } from './fetch-material-icons.query';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @QueryHandler(FetchMaterialIconsQuery)
 export class FetchMaterialIconsQueryHandler
@@ -21,18 +21,14 @@ export class FetchMaterialIconsQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchMaterialIconsQuery,
     ): Promise<Result<string[], ThingsboardApiException>> {
         try {
-            const sysAdminAccessToken =
-                await this.sysAdminAuthService.getAccessToken();
-
             const icons = await this.thingsboardApi.fetchMaterialIcons(
-                sysAdminAccessToken,
+                query.accessToken,
             );
 
             return Ok(icons);

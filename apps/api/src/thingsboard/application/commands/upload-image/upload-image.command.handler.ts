@@ -16,30 +16,14 @@ export class UploadImageCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(command: UploadImageCommand): Promise<Result<ImageDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
-            const { file, fileName, title, imageSubType } = command;
+            const { file, fileName, title, imageSubType, accessToken } = command;
 
             const response = await this.thingsboardApi.uploadImage(
-                loginResponse.token,
+                accessToken,
                 file,
                 fileName,
                 title,

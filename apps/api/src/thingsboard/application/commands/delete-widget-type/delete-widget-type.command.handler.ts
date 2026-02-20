@@ -15,28 +15,12 @@ export class DeleteWidgetTypeCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(command: DeleteWidgetTypeCommand): Promise<Result<void, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
             await this.thingsboardApi.deleteWidgetType(
-                loginResponse.token,
+                command.accessToken,
                 command.widgetTypeId,
             );
 

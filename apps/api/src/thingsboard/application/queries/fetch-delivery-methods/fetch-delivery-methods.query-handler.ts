@@ -8,7 +8,7 @@ import {
     THINGSBOARD_API_PORT,
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @QueryHandler(FetchDeliveryMethodsQuery)
 export class FetchDeliveryMethodsQueryHandler
@@ -22,18 +22,14 @@ export class FetchDeliveryMethodsQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchDeliveryMethodsQuery,
     ): Promise<Result<DeliveryMethodsResponse, ThingsboardApiException>> {
         try {
-            const sysAdminAccessToken =
-                await this.sysAdminAuthService.getAccessToken();
-
             const response =
-                await this.thingsboardApi.fetchDeliveryMethods(sysAdminAccessToken);
+                await this.thingsboardApi.fetchDeliveryMethods(query.accessToken);
 
             return Ok(response);
         } catch (error) {

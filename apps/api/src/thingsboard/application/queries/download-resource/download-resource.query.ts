@@ -5,7 +5,10 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 export class DownloadResourceQuery extends Query<
     Result<Buffer, ThingsboardApiException>
 > {
-    constructor(public readonly resourceId: string) {
+    constructor(
+        public readonly resourceId: string,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

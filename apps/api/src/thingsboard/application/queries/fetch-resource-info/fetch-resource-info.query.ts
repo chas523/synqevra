@@ -8,6 +8,7 @@ export class FetchResourceInfoQuery extends Query<
 > {
     constructor(
         public readonly resourceId: string,
+        public readonly accessToken: string,
     ) {
         super();
     }

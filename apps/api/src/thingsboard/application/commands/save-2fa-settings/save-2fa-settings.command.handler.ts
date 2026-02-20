@@ -23,7 +23,7 @@ export class SaveTwoFaSettingsCommandHandler
     ): Promise<Result<void, ThingsboardApiException>> {
         try {
             await this.thingsboardApiPort.saveTwoFaSettings(
-                command.sysAdminAccessToken,
+                command.accessToken,
                 command.settings,
             );
             return Ok(undefined);

@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SaveEntityAttributesCommand } from './save-entity-attributes.command';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
     THINGSBOARD_API_PORT,

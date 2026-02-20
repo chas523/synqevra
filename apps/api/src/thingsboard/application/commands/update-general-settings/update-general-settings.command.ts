@@ -6,7 +6,10 @@ import { GeneralSettingsDto } from 'src/thingsboard/interface/rest/dtos/response
 export class UpdateGeneralSettingsCommand extends Command<
     Result<GeneralSettingsDto, ThingsboardApiException>
 > {
-    constructor(public readonly settings: GeneralSettingsDto) {
+    constructor(
+        public readonly settings: GeneralSettingsDto,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

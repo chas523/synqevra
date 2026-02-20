@@ -8,7 +8,7 @@ import {
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @QueryHandler(FetchNotificationTemplatesQuery)
 export class FetchNotificationTemplatesQueryHandler
@@ -24,17 +24,14 @@ export class FetchNotificationTemplatesQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApiPort: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchNotificationTemplatesQuery,
     ): Promise<Result<NotificationTemplatesResponse, ThingsboardApiException>> {
         try {
-            const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
-
             const response = await this.thingsboardApiPort.fetchNotificationTemplates(
-                sysAdminToken,
+                query.accessToken,
                 query.params,
             );
 

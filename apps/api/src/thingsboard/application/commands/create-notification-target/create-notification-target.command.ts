@@ -7,7 +7,10 @@ import { CreateNotificationTargetRequestDto } from 'src/thingsboard/interface/re
 export class CreateNotificationTargetCommand extends Command<
     Result<NotificationTargetDto, ThingsboardApiException>
 > {
-    constructor(public readonly request: CreateNotificationTargetRequestDto) {
+    constructor(
+        public readonly accessToken: string,
+        public readonly request: CreateNotificationTargetRequestDto,
+    ) {
         super();
     }
 }

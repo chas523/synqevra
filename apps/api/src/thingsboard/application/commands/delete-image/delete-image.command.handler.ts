@@ -16,30 +16,14 @@ export class DeleteImageCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(command: DeleteImageCommand): Promise<Result<DeleteImageResponseDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
-            const { imageLink, force } = command;
+            const { imageLink, force, accessToken } = command;
 
             const response = await this.thingsboardApi.deleteImage(
-                loginResponse.token,
+                accessToken,
                 imageLink,
                 force,
             );

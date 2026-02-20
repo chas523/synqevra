@@ -7,7 +7,7 @@ import {
     ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { PreviewNotificationRequestCommand } from './preview-notification-request.command';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @CommandHandler(PreviewNotificationRequestCommand)
 export class PreviewNotificationRequestCommandHandler
@@ -21,18 +21,14 @@ export class PreviewNotificationRequestCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         command: PreviewNotificationRequestCommand,
     ): Promise<Result<any, ThingsboardApiException>> {
         try {
-            const sysAdminAccessToken =
-                await this.sysAdminAuthService.getAccessToken();
-
             const result = await this.thingsboardApi.previewNotificationRequest(
-                sysAdminAccessToken,
+                command.accessToken,
                 command.previewRequest,
             );
 

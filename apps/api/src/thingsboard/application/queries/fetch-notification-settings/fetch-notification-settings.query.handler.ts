@@ -20,30 +20,14 @@ export class FetchNotificationSettingsQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
 
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
-
     async execute(
-        _: FetchNotificationSettingsQuery,
+        query: FetchNotificationSettingsQuery,
     ): Promise<Result<NotificationSettingsDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
             const settings = await this.thingsboardApi.fetchNotificationSettings(
-                loginResponse.token,
+                query.accessToken,
             );
 
             return Ok(settings);

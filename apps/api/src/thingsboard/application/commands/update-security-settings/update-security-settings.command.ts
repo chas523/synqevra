@@ -6,10 +6,12 @@ import { SecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/respons
 export class UpdateSecuritySettingsCommand extends Command<
   Result<SecuritySettingsDto, ThingsboardApiException>
 > {
-  public readonly settings: SecuritySettingsDto;
 
-  constructor(settings: SecuritySettingsDto) {
+
+  constructor(
+    public readonly settings: SecuritySettingsDto,
+    public readonly accessToken: string,
+  ) {
     super();
-    this.settings = settings;
   }
 }

@@ -6,6 +6,7 @@ export class PreviewNotificationRequestCommand extends Command<
     Result<any, ThingsboardApiException>
 > {
     constructor(
+        public readonly accessToken: string,
         public readonly previewRequest: any,
     ) {
         super();

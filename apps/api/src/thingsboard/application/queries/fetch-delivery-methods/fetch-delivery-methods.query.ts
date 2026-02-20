@@ -6,7 +6,7 @@ import { DeliveryMethodsResponse } from 'src/thingsboard/interface/rest/dtos/res
 export class FetchDeliveryMethodsQuery extends Query<
     Result<DeliveryMethodsResponse, ThingsboardApiException>
 > {
-    constructor() {
+    constructor(public readonly accessToken: string) {
         super();
     }
 }
