@@ -98,6 +98,16 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     );
   }
 
+  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
+    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
+  }
+
+  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
+    return this.configService.getOrThrow<string>(
+      'THINGSBOARD_SYSADMIN_PASSWORD',
+    );
+  }
+
   async fetchDevices(
     accessToken: string,
     page: number,
@@ -268,22 +278,19 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async loginToSysadminAccount(
-    username: string,
-    password: string,
-  ): Promise<ThingsboardLoginResponse> {
+  async loginToSysadminAccount(username: string, password: string): Promise<ThingsboardLoginResponse> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/auth/login`;
       const response = await firstValueFrom(
         this.httpService.post<ThingsboardLoginResponse>(url, {
-          username,
-          password,
+          username: this.THINGSBOARD_SYSADMIN_EMAIL,
+          password: this.THINGSBOARD_SYSADMIN_PASSWORD,
         }),
       );
       return response.data;
     } catch (error) {
       ThingsboardApiException.createException(
-        'Failed to login to ThingsBoard',
+        'Failed to login to ThingsBoard as sysadmin',
         error,
         this.logger,
       );
@@ -2271,131 +2278,131 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
-    async fetchTwoFaSettings(
-        sysAdminAccessToken: string,
-    ): Promise<TwoFactorAuthSettingsDto> {
-        try {
-            const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
-            const response = await firstValueFrom(
-                this.httpService.get<TwoFactorAuthSettingsDto>(url, {
-                    headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
-                }),
-            );
-            return response.data;
-        } catch (error) {
-            ThingsboardApiException.createException(
-                'Failed to fetch 2FA settings',
-                error,
-                this.logger,
-            );
-        }
+  async fetchTwoFaSettings(
+    sysAdminAccessToken: string,
+  ): Promise<TwoFactorAuthSettingsDto> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
+      const response = await firstValueFrom(
+        this.httpService.get<TwoFactorAuthSettingsDto>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch 2FA settings',
+        error,
+        this.logger,
+      );
     }
+  }
 
-    async saveTwoFaSettings(
-        sysAdminAccessToken: string,
-        settings: TwoFactorAuthSettingsRequestDto,
-    ): Promise<void> {
-        try {
-            const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
-            await firstValueFrom(
-                this.httpService.post(url, settings, {
-                    headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
-                }),
-            );
-        } catch (error) {
-            ThingsboardApiException.createException(
-                'Failed to save 2FA settings',
-                error,
-                this.logger,
-            );
-        }
+  async saveTwoFaSettings(
+    sysAdminAccessToken: string,
+    settings: TwoFactorAuthSettingsRequestDto,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/2fa/settings`;
+      await firstValueFrom(
+        this.httpService.post(url, settings, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save 2FA settings',
+        error,
+        this.logger,
+      );
     }
+  }
 
-    async getWidgetsBundles(
-        accessToken: string,
-        page: number,
-        pageSize: number,
-        sortProperty: string,
-        sortOrder: 'ASC' | 'DESC',
-        tenantOnly: boolean,
-        fullSearch: boolean,
-        scadaFirst: boolean,
-        deprecatedFilter: string,
-    ): Promise<any> {
-        try {
-            // Constructing URL with query parameters.
-            // Note: Handling boolean/string conversion might be needed if values are not strings.
-            // Assuming query params are handled correctly by the caller or stringified here.
-            const queryParams = new URLSearchParams({
-                pageSize: pageSize.toString(),
-                page: page.toString(),
-                sortProperty: sortProperty,
-                sortOrder: sortOrder,
-                tenantOnly: String(tenantOnly),
-                fullSearch: String(fullSearch),
-                scadaFirst: String(scadaFirst),
-                deprecatedFilter: deprecatedFilter,
-            });
+  async getWidgetsBundles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    tenantOnly: boolean,
+    fullSearch: boolean,
+    scadaFirst: boolean,
+    deprecatedFilter: string,
+  ): Promise<any> {
+    try {
+      // Constructing URL with query parameters.
+      // Note: Handling boolean/string conversion might be needed if values are not strings.
+      // Assuming query params are handled correctly by the caller or stringified here.
+      const queryParams = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty: sortProperty,
+        sortOrder: sortOrder,
+        tenantOnly: String(tenantOnly),
+        fullSearch: String(fullSearch),
+        scadaFirst: String(scadaFirst),
+        deprecatedFilter: deprecatedFilter,
+      });
 
-            const url = `${this.THINGSBOARD_API_URL}/widgetsBundles?${queryParams.toString()}`;
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundles?${queryParams.toString()}`;
 
-            const response = await firstValueFrom(
-                this.httpService.get(url, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                }),
-            );
-            return response.data;
-        } catch (error) {
-            ThingsboardApiException.createException(
-                'Failed to fetch widget bundles from ThingsBoard API',
-                error,
-                this.logger,
-            );
-        }
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget bundles from ThingsBoard API',
+        error,
+        this.logger,
+      );
     }
+  }
 
-    async getWidgetTypeFqns(
-        accessToken: string,
-        widgetsBundleId: string,
-    ): Promise<any> {
-        try {
-            // User provided endpoint: GET /api/widgetTypeFqns?widgetsBundleId={uuid}
-            const url = `${this.THINGSBOARD_API_URL}/widgetTypeFqns?widgetsBundleId=${widgetsBundleId}`;
-            const response = await firstValueFrom(
-                this.httpService.get(url, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                }),
-            );
-            return response.data;
-        } catch (error) {
-            ThingsboardApiException.createException(
-                'Failed to fetch widget type FQNs from ThingsBoard API',
-                error,
-                this.logger,
-            );
-        }
+  async getWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+  ): Promise<any> {
+    try {
+      // User provided endpoint: GET /api/widgetTypeFqns?widgetsBundleId={uuid}
+      const url = `${this.THINGSBOARD_API_URL}/widgetTypeFqns?widgetsBundleId=${widgetsBundleId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch widget type FQNs from ThingsBoard API',
+        error,
+        this.logger,
+      );
     }
+  }
 
-    async saveWidgetTypeFqns(
-        accessToken: string,
-        widgetsBundleId: string,
-        fqns: string[],
-    ): Promise<any> {
-        try {
-            // User provided endpoint: POST /widgetsBundle/{uuid}/widgetTypeFqns
-            const url = `${this.THINGSBOARD_API_URL}/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`;
-            const response = await firstValueFrom(
-                this.httpService.post(url, fqns, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                }),
-            );
-            return response.data;
-        } catch (error) {
-            ThingsboardApiException.createException(
-                'Failed to save widget type FQNs to ThingsBoard API',
-                error,
-                this.logger,
-            );
-        }
+  async saveWidgetTypeFqns(
+    accessToken: string,
+    widgetsBundleId: string,
+    fqns: string[],
+  ): Promise<any> {
+    try {
+      // User provided endpoint: POST /widgetsBundle/{uuid}/widgetTypeFqns
+      const url = `${this.THINGSBOARD_API_URL}/widgetsBundle/${widgetsBundleId}/widgetTypeFqns`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, fqns, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save widget type FQNs to ThingsBoard API',
+        error,
+        this.logger,
+      );
     }
+  }
 }

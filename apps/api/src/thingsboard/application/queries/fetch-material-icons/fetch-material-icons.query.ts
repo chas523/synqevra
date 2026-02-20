@@ -5,7 +5,7 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 export class FetchMaterialIconsQuery extends Query<
     Result<string[], ThingsboardApiException>
 > {
-    constructor() {
+    constructor(public readonly accessToken: string) {
         super();
     }
 }

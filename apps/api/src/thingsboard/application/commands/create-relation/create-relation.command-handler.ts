@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateRelationCommand } from './create-relation.command';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
     THINGSBOARD_API_PORT,
@@ -17,16 +17,14 @@ export class CreateRelationCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: CreateRelationCommand,
     ): Promise<Result<void, TBAdminGetError>> {
-        const { fromId, fromType, toId, toType, relationType, additionalInfo } = command;
+        const { fromId, fromType, toId, toType, relationType, additionalInfo, accessToken } = command;
 
         try {
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             await this.thingsboardApi.saveRelation(
                 accessToken,

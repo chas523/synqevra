@@ -3,7 +3,7 @@ import { FetchTenantAttributesQuery } from './fetch-tenant-attributes.query';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger } from '@nestjs/common';
 import { TenantAttributesResponse } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import { Inject } from '@nestjs/common';
 import {
@@ -23,19 +23,17 @@ export class FetchTenantAttributesQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchTenantAttributesQuery,
     ): Promise<Result<TenantAttributesResponse, TBAdminGetError>> {
-        const { tenantId, scope } = query;
+        const { tenantId, scope, accessToken } = query;
 
         try {
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             const response = await this.thingsboardApi.fetchTenantAttributes(
-                accessToken,
+                accessToken!,
                 tenantId,
                 scope,
             );

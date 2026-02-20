@@ -20,30 +20,14 @@ export class FetchResourcesQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly configService: ConfigService,
     ) { }
-
-    private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-        return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-    }
-
-    private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-        return this.configService.getOrThrow<string>(
-            'THINGSBOARD_SYSADMIN_PASSWORD',
-        );
-    }
 
     async execute(
         query: FetchResourcesQuery,
     ): Promise<Result<ResourcesPageResponseDto, ThingsboardApiException>> {
         try {
-            const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-                this.THINGSBOARD_SYSADMIN_EMAIL,
-                this.THINGSBOARD_SYSADMIN_PASSWORD,
-            );
-
             const resources = await this.thingsboardApi.fetchResources(
-                loginResponse.token,
+                query.accessToken,
                 query.page,
                 query.pageSize,
                 query.sortProperty,

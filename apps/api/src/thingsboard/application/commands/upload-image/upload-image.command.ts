@@ -5,6 +5,7 @@ export class UploadImageCommand implements ICommand {
         public readonly file: Buffer,
         public readonly fileName: string,
         public readonly title: string,
+        public readonly accessToken: string,
         public readonly imageSubType: string = 'IMAGE',
     ) { }
 }

@@ -7,7 +7,7 @@ import { ConnectivitySettingsDto } from 'src/thingsboard/interface/rest/dtos/res
 export class FetchConnectivitySettingsQuery extends Query<
     Result<ConnectivitySettingsDto, ThingsboardApiException>
 > {
-    constructor() {
+    constructor(public readonly accessToken: string) {
         super();
     }
 }

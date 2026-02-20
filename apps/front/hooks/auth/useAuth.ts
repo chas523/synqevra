@@ -8,37 +8,17 @@ export function useLogin() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function login(loginForm: LoginFormData) {
+  async function login(loginForm: LoginFormData, role: string) {
     setLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      await AuthService.loginRequest(loginForm);
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-      setSuccess(false);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return { login, isLoading, error, success };
-}
-
-export function useAdminLogin() {
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  async function login(loginForm: LoginFormData) {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    try {
-      await AuthService.loginAdminRequest(loginForm);
+      if (role === 'ADMIN') {
+        await AuthService.loginAdminRequest(loginForm);
+      } else {
+        await AuthService.loginRequest(loginForm);
+      }
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -80,15 +60,20 @@ export function useLogout() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
-  async function logout() {
+  async function logout(role: string) {
     setLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
-      await AuthService.logoutRequest();
+      if (role === 'ADMIN') {
+        await AuthService.logoutAdminRequest();
+        router.push("/auth/login/admin");
+      } else {
+        await AuthService.logoutRequest();
+        router.push("/auth/login");
+      }
       setSuccess(true);
-      router.push("/auth/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Logout failed");
     } finally {
@@ -99,28 +84,28 @@ export function useLogout() {
   return { logout, isLoading, error, success };
 }
 
-export function useAdminLogout() {
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const router = useRouter();
+// export function useAdminLogout() {
+//   const [isLoading, setLoading] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [success, setSuccess] = useState(false);
+//   const router = useRouter();
 
-  async function logout() {
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
+//   async function logout() {
+//     setLoading(true);
+//     setError(null);
+//     setSuccess(false);
 
-    try {
-      await AuthService.logoutAdminRequest();
-      setSuccess(true);
-      router.push("/auth/login");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Logout failed");
-    } finally {
-      setLoading(false);
-    }
-  }
+//     try {
+//       await AuthService.logoutAdminRequest();
+//       setSuccess(true);
+//       router.push("/auth/login/admin");
+//     } catch (err) {
+//       setError(err instanceof Error ? err.message : "Logout failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
 
-  return { logout, isLoading, error, success };
-}
+//   return { logout, isLoading, error, success };
+// }
 

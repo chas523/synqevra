@@ -9,14 +9,20 @@ import * as jwt from 'jsonwebtoken';
 import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
+
 } from '../../../thingsboard/application/ports/thingsboard.repository.port';
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenCommand } from '../../../thingsboard/application/commands/refresh-token/refresh-token.command';
 import { Socket } from 'socket.io';
 import { AuthJwtPayload } from 'src/auth/types/auth-jwtPayload';
+import { Role } from 'src/iam/domain/enums/role.enum';
+import {
+  THINGSBOARD_API_PORT,
+  ThingsboardApiPort,
+} from 'src/thingsboard/application/ports/thingsboard.api.port';
 
 export interface SocketWithUser extends Socket {
-  user?: { id: number };
+  user?: { id: number; role: Role };
   tbAccessToken?: string;
 }
 
@@ -25,8 +31,10 @@ export class ThingsboardWsAuthGuard implements CanActivate {
   constructor(
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly repositoryPort: ThingsboardRepositoryPort,
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApiPort: ThingsboardApiPort,
     private readonly commandBus: CommandBus,
-  ) {}
+  ) { }
 
   private isExpiredOrNear(exp?: number, skewSec = 45): boolean {
     if (!exp) return true;
@@ -36,10 +44,8 @@ export class ThingsboardWsAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient<SocketWithUser>();
-
     // Get token from handshake cookies
     const cookies = client.handshake.headers.cookie;
-
     if (!cookies) {
       throw new UnauthorizedException('No cookies found');
     }
@@ -47,7 +53,6 @@ export class ThingsboardWsAuthGuard implements CanActivate {
     // Parse cookies to get access token
     const accessTokenMatch = cookies.match(/access_token=([^;]+)/);
     const accessToken = accessTokenMatch ? accessTokenMatch[1] : null;
-
     if (!accessToken) {
       throw new UnauthorizedException('Access token not found in cookies');
     }
@@ -61,17 +66,29 @@ export class ThingsboardWsAuthGuard implements CanActivate {
 
     const payload = decoded as unknown as AuthJwtPayload;
     const userId = payload.sub;
+    const role = payload.role;
 
+    console.log("payload", payload)
     // Get token from DB
-    const tokens = await this.repositoryPort.getTokens(userId);
-    let freshAccessToken = tokens?.getAccessToken();
+    let freshAccessToken;
+    if (role === Role.MODERATOR || role === Role.USER) {
+      const tokens = await this.repositoryPort.getTokens(userId);
+      freshAccessToken = tokens?.getAccessToken();
+      //if admin then we'll never need to refresh token, because we always call loginToSysadmin, so we're refreshing it this way.
+    } else if (role === Role.ADMIN) {
+      const tokens = await this.thingsboardApiPort.loginToSysadminAccount();
+      freshAccessToken = tokens.token;
+      client.tbAccessToken = freshAccessToken;
+      client.user = { id: userId, role: payload.role };
+      return true;
+    }
+
 
     // Check expiration
     const decodedDb: any = freshAccessToken
       ? jwt.decode(freshAccessToken)
       : null;
     const needRefresh = !decodedDb || this.isExpiredOrNear(decodedDb?.exp);
-
     if (needRefresh) {
       const result = await this.commandBus.execute(
         new RefreshTokenCommand(userId),
@@ -82,10 +99,9 @@ export class ThingsboardWsAuthGuard implements CanActivate {
       }
       freshAccessToken = result.unwrap().accessToken;
     }
-
     // Store token and user on socket for later use
     client.tbAccessToken = freshAccessToken;
-    client.user = { id: userId };
+    client.user = { id: userId, role: payload.role };
     return true;
   }
 }

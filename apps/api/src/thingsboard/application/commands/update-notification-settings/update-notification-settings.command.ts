@@ -6,7 +6,10 @@ import { NotificationSettingsDto } from 'src/thingsboard/interface/rest/dtos/res
 export class UpdateNotificationSettingsCommand extends Command<
     Result<NotificationSettingsDto, ThingsboardApiException>
 > {
-    constructor(public readonly settings: NotificationSettingsDto) {
+    constructor(
+        public readonly settings: NotificationSettingsDto,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

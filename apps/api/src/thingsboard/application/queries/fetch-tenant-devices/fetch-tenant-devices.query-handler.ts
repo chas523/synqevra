@@ -18,32 +18,17 @@ export class FetchTenantDevicesQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(FetchTenantDevicesQueryHandler.name);
-
-  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-  }
-
-  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-    return this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_PASSWORD',
-    );
-  }
 
   async execute(
     query: FetchTenantDevicesQuery,
   ): Promise<Result<GetTenantDevicesResponse, TBAdminGetTenantDevicesError>> {
     try {
-      const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-        this.THINGSBOARD_SYSADMIN_EMAIL,
-        this.THINGSBOARD_SYSADMIN_PASSWORD,
-      );
 
       const response = await this.thingsboardApi.fetchTenantDevices(
-        loginResponse.token,
+        query.accessToken,
         query.tenantId,
         query.page,
         query.pageSize,

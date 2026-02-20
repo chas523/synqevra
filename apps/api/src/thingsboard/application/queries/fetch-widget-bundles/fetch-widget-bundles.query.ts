@@ -9,5 +9,6 @@ export class FetchWidgetBundlesQuery implements IQuery {
         public readonly tenantOnly: boolean,
         public readonly fullSearch: boolean,
         public readonly scadaFirst: boolean,
+        public readonly accessToken: string,
     ) { }
 }

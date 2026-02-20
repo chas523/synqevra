@@ -8,7 +8,6 @@ import {
   THINGSBOARD_API_PORT,
   ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
-import { ConfigService } from '@nestjs/config';
 
 @QueryHandler(FetchTenantsQuery)
 export class FetchTenantsQueryHandler implements IQueryHandler<
@@ -18,20 +17,10 @@ export class FetchTenantsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(FetchTenantsQueryHandler.name);
 
-  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-  }
-
-  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-    return this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_PASSWORD',
-    );
-  }
 
   async execute(
     query: FetchTenantsQuery,
@@ -39,15 +28,8 @@ export class FetchTenantsQueryHandler implements IQueryHandler<
     const { page, pageSize } = query;
 
     try {
-      const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-        this.THINGSBOARD_SYSADMIN_EMAIL,
-        this.THINGSBOARD_SYSADMIN_PASSWORD,
-      );
-
-      const sysAdminAccessToken = loginResponse.token;
-
       const response = await this.thingsboardApi.fetchTenants(
-        sysAdminAccessToken,
+        query.accessToken,
         page,
         pageSize,
       );

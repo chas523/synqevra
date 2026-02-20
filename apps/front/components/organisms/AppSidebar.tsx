@@ -11,12 +11,13 @@ import {
   PersonStanding,
   Settings,
   Stethoscope,
-  UserRoundCog,
-  ShieldCheck, BellIcon,
+  ShieldCheck,
+  BellIcon,
 } from "lucide-react";
 import Image from "next/image";
-
 import Link from "next/link";
+import { useAppSelector } from "@/lib/redux/store";
+
 import logoDark from "@/public/logo.svg";
 import logoLight from "@/public/logo-white.svg";
 import {
@@ -39,48 +40,129 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-const MENU_ITEMS = {
-  admin: [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
+interface NavItem {
+  label: string;
+  href?: string;
+  icon?: any;
+  items?: { label: string; href: string }[];
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
+  ADMIN: [
     {
-      href: "/dashboard/tenant-profiles",
-      icon: PersonStanding,
-      label: "Tenant Profiles"
-    },
-    {
-      href: "/dashboard/notifications",
-      icon: BellIcon,
-      label: "Notification Center"
-    },
-    {
-      href: "/settings",
-      icon: Settings,
-      label: "Settings",
+      label: "Admin",
+      items: [
+        { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+        { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
+        { href: "/dashboard/tenant-profiles", icon: PersonStanding, label: "Tenant Profiles" },
+        { href: "/dashboard/notifications", icon: BellIcon, label: "Notification Center" },
+        {
+          label: "Resources",
+          icon: FolderOpen,
+          items: [
+            { href: "/resources/widgets-library", label: "Widgets Library" },
+            { href: "/resources/image-gallery", label: "Image gallery" },
+            { href: "/resources/scada-symbols", label: "SCADA Symbols" },
+            { href: "/resources/javascript-library", label: "JavaScript library" },
+            { href: "/resources/resource-library", label: "Resource library" },
+          ],
+        },
+        {
+          label: "Security",
+          icon: ShieldCheck,
+          items: [
+            { href: "/security-settings", label: "Security Settings" },
+            { href: "/security/2fa", label: "Two-factor authentication" },
+          ],
+        },
+        { href: "/settings", icon: Settings, label: "Settings" },
+      ],
     },
   ],
-  // user: [
-  //   { href: "/", icon: Home, label: "Landing Page" },
-  //   { href: "/devices", icon: Settings, label: "Devices" },
-  //   { href: "/patients", icon: PersonStanding, label: "Patients" },
-  //   { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
-  // ],
-  medplum: [
-    { href: "/patients", icon: PersonStanding, label: "Patients" },
-    { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+  OTHERS: [
+    {
+      label: "User",
+      items: [
+        { href: "/", icon: Home, label: "Landing Page" },
+        { href: "/devices", icon: Settings, label: "Devices" },
+        { href: "/patients", icon: PersonStanding, label: "Patients" },
+        { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+      ],
+    },
   ],
+};
+
+const NavMenuItems = ({ items }: { items: NavItem[] }) => {
+  return (
+    <SidebarMenu>
+      {items.map((item) => {
+        if (item.items) {
+          return (
+            <Collapsible
+              key={item.label}
+              className="group/collapsible"
+              defaultOpen={item.label === "Resources"}
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton>
+                    {item.icon && <item.icon />}
+                    <span>{item.label}</span>
+                    <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {item.items.map((subItem) => (
+                      <SidebarMenuSubItem key={subItem.href}>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={subItem.href}>
+                            <span>{subItem.label}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        }
+
+        return (
+          <SidebarMenuItem key={item.label}>
+            <SidebarMenuButton asChild>
+              <Link href={item.href!}>
+                {item.icon && <item.icon />}
+                <span>{item.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
 };
 
 export default function AppSidebar() {
   const [medplumEnabled] = useLocalStorage({
-    key: 'medplum-enabled',
+    key: "medplum-enabled",
     defaultValue: false,
   });
   const [mounted, setMounted] = useState(false);
+  const user = useAppSelector((state) => state.user.user);
+  const role = user?.role;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const groups = role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
 
   return (
     <Sidebar
@@ -113,142 +195,30 @@ export default function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Admin</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {MENU_ITEMS.admin.map(({ href, icon: Icon, label }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild>
-                    <a href={href}>
-                      <Icon />
-                      <span>{label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              {/* Resources collapsible menu */}
-              <Collapsible defaultOpen className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <FolderOpen />
-                      <span>Resources</span>
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <a href="/resources/widgets-library">
-                            <span>Widgets Library</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <a href="/resources/image-gallery">
-                            <span>Image gallery</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <a href="/resources/scada-symbols">
-                            <span>SCADA Symbols</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <a href="/resources/javascript-library">
-                            <span>JavaScript library</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <a href="/resources/resource-library">
-                            <span>Resource library</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-              {/* Security collapsible menu */}
-              <Collapsible className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton>
-                      <ShieldCheck />
-                      <span>Security</span>
-                      <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href="/security-settings">
-                            <span>Security Settings</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href="/security/2fa">
-                            <span>Two-factor authentication</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <NavMenuItems items={group.items} />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
 
-        {/* <SidebarGroup>
-          <SidebarGroupLabel>User</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {MENU_ITEMS.user.map(({ href, icon: Icon, label }) => (
-                <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild>
-                    <Link href={href}>
-                      <Icon />
-                      <span>{label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup> */}
-        {mounted && medplumEnabled && (
+        {mounted && medplumEnabled && role === "ADMIN" && (
           <SidebarGroup>
             <SidebarGroupLabel>Medplum</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {MENU_ITEMS.medplum.map(({ href, icon: Icon, label }) => (
-                  <SidebarMenuItem key={href}>
-                    <SidebarMenuButton asChild>
-                      <Link href={href}>
-                        <Icon />
-                        <span>{label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+              <NavMenuItems
+                items={[
+                  { href: "/patients", icon: PersonStanding, label: "Patients" },
+                  { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+                ]}
+              />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
       </SidebarContent>
-    </Sidebar >
+    </Sidebar>
   );
 }
+

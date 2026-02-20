@@ -1,4 +1,4 @@
-export interface User {
+export interface AdminPanelUser {
   id: string;
   email: string;
   firstName: string;
@@ -19,7 +19,7 @@ export interface PaginatedResponse<T> {
   };
   total: number;
 }
-export interface PendingUser extends User {
+export interface PendingUser extends AdminPanelUser {
   status?: "new" | "pending";
 }
 

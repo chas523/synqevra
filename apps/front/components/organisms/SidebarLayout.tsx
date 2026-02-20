@@ -8,11 +8,14 @@ import logo from "@/public/logo.svg";
 import logoWhite from "@/public/logo-white.svg";
 import { useLogout } from "@/hooks/auth/useAuth";
 import { Button } from "../ui/button";
-import { LogOutIcon, Moon, Sun, Loader2 } from "lucide-react";
+import { LogOutIcon, Moon, Sun, Loader2, User, ShieldCheck } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
 import NotificationButton from "../molecules/NotificationButton";
 import { useTelemetryContext } from "@/lib/context/TelemetryContext";
+import { useSelector } from "react-redux";
+import { RootState, useAppDispatch, useAppSelector } from "@/lib/redux/store";
+import { fetchUserInformations, clearUser } from "@/lib/redux/slices/userSlice/userSlice";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -27,6 +30,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
 
+  const userStatus = useAppSelector((state) => state.user.status)
+  const user = useAppSelector((state) => state.user.user)
+  const dispatch = useAppDispatch();
+
   const prevPathRef = useRef(pathname);
 
   useEffect(() => {
@@ -38,6 +45,10 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
     if (wasAuth && isLoggedIn) {
       reconnect();
+    }
+
+    if (isLoggedIn && userStatus === "idle") {
+      dispatch(fetchUserInformations());
     }
 
     prevPathRef.current = pathname;
@@ -59,6 +70,11 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
+  };
+
+  const handleLogout = async () => {
+    await logout(user!.role);
+    dispatch(clearUser());
   };
 
   // Public routes - show header with logo
@@ -146,6 +162,25 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
           <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-20">
             <SidebarTrigger className="-ml-1 text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-black" />
             <div className="flex items-center gap-3">
+              {user && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/60 dark:hover:bg-white/10">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                    {user.role === "ADMIN" ? (
+                      <ShieldCheck className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                    ) : (
+                      <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    )}
+                  </div>
+                  <div className="flex flex-col leading-tight hidden sm:flex">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-cyan-600 dark:text-cyan-500/80">
+                      {user.role}
+                    </span>
+                  </div>
+                </div>
+              )}
               <NotificationButton />
 
               <Button
@@ -163,7 +198,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Button
                 size="lg"
                 className="cursor-pointer gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
-                onClick={logout}
+                onClick={handleLogout}
               >
                 {isLoading ? (
                   "Logging out "

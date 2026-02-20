@@ -3,5 +3,6 @@ import { CreateNotificationRuleRequestDto } from '../../../interface/rest/dtos/r
 export class CreateNotificationRuleCommand {
     constructor(
         public readonly rule: CreateNotificationRuleRequestDto,
+        public readonly accessToken: string,
     ) { }
 }

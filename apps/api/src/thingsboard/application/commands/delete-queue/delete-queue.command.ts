@@ -5,7 +5,10 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 export class DeleteQueueCommand extends Command<
     Result<void, ThingsboardApiException>
 > {
-    constructor(public readonly queueId: string) {
+    constructor(
+        public readonly queueId: string,
+        public readonly accessToken: string,
+    ) {
         super();
     }
 }

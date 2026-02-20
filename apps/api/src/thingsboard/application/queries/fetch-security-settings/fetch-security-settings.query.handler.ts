@@ -19,29 +19,14 @@ export class FetchSecuritySettingsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-    private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
-  private get THINGSBOARD_SYSADMIN_EMAIL(): string {
-    return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
-  }
-
-  private get THINGSBOARD_SYSADMIN_PASSWORD(): string {
-    return this.configService.getOrThrow<string>(
-      'THINGSBOARD_SYSADMIN_PASSWORD',
-    );
-  }
   async execute(
-    _: FetchSecuritySettingsQuery,
+    query: FetchSecuritySettingsQuery,
   ): Promise<Result<SecuritySettingsDto, ThingsboardApiException>> {
     try {
-      const loginResponse = await this.thingsboardApi.loginToSysadminAccount(
-        this.THINGSBOARD_SYSADMIN_EMAIL,
-        this.THINGSBOARD_SYSADMIN_PASSWORD,
-      );
-
       const settings = await this.thingsboardApi.fetchSecuritySettings(
-        loginResponse.token,
+        query.accessToken,
       );
 
       const filteredSettings = plainToInstance(SecuritySettingsDto, settings, {

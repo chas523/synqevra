@@ -8,7 +8,7 @@ import {
 } from '../../../application/ports/thingsboard.api.port';
 import { CreateNotificationTargetCommand } from './create-notification-target.command';
 import { NotificationTargetDto } from 'src/thingsboard/interface/rest/dtos/response/notification-target.response.dto';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 
 @CommandHandler(CreateNotificationTargetCommand)
 export class CreateNotificationTargetCommandHandler
@@ -24,19 +24,15 @@ export class CreateNotificationTargetCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApiPort: ThingsboardApiPort,
-        private readonly sysAdminAuthService: SysAdminAuthService,
     ) { }
 
     async execute(
         command: CreateNotificationTargetCommand,
     ): Promise<Result<NotificationTargetDto, ThingsboardApiException>> {
         try {
-            // Get SysAdmin token
-            const sysAdminToken = await this.sysAdminAuthService.getAccessToken();
-
             // Create notification target
             const target = await this.thingsboardApiPort.createNotificationTarget(
-                sysAdminToken,
+                command.accessToken,
                 command.request,
             );
 

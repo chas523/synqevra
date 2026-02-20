@@ -138,7 +138,7 @@ const NotificationButton = () => {
           </CardContent>
           <CardFooter className="p-2 border-t bg-slate-50 dark:bg-slate-900/50">
             <Link
-              href="/notifications"
+              href="/dashboard/notifications"
               className="flex items-center justify-center w-full text-xs text-blue-500 hover:text-blue-600 font-medium py-1"
               onClick={() => setIsOpen(false)}
             >

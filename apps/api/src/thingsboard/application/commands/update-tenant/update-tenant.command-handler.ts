@@ -3,7 +3,7 @@ import { UpdateTenantCommand } from './update-tenant.command';
 import { Err, Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
 import { TenantResponse } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
     THINGSBOARD_API_PORT,
@@ -22,17 +22,15 @@ export class UpdateTenantCommandHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         command: UpdateTenantCommand,
     ): Promise<Result<TenantResponse, TBAdminGetError>> {
-        const { tenantData } = command;
+        const { tenantData, accessToken } = command;
 
         try {
             this.logger.log(`Updating tenant: ${tenantData.id.id}`);
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             const response = await this.thingsboardApi.updateTenant(
                 tenantData,

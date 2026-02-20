@@ -3,7 +3,7 @@ import { FetchTenantProfileAlarmsQuery } from './fetch-tenant-profile-alarms.que
 import { Ok, Result } from 'oxide.ts';
 import { Logger, Inject } from '@nestjs/common';
 import { EntityAlarmsResponse } from '../../ports/thingsboard.api.port';
-import { SysAdminAuthService } from '../../services/sysadmin-auth.service';
+
 import { TBAdminGetError } from '../../../domain/errors/thingsboard-admin.errors';
 import {
     THINGSBOARD_API_PORT,
@@ -22,19 +22,17 @@ export class FetchTenantProfileAlarmsQueryHandler
     constructor(
         @Inject(THINGSBOARD_API_PORT)
         private readonly thingsboardApi: ThingsboardApiPort,
-        private readonly sysAdminAuth: SysAdminAuthService,
     ) { }
 
     async execute(
         query: FetchTenantProfileAlarmsQuery,
     ): Promise<Result<EntityAlarmsResponse, TBAdminGetError>> {
-        const { tenantProfileId, page, pageSize, statusList, severityList, startTime, endTime } = query;
+        const { tenantProfileId, page, pageSize, statusList, severityList, startTime, endTime, accessToken } = query;
 
         try {
-            const accessToken = await this.sysAdminAuth.getAccessToken();
 
             const response = await this.thingsboardApi.fetchEntityAlarms(
-                accessToken,
+                accessToken!,
                 'TENANT_PROFILE',
                 tenantProfileId,
                 page,

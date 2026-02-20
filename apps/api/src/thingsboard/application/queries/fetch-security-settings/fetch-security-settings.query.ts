@@ -7,7 +7,7 @@ import { SecuritySettingsDto } from 'src/thingsboard/interface/rest/dtos/respons
 export class FetchSecuritySettingsQuery extends Query<
   Result<SecuritySettingsDto, ThingsboardApiException>
 > {
-  constructor() {
+  constructor(public readonly accessToken: string) {
     super();
   }
 }
