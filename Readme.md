@@ -5,7 +5,7 @@ Implementation of ThingsBoard and Medplum on docker containers.
 
 ### 1. First time local setup
 1. To run project locally, you have to run initialization script. Use `init.bat` or `init.ps1` for Windows or `init.sh` for Linux/Mac.  
-2. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait untill containers are running  
+2. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait until containers are running  
 3. Navigate to root project folder `/fpl_thingsboard` and run `pnpm install` command to install all dependencies  
 4. Copy `fpl_thingsboard/apps/api/.env.example` to `fpl_thingsboard/apps/api/.env` file and fill in the values with your own database url, jwt and refresh jwt secrets, and mailer credentials.  
 5. Copy `fpl_thingsboard/apps/front/.env.example` to `fpl_thingsboard/apps/front/.env` file.  
@@ -16,7 +16,7 @@ Implementation of ThingsBoard and Medplum on docker containers.
 10. To accept requested users, go to `localhost:3000/dashboard/requestedUsers` and accept them.  
 
 ### 2. After first time setup
-1. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait untill containers are running
+1. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait until containers are running
 2. Go to `fpl_thingsboard` folder and run `pnpm dev` command to start dev server for frontend and backend  
 
 

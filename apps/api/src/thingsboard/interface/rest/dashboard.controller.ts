@@ -59,16 +59,23 @@ export class DashboardController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
-  ) { }
+  ) {}
 
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants')
-  async getTenants(@Query('page') page = 0, @Query('pageSize') pageSize = 20, @TbAccessToken() accessToken: string) {
-    const query = new FetchTenantsQuery({
-      page: Number(page),
-      pageSize: Number(pageSize),
-    }, accessToken);
+  async getTenants(
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 20,
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchTenantsQuery(
+      {
+        page: Number(page),
+        pageSize: Number(pageSize),
+      },
+      accessToken,
+    );
     const result: Result<GetTenantsResponse, TBAdminGetError> =
       await this.queryBus.execute(query);
 
@@ -139,7 +146,8 @@ export class DashboardController {
   async getTenantProfileAttributes(
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
-    @Query('scope') scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
+    @Query('scope')
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
   ) {
     const query = new FetchTenantProfileAttributesQuery(id, scope, accessToken);
     const result: Result<TenantAttributesResponse, TBAdminGetError> =
@@ -159,10 +167,20 @@ export class DashboardController {
   async saveTenantProfileAttributes(
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
-    @Body() body: { scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE'; attributes: Record<string, unknown> },
+    @Body()
+    body: {
+      scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE';
+      attributes: Record<string, unknown>;
+    },
   ) {
     const scope = body.scope || 'SERVER_SCOPE';
-    const command = new SaveEntityAttributesCommand('TENANT_PROFILE', id, scope, body.attributes, accessToken);
+    const command = new SaveEntityAttributesCommand(
+      'TENANT_PROFILE',
+      id,
+      scope,
+      body.attributes,
+      accessToken,
+    );
     const result: Result<void, TBAdminGetError> =
       await this.commandBus.execute(command);
 
@@ -212,7 +230,6 @@ export class DashboardController {
     });
   }
 
-
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/users')
@@ -222,11 +239,14 @@ export class DashboardController {
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
   ) {
-    const query = new FetchTenantUsersQuery({
-      tenantId: id,
-      page: Number(page),
-      pageSize: Number(pageSize),
-    }, accessToken);
+    const query = new FetchTenantUsersQuery(
+      {
+        tenantId: id,
+        page: Number(page),
+        pageSize: Number(pageSize),
+      },
+      accessToken,
+    );
     const result: Result<GetTenantUsersResponse, TBAdminGetTenantsUsersError> =
       await this.queryBus.execute(query);
 
@@ -247,11 +267,14 @@ export class DashboardController {
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
   ) {
-    const query = new FetchTenantDevicesQuery({
-      tenantId: id,
-      page: Number(page),
-      pageSize: Number(pageSize),
-    }, accessToken);
+    const query = new FetchTenantDevicesQuery(
+      {
+        tenantId: id,
+        page: Number(page),
+        pageSize: Number(pageSize),
+      },
+      accessToken,
+    );
     const result: Result<
       GetTenantDevicesResponse,
       TBAdminGetTenantDevicesError
@@ -265,6 +288,7 @@ export class DashboardController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/notifications')
   async getNotifications(
@@ -272,10 +296,13 @@ export class DashboardController {
     @Query('pageSize') pageSize = 20,
     @TbAccessToken() accessToken: string,
   ) {
-    const query = new FetchNotificationsQuery({
-      page: Number(page),
-      pageSize: Number(pageSize),
-    }, accessToken);
+    const query = new FetchNotificationsQuery(
+      {
+        page: Number(page),
+        pageSize: Number(pageSize),
+      },
+      accessToken,
+    );
 
     const result: Result<
       GetNotificationsResponse,
@@ -296,7 +323,8 @@ export class DashboardController {
   async getTenantAttributes(
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
-    @Query('scope') scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
+    @Query('scope')
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE' = 'SERVER_SCOPE',
   ) {
     const query = new FetchTenantAttributesQuery(id, scope, accessToken);
     const result: Result<TenantAttributesResponse, TBAdminGetError> =
@@ -434,10 +462,20 @@ export class DashboardController {
   async saveTenantAttributes(
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
-    @Body() body: { scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE'; attributes: Record<string, unknown> },
+    @Body()
+    body: {
+      scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE';
+      attributes: Record<string, unknown>;
+    },
   ) {
     const scope = body.scope || 'SERVER_SCOPE';
-    const command = new SaveEntityAttributesCommand('TENANT', id, scope, body.attributes, accessToken);
+    const command = new SaveEntityAttributesCommand(
+      'TENANT',
+      id,
+      scope,
+      body.attributes,
+      accessToken,
+    );
     const result: Result<void, TBAdminGetError> =
       await this.commandBus.execute(command);
 

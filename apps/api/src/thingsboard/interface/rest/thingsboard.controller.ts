@@ -27,7 +27,6 @@ import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboard-auth.guard';
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -53,7 +52,6 @@ import { CreateNotificationTemplateRequestDto } from './dtos/request/create-noti
 import { CreateNotificationRuleRequestDto } from './dtos/request/create-notification-rule.request.dto';
 import { CreateNotificationRuleCommand } from '../../application/commands/create-notification-rule/create-notification-rule.command';
 import { CreateNotificationTemplateCommand } from '../../application/commands/create-notification-template/create-notification-template.command';
-import { NotificationTemplateDto } from './dtos/response/notification-template.response.dto';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { GetUserQuery } from 'src/thingsboard/application/queries/get-user/get-user.query';
 import { ThingsboardLoginCommand } from 'src/thingsboard/application/commands/thingsboard-login/thingsboard-login.command';
@@ -170,7 +168,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -683,7 +681,6 @@ export class ThingsboardController {
     });
   }
 
-
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/settings/general')
@@ -717,7 +714,6 @@ export class ThingsboardController {
       },
     });
   }
-
 
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
@@ -764,7 +760,6 @@ export class ThingsboardController {
     });
   }
 
-
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/admin/settings/connectivity')
@@ -799,7 +794,6 @@ export class ThingsboardController {
     });
   }
 
-
   @Roles(Role.ADMIN)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/admin/settings/connectivity')
@@ -833,7 +827,10 @@ export class ThingsboardController {
     @Body() settings: ConnectivitySettingsRequestDto,
     @TbAccessToken() accessToken: string,
   ) {
-    const command = new UpdateConnectivitySettingsCommand(settings, accessToken);
+    const command = new UpdateConnectivitySettingsCommand(
+      settings,
+      accessToken,
+    );
     const result: Result<ConnectivitySettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -991,7 +988,10 @@ export class ThingsboardController {
     @Body() settings: NotificationSettingsDto,
     @TbAccessToken() accessToken: string,
   ) {
-    const command = new UpdateNotificationSettingsCommand(settings, accessToken);
+    const command = new UpdateNotificationSettingsCommand(
+      settings,
+      accessToken,
+    );
     const result: Result<NotificationSettingsDto, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1079,7 +1079,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1193,7 +1193,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1291,7 +1291,10 @@ export class ThingsboardController {
     @Body() notificationRequest: SendNotificationRequestDto,
     @TbAccessToken() accessToken: string,
   ) {
-    const command = new SendNotificationCommand(accessToken, notificationRequest);
+    const command = new SendNotificationCommand(
+      accessToken,
+      notificationRequest,
+    );
     const result: Result<NotificationRequestResponse, ThingsboardApiException> =
       await this.commandBus.execute(command);
 
@@ -1846,7 +1849,7 @@ export class ThingsboardController {
       scadaFirst === true || String(scadaFirst) === 'true',
       deprecatedFilter,
       widgetsBundleId,
-      accessToken
+      accessToken,
     );
     const result: Result<WidgetTypesPageDto, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -1970,7 +1973,11 @@ export class ThingsboardController {
     @TbAccessToken() accessToken: string,
     @Query('includeResources') includeResources: boolean = false,
   ) {
-    const query = new DownloadWidgetTypeQuery(id, accessToken, includeResources);
+    const query = new DownloadWidgetTypeQuery(
+      id,
+      accessToken,
+      includeResources,
+    );
     const result: Result<any, ThingsboardApiException> =
       await this.queryBus.execute(query);
 
@@ -1981,7 +1988,6 @@ export class ThingsboardController {
       },
     });
   }
-
 
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
