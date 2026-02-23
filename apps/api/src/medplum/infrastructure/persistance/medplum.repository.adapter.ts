@@ -34,6 +34,11 @@ export class MedplumRepositoryAdapter extends MedplumRepository {
     return saved ? MedplumMapper.toDomain(saved) : null;
   }
 
+  async findById(id: number): Promise<MedplumModel | null> {
+    const entity = await this.repository.findOne({ where: { id } });
+    return entity ? MedplumMapper.toDomain(entity) : null;
+  }
+
   async findByUserId(userId: number): Promise<MedplumModel | null> {
     const entity = await this.repository
       .createQueryBuilder('medplum')

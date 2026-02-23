@@ -3,4 +3,5 @@ export enum Role {
   MODERATOR = 'MODERATOR',
   PRACTITIONER = 'PRACTITIONER',
   USER = 'USER',
+  PATIENT = 'PATIENT',
 }

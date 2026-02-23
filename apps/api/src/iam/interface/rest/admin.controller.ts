@@ -22,7 +22,7 @@ import { RefreshAuthGuard } from '../../../auth/guards/refresh-auth/refresh-auth
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
-@ApiTags('admin')
+@ApiTags('Admin')
 @ApiBearerAuth()
 @Controller('admin')
 export class AdminController {

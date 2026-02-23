@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './infrastructure/persistance/user.entity';
 import { Admin } from './infrastructure/persistance/admin.entity';
 import { ActivationLink } from './infrastructure/persistance/activation-link.entity';
+import { Patient } from './infrastructure/persistance/patient.entity';
+import { PatientMedplum } from './infrastructure/persistance/patient-medplum.entity';
 import { AuthController } from './interface/rest/auth.controller';
 import { AuthService } from './application/auth/auth.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -34,17 +36,26 @@ import { LogoutAdminUseCase } from './application/use-cases/logout-admin.use-cas
 import { AdminRepository } from './domain/repositories/admin.repository';
 import { AdminRepositoryAdapter } from './infrastructure/persistance/admin.repository.adapter';
 import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.use-case';
+import { PatientLoginUseCase } from './application/use-cases/patient-login.use-case';
+import { PatientRepository } from './domain/repositories/patient.repository';
+import { PatientRepositoryAdapter } from './infrastructure/persistance/patient.repository.adapter';
+import { PatientMedplumRepository } from './domain/repositories/patient-medplum.repository';
+import { PatientMedplumRepositoryAdapter } from './infrastructure/persistance/patient-medplum.repository.adapter';
+import { PatientAuthGuard } from 'src/auth/guards/patient-auth/patient-auth.guard';
+import { MedplumModule } from 'src/medplum/medplum.module';
+import { PatientController } from './interface/rest/patient.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Admin, ActivationLink]),
+    TypeOrmModule.forFeature([User, Admin, ActivationLink, Patient, PatientMedplum]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
     ThingsboardModule,
     forwardRef(() => ConnectionModule),
+    forwardRef(() => MedplumModule),
   ],
-  controllers: [UsersController, AuthController, AdminController],
+  controllers: [UsersController, AuthController, AdminController, PatientController],
   providers: [
     AuthService,
 
@@ -59,10 +70,14 @@ import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.
     InvitePractitionerUseCase,
     GetUserByTokenUseCase,
     GetUserProfileUseCase,
+    PatientLoginUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },
     { provide: TokenGeneratorPort, useClass: TokenGeneratorAdapter },
+    { provide: PatientRepository, useClass: PatientRepositoryAdapter },
+    { provide: PatientMedplumRepository, useClass: PatientMedplumRepositoryAdapter },
+    PatientAuthGuard,
     {
       provide: ActivationLinkRepository,
       useClass: ActivationLinkRepositoryAdapter,
@@ -80,6 +95,9 @@ import { GetUserProfileUseCase } from './application/use-cases/get-user-profile.
     UserRepository,
     TokenGeneratorPort,
     ActivationLinkRepository,
+    PatientRepository,
+    PatientMedplumRepository,
+    PatientAuthGuard,
   ],
 })
 export class IamModule { }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { LocalStrategy } from './strategies/local.strategy';
 import { LocalStrategy as LocalAdminStrategy } from './strategies/local.admin.strategy';
+import { LocalPatientStrategy } from './strategies/local.patient.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
@@ -14,6 +15,7 @@ import { IamModule } from '../iam/iam.module';
 import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 import { JwtAdminStrategy } from './strategies/jwt.admin.strategy';
 import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
+import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
 
 @Module({
   imports: [
@@ -26,10 +28,12 @@ import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
   providers: [
     LocalStrategy,
     LocalAdminStrategy,
+    LocalPatientStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
     JwtAdminStrategy,
     RefreshAdminStrategy,
+    JwtPatientStrategy,
     // global guards
     {
       provide: APP_GUARD,
