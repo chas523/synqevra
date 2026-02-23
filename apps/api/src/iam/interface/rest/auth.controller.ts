@@ -24,6 +24,7 @@ import { CreateUserDto } from './dto/createUserDto';
 import type { CurrentUser } from '../../../auth/types/current-user';
 import { seconds, Throttle } from '@nestjs/throttler';
 import { RegisterUserUseCase } from '../../application/use-cases/register-user.use-case';
+import { PatientLoginUseCase } from '../../application/use-cases/patient-login.use-case';
 import { LoginUserUseCase } from 'src/iam/application/use-cases/login-user.use-case';
 import { LogoutUserUseCase } from '../../application/use-cases/logout-user.use-case';
 import { RefreshTokensUseCase } from '../../application/use-cases/refresh-token.use-case';
@@ -50,6 +51,7 @@ export class AuthController {
     private readonly refreshTokensUseCase: RefreshTokensUseCase,
     private readonly invitePractitionerUseCase: InvitePractitionerUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
+    private readonly patientLoginUseCase: PatientLoginUseCase,
   ) { }
 
   @Public()

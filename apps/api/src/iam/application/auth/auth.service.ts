@@ -13,6 +13,7 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '../../domain/repositories/user.repository';
 import { ConnectionRepository } from '../../../connection/domain/repositories/connection.repository';
 import { AdminRepository } from '../../domain/repositories/admin.repository';
+import { PatientRepository } from '../../domain/repositories/patient.repository';
 import {
   THINGSBOARD_API_PORT,
   ThingsboardApiPort,
@@ -23,6 +24,7 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly adminRepository: AdminRepository,
+    private readonly patientRepository: PatientRepository,
     private readonly connectionRepository: ConnectionRepository,
     private readonly jwtService: JwtService,
     @Inject(THINGSBOARD_API_PORT)
@@ -116,11 +118,22 @@ export class AuthService {
     return { id: admin.id, connectionRole: admin.role };
   }
 
+  async validatePatient(email: string, password: string): Promise<CurrentUser> {
+    const patient = await this.patientRepository.getPatientByEmail(email);
+    const hashToCompare = patient?.password ?? DUMMY_BCRYPT_HASH;
+    const isPasswordValid = await compare(password, hashToCompare);
+
+    if (!patient || !patient.id || !isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return { id: patient.id, connectionRole: patient.role };
+  }
+
   async validateJwtUser(userId: number) {
     const user = await this.userRepository.getUserById(userId);
     if (!user || !user.id) return null;
 
-    // Pobierz role z connection
     const connection =
       await this.connectionRepository.getConnectionByUserId(userId);
     if (!connection || !connection.role) return null;
@@ -143,6 +156,18 @@ export class AuthService {
     };
 
     return currentAdmin;
+  }
+
+  async validateJwtPatient(patientId: number) {
+    const patient = await this.patientRepository.getPatientById(patientId);
+    if (!patient || !patient.id) return null;
+
+    const currentPatient: CurrentUser = {
+      id: patient.id,
+      connectionRole: patient.role,
+    };
+
+    return currentPatient;
   }
 
   async validateRefreshToken(userId: number, refreshToken: string) {

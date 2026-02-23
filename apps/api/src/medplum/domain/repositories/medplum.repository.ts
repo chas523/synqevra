@@ -7,6 +7,7 @@ export abstract class MedplumRepository {
   abstract withManager(manager: EntityManager): MedplumRepositoryAdapter;
   abstract create(command: CreateMedplumCommand): MedplumModel | null;
   abstract save(model: MedplumModel): Promise<MedplumModel | null>;
+  abstract findById(id: number): Promise<MedplumModel | null>;
   abstract findByUserId(userId: number): Promise<MedplumModel | null>;
   abstract findByTenantId(tenantId: string): Promise<MedplumModel | null>;
 }
