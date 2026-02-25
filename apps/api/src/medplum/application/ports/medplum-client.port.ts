@@ -39,6 +39,12 @@ export abstract class MedplumClientPort {
     tenantId?: string,
   ): Promise<WithId<Patient>>;
 
+  abstract findPatientProfileByEmailWithClientIdClientSecret(
+    email: string,
+    clientId: string,
+    clientSecret: string,
+  ): Promise<Patient | null>;
+
   abstract findPatientByIdentifier(
     identifier: MedplumIdentifierCommand,
     userId?: number,

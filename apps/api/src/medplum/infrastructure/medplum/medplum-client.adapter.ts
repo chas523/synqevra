@@ -76,6 +76,20 @@ export class MedplumClientAdapter extends MedplumClientPort {
     return patient;
   }
 
+  async findPatientProfileByEmailWithClientIdClientSecret(
+    email: string,
+    clientId: string,
+    clientSecret: string,
+  ): Promise<Patient | null> {
+    const client = await this.medplumClient.initMedplumWithClientIdClientSecret(
+      clientId,
+      clientSecret,
+    );
+    const patient = await client.searchOne('Patient', `email=${email}`);
+
+    return patient || null;
+  }
+
   async findPatientByIdentifier(
     identifier: MedplumIdentifierCommand,
     userId?: number,

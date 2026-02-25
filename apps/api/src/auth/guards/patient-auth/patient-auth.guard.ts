@@ -12,7 +12,7 @@ import { PatientMedplumRepository } from 'src/iam/domain/repositories/patient-me
 import { MedplumRepository } from 'src/medplum/domain/repositories/medplum.repository';
 import type { CurrentUser } from 'src/auth/types/current-user';
 
-export interface MedplumCredentials {
+export class MedplumCredentials {
     clientId: string;
     clientSecret: string;
     medplumId: number;

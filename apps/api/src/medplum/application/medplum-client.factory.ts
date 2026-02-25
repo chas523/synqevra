@@ -11,7 +11,7 @@ import process from 'node:process';
 
 @Injectable()
 export class MedplumClientFactory {
-  constructor(private readonly repository: MedplumRepository) {}
+  constructor(private readonly repository: MedplumRepository) { }
 
   private readonly clientCache = new Map<number, Promise<MedplumClient>>();
   private readonly proxyCache = new Map<string, Promise<MedplumClient>>();
@@ -147,6 +147,18 @@ export class MedplumClientFactory {
       });
 
     this.proxyCache.set(tenantId, loginPromise);
+    return loginPromise;
+  }
+
+  async initMedplumWithClientIdClientSecret(clientId: string, clientSecret: string): Promise<MedplumClient> {
+    const client = new MedplumClient({
+      baseUrl: process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103',
+    });
+
+    const loginPromise = client
+      .startClientLogin(clientId, clientSecret)
+      .then(() => client)
+
     return loginPromise;
   }
 
