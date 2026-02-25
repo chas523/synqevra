@@ -40,3 +40,18 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: do-block-storage
+
+---
+# MinIO Volumes
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-data-pvc
+  namespace: medboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 25Gi
+  storageClassName: do-block-storage

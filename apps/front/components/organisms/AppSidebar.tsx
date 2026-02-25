@@ -21,8 +21,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAppSelector } from "@/lib/redux/store";
 
-import logoDark from "@/public/logo.svg";
-import logoLight from "@/public/logo-white.svg";
+import logoDarkStatic from "@/public/logo.svg";
+import logoLightStatic from "@/public/logo-white.svg";
 import {
   Sidebar,
   SidebarContent,
@@ -182,11 +182,44 @@ export default function AppSidebar() {
   const user = useAppSelector((state) => state.user.user);
   const role = user?.role;
 
+  const [imgErrorDarkTheme, setImgErrorDarkTheme] = useState<'none' | 'tenant_failed' | 'global_failed'>('none');
+  const [imgErrorLightTheme, setImgErrorLightTheme] = useState<'none' | 'tenant_failed' | 'global_failed'>('none');
+  const tenantId = user?.tenantId;
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    // Reset errors if user changes
+    setImgErrorDarkTheme('none');
+    setImgErrorLightTheme('none');
+  }, [tenantId]);
+
   const groups = role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
+
+  const getLogoSrc = (theme: 'dark' | 'light') => {
+    const errorState = theme === 'dark' ? imgErrorDarkTheme : imgErrorLightTheme;
+
+    // If all MinIO fetches failed, fallback to local static assets
+    if (errorState === 'global_failed') {
+      return theme === 'dark' ? logoLightStatic.src : logoDarkStatic.src;
+    }
+
+    const useTenant = tenantId && errorState !== 'tenant_failed';
+    const prefix = useTenant ? tenantId : 'global';
+    // Dark theme uses the white logo, light theme uses the dark logo
+    const filename = theme === 'dark' ? 'logo-dark.svg' : 'logo-white.svg';
+    return `/public-assets/${prefix}/${filename}`;
+  };
+
+  const handleImageError = (theme: 'dark' | 'light') => {
+    if (theme === 'dark') {
+      setImgErrorDarkTheme(prev => prev === 'none' && tenantId ? 'tenant_failed' : 'global_failed');
+    } else {
+      setImgErrorLightTheme(prev => prev === 'none' && tenantId ? 'tenant_failed' : 'global_failed');
+    }
+  };
 
   return (
     <Sidebar
@@ -199,19 +232,19 @@ export default function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <Image
-                  src={logoDark}
+                {/* Light Theme Logo */}
+                <img
+                  src={getLogoSrc('light')}
                   alt="Logo"
-                  height={32}
-                  width={100}
                   className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity dark:hidden"
+                  onError={() => handleImageError('light')}
                 />
-                <Image
-                  src={logoLight}
+                {/* Dark Theme Logo */}
+                <img
+                  src={getLogoSrc('dark')}
                   alt="Logo"
-                  height={32}
-                  width={100}
                   className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity hidden dark:block"
+                  onError={() => handleImageError('dark')}
                 />
               </Link>
             </SidebarMenuButton>

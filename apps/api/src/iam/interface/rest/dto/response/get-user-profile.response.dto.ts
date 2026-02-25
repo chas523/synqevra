@@ -32,4 +32,12 @@ export class UserProfileResult {
     description: 'The role assigned to the user',
   })
   role: Role;
+
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'The tenant ID of the user (if applicable)',
+    required: false,
+    nullable: true,
+  })
+  tenantId?: string | null;
 }
