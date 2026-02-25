@@ -18,16 +18,17 @@ export class GetPatientProfileUseCase {
 
         const { clientId, clientSecret } = credentials;
         const patientModel = await this.patientRepository.getPatientById(patientId);
-
+        console.log("Patient model: ", patientModel)
         if (!patientModel || !patientModel.email) {
             throw new NotFoundException('Patient not found');
         }
-
+        console.log("Patient email: ", patientModel.email)
         const patient = await this.medplumClientPort.findPatientProfileByEmailWithClientIdClientSecret(
             patientModel.email,
             clientId,
             clientSecret,
         );
+        console.log("Patient: ", patient)
 
         return {
             id: patient?.id,

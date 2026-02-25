@@ -81,11 +81,16 @@ export class MedplumClientAdapter extends MedplumClientPort {
     clientId: string,
     clientSecret: string,
   ): Promise<Patient | null> {
+    console.log("Email: ", email)
+    console.log("Client ID: ", clientId)
+    console.log("Client Secret: ", clientSecret)
     const client = await this.medplumClient.initMedplumWithClientIdClientSecret(
       clientId,
       clientSecret,
     );
+    console.log("Client: ", client)
     const patient = await client.searchOne('Patient', `email=${email}`);
+    console.log("Patient: ", patient)
 
     return patient || null;
   }

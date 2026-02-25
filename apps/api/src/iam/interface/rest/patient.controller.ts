@@ -63,6 +63,7 @@ export class PatientController {
     @UseGuards(PatientAuthGuard)
     @Get('profile')
     async patientProfile(@ActiveUser() patient: CurrentUser, @MedplumSecrets() credentials: MedplumCredentials) {
+        console.log("Credentials: ", credentials)
         return this.getPatientProfileUseCase.execute(
             patient.id,
             credentials,

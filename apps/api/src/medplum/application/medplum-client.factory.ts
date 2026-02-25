@@ -151,14 +151,27 @@ export class MedplumClientFactory {
   }
 
   async initMedplumWithClientIdClientSecret(clientId: string, clientSecret: string): Promise<MedplumClient> {
-    const client = new MedplumClient({
-      baseUrl: process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103',
-    });
+    const medplumUrl = process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103';
 
+    if (!clientId || !clientSecret) {
+      this.logger.error(`Missing credentials for Medplum login! URL: ${medplumUrl}`);
+      throw new BadRequestException('Medplum clientId and clientSecret are required');
+    }
+
+    this.logger.log(`Initializing Medplum with URL: ${medplumUrl} (Client ID ends with: ...${clientId.slice(-4)})`);
+
+    const client = new MedplumClient({
+      baseUrl: medplumUrl,
+    });
+    console.log("Client: ", client)
     const loginPromise = client
       .startClientLogin(clientId, clientSecret)
       .then(() => client)
-
+      .catch((err) => {
+        this.logger.error(`Medplum login failed for client ...${clientId.slice(-4)}: ${err.message}`);
+        throw err;
+      });
+    console.log("Login promise: ", loginPromise)
     return loginPromise;
   }
 
