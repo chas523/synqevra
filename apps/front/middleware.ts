@@ -22,7 +22,7 @@ export function middleware(req: NextRequest) {
 
   if (!isLoggedIn && !isGuestRoute && !isAlwaysPublic) {
     const loginUrl = new URL("/auth/login", req.url);
-    loginUrl.searchParams.set("from", pathname); // np. żeby potem wrócić
+    loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
@@ -32,5 +32,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|api).*)"], // działa na wszystkie strony
+  matcher: ["/((?!_next|favicon.ico|api).*)"],
 };
