@@ -21,7 +21,7 @@ import {
 import { EntityDetailPanel } from "@/components/templates/EntityDetailPanel";
 import { DetailPanelSection } from "@/components/molecules/DetailPanelSection";
 import { AddAttributeModal, AttributeValueType } from "@/components/molecules/AddAttributeModal";
-import { Copy, Save, X, AlertTriangle, Link2, Plus, ArrowRight, Trash2 } from "lucide-react";
+import { Copy, Save, X, AlertTriangle, Link2, Plus, ArrowRight, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -664,6 +664,91 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
     );
 }
 
+function WhitelabelTabContent({ tenantId }: { tenantId: string }) {
+    const [logoWhiteFile, setLogoWhiteFile] = useState<File | null>(null);
+    const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleUpload = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!logoWhiteFile && !logoDarkFile) {
+            toast.error("Please select at least one file to upload.");
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            if (logoWhiteFile) formData.append("logoWhite", logoWhiteFile);
+            if (logoDarkFile) formData.append("logoDark", logoDarkFile);
+
+            const response = await TenantService.uploadWhitelabelImages(tenantId, formData);
+
+            if (!response.success) {
+                throw new Error("Error during file upload");
+            }
+
+            toast.success("Files uploaded successfully.");
+            // Optional: reset file inputs after successful upload
+            // setLogoWhiteFile(null);
+            // setLogoDarkFile(null);
+        } catch (error) {
+            toast.error("An error occurred during upload.");
+            console.error(error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4">Whitelabel Settings</h3>
+                <form onSubmit={handleUpload} className="space-y-4">
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Logo (Light Mode)
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/svg+xml"
+                            onChange={(e) => setLogoWhiteFile(e.target.files?.[0] || null)}
+                            className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                        />
+                        <p className="text-xs text-slate-500">Recommended format: PNG, SVG. Displayed when UI is in light mode.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Logo (Dark Mode)
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/svg+xml"
+                            onChange={(e) => setLogoDarkFile(e.target.files?.[0] || null)}
+                            className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                        />
+                        <p className="text-xs text-slate-500">Recommended format: PNG, SVG. Displayed when UI is in dark mode.</p>
+                    </div>
+
+                    <div className="pt-2">
+                        <button
+                            type="submit"
+                            disabled={isUploading || (!logoWhiteFile && !logoDarkFile)}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isUploading ? "Uploading..." : "Save Images"}
+                            <Upload className="w-4 h-4" />
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 
 interface EditFormState {
     title: string;
@@ -904,6 +989,11 @@ export function TenantDetailPanel({
             id: "relations",
             label: "Relations",
             content: <RelationsTabContent tenant={tenant} />,
+        },
+        {
+            id: "whitelabel",
+            label: "Whitelabel",
+            content: <WhitelabelTabContent tenantId={tenant.id.id} />,
         },
     ];
 

@@ -102,6 +102,7 @@ import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-w
 import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
+import { StorageService } from './application/services/storage.service';
 
 
 const commandHandlers = [
@@ -217,6 +218,7 @@ const queryHandlers = [
     TelemetryService,
     TelemetryParserService,
     TelemetryGateway,
+    StorageService,
 
   ],
   controllers: [ThingsboardController, DashboardController],
@@ -226,6 +228,7 @@ const queryHandlers = [
     THINGSBOARD_TELEMETRY_PORT,
     ThingsboardRollbackService,
     TelemetryService,
+    StorageService,
   ],
 })
 export class ThingsboardModule { }

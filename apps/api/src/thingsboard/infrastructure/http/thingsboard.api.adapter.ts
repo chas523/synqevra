@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -177,8 +177,17 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         //if medplum fails - we're rollbacking creation of thingsboard device
         await this.deleteDevice(accessToken, response.data.id.id);
         this.logger.error('Failed to create medplum device:', medplumError);
+        // Surface a user-friendly error when the user has no Medplum connection set up
+        if (
+          medplumError instanceof HttpException &&
+          (medplumError.getResponse() as any)?.error === 'MedplumConnectionNotFound'
+        ) {
+          throw new ServiceUnavailableException(
+            'This feature requires a Medplum connection. Please set up your Medplum integration before creating devices.',
+          );
+        }
         MedplumApiError.createException(
-          'Failed to fetch device from ThingsBoard API',
+          'Failed to create device in Medplum',
           medplumError,
         );
       }

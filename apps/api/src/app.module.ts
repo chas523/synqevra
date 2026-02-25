@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from './connection/connection.module';
 import { IamModule } from './iam/iam.module';
 import dbConfig from './config/db.config';
+import minioConfig from './config/minio.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';
 import { MailerModule } from './mailer/mailer.module';
 import { PendingUserModule } from './pending-user/pending-user.module';
@@ -25,7 +26,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [dbConfig],
+      load: [dbConfig, minioConfig],
     }),
     TypeOrmModule.forRootAsync({ useFactory: dbConfig }),
     ThrottlerModule.forRoot({

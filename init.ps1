@@ -32,12 +32,13 @@ $content = Get-Content $nextConfigPath -Raw
 $content = $content -replace [regex]::Escape("http://api:3003/api/:path*"),   "http://localhost:3003/api/:path*"
 $content = $content -replace [regex]::Escape("http://api:3003/fhir/:path*"),  "http://localhost:3003/fhir/:path*"
 $content = $content -replace [regex]::Escape("http://thingsboard:8080/assets/:path*"),"http://localhost:8088/assets/:path*"
+$content = $content -replace [regex]::Escape("http://minio:9000/public-assets/:path*"),"http://localhost:9000/public-assets/:path*"
 [System.IO.File]::WriteAllText($nextConfigPath, $content)
 Write-Host "      Done." 
 
 # ─── 3. Docker Compose – ThingsBoard install ─────────────────────────────────
 Write-Host "[3/3] Running ThingsBoard CE install (INSTALL_TB=true, LOAD_DEMO=true) ..."
-Write-Host "Note: If you're running this for the second time it will throw error, you can safely ignore it"
+Write-Host "Note: If you're running this for the second time it will throw error, but you can safely ignore it"
 Set-Location (Join-Path $rootDir "backend")
 docker compose run --rm -e INSTALL_TB=true -e LOAD_DEMO=true thingsboard-ce
 

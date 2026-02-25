@@ -17,6 +17,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.997.0",
     "@keyv/redis": "^5.1.4",
     "@medplum/core": "^4.4.1",
     "@nestjs-modules/mailer": "^2.0.2",
@@ -38,6 +39,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.12",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "argon2": "^0.44.0",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",

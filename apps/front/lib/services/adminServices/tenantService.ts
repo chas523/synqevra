@@ -528,6 +528,46 @@ export class TenantService {
       throw new Error(message);
     }
   }
+
+  public static async uploadWhitelabelImages(
+    tenantId: string,
+    formData: FormData,
+  ): Promise<{ success: boolean; paths: Record<string, string> }> {
+    try {
+      // NOTE: We do not set Content-Type header here manually.
+      // When posting FormData, axios/fetch will automatically set Content-Type
+      // to multipart/form-data and calculate the proper boundary string.
+      const response = await proxyApi.post<{
+        success: boolean;
+        paths: Record<string, string>;
+      }>(`/dashboard/tenants/${tenantId}/whitelabel`, formData);
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to upload whitelabel images for tenant ${tenantId}`,
+      );
+      throw new Error(message);
+    }
+  }
+
+  public static async uploadGlobalWhitelabelImages(
+    formData: FormData,
+  ): Promise<{ success: boolean; paths: Record<string, string> }> {
+    try {
+      const response = await proxyApi.post<{
+        success: boolean;
+        paths: Record<string, string>;
+      }>(`/dashboard/settings/whitelabel`, formData);
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to upload global whitelabel images`,
+      );
+      throw new Error(message);
+    }
+  }
 }
 
 export interface UpdateTenantRequest {
