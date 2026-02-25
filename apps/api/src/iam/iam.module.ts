@@ -44,6 +44,7 @@ import { PatientMedplumRepositoryAdapter } from './infrastructure/persistance/pa
 import { PatientAuthGuard } from 'src/auth/guards/patient-auth/patient-auth.guard';
 import { MedplumModule } from 'src/medplum/medplum.module';
 import { PatientController } from './interface/rest/patient.controller';
+import { GetPatientProfileUseCase } from './application/use-cases/get-patient-profile.use-case';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { PatientController } from './interface/rest/patient.controller';
     GetUserByTokenUseCase,
     GetUserProfileUseCase,
     PatientLoginUseCase,
+    GetPatientProfileUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },

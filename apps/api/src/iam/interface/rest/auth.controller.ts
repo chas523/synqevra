@@ -226,6 +226,7 @@ export class AuthController {
     });
   }
 
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @Get('profile')
   @ApiOperation({
     summary: 'Get user profile',

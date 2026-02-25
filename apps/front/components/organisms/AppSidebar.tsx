@@ -13,6 +13,9 @@ import {
   Stethoscope,
   ShieldCheck,
   BellIcon,
+  Cpu,
+  History,
+  Wrench,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,7 +47,7 @@ interface NavItem {
   label: string;
   href?: string;
   icon?: any;
-  items?: { label: string; href: string }[];
+  items?: { label: string; href: string; icon?: any }[];
 }
 
 interface NavGroup {
@@ -92,6 +95,26 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
         { href: "/devices", icon: Settings, label: "Devices" },
         { href: "/patients", icon: PersonStanding, label: "Patients" },
         { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+        { href: "/dashboard/notifications", icon: BellIcon, label: "Notification Center" },
+        {
+          label: "Resources",
+          icon: FolderOpen,
+          items: [
+            { href: "/resources/widgets-library", label: "Widgets Library" },
+            { href: "/resources/image-gallery", label: "Image gallery" },
+            { href: "/resources/scada-symbols", label: "SCADA Symbols" },
+            { href: "/resources/javascript-library", label: "JavaScript library" },
+            { href: "/resources/resource-library", label: "Resource library" },
+          ],
+        },
+        {
+          label: "Advanced features",
+          icon: Wrench,
+          items: [
+            { href: "/advanced/ota-updates", label: "OTA updates", icon: Cpu },
+            { href: "/advanced/version-control", label: "Version control", icon: History },
+          ],
+        },
       ],
     },
   ],
@@ -122,6 +145,7 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
                       <SidebarMenuSubItem key={subItem.href}>
                         <SidebarMenuSubButton asChild>
                           <Link href={subItem.href}>
+                            {subItem.icon && <subItem.icon className="h-4 w-4" />}
                             <span>{subItem.label}</span>
                           </Link>
                         </SidebarMenuSubButton>
