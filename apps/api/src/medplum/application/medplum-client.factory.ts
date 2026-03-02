@@ -163,7 +163,6 @@ export class MedplumClientFactory {
     const client = new MedplumClient({
       baseUrl: medplumUrl,
     });
-    console.log("Client: ", client)
     const loginPromise = client
       .startClientLogin(clientId, clientSecret)
       .then(() => client)
@@ -171,7 +170,6 @@ export class MedplumClientFactory {
         this.logger.error(`Medplum login failed for client ...${clientId.slice(-4)}: ${err.message}`);
         throw err;
       });
-    console.log("Login promise: ", loginPromise)
     return loginPromise;
   }
 

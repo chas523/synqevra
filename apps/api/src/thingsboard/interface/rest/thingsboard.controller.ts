@@ -22,6 +22,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiQuery,
+  ApiParam,
   ApiBearerAuth,
   ApiOkResponse,
   ApiBadRequestResponse,
@@ -160,6 +161,26 @@ import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget
 import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/iam/domain/enums/role.enum';
+import { FetchOtaPackagesQuery } from 'src/thingsboard/application/queries/fetch-ota-packages/fetch-ota-packages.query';
+import { DownloadOtaPackageQuery } from 'src/thingsboard/application/queries/download-ota-package/download-ota-package.query';
+import { CreateOtaPackageCommand } from 'src/thingsboard/application/commands/create-ota-package/create-ota-package.command';
+import { DeleteOtaPackageCommand } from 'src/thingsboard/application/commands/delete-ota-package/delete-ota-package.command';
+import { CreateOtaPackageRequestDto } from './dtos/request/create-ota-package.request.dto';
+import { OtaPackagesPageResponseDto } from './dtos/response/ota-package.response.dto';
+import { FetchDeviceProfileInfosQuery } from 'src/thingsboard/application/queries/fetch-device-profile-infos/fetch-device-profile-infos.query';
+import { FetchRepoSettingsInfoQuery } from 'src/thingsboard/application/queries/fetch-repo-settings-info/fetch-repo-settings-info.query';
+import { FetchRepoSettingsQuery } from 'src/thingsboard/application/queries/fetch-repo-settings/fetch-repo-settings.query';
+import { FetchVersionsQuery } from 'src/thingsboard/application/queries/fetch-versions/fetch-versions.query';
+import { CheckRepoAccessCommand } from 'src/thingsboard/application/commands/check-repo-access/check-repo-access.command';
+import { SaveRepoSettingsCommand } from 'src/thingsboard/application/commands/save-repo-settings/save-repo-settings.command';
+import { DeleteRepoSettingsCommand } from 'src/thingsboard/application/commands/delete-repo-settings/delete-repo-settings.command';
+import { FetchBranchesQuery } from 'src/thingsboard/application/queries/fetch-branches/fetch-branches.query';
+import { FetchTrendzSettingsQuery } from 'src/thingsboard/application/queries/fetch-trendz-settings/fetch-trendz-settings.query';
+import { SaveTrendzSettingsCommand } from 'src/thingsboard/application/commands/save-trendz-settings/save-trendz-settings.command';
+import { FetchAiModelsQuery } from 'src/thingsboard/application/queries/fetch-ai-models/fetch-ai-models.query';
+import { SaveAiModelCommand } from 'src/thingsboard/application/commands/save-ai-model/save-ai-model.command';
+import { DeleteAiModelCommand } from 'src/thingsboard/application/commands/delete-ai-model/delete-ai-model.command';
+import { CheckAiModelConnectivityCommand } from 'src/thingsboard/application/commands/check-ai-model-connectivity/check-ai-model-connectivity.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -168,7 +189,7 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -921,7 +942,7 @@ export class ThingsboardController {
     });
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/notification/settings')
   @ApiBearerAuth()
@@ -955,7 +976,7 @@ export class ThingsboardController {
     });
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/notification/settings')
   @ApiBearerAuth()
@@ -1079,7 +1100,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -1193,7 +1214,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -2335,6 +2356,556 @@ export class ThingsboardController {
     );
     const result: Result<any, ThingsboardApiException> =
       await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // OTA Package endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/otaPackages')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get OTA packages',
+    description: 'Retrieve paginated list of OTA packages',
+  })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'sortProperty', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'OTA packages retrieved successfully',
+  })
+  async getOtaPackages(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchOtaPackagesQuery({
+      accessToken,
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      page: page ? parseInt(page, 10) : 0,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: (sortOrder as 'ASC' | 'DESC') || 'DESC',
+    });
+    const result: Result<OtaPackagesPageResponseDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: OtaPackagesPageResponseDto) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/otaPackage')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create OTA package',
+    description: 'Create a new OTA package',
+  })
+  @ApiBody({ type: CreateOtaPackageRequestDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'OTA package created successfully',
+  })
+  async createOtaPackage(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: CreateOtaPackageRequestDto,
+  ) {
+    const command = new CreateOtaPackageCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/otaPackage/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete OTA package',
+    description: 'Delete an OTA package by ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'OTA package deleted successfully',
+  })
+  async deleteOtaPackage(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const command = new DeleteOtaPackageCommand(accessToken, id);
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/otaPackage/:id/download')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Download OTA package',
+    description: 'Download OTA package binary by ID',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'OTA package downloaded successfully',
+  })
+  async downloadOtaPackage(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Res() res: any,
+  ) {
+    const query = new DownloadOtaPackageQuery(accessToken, id);
+    const result: Result<Buffer, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (buffer: Buffer) => {
+        res.set({
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': 'attachment',
+        });
+        res.send(buffer);
+      },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/deviceProfileInfos')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile infos',
+    description: 'Retrieve paginated list of device profile infos',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device profile infos retrieved successfully',
+  })
+  async getDeviceProfileInfos(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    const query = new FetchDeviceProfileInfosQuery(
+      accessToken,
+      page ? parseInt(page, 10) : 0,
+      pageSize ? parseInt(pageSize, 10) : 100,
+      sortProperty || 'name',
+      (sortOrder as 'ASC' | 'DESC') || 'ASC',
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // Version Control endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/repositorySettings/info')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get repository settings info',
+    description: 'Check if version control is configured',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Repository settings info retrieved',
+  })
+  async getRepoSettingsInfo(
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchRepoSettingsInfoQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/repositorySettings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get repository settings',
+    description: 'Get full repository settings configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Repository settings retrieved',
+  })
+  async getRepoSettings(
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchRepoSettingsQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/repositorySettings/checkAccess')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Check repository access',
+    description: 'Check if the repository is accessible with the given credentials',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Access check result',
+  })
+  async checkRepoAccess(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    const command = new CheckRepoAccessCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/repositorySettings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save repository settings',
+    description: 'Save version control repository settings',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Repository settings saved',
+  })
+  async saveRepoSettings(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    const command = new SaveRepoSettingsCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/versions')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get versions',
+    description: 'Retrieve paginated list of version control versions',
+  })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'sortProperty', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
+  @ApiQuery({ name: 'branch', required: false, type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Versions retrieved successfully',
+  })
+  async getVersions(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('branch') branch?: string,
+  ) {
+    const query = new FetchVersionsQuery(
+      accessToken,
+      page ? parseInt(page, 10) : 0,
+      pageSize ? parseInt(pageSize, 10) : 10,
+      sortProperty || 'timestamp',
+      sortOrder || 'DESC',
+      branch || 'main',
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/versions/:entityType/:entityId')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get entity versions',
+    description: 'Retrieve paginated list of version control versions for a specific entity',
+  })
+  @ApiParam({ name: 'entityType', required: true, type: String })
+  @ApiParam({ name: 'entityId', required: true, type: String })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'sortProperty', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
+  @ApiQuery({ name: 'branch', required: false, type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Entity versions retrieved successfully',
+  })
+  async getEntityVersions(
+    @TbAccessToken() accessToken: string,
+    @Param('entityType') entityType: string,
+    @Param('entityId') entityId: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('branch') branch?: string,
+  ) {
+    const query = new FetchVersionsQuery(
+      accessToken,
+      page ? parseInt(page, 10) : 0,
+      pageSize ? parseInt(pageSize, 10) : 10,
+      sortProperty || 'timestamp',
+      sortOrder || 'DESC',
+      branch || 'main',
+      entityType,
+      entityId,
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/repositorySettings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete repository settings',
+    description: 'Delete current version control repository settings',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Repository settings deleted successfully',
+  })
+  async deleteRepoSettings(@TbAccessToken() accessToken: string) {
+    const command = new DeleteRepoSettingsCommand(accessToken);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/branches')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get repository branches',
+    description: 'Retrieve list of branches for the configured repository',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Branches retrieved successfully',
+  })
+  async getBranches(@TbAccessToken() accessToken: string) {
+    const query = new FetchBranchesQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // Trendz endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/trendz/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get Trendz settings',
+    description: 'Retrieve Trendz integration settings',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Trendz settings retrieved' })
+  async getTrendzSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchTrendzSettingsQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/trendz/settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save Trendz settings',
+    description: 'Save Trendz integration settings',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Trendz settings saved' })
+  async saveTrendzSettings(
+    @TbAccessToken() accessToken: string,
+    @Body() body: { enabled: boolean; baseUrl: string; apiKey: string },
+  ) {
+    const command = new SaveTrendzSettingsCommand(accessToken, body);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // AI Model endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/ai/model')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get AI models', description: 'Get paginated list of AI models' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'AI models retrieved' })
+  async getAiModels(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page: number = 0,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('sortProperty') sortProperty: string = 'createdTime',
+    @Query('sortOrder') sortOrder: string = 'DESC',
+  ) {
+    const query = new FetchAiModelsQuery(accessToken, page, pageSize, sortProperty, sortOrder);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/ai/model')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save AI model', description: 'Create or update an AI model' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'AI model saved' })
+  async saveAiModel(
+    @TbAccessToken() accessToken: string,
+    @Body() body: any,
+  ) {
+    const command = new SaveAiModelCommand(accessToken, body);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/ai/model/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete AI model', description: 'Delete an AI model by ID' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'AI model deleted' })
+  async deleteAiModel(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const command = new DeleteAiModelCommand(accessToken, id);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/ai/model/chat')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check AI model connectivity', description: 'Test connectivity of an AI model configuration' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Connectivity check result' })
+  async checkAiModelConnectivity(
+    @TbAccessToken() accessToken: string,
+    @Body() body: any,
+  ) {
+    const command = new CheckAiModelConnectivityCommand(accessToken, body);
+    const result = await this.commandBus.execute(command);
 
     return match(result, {
       Ok: (response: any) => response,

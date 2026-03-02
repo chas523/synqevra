@@ -62,6 +62,11 @@ import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/respo
 import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
 import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
 import { TwoFactorAuthSettingsRequestDto } from 'src/thingsboard/interface/rest/dtos/request/thingsboard-2fa-settings.request.dto';
+import {
+  OtaPackageDto,
+  OtaPackagesPageResponseDto,
+} from 'src/thingsboard/interface/rest/dtos/response/ota-package.response.dto';
+import { CreateOtaPackageRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-ota-package.request.dto';
 
 // Re-export infrastructure types for handlers
 export type { EntityId, ThingsboardLoginResponse, UserResponse };
@@ -575,6 +580,84 @@ export abstract class ThingsboardApiPort {
     widgetsBundleId: string,
     fqns: string[],
   ): Promise<any>;
+
+  // OTA Package operations
+  abstract fetchOtaPackages(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<OtaPackagesPageResponseDto>;
+
+  abstract createOtaPackage(
+    accessToken: string,
+    payload: CreateOtaPackageRequestDto,
+  ): Promise<OtaPackageDto>;
+
+  abstract deleteOtaPackage(
+    accessToken: string,
+    id: string,
+  ): Promise<void>;
+
+  abstract downloadOtaPackage(
+    accessToken: string,
+    id: string,
+  ): Promise<Buffer>;
+
+  abstract fetchDeviceProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<any>;
+
+  // Version Control operations
+  abstract getRepoSettingsInfo(accessToken: string): Promise<any>;
+
+  abstract getRepoSettings(accessToken: string): Promise<any>;
+
+  abstract checkRepoAccess(accessToken: string, payload: any): Promise<any>;
+
+  abstract saveRepoSettings(accessToken: string, payload: any): Promise<any>;
+
+  abstract fetchVersions(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: string,
+    branch: string,
+  ): Promise<any>;
+
+  abstract fetchEntityVersions(
+    accessToken: string,
+    entityType: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: string,
+    branch: string,
+  ): Promise<any>;
+
+  abstract deleteRepoSettings(accessToken: string): Promise<any>;
+
+  abstract getBranches(accessToken: string): Promise<any>;
+
+  abstract getTrendzSettings(accessToken: string): Promise<any>;
+
+  abstract saveTrendzSettings(accessToken: string, payload: any): Promise<any>;
+
+  // AI Model operations
+  abstract getAiModels(accessToken: string, page: number, pageSize: number, sortProperty: string, sortOrder: string): Promise<any>;
+
+  abstract saveAiModel(accessToken: string, payload: any): Promise<any>;
+
+  abstract deleteAiModel(accessToken: string, modelId: string): Promise<any>;
+
+  abstract checkAiModelConnectivity(accessToken: string, payload: any): Promise<any>;
 }
 
 // Response types for new methods

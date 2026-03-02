@@ -49,6 +49,15 @@ import { CreateNotificationTargetCommandHandler } from './application/commands/c
 import { CreateNotificationTemplateCommandHandler } from './application/commands/create-notification-template/create-notification-template.command-handler';
 import { CreateNotificationRuleCommandHandler } from './application/commands/create-notification-rule/create-notification-rule.command-handler';
 import { PreviewNotificationRequestCommandHandler } from './application/commands/preview-notification-request/preview-notification-request.command-handler';
+import { CreateOtaPackageCommandHandler } from './application/commands/create-ota-package/create-ota-package.command-handler';
+import { DeleteOtaPackageCommandHandler } from './application/commands/delete-ota-package/delete-ota-package.command-handler';
+import { CheckRepoAccessCommandHandler } from './application/commands/check-repo-access/check-repo-access.command-handler';
+import { SaveRepoSettingsCommandHandler } from './application/commands/save-repo-settings/save-repo-settings.command-handler';
+import { DeleteRepoSettingsCommandHandler } from './application/commands/delete-repo-settings/delete-repo-settings.command-handler';
+import { SaveTrendzSettingsCommandHandler } from './application/commands/save-trendz-settings/save-trendz-settings.command-handler';
+import { SaveAiModelCommandHandler } from './application/commands/save-ai-model/save-ai-model.command-handler';
+import { DeleteAiModelCommandHandler } from './application/commands/delete-ai-model/delete-ai-model.command-handler';
+import { CheckAiModelConnectivityCommandHandler } from './application/commands/check-ai-model-connectivity/check-ai-model-connectivity.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -97,6 +106,15 @@ import { FetchWidgetTypeFqnsHandler } from './application/queries/fetch-widget-t
 import { SaveWidgetTypeFqnsHandler } from './application/commands/save-widget-type-fqns/save-widget-type-fqns.handler';
 import { FetchWidgetBundlesQueryHandler } from './application/queries/fetch-widget-bundles/fetch-widget-bundles.query.handler';
 import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query-handler';
+import { FetchOtaPackagesQueryHandler } from './application/queries/fetch-ota-packages/fetch-ota-packages.query.handler';
+import { DownloadOtaPackageQueryHandler } from './application/queries/download-ota-package/download-ota-package.query.handler';
+import { FetchDeviceProfileInfosQueryHandler } from './application/queries/fetch-device-profile-infos/fetch-device-profile-infos.query.handler';
+import { FetchRepoSettingsInfoQueryHandler } from './application/queries/fetch-repo-settings-info/fetch-repo-settings-info.query.handler';
+import { FetchRepoSettingsQueryHandler } from './application/queries/fetch-repo-settings/fetch-repo-settings.query.handler';
+import { FetchVersionsQueryHandler } from './application/queries/fetch-versions/fetch-versions.query.handler';
+import { FetchBranchesQueryHandler } from './application/queries/fetch-branches/fetch-branches.query.handler';
+import { FetchTrendzSettingsQueryHandler } from './application/queries/fetch-trendz-settings/fetch-trendz-settings.query.handler';
+import { FetchAiModelsQueryHandler } from './application/queries/fetch-ai-models/fetch-ai-models.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -139,6 +157,15 @@ const commandHandlers = [
   DeleteWidgetTypeCommandHandler,
   SaveTwoFaSettingsCommandHandler,
   SaveWidgetTypeFqnsHandler,
+  CreateOtaPackageCommandHandler,
+  DeleteOtaPackageCommandHandler,
+  CheckRepoAccessCommandHandler,
+  SaveRepoSettingsCommandHandler,
+  DeleteRepoSettingsCommandHandler,
+  SaveTrendzSettingsCommandHandler,
+  SaveAiModelCommandHandler,
+  DeleteAiModelCommandHandler,
+  CheckAiModelConnectivityCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -188,6 +215,15 @@ const queryHandlers = [
   FetchTwoFaSettingsQueryHandler,
   FetchWidgetsBundlesHandler,
   FetchWidgetTypeFqnsHandler,
+  FetchOtaPackagesQueryHandler,
+  DownloadOtaPackageQueryHandler,
+  FetchDeviceProfileInfosQueryHandler,
+  FetchRepoSettingsInfoQueryHandler,
+  FetchRepoSettingsQueryHandler,
+  FetchVersionsQueryHandler,
+  FetchBranchesQueryHandler,
+  FetchTrendzSettingsQueryHandler,
+  FetchAiModelsQueryHandler,
 ];
 
 @Module({

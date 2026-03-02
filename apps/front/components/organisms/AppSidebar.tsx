@@ -115,6 +115,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
             { href: "/advanced/version-control", label: "Version control", icon: History },
           ],
         },
+        { href: "/settings/notifications", icon: Settings, label: "Settings" },
       ],
     },
   ],
@@ -143,8 +144,8 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.href}>
-                        <SidebarMenuSubButton asChild>
-                          <Link href={subItem.href}>
+                        <SidebarMenuSubButton asChild >
+                          <Link href={subItem.href} prefetch={false}>
                             {subItem.icon && <subItem.icon className="h-4 w-4" />}
                             <span>{subItem.label}</span>
                           </Link>
@@ -161,7 +162,7 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
         return (
           <SidebarMenuItem key={item.label}>
             <SidebarMenuButton asChild>
-              <Link href={item.href!}>
+              <Link href={item.href!} prefetch={false}>
                 {item.icon && <item.icon />}
                 <span>{item.label}</span>
               </Link>

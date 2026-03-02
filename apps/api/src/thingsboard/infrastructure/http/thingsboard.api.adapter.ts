@@ -2406,4 +2406,386 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  // OTA Package operations
+  async fetchOtaPackages(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/otaPackages?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch OTA packages from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createOtaPackage(
+    accessToken: string,
+    payload: any,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/otaPackage`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create OTA package in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteOtaPackage(
+    accessToken: string,
+    id: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/otaPackage/${id}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete OTA package from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async downloadOtaPackage(
+    accessToken: string,
+    id: string,
+  ): Promise<Buffer> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/otaPackage/${id}/download`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          responseType: 'arraybuffer',
+        }),
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to download OTA package from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfileInfos?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch device profile infos from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Version Control operations
+  async getRepoSettingsInfo(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/repositorySettings/info`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get repository settings info',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async checkRepoAccess(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/repositorySettings/checkAccess`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to check repository access',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getRepoSettings(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/repositorySettings`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch repository settings from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveRepoSettings(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/repositorySettings`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save repository settings',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchVersions(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: string,
+    branch: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/version?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}&branch=${branch}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch versions from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchEntityVersions(
+    accessToken: string,
+    entityType: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: string,
+    branch: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/version/${entityType}/${id}?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}&branch=${branch}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch entity versions from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteRepoSettings(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/repositorySettings`;
+      const response = await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete repository settings from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getBranches(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/branches`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch branches from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getTrendzSettings(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/trendz/settings`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch Trendz settings from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveTrendzSettings(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/trendz/settings`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save Trendz settings to ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getAiModels(accessToken: string, page: number, pageSize: number, sortProperty: string, sortOrder: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ai/model?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch AI models from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveAiModel(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ai/model`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save AI model to ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteAiModel(accessToken: string, modelId: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ai/model/${modelId}`;
+      const response = await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete AI model from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async checkAiModelConnectivity(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ai/model/chat`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to check AI model connectivity',
+        error,
+        this.logger,
+      );
+    }
+  }
 }
+
