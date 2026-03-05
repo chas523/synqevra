@@ -85,7 +85,7 @@ export function DeviceEventsTabContent({ deviceId }: DeviceEventsTabContentProps
                 key: "data",
                 header: "Event Data",
                 render: (event) => (
-                    <div className="max-w-[300px] truncate text-xs font-mono text-slate-500">
+                    <div className="max-w-75 truncate text-xs font-mono text-slate-500">
                         {JSON.stringify(event.body)}
                     </div>
                 ),
@@ -109,7 +109,7 @@ export function DeviceEventsTabContent({ deviceId }: DeviceEventsTabContentProps
                             placeholder="e.g. ERROR, STATS"
                             value={eventType}
                             onChange={handleTypeChange}
-                            className="pl-9 h-9 w-[200px]"
+                            className="pl-9 h-9 w-50"
                         />
                     </div>
                 </div>

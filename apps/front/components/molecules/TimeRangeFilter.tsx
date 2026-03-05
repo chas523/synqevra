@@ -94,7 +94,7 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
                     {getDisplayLabel()}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] dark:bg-slate-900 dark:border-slate-800">
+            <DialogContent className="sm:max-w-106.25 dark:bg-slate-900 dark:border-slate-800">
                 <DialogHeader>
                     <DialogTitle className="dark:text-slate-100">Time window</DialogTitle>
                 </DialogHeader>
@@ -146,7 +146,7 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
                                     const date = e.target.value ? new Date(e.target.value) : undefined;
                                     setTempValue(prev => ({ ...prev, startTime: date?.getTime() }));
                                 }}
-                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:[color-scheme:dark]"
+                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:scheme-dark"
                             />
                         </div>
                         <div className="grid gap-2">
@@ -158,7 +158,7 @@ export function TimeRangeFilter({ value, onChange }: TimeRangeFilterProps) {
                                     const date = e.target.value ? new Date(e.target.value) : undefined;
                                     setTempValue(prev => ({ ...prev, endTime: date?.getTime() }));
                                 }}
-                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:[color-scheme:dark]"
+                                className="dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:scheme-dark"
                             />
                         </div>
                     </TabsContent>
