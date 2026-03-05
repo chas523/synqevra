@@ -17,10 +17,9 @@ export class FetchTenantsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(FetchTenantsQueryHandler.name);
-
 
   async execute(
     query: FetchTenantsQuery,

@@ -8,7 +8,7 @@ import {
     SheetContent,
 } from "@/components/ui/sheet";
 import { DetailPanelHeader } from "@/components/molecules/DetailPanelHeader";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export interface TabConfig {
     id: string;
@@ -60,14 +60,58 @@ export function EntityDetailPanel({
     defaultTab,
     className,
 }: EntityDetailPanelProps) {
+    const tabsScrollRef = useRef<HTMLDivElement | null>(null);
     const defaultTabId = defaultTab || tabs[0]?.id;
+    const [activeTab, setActiveTab] = useState(defaultTabId);
+
+    useEffect(() => {
+        setActiveTab(defaultTabId);
+    }, [defaultTabId, isOpen]);
+
+    useEffect(() => {
+        const container = tabsScrollRef.current;
+        if (!container) {
+            return;
+        }
+
+        const snapActiveTabIntoView = () => {
+            const activeTrigger = container.querySelector<HTMLButtonElement>(
+                `[data-tab-id="${activeTab}"]`
+            );
+
+            if (activeTrigger) {
+                activeTrigger.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            }
+        };
+
+        snapActiveTabIntoView();
+    }, [activeTab, tabs]);
+
+    const handleTabsWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        const container = tabsScrollRef.current;
+
+        if (!container) {
+            return;
+        }
+
+        const horizontalDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+            ? event.deltaX
+            : event.deltaY;
+
+        if (horizontalDelta === 0) {
+            return;
+        }
+
+        event.preventDefault();
+        container.scrollBy({ left: horizontalDelta, behavior: "auto" });
+    };
 
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <SheetContent
                 side="right"
                 className={cn(
-                    "w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl p-0 gap-0 flex flex-col",
+                    "w-full sm:max-w-3xl lg:max-w-4xl p-0 gap-0 flex flex-col",
                     className
                 )}
             >
@@ -80,20 +124,30 @@ export function EntityDetailPanel({
                 />
 
                 {/* Tabs Navigation */}
-                <Tabs defaultValue={defaultTabId} onValueChange={onTabChange} className="flex-1 flex flex-col min-h-0">
-                    <div className="border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 px-4">
-                        <TabsList variant="line" className="h-auto py-0">
-                            {tabs.map((tab) => (
-                                <TabsTrigger
-                                    key={tab.id}
-                                    value={tab.id}
-                                    disabled={tab.disabled}
-                                    className="px-3 py-2.5 text-sm data-[state=active]:font-medium"
-                                >
-                                    {tab.label}
-                                </TabsTrigger>
-                            ))}
-                        </TabsList>
+                <Tabs value={activeTab} onValueChange={(value) => {
+                    setActiveTab(value);
+                    onTabChange?.(value);
+                }} className="flex-1 flex flex-col min-h-0">
+                    <div className="relative border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 px-4">
+                        <div
+                            ref={tabsScrollRef}
+                            onWheel={handleTabsWheel}
+                            className="w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                        >
+                            <TabsList variant="line" className="h-auto py-0 flex w-max min-w-full justify-start">
+                                {tabs.map((tab) => (
+                                    <TabsTrigger
+                                        key={tab.id}
+                                        value={tab.id}
+                                        data-tab-id={tab.id}
+                                        disabled={tab.disabled}
+                                        className="px-3 py-2.5 text-sm data-[state=active]:font-medium whitespace-nowrap"
+                                    >
+                                        {tab.label}
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
                     </div>
 
                     {/* Action Buttons */}

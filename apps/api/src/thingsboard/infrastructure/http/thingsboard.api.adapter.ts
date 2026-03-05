@@ -1,9 +1,19 @@
 import { HttpService } from '@nestjs/axios';
-import { HttpException, Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
+  CreateCalculatedFieldPayload,
+  DeviceCalculatedField,
+  DeviceCalculatedFieldsResponse,
   EntityId,
+  LatestTelemetryResponse,
   RelationInfo,
   TenantProfilesResponse,
   ThingsboardApiPort,
@@ -24,6 +34,7 @@ import { CreateTenantRequestDto } from 'src/thingsboard/interface/rest/dtos/requ
 import { CreateTenantAdminRequestDto } from 'src/thingsboard/interface/rest/dtos/request/create-tenant-admin.request.dto';
 import * as jwt from 'jsonwebtoken';
 import { MedplumClientPort } from '../../../medplum/application/ports/medplum-client.port';
+import { ConnectionRepository } from '../../../connection/domain/repositories/connection.repository';
 import {
   THINGSBOARD_REPOSITORY_PORT,
   ThingsboardRepositoryPort,
@@ -67,8 +78,15 @@ import {
   NotificationRulesResponse,
   NotificationRuleDto,
 } from 'src/thingsboard/interface/rest/dtos/response/notification-rule.response.dto';
-import { CreateWidgetTypeRequestDto, WidgetTypeDto, WidgetTypesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
-import { WidgetBundleDto, WidgetBundlesPageDto } from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
+import {
+  CreateWidgetTypeRequestDto,
+  WidgetTypeDto,
+  WidgetTypesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-types.response.dto';
+import {
+  WidgetBundleDto,
+  WidgetBundlesPageDto,
+} from 'src/thingsboard/interface/rest/dtos/response/widget-bundles.response.dto';
 import { ImagesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/image.response.dto';
 import { SaveWidgetBundleRequestDto } from 'src/thingsboard/interface/rest/dtos/request/save-widget-bundle.request.dto';
 import { TwoFactorAuthSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-2fa-settings.response.dto';
@@ -83,6 +101,11 @@ interface JwtPayload {
 @Injectable()
 export class ThingsboardApiAdapter implements ThingsboardApiPort {
   private readonly logger = new Logger(ThingsboardApiAdapter.name);
+  private readonly deviceTelemetryKeysCache = new Map<
+    string,
+    { expiresAt: number; keys: string[] }
+  >();
+  private readonly DEVICE_TELEMETRY_KEYS_TTL_MS = 60_000;
 
   constructor(
     private readonly httpService: HttpService,
@@ -90,7 +113,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly medplum: MedplumClientPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) { }
+    @Inject(ConnectionRepository)
+    private readonly connectionRepository: ConnectionRepository,
+  ) {}
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -112,9 +137,11 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     accessToken: string,
     page: number,
     pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): Promise<DevicesResponse> {
     try {
-      const url = `${this.THINGSBOARD_API_URL}/tenant/deviceInfos?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      const url = `${this.THINGSBOARD_API_URL}/tenant/deviceInfos?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
       const response = await firstValueFrom(
         this.httpService.get<DevicesResponse>(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -147,6 +174,104 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async saveDevice(
+    accessToken: string,
+    payload: Partial<DeviceDetails> & { id: EntityId },
+  ): Promise<DeviceDetails> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/device`;
+      const response = await firstValueFrom(
+        this.httpService.post<DeviceDetails>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save device in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+    textSearch?: string,
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfileInfos?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<any>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch device profile infos from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchOtaPackages(
+    accessToken: string,
+    type: 'FIRMWARE' | 'SOFTWARE',
+    deviceProfileId: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    textSearch?: string,
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams({
+        type,
+        deviceProfileId,
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/otaPackages?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<any>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch OTA packages from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async createDevice(
     accessToken: string,
     payload: CreateDeviceRequest,
@@ -166,30 +291,29 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           { telemetry_keys: payload.parameters },
         );
       }
-      try {
-        await this.medplum.createDevice(
-          {
-            identifier: response.data.id.id,
-          },
-          userId,
-        );
-      } catch (medplumError) {
-        //if medplum fails - we're rollbacking creation of thingsboard device
-        await this.deleteDevice(accessToken, response.data.id.id);
-        this.logger.error('Failed to create medplum device:', medplumError);
-        // Surface a user-friendly error when the user has no Medplum connection set up
-        if (
-          medplumError instanceof HttpException &&
-          (medplumError.getResponse() as any)?.error === 'MedplumConnectionNotFound'
-        ) {
-          throw new ServiceUnavailableException(
-            'This feature requires a Medplum connection. Please set up your Medplum integration before creating devices.',
+
+      // Only create device in Medplum if the user's connection has a Medplum link
+      const connection =
+        await this.connectionRepository.getConnectionByUserId(userId);
+      const hasMedplum = connection?.medplumId != null;
+
+      if (hasMedplum) {
+        try {
+          await this.medplum.createDevice(
+            {
+              identifier: response.data.id.id,
+            },
+            userId,
+          );
+        } catch (medplumError) {
+          //if medplum fails - we're rollbacking creation of thingsboard device
+          await this.deleteDevice(accessToken, response.data.id.id);
+          this.logger.error('Failed to create medplum device:', medplumError);
+          MedplumApiError.createException(
+            'Failed to create device in Medplum',
+            medplumError,
           );
         }
-        MedplumApiError.createException(
-          'Failed to create device in Medplum',
-          medplumError,
-        );
       }
       return response.data;
     } catch (error) {
@@ -212,6 +336,88 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to delete device from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeDevicePublic(accessToken: string, id: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/public/device/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.post<any>(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make device public in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeDevicePrivate(accessToken: string, id: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/device/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.delete<any>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make device private in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getDeviceCredentials(
+    accessToken: string,
+    deviceId: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/device/${deviceId}/credentials`;
+      const response = await firstValueFrom(
+        this.httpService.get<any>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch device credentials from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveDeviceCredentials(
+    accessToken: string,
+    credentials: any,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/device/credentials`;
+      const response = await firstValueFrom(
+        this.httpService.post<any>(url, credentials, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save device credentials in ThingsBoard API',
         error,
         this.logger,
       );
@@ -260,6 +466,140 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async addDeviceLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/DEVICE/${id}/timeseries/LATEST_TELEMETRY`;
+      await firstValueFrom(
+        this.httpService.post(url, telemetry, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      // New writes may introduce unseen keys, so invalidate per-device key cache.
+      this.deviceTelemetryKeysCache.delete(id);
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to add latest telemetry in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]> {
+    try {
+      const now = Date.now();
+      const cached = this.deviceTelemetryKeysCache.get(id);
+      if (cached && cached.expiresAt > now) {
+        return cached.keys;
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/DEVICE/${id}/keys/timeseries`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const keys = Array.isArray(response.data) ? response.data : [];
+      this.deviceTelemetryKeysCache.set(id, {
+        keys,
+        expiresAt: now + this.DEVICE_TELEMETRY_KEYS_TTL_MS,
+      });
+
+      return keys;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch telemetry keys from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/DEVICE/${id}/calculatedFields?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get<DeviceCalculatedFieldsResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch calculated fields from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createCalculatedField(
+    accessToken: string,
+    payload: CreateCalculatedFieldPayload,
+  ): Promise<DeviceCalculatedField> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/calculatedField`;
+      const response = await firstValueFrom(
+        this.httpService.post<DeviceCalculatedField>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create calculated field in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse> {
+    try {
+      if (!keys.length) {
+        return {};
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/DEVICE/${id}/values/timeseries?keys=${encodeURIComponent(
+        keys.join(','),
+      )}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get<LatestTelemetryResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch latest telemetry from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   // Auth operations
   async login(
     userId: number,
@@ -287,7 +627,10 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async loginToSysadminAccount(username: string, password: string): Promise<ThingsboardLoginResponse> {
+  async loginToSysadminAccount(
+    username: string,
+    password: string,
+  ): Promise<ThingsboardLoginResponse> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/auth/login`;
       const response = await firstValueFrom(
@@ -805,9 +1148,12 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
   ): Promise<any> {
     try {
       const searchParams = new URLSearchParams();
-      if (params.pageSize) searchParams.append('pageSize', params.pageSize.toString());
-      if (params.page !== undefined) searchParams.append('page', params.page.toString());
-      if (params.sortProperty) searchParams.append('sortProperty', params.sortProperty);
+      if (params.pageSize)
+        searchParams.append('pageSize', params.pageSize.toString());
+      if (params.page !== undefined)
+        searchParams.append('page', params.page.toString());
+      if (params.sortProperty)
+        searchParams.append('sortProperty', params.sortProperty);
       if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
 
       const url = `${this.THINGSBOARD_API_URL}/notification/requests?${searchParams.toString()}`;
@@ -835,9 +1181,13 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     try {
       const url = `${this.THINGSBOARD_API_URL}/notification/request`;
       const response = await firstValueFrom(
-        this.httpService.post<NotificationRequestResponse>(url, notificationRequest, {
-          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
-        }),
+        this.httpService.post<NotificationRequestResponse>(
+          url,
+          notificationRequest,
+          {
+            headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+          },
+        ),
       );
       return response.data;
     } catch (error) {
@@ -922,7 +1272,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
 
       const { data, totalElements, totalPages } = response.data;
-      this.logger.log(`Fetched ${data?.length || 0} templates from ThingsBoard`);
+      this.logger.log(
+        `Fetched ${data?.length || 0} templates from ThingsBoard`,
+      );
       return {
         templates: data,
         totalElements,
@@ -1306,6 +1658,37 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         `Failed to fetch entity events (may not be available): ${error}`,
       );
       // Return empty response instead of throwing - events may not exist for all entities
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
+  async fetchEntityAuditLogs(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      const end = endTime || Date.now();
+      const start = startTime || end - 30 * 24 * 60 * 60 * 1000;
+      const url = `${this.THINGSBOARD_API_URL}/audit/logs/entity/${entityType}/${entityId}?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}&startTime=${start}&endTime=${end}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch entity audit logs (may not be available): ${error}`,
+      );
       return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
     }
   }
@@ -2140,7 +2523,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-
   async previewNotificationRequest(
     sysAdminAccessToken: string,
     previewRequest: any,
@@ -2160,7 +2542,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       throw new ThingsboardApiException(
         error.response?.data?.message ||
-        'Failed to preview notification request',
+          'Failed to preview notification request',
         error.response?.status || 500,
       );
     }
@@ -2187,9 +2569,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async fetchMaterialIcons(
-    sysAdminAccessToken: string,
-  ): Promise<string[]> {
+  async fetchMaterialIcons(sysAdminAccessToken: string): Promise<string[]> {
     try {
       // Material icons JSON is a public static asset, doesn't require authentication
       const url = `${this.THINGSBOARD_API_URL}/assets/metadata/material-icons.json`;
@@ -2203,8 +2583,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         `Failed to fetch material icons: ${error.response?.data?.message || error.message}`,
       );
       throw new ThingsboardApiException(
-        error.response?.data?.message ||
-        'Failed to fetch material icons',
+        error.response?.data?.message || 'Failed to fetch material icons',
         error.response?.status || 500,
       );
     }

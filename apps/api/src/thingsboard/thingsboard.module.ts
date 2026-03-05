@@ -21,6 +21,8 @@ import { THINGSBOARD_TELEMETRY_PORT } from './application/ports/thingsboard.tele
 import { CreateDeviceCommandHandler } from './application/commands/create-device/create-device.command-handler';
 import { DeleteDeviceCommandHandler } from './application/commands/delete-device/delete-device.command-handler';
 import { UpdateDeviceSharedAttributesCommandHandler } from './application/commands/update-device-shared-attributes/update-device-shared-attributes.command-handler';
+import { AddDeviceLatestTelemetryCommandHandler } from './application/commands/add-device-latest-telemetry/add-device-latest-telemetry.command-handler';
+import { CreateDeviceCalculatedFieldCommandHandler } from './application/commands/create-device-calculated-field/create-device-calculated-field.command-handler';
 import { RegisterTenantCommandHandler } from './application/commands/register-tenant/register-tenant.command-handler';
 import { ThingsboardLoginCommandHandler } from './application/commands/thingsboard-login/thingsboard-login.command-handler';
 import { RefreshTokenCommandHandler } from './application/commands/refresh-token/refresh-token.command-handler';
@@ -54,6 +56,13 @@ import { PreviewNotificationRequestCommandHandler } from './application/commands
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
 import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
+import { FetchDeviceLatestTelemetryQueryHandler } from './application/queries/fetch-device-latest-telemetry/fetch-device-latest-telemetry.query-handler';
+import { FetchDeviceTelemetryKeysQueryHandler } from './application/queries/fetch-device-telemetry-keys/fetch-device-telemetry-keys.query-handler';
+import { FetchDeviceCalculatedFieldsQueryHandler } from './application/queries/fetch-device-calculated-fields/fetch-device-calculated-fields.query-handler';
+import { FetchDeviceAlarmsQueryHandler } from './application/queries/fetch-device-alarms/fetch-device-alarms.query-handler';
+import { FetchDeviceEventsQueryHandler } from './application/queries/fetch-device-events/fetch-device-events.query-handler';
+import { FetchDeviceAuditLogsQueryHandler } from './application/queries/fetch-device-audit-logs/fetch-device-audit-logs.query-handler';
+import { FetchDeviceRelationsQueryHandler } from './application/queries/fetch-device-relations/fetch-device-relations.query-handler';
 import { GetUserQueryHandler } from './application/queries/get-user/get-user.query-handler';
 import { FetchSecuritySettingsQueryHandler } from './application/queries/fetch-security-settings/fetch-security-settings.query.handler';
 import { FetchTenantsQueryHandler } from './application/queries/fetch-tenants/fetch-tenants.query-handler';
@@ -104,11 +113,12 @@ import { ThingsboardRollbackService } from './application/services/thingsboard-r
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
 import { StorageService } from './application/services/storage.service';
 
-
 const commandHandlers = [
   CreateDeviceCommandHandler,
   DeleteDeviceCommandHandler,
   UpdateDeviceSharedAttributesCommandHandler,
+  AddDeviceLatestTelemetryCommandHandler,
+  CreateDeviceCalculatedFieldCommandHandler,
   RegisterTenantCommandHandler,
   ThingsboardLoginCommandHandler,
   DeleteTenantCommandHandler,
@@ -148,6 +158,13 @@ const queryHandlers = [
   FetchDevicesQueryHandler,
   FetchDeviceByIdQueryHandler,
   FetchDeviceSharedAttributesQueryHandler,
+  FetchDeviceLatestTelemetryQueryHandler,
+  FetchDeviceTelemetryKeysQueryHandler,
+  FetchDeviceCalculatedFieldsQueryHandler,
+  FetchDeviceAlarmsQueryHandler,
+  FetchDeviceEventsQueryHandler,
+  FetchDeviceAuditLogsQueryHandler,
+  FetchDeviceRelationsQueryHandler,
   GetUserQueryHandler,
   FetchTenantsQueryHandler,
   FetchTenantUsersQueryHandler,
@@ -219,7 +236,6 @@ const queryHandlers = [
     TelemetryParserService,
     TelemetryGateway,
     StorageService,
-
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [
@@ -231,4 +247,4 @@ const queryHandlers = [
     StorageService,
   ],
 })
-export class ThingsboardModule { }
+export class ThingsboardModule {}

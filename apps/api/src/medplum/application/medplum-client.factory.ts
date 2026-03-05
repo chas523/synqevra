@@ -11,7 +11,7 @@ import process from 'node:process';
 
 @Injectable()
 export class MedplumClientFactory {
-  constructor(private readonly repository: MedplumRepository) { }
+  constructor(private readonly repository: MedplumRepository) {}
 
   private readonly clientCache = new Map<number, Promise<MedplumClient>>();
   private readonly proxyCache = new Map<string, Promise<MedplumClient>>();
@@ -150,28 +150,40 @@ export class MedplumClientFactory {
     return loginPromise;
   }
 
-  async initMedplumWithClientIdClientSecret(clientId: string, clientSecret: string): Promise<MedplumClient> {
-    const medplumUrl = process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103';
+  async initMedplumWithClientIdClientSecret(
+    clientId: string,
+    clientSecret: string,
+  ): Promise<MedplumClient> {
+    const medplumUrl =
+      process.env.MEDPLUM_URL ?? 'http://host.docker.internal:8103';
 
     if (!clientId || !clientSecret) {
-      this.logger.error(`Missing credentials for Medplum login! URL: ${medplumUrl}`);
-      throw new BadRequestException('Medplum clientId and clientSecret are required');
+      this.logger.error(
+        `Missing credentials for Medplum login! URL: ${medplumUrl}`,
+      );
+      throw new BadRequestException(
+        'Medplum clientId and clientSecret are required',
+      );
     }
 
-    this.logger.log(`Initializing Medplum with URL: ${medplumUrl} (Client ID ends with: ...${clientId.slice(-4)})`);
+    this.logger.log(
+      `Initializing Medplum with URL: ${medplumUrl} (Client ID ends with: ...${clientId.slice(-4)})`,
+    );
 
     const client = new MedplumClient({
       baseUrl: medplumUrl,
     });
-    console.log("Client: ", client)
+    console.log('Client: ', client);
     const loginPromise = client
       .startClientLogin(clientId, clientSecret)
       .then(() => client)
       .catch((err) => {
-        this.logger.error(`Medplum login failed for client ...${clientId.slice(-4)}: ${err.message}`);
+        this.logger.error(
+          `Medplum login failed for client ...${clientId.slice(-4)}: ${err.message}`,
+        );
         throw err;
       });
-    console.log("Login promise: ", loginPromise)
+    console.log('Login promise: ', loginPromise);
     return loginPromise;
   }
 

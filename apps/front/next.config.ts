@@ -39,14 +39,14 @@ const nextConfig: NextConfig = {
         },
         {
           source: "/fhir/:path*",
-          destination: "http://fhir:3003/fhir/:path*", // Internal K8s DNS (or localhost replaced by scripts)
+          destination: "http://api:3003/fhir/:path*", // Internal K8s DNS (or localhost replaced by scripts)
         },
         {
           source: "/tb-assets/:path*",
           destination: "http://thingsboard:8080/assets/:path*", // Internal K8s DNS to ThingsBoard static assets (or localhost replaced by scripts)
         },
         {
-          source: "/public-assets/:path*",
+          source: "/public-assets/:path*", 
           destination: "http://minio:9000/public-assets/:path*", // Internal K8s DNS to MinIO (or localhost replaced by scripts)
         },
       ],

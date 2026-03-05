@@ -18,7 +18,7 @@ export class FetchNotificationsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(FetchNotificationsQueryHandler.name);
 
@@ -28,7 +28,6 @@ export class FetchNotificationsQueryHandler implements IQueryHandler<
     const { page, pageSize, accessToken } = query;
 
     try {
-
       const response = await this.thingsboardApi.fetchNotifications(
         accessToken,
         page,

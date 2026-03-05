@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Get,
+  Inject,
   UseGuards,
   Query,
   Param,
@@ -36,6 +37,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FetchDevicesQuery } from 'src/thingsboard/application/queries/fetch-devices/fetch-devices.query';
 import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
 import { FetchResourceInfoQuery } from 'src/thingsboard/application/queries/fetch-resource-info/fetch-resource-info.query';
+import { FetchDeviceRelationsQuery } from '../../application/queries/fetch-device-relations/fetch-device-relations.query';
 import { match, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import { FetchDeviceByIdQuery } from 'src/thingsboard/application/queries/fetch-device-by-id/fetch-device-by-id.query';
@@ -65,8 +67,14 @@ import {
   ThingsboardConnectionNotFoundError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { FetchDeviceSharedAttributesQuery } from 'src/thingsboard/application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query';
+import { FetchDeviceLatestTelemetryQuery } from 'src/thingsboard/application/queries/fetch-device-latest-telemetry/fetch-device-latest-telemetry.query';
+import { FetchDeviceTelemetryKeysQuery } from 'src/thingsboard/application/queries/fetch-device-telemetry-keys/fetch-device-telemetry-keys.query';
+import { FetchDeviceCalculatedFieldsQuery } from 'src/thingsboard/application/queries/fetch-device-calculated-fields/fetch-device-calculated-fields.query';
+import { FetchDeviceAuditLogsQuery } from 'src/thingsboard/application/queries/fetch-device-audit-logs/fetch-device-audit-logs.query';
 import { DeviceAttributes } from './dtos/response/thingsboard-device-attributes.response.dto';
 import { UpdateDeviceSharedAttributesCommand } from 'src/thingsboard/application/commands/update-device-shared-attributes/update-device-shared-attributes.command';
+import { AddDeviceLatestTelemetryCommand } from 'src/thingsboard/application/commands/add-device-latest-telemetry/add-device-latest-telemetry.command';
+import { CreateDeviceCalculatedFieldCommand } from 'src/thingsboard/application/commands/create-device-calculated-field/create-device-calculated-field.command';
 import { DevicesResponse } from './dtos/response/thingsboard-devices.response.dto';
 import { ThingsboardTokensResponseDto } from './dtos/response/thingsboard-tokens.response.dto';
 import { ThingsboardUserResponseDto } from './dtos/response/thingsboard-user.response.dto';
@@ -160,6 +168,11 @@ import { FetchWidgetTypeFqnsQuery } from '../../application/queries/fetch-widget
 import { SaveWidgetTypeFqnsCommand } from '../../application/commands/save-widget-type-fqns/save-widget-type-fqns.command';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/iam/domain/enums/role.enum';
+import {
+  THINGSBOARD_API_PORT,
+  EntityAuditLogsResponse,
+  ThingsboardApiPort,
+} from 'src/thingsboard/application/ports/thingsboard.api.port';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -168,6 +181,8 @@ export class ThingsboardController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApi: ThingsboardApiPort,
   ) {}
 
   @Public()
@@ -335,11 +350,15 @@ export class ThingsboardController {
     @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
   ) {
     const query = new FetchDevicesQuery({
       accessToken,
       page: Number(page),
       pageSize: Number(pageSize),
+      sortProperty,
+      sortOrder,
     });
     const result: Result<DevicesResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -391,6 +410,114 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Put('/devices/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update device by ID',
+    description: 'Update selected device details in ThingsBoard',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device updated successfully',
+    type: DeviceDetails,
+  })
+  async updateDevice(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() payload: Record<string, unknown>,
+  ) {
+    try {
+      return await this.thingsboardApi.saveDevice(accessToken, {
+        ...payload,
+        id: {
+          entityType: 'DEVICE',
+          id,
+        },
+      } as any);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update device');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profile-infos')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile infos',
+    description: 'Retrieve paginated device profile infos from ThingsBoard',
+  })
+  async getDeviceProfileInfos(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 100,
+    @Query('sortProperty') sortProperty = 'name',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('textSearch') textSearch?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchDeviceProfileInfos(
+        accessToken,
+        Number(page),
+        Number(pageSize),
+        sortProperty,
+        sortOrder,
+        textSearch,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch device profile infos',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/ota-packages')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get OTA packages',
+    description:
+      'Retrieve paginated OTA packages for selected type and device profile',
+  })
+  async getOtaPackages(
+    @TbAccessToken() accessToken: string,
+    @Query('type') type: 'FIRMWARE' | 'SOFTWARE',
+    @Query('deviceProfileId') deviceProfileId: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 100,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('textSearch') textSearch?: string,
+  ) {
+    if (!type) {
+      throw new BadRequestException('Query parameter "type" is required');
+    }
+
+    if (!deviceProfileId) {
+      throw new BadRequestException(
+        'Query parameter "deviceProfileId" is required',
+      );
+    }
+
+    try {
+      return await this.thingsboardApi.fetchOtaPackages(
+        accessToken,
+        type,
+        deviceProfileId,
+        Number(page),
+        Number(pageSize),
+        sortProperty,
+        sortOrder,
+        textSearch,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch OTA packages');
+    }
   }
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -569,6 +696,534 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @Roles(Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/telemetry/latest')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Add latest telemetry',
+    description: 'Push latest telemetry values for a specific device',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      description: 'Telemetry key-value payload',
+      example: {
+        heart_rate: 82,
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Latest telemetry added successfully',
+    schema: {
+      type: 'object',
+      example: {
+        success: true,
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid telemetry payload',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to add latest telemetry in ThingsBoard',
+  })
+  async addLatestTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() telemetry: Record<string, unknown>,
+  ) {
+    if (!telemetry || Object.keys(telemetry).length === 0) {
+      throw new BadRequestException('Telemetry payload cannot be empty');
+    }
+
+    const command = new AddDeviceLatestTelemetryCommand(
+      accessToken,
+      id,
+      telemetry,
+    );
+
+    const result: Result<void, ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/telemetry/latest')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get latest telemetry',
+    description: 'Retrieve latest telemetry values for selected keys',
+  })
+  @ApiQuery({
+    name: 'keys',
+    required: true,
+    description: 'Comma-separated telemetry keys, e.g. heart_rate,spo2',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Latest telemetry retrieved successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid keys query parameter',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch latest telemetry from ThingsBoard',
+  })
+  async getLatestTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('keys') keysParam: string,
+  ) {
+    const keys = (keysParam || '')
+      .split(',')
+      .map((key) => key.trim())
+      .filter(Boolean);
+
+    if (!keys.length) {
+      throw new BadRequestException('Query parameter "keys" is required');
+    }
+
+    const query = new FetchDeviceLatestTelemetryQuery(accessToken, id, keys);
+    const result: Result<Record<string, Array<{ ts: number; value: unknown }>>, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (telemetry) => telemetry,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/telemetry/latest/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get latest telemetry keys',
+    description: 'Retrieve all known latest telemetry keys for a device',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Telemetry keys retrieved successfully',
+    schema: {
+      type: 'array',
+      items: { type: 'string' },
+      example: ['heart_rate', 'spo2', 'temperature'],
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired access token',
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Failed to fetch telemetry keys from ThingsBoard',
+  })
+  async getLatestTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const query = new FetchDeviceTelemetryKeysQuery(accessToken, id);
+    const result: Result<string[], ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (keys) => keys,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get calculated fields for device',
+    description: 'Retrieve paginated calculated fields for a specific device',
+  })
+  async getDeviceCalculatedFields(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const query = new FetchDeviceCalculatedFieldsQuery(
+      accessToken,
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+    );
+
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create calculated field for device',
+    description: 'Create a calculated field using ThingsBoard calculatedField API',
+  })
+  async createDeviceCalculatedField(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() payload: {
+      title: string;
+      fieldType: 'simple' | 'script';
+      expression: string;
+      outputKey?: string;
+      outputType?: 'TIME_SERIES' | 'ATTRIBUTES';
+      attributeScope?: 'SERVER_SCOPE' | 'SHARED_SCOPE';
+      useLatestTimestamp?: boolean;
+      arguments: Array<{
+        argumentName: string;
+        entityType:
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
+        argumentType: 'attribute' | 'latest_telemetry';
+        timeSeriesKey?: string;
+        name?: string;
+        defaultValue?: string;
+      }>;
+      failuresEnabled?: boolean;
+      allEnabled?: boolean;
+      decimalsByDefault?: number;
+    },
+  ) {
+    if (!payload?.title?.trim()) {
+      throw new BadRequestException('Field title is required');
+    }
+
+    if (!Array.isArray(payload?.arguments) || payload.arguments.length === 0) {
+      throw new BadRequestException('At least one argument is required');
+    }
+
+    if (!payload?.expression?.trim()) {
+      throw new BadRequestException('Expression is required');
+    }
+
+    if (payload.fieldType === 'simple' && !payload?.outputKey?.trim()) {
+      throw new BadRequestException('Output key is required for simple type');
+    }
+
+    const mappedArguments = payload.arguments.reduce<Record<string, unknown>>(
+      (acc, argument) => {
+        const argumentName = argument.argumentName?.trim();
+        if (!argumentName) {
+          return acc;
+        }
+
+        const refKey =
+          argument.entityType === 'current_entity' ||
+          argument.entityType === 'current_tenant'
+            ? argument.timeSeriesKey?.trim()
+            : argument.name?.trim();
+
+        if (!refKey) {
+          return acc;
+        }
+
+        const entityTypeMap: Record<string, string> = {
+          current_entity: 'CURRENT_ENTITY',
+          device: 'DEVICE',
+          asset: 'ASSET',
+          customer: 'CUSTOMER',
+          current_tenant: 'CURRENT_TENANT',
+        };
+
+        const typeMap: Record<string, string> = {
+          latest_telemetry: 'TS_LATEST',
+          attribute: 'ATTRIBUTE',
+        };
+
+        acc[argumentName] = {
+          refEntityKey: {
+            type: typeMap[argument.argumentType] || 'TS_LATEST',
+            key: refKey,
+            entityType: entityTypeMap[argument.entityType] || 'CURRENT_ENTITY',
+          },
+          defaultValue: argument.defaultValue ?? '',
+        };
+
+        return acc;
+      },
+      {},
+    );
+
+    const outputType = payload.outputType === 'ATTRIBUTES' ? 'ATTRIBUTES' : 'TIME_SERIES';
+    const outputName =
+      payload.outputKey?.trim() || payload.title?.trim() || payload.expression.trim();
+
+    if (Object.keys(mappedArguments).length === 0) {
+      throw new BadRequestException('At least one valid argument is required');
+    }
+
+    const command = new CreateDeviceCalculatedFieldCommand(accessToken, {
+      entityId: { entityType: 'DEVICE', id },
+      configuration: {
+        arguments: mappedArguments,
+        useLatestTs: payload.useLatestTimestamp ?? false,
+        type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+        expression: payload.expression.trim(),
+        output: {
+          name: outputName,
+          type: outputType,
+          ...(outputType === 'ATTRIBUTES'
+            ? {
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
+            : {}),
+          decimalsByDefault: payload.decimalsByDefault ?? 2,
+        },
+      },
+      name: payload.title.trim(),
+      type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+      debugSettings: {
+        failuresEnabled: payload.failuresEnabled ?? true,
+        allEnabled: payload.allEnabled ?? true,
+      },
+    });
+
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (created) => created,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/audit-logs')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device audit logs',
+    description: 'Retrieve paginated audit logs for a specific device',
+  })
+  async getDeviceAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    const start = startTime ? parseInt(startTime, 10) : undefined;
+    const end = endTime ? parseInt(endTime, 10) : undefined;
+
+    const query = new FetchDeviceAuditLogsQuery(
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      start,
+      end,
+      accessToken,
+    );
+
+    const result: Result<EntityAuditLogsResponse, Error> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: EntityAuditLogsResponse) => response,
+      Err: (error: Error) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/devices/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete device' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device deleted successfully',
+  })
+  async deleteDevice(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      await this.thingsboardApi.deleteDevice(accessToken, id);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete device');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device relations' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device relations retrieved successfully',
+  })
+  async getDeviceRelations(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('direction') direction?: 'FROM' | 'TO',
+  ) {
+    const query = new FetchDeviceRelationsQuery(
+      id,
+      direction || 'FROM',
+      accessToken,
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: Error) => {
+        throw new InternalServerErrorException(error.message);
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/make-public')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Make device public (assign to public customer)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device made public successfully',
+  })
+  async makeDevicePublic(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      const result = await this.thingsboardApi.makeDevicePublic(
+        accessToken,
+        id,
+      );
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to make device public');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/devices/:id/make-private')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Make device private (unassign from customer)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device made private successfully',
+  })
+  async makeDevicePrivate(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      const result = await this.thingsboardApi.makeDevicePrivate(
+        accessToken,
+        id,
+      );
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to make device private');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/credentials')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device credentials' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device credentials retrieved successfully',
+  })
+  async getDeviceCredentials(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.getDeviceCredentials(accessToken, id);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to get device credentials',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/credentials')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save device credentials' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device credentials saved successfully',
+  })
+  async saveDeviceCredentials(
+    @TbAccessToken() accessToken: string,
+    @Body() credentials: any,
+  ) {
+    try {
+      return await this.thingsboardApi.saveDeviceCredentials(
+        accessToken,
+        credentials,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to save device credentials',
+      );
+    }
   }
 
   @Roles(Role.ADMIN)

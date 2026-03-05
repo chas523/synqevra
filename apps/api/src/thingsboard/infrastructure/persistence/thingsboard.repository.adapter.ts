@@ -13,7 +13,7 @@ export class ThingsboardRepositoryAdapter implements ThingsboardRepositoryPort {
   constructor(
     @InjectRepository(Thingsboard)
     private readonly repository: Repository<Thingsboard>,
-  ) { }
+  ) {}
 
   withManager(manager: EntityManager): ThingsboardRepositoryAdapter {
     const repository = manager.getRepository(Thingsboard);

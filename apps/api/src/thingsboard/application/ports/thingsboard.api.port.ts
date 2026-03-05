@@ -159,14 +159,30 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     page: number,
     pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
   ): Promise<DevicesResponse>;
   abstract fetchDevice(accessToken: string, id: string): Promise<DeviceDetails>;
+  abstract saveDevice(
+    accessToken: string,
+    payload: Partial<DeviceDetails> & { id: EntityId },
+  ): Promise<DeviceDetails>;
   abstract createDevice(
     accessToken: string,
     payload: CreateDeviceRequest,
     userId: number,
   ): Promise<Device>;
   abstract deleteDevice(accessToken: string, id: string): Promise<void>;
+  abstract makeDevicePublic(accessToken: string, id: string): Promise<any>;
+  abstract makeDevicePrivate(accessToken: string, id: string): Promise<any>;
+  abstract getDeviceCredentials(
+    accessToken: string,
+    deviceId: string,
+  ): Promise<any>;
+  abstract saveDeviceCredentials(
+    accessToken: string,
+    credentials: any,
+  ): Promise<any>;
   abstract fetchDeviceSharedAttributes(
     accessToken: string,
     id: string,
@@ -176,6 +192,47 @@ export abstract class ThingsboardApiPort {
     id: string,
     attributes: Record<string, any>,
   ): Promise<void>;
+  abstract addDeviceLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void>;
+  abstract fetchDeviceTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]>;
+  abstract fetchDeviceProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<any>;
+  abstract fetchOtaPackages(
+    accessToken: string,
+    type: 'FIRMWARE' | 'SOFTWARE',
+    deviceProfileId: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<any>;
+
+  abstract fetchDeviceCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse>;
+
+  abstract createCalculatedField(
+    accessToken: string,
+    payload: CreateCalculatedFieldPayload,
+  ): Promise<DeviceCalculatedField>;
 
   // Admin operations
   abstract fetchTenants(
@@ -398,6 +455,24 @@ export abstract class ThingsboardApiPort {
     startTime?: number,
     endTime?: number,
   ): Promise<EntityEventsResponse>;
+
+  abstract fetchEntityAuditLogs(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityAuditLogsResponse>;
+
+  abstract fetchDeviceLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse>;
 
   abstract fetchEntityRelations(
     sysAdminAccessToken: string,
@@ -627,6 +702,86 @@ export interface EntityEventsResponse {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+}
+
+export interface AuditLogInfo {
+  id: {
+    id: string;
+  };
+  createdTime: number;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  entityId: EntityId;
+  entityName?: string;
+  userId?: EntityId;
+  userName?: string;
+  actionType: string;
+  actionData?: Record<string, unknown>;
+  actionStatus: string;
+  actionFailureDetails?: string;
+}
+
+export interface EntityAuditLogsResponse {
+  data: AuditLogInfo[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface LatestTelemetryValue {
+  ts: number;
+  value: unknown;
+}
+
+export type LatestTelemetryResponse = Record<string, LatestTelemetryValue[]>;
+
+export interface DeviceCalculatedField {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  entityId: EntityId;
+  type: string;
+  name: string;
+  debugSettings?: {
+    failuresEnabled?: boolean;
+    allEnabled?: boolean;
+    allEnabledUntil?: number;
+  };
+  configurationVersion?: number;
+  configuration?: Record<string, unknown>;
+  version?: number;
+}
+
+export interface DeviceCalculatedFieldsResponse {
+  data: DeviceCalculatedField[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface CreateCalculatedFieldPayload {
+  entityId: {
+    entityType: 'DEVICE';
+    id: string;
+  };
+  configuration: {
+    arguments: Record<string, unknown>;
+    useLatestTs: boolean;
+    type: string;
+    expression: string;
+    output: {
+      name: string;
+      type: string;
+      scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE';
+      decimalsByDefault: number;
+    };
+  };
+  name: string;
+  type: string;
+  debugSettings: {
+    failuresEnabled: boolean;
+    allEnabled: boolean;
+  };
 }
 
 export interface RelationInfo {

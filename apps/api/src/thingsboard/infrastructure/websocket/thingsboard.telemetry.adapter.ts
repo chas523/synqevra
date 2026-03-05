@@ -18,7 +18,7 @@ export class ThingsboardTelemetryAdapter implements ThingsboardTelemetryPort {
   private authenticated = false;
   private messageHandler: ((msg: TelemetryResponse) => void) | null = null;
 
-  constructor(private readonly configService: ConfigService) { }
+  constructor(private readonly configService: ConfigService) {}
 
   isConnected(): boolean {
     return (

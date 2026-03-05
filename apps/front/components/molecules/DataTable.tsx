@@ -163,11 +163,11 @@ export function DataTable<T>({
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border">
-                    <Table>
+                <div className="rounded-md border overflow-x-auto">
+                    <Table className="min-w-max">
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[50px]">
+                                <TableHead className="w-12.5">
                                     <Checkbox
                                         checked={
                                             data.length > 0 && selectedIds.length === data.length
@@ -196,7 +196,7 @@ export function DataTable<T>({
                                         )}
                                     </TableHead>
                                 ))}
-                                {rowActions && <TableHead className="w-[100px]"></TableHead>}
+                                {rowActions && <TableHead className="w-25"></TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>

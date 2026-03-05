@@ -19,7 +19,7 @@ export class UpdateSecuritySettingsCommandHandler implements ICommandHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   async execute(
     command: UpdateSecuritySettingsCommand,

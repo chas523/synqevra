@@ -16,6 +16,10 @@ import {
   Cpu,
   History,
   Wrench,
+  Box,
+  Eye,
+  Radio,
+  Layers,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -96,6 +100,16 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
         { href: "/patients", icon: PersonStanding, label: "Patients" },
         { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
         { href: "/dashboard/notifications", icon: BellIcon, label: "Notification Center" },
+        {
+          label: "Entities",
+          icon: Layers,
+          items: [
+            { href: "/entities/devices", label: "Devices", icon: Settings },
+            { href: "/entities/assets", label: "Assets", icon: Box },
+            { href: "/entities/entity-views", label: "Entity views", icon: Eye },
+            { href: "/entities/gateways", label: "Gateways", icon: Radio },
+          ],
+        },
         {
           label: "Resources",
           icon: FolderOpen,

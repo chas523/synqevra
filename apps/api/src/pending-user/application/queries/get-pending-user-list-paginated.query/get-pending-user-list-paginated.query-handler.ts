@@ -22,13 +22,10 @@ import { PendingUserModel } from 'src/pending-user/domain/models/pending-user.mo
 import { PaginatedResponse } from 'src/pending-user/interface/rest/dtos/paginated-response.dto';
 
 @QueryHandler(GetPendingUserListPaginatedQuery)
-export class GetPendingUserListPaginatedQueryHandler
-  implements
-    IQueryHandler<
-      GetPendingUserListPaginatedQuery,
-      Result<PaginatedResponse<PendingUserModel>, PaginationQueryErrors>
-    >
-{
+export class GetPendingUserListPaginatedQueryHandler implements IQueryHandler<
+  GetPendingUserListPaginatedQuery,
+  Result<PaginatedResponse<PendingUserModel>, PaginationQueryErrors>
+> {
   constructor(
     @Inject(PENDING_USER_REPOSITORY_PORT)
     private readonly pendingUserRepository: PendingUserRepositoryPort,

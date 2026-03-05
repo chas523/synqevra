@@ -44,6 +44,7 @@ export interface DeviceDetailTemplateProps {
   ) => void;
   onAddTelemetry: (key: string) => void;
   updating: boolean;
+  hasMedplum: boolean;
   className?: string;
 }
 
@@ -64,9 +65,10 @@ const DeviceDetailTemplate = ({
   onAddParameter,
   onAddTelemetry,
   updating,
+  hasMedplum,
   className = "",
 }: DeviceDetailTemplateProps) => {
-  if (isLoading || medplumDeviceHook.isLoadingDevice) {
+  if (isLoading || (hasMedplum && medplumDeviceHook.isLoadingDevice)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -180,13 +182,15 @@ const DeviceDetailTemplate = ({
           </div>
         </div>
 
-        <PatientAssignmentCompact
-          patientList={medplumPatientDeviceHook.patientList}
-          currentPatient={medplumDeviceHook.medplumDevice?.patient || undefined}
-          isLoadingPatients={medplumPatientDeviceHook.isLoadingPatients}
-          isAssigning={medplumPatientDeviceHook.isAssigning}
-          onAssign={medplumPatientDeviceHook.onAssignPatient}
-        />
+        {hasMedplum && (
+          <PatientAssignmentCompact
+            patientList={medplumPatientDeviceHook.patientList}
+            currentPatient={medplumDeviceHook.medplumDevice?.patient || undefined}
+            isLoadingPatients={medplumPatientDeviceHook.isLoadingPatients}
+            isAssigning={medplumPatientDeviceHook.isAssigning}
+            onAssign={medplumPatientDeviceHook.onAssignPatient}
+          />
+        )}
 
         <div className="bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">

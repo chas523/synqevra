@@ -19,7 +19,7 @@ export class FetchSecuritySettingsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   async execute(
     query: FetchSecuritySettingsQuery,

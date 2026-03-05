@@ -13,13 +13,10 @@ import { PendingUserModel } from 'src/pending-user/domain/models/pending-user.mo
 import { EmailAddress } from 'src/pending-user/domain/value-objects/email-address.vo';
 
 @CommandHandler(CreatePendingUserCommand)
-export class CreatePendingUserCommandHandler
-  implements
-    ICommandHandler<
-      CreatePendingUserCommand,
-      Result<PendingUserModel, UserAlreadyExistsError>
-    >
-{
+export class CreatePendingUserCommandHandler implements ICommandHandler<
+  CreatePendingUserCommand,
+  Result<PendingUserModel, UserAlreadyExistsError>
+> {
   constructor(
     @Inject(PENDING_USER_REPOSITORY_PORT)
     private readonly pendingUserRepository: PendingUserRepositoryPort,

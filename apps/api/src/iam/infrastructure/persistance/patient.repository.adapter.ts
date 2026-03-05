@@ -8,30 +8,33 @@ import { PatientMapper } from './patient.mapper';
 
 @Injectable()
 export class PatientRepositoryAdapter extends PatientRepository {
-    constructor(
-        @InjectRepository(Patient)
-        private readonly repository: Repository<Patient>,
-    ) {
-        super();
-    }
+  constructor(
+    @InjectRepository(Patient)
+    private readonly repository: Repository<Patient>,
+  ) {
+    super();
+  }
 
-    async getPatientByEmail(email: string): Promise<PatientModel | null> {
-        const entity = await this.repository.findOne({ where: { email } });
-        return entity ? PatientMapper.toDomain(entity) : null;
-    }
+  async getPatientByEmail(email: string): Promise<PatientModel | null> {
+    const entity = await this.repository.findOne({ where: { email } });
+    return entity ? PatientMapper.toDomain(entity) : null;
+  }
 
-    async getPatientById(id: number): Promise<PatientModel | null> {
-        const entity = await this.repository.findOne({ where: { id } });
-        return entity ? PatientMapper.toDomain(entity) : null;
-    }
+  async getPatientById(id: number): Promise<PatientModel | null> {
+    const entity = await this.repository.findOne({ where: { id } });
+    return entity ? PatientMapper.toDomain(entity) : null;
+  }
 
-    async save(model: PatientModel): Promise<PatientModel> {
-        const entity = PatientMapper.toOrm(model);
-        const saved = await this.repository.save(entity);
-        return PatientMapper.toDomain(saved);
-    }
+  async save(model: PatientModel): Promise<PatientModel> {
+    const entity = PatientMapper.toOrm(model);
+    const saved = await this.repository.save(entity);
+    return PatientMapper.toDomain(saved);
+  }
 
-    async updateHashedRt(patientId: number, hashedRt: string | null): Promise<void> {
-        await this.repository.update({ id: patientId }, { hashedRt });
-    }
+  async updateHashedRt(
+    patientId: number,
+    hashedRt: string | null,
+  ): Promise<void> {
+    await this.repository.update({ id: patientId }, { hashedRt });
+  }
 }

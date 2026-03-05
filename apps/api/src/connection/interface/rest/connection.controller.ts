@@ -16,8 +16,12 @@ import {
   ApiQuery,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
+import type { CurrentUser } from 'src/auth/types/current-user';
+
 import {
   ValidateTokenUseCase,
   ValidateTokenResult,
@@ -34,6 +38,7 @@ import { ConfirmPractitionerOrchestrator } from 'src/connection/application/conf
 import { InitialConnectionResult } from '../../application/dto/initial-connection.result';
 import { ConfirmPractitionerResult } from '../../application/dto/confirm-practitioner.result';
 import { GetConnectionStatusUseCase } from '../../application/use-cases/get-connection-status.use-case';
+import { ConnectionRepository } from '../../domain/repositories/connection.repository';
 
 @ApiTags('Connection')
 @Controller('connection')
@@ -45,7 +50,8 @@ export class ConnectionController {
     private readonly medplum: MedplumClientFactory,
     private readonly confirmPractitionerUseCase: ConfirmPractitionerUseCase,
     private readonly getConnectionStatusUseCase: GetConnectionStatusUseCase,
-  ) { }
+    private readonly connectionRepository: ConnectionRepository,
+  ) {}
 
   @Public()
   @Post('/connect')
@@ -110,6 +116,30 @@ export class ConnectionController {
   })
   async getConnectionStatus(@Param('id') tenantId: string) {
     return this.getConnectionStatusUseCase.execute(tenantId);
+  }
+
+  @Get('/me/status')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get Medplum connection status for the current user',
+    description:
+      'Returns whether the currently logged-in user has a Medplum connection configured.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connection status retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        medplum: { type: 'boolean' },
+      },
+    },
+  })
+  async getMyConnectionStatus(@ActiveUser() user: CurrentUser) {
+    const connection = await this.connectionRepository.getConnectionByUserId(
+      user.id,
+    );
+    return { medplum: connection?.medplumId != null };
   }
 
   @Public()

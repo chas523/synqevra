@@ -4,20 +4,20 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { NotificationTemplatesResponse } from 'src/thingsboard/interface/rest/dtos/response/notification-template.response.dto';
 
 export interface NotificationTemplatesQueryParams {
-    pageSize?: number;
-    page?: number;
-    sortProperty?: string;
-    sortOrder?: string;
-    notificationTypes?: string;
+  pageSize?: number;
+  page?: number;
+  sortProperty?: string;
+  sortOrder?: string;
+  notificationTypes?: string;
 }
 
 export class FetchNotificationTemplatesQuery extends Query<
-    Result<NotificationTemplatesResponse, ThingsboardApiException>
+  Result<NotificationTemplatesResponse, ThingsboardApiException>
 > {
-    constructor(
-        public readonly accessToken: string,
-        public readonly params: NotificationTemplatesQueryParams = {},
-    ) {
-        super();
-    }
+  constructor(
+    public readonly accessToken: string,
+    public readonly params: NotificationTemplatesQueryParams = {},
+  ) {
+    super();
+  }
 }

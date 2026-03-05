@@ -4,50 +4,47 @@ import { Err, Ok, Result } from 'oxide.ts';
 import { NotificationTemplatesResponse } from '../../../interface/rest/dtos/response/notification-template.response.dto';
 import { Inject, Logger } from '@nestjs/common';
 import {
-    THINGSBOARD_API_PORT,
-    ThingsboardApiPort,
+  THINGSBOARD_API_PORT,
+  ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
-
 @QueryHandler(FetchNotificationTemplatesQuery)
-export class FetchNotificationTemplatesQueryHandler
-    implements
-    IQueryHandler<
-        FetchNotificationTemplatesQuery,
-        Result<NotificationTemplatesResponse, ThingsboardApiException>
-    > {
-    private readonly logger = new Logger(
-        FetchNotificationTemplatesQueryHandler.name,
-    );
+export class FetchNotificationTemplatesQueryHandler implements IQueryHandler<
+  FetchNotificationTemplatesQuery,
+  Result<NotificationTemplatesResponse, ThingsboardApiException>
+> {
+  private readonly logger = new Logger(
+    FetchNotificationTemplatesQueryHandler.name,
+  );
 
-    constructor(
-        @Inject(THINGSBOARD_API_PORT)
-        private readonly thingsboardApiPort: ThingsboardApiPort,
-    ) { }
+  constructor(
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApiPort: ThingsboardApiPort,
+  ) {}
 
-    async execute(
-        query: FetchNotificationTemplatesQuery,
-    ): Promise<Result<NotificationTemplatesResponse, ThingsboardApiException>> {
-        try {
-            const response = await this.thingsboardApiPort.fetchNotificationTemplates(
-                query.accessToken,
-                query.params,
-            );
+  async execute(
+    query: FetchNotificationTemplatesQuery,
+  ): Promise<Result<NotificationTemplatesResponse, ThingsboardApiException>> {
+    try {
+      const response = await this.thingsboardApiPort.fetchNotificationTemplates(
+        query.accessToken,
+        query.params,
+      );
 
-            this.logger.log(
-                `Successfully fetched ${response.totalElements} notification templates`,
-            );
-            return Ok(response);
-        } catch (error) {
-            this.logger.error(
-                `Failed to fetch notification templates: ${error.message}`,
-            );
-            return Err(
-                error instanceof ThingsboardApiException
-                    ? error
-                    : new ThingsboardApiException(error.message, 500),
-            );
-        }
+      this.logger.log(
+        `Successfully fetched ${response.totalElements} notification templates`,
+      );
+      return Ok(response);
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch notification templates: ${error.message}`,
+      );
+      return Err(
+        error instanceof ThingsboardApiException
+          ? error
+          : new ThingsboardApiException(error.message, 500),
+      );
     }
+  }
 }

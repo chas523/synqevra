@@ -196,7 +196,11 @@ export interface TelemetryResponse {
   errorCode: number;
   errorMsg: string | null;
   allowedEntities?: number;
-  cmdUpdateType: 'ENTITY_DATA' | 'COUNT_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS';
+  cmdUpdateType:
+    | 'ENTITY_DATA'
+    | 'COUNT_DATA'
+    | 'NOTIFICATIONS_COUNT'
+    | 'NOTIFICATIONS';
 }
 
 // ============================================================================

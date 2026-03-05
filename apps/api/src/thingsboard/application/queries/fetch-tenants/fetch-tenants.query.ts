@@ -6,7 +6,6 @@ import { GetTenantsResponse } from '../../../interface/rest/dtos/response/things
 export type FetchTenantsProps = {
   page?: number;
   pageSize?: number;
-
 };
 
 export class FetchTenantsQuery extends Query<

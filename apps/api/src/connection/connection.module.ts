@@ -51,4 +51,4 @@ import { GetConnectionStatusUseCase } from './application/use-cases/get-connecti
     ConnectionRepository,
   ],
 })
-export class ConnectionModule { }
+export class ConnectionModule {}

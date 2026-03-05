@@ -3,12 +3,12 @@ import { Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 export class DeleteQueueCommand extends Command<
-    Result<void, ThingsboardApiException>
+  Result<void, ThingsboardApiException>
 > {
-    constructor(
-        public readonly queueId: string,
-        public readonly accessToken: string,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly queueId: string,
+    public readonly accessToken: string,
+  ) {
+    super();
+  }
 }

@@ -4,6 +4,8 @@ import { useMedplumDevice } from "@/hooks/medplum/useMedplumDevice";
 import { useMedplumPatientDevice } from "@/hooks/medplum/useMedplumPatientDevice";
 import { useDevice } from "@/hooks/thingsboard/device/useDevice";
 import { useUpdateDeviceAttributes } from "@/hooks/thingsboard/device/useUpdateDeviceAttributes";
+import { useConnectionStatus } from "@/hooks/connection/useConnectionStatus";
+
 import type {
   DeviceParameterConfig,
   DeviceParameterLimits,
@@ -15,8 +17,10 @@ export const useDeviceDetail = (deviceId: string) => {
 
   const deviceHook = useDevice(deviceId);
   const updateHook = useUpdateDeviceAttributes(deviceId);
-  const medplumPatientDeviceHook = useMedplumPatientDevice(deviceId);
-  const medplumDeviceHook = useMedplumDevice(deviceId);
+  const { hasMedplum } = useConnectionStatus();
+  const medplumPatientDeviceHook = useMedplumPatientDevice(hasMedplum ? deviceId : undefined);
+  const medplumDeviceHook = useMedplumDevice(hasMedplum ? deviceId : undefined);
+
   console.log("devicehook", deviceHook);
   const [limits, setLimits] = useState<DeviceParameterConfig>({
     limits: {},
@@ -38,7 +42,7 @@ export const useDeviceDetail = (deviceId: string) => {
 
   console.log("telemetryKeys", telemetryKeys);
   console.log("currentLimits", currentLimits);
-  const isLoading = deviceHook.isLoading || medplumDeviceHook.isLoadingDevice;
+  const isLoading = deviceHook.isLoading || (hasMedplum && medplumDeviceHook.isLoadingDevice);
   const hasParameters = Object.keys(limits).length > 0;
   console.log("limits", limits);
 
@@ -194,6 +198,7 @@ export const useDeviceDetail = (deviceId: string) => {
       ...medplumPatientDeviceHook,
       onAssignPatient: handleAssignPatient,
     },
+    hasMedplum,
 
     onBackToList: handleBackToList,
     onRefresh: deviceHook.refresh,

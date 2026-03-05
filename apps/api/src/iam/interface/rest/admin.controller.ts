@@ -30,8 +30,7 @@ export class AdminController {
     private readonly loginAdminUseCase: LoginAdminUseCase,
     private readonly refreshTokensUseCase: RefreshTokensUseCase,
     private readonly logoutAdminUseCase: LogoutAdminUseCase,
-
-  ) { }
+  ) {}
 
   @Public()
   @UseGuards(LocalAdminAuthGuard)

@@ -48,7 +48,13 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Admin, ActivationLink, Patient, PatientMedplum]),
+    TypeOrmModule.forFeature([
+      User,
+      Admin,
+      ActivationLink,
+      Patient,
+      PatientMedplum,
+    ]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
@@ -56,7 +62,12 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     forwardRef(() => ConnectionModule),
     forwardRef(() => MedplumModule),
   ],
-  controllers: [UsersController, AuthController, AdminController, PatientController],
+  controllers: [
+    UsersController,
+    AuthController,
+    AdminController,
+    PatientController,
+  ],
   providers: [
     AuthService,
 
@@ -78,7 +89,10 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },
     { provide: TokenGeneratorPort, useClass: TokenGeneratorAdapter },
     { provide: PatientRepository, useClass: PatientRepositoryAdapter },
-    { provide: PatientMedplumRepository, useClass: PatientMedplumRepositoryAdapter },
+    {
+      provide: PatientMedplumRepository,
+      useClass: PatientMedplumRepositoryAdapter,
+    },
     PatientAuthGuard,
     {
       provide: ActivationLinkRepository,
@@ -102,4 +116,4 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     PatientAuthGuard,
   ],
 })
-export class IamModule { }
+export class IamModule {}

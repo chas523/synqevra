@@ -52,7 +52,7 @@ export class AuthController {
     private readonly invitePractitionerUseCase: InvitePractitionerUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
     private readonly patientLoginUseCase: PatientLoginUseCase,
-  ) { }
+  ) {}
 
   @Public()
   @HttpCode(HttpStatus.CREATED)
@@ -242,7 +242,10 @@ export class AuthController {
     description: 'Invalid or missing authentication token',
   })
   async getProfile(@ActiveUser() user: CurrentUser) {
-    const userProfile = await this.getUserProfileUseCase.execute(user.id, user.connectionRole) as UserProfileResult;
+    const userProfile = (await this.getUserProfileUseCase.execute(
+      user.id,
+      user.connectionRole,
+    )) as UserProfileResult;
     return userProfile;
   }
 }

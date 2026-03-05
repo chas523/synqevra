@@ -4,12 +4,12 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { ResourceDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
 
 export class FetchResourceInfoQuery extends Query<
-    Result<ResourceDto, ThingsboardApiException>
+  Result<ResourceDto, ThingsboardApiException>
 > {
-    constructor(
-        public readonly resourceId: string,
-        public readonly accessToken: string,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly resourceId: string,
+    public readonly accessToken: string,
+  ) {
+    super();
+  }
 }
