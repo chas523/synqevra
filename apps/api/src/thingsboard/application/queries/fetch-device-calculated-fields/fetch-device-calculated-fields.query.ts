@@ -1,8 +1,6 @@
 import { Query } from '@nestjs/cqrs';
 import { Result } from 'oxide.ts';
-import {
-  DeviceCalculatedFieldsResponse,
-} from 'src/thingsboard/application/ports/thingsboard.api.port';
+import { DeviceCalculatedFieldsResponse } from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 export class FetchDeviceCalculatedFieldsQuery extends Query<

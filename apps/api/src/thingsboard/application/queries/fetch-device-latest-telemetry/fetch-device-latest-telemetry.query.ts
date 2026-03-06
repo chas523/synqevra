@@ -1,8 +1,6 @@
 import { Query } from '@nestjs/cqrs';
 import { Result } from 'oxide.ts';
-import {
-  LatestTelemetryResponse,
-} from 'src/thingsboard/application/ports/thingsboard.api.port';
+import { LatestTelemetryResponse } from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 export class FetchDeviceLatestTelemetryQuery extends Query<

@@ -652,7 +652,9 @@ export class ThingsboardController {
         'SERVER_SCOPE',
       );
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset attributes');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset attributes',
+      );
     }
   }
 
@@ -679,7 +681,9 @@ export class ThingsboardController {
       );
       return { success: true };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to update asset attributes');
+      throw new InternalServerErrorException(
+        'Failed to update asset attributes',
+      );
     }
   }
 
@@ -706,7 +710,9 @@ export class ThingsboardController {
       );
       return { success: true };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to update asset attributes');
+      throw new InternalServerErrorException(
+        'Failed to update asset attributes',
+      );
     }
   }
 
@@ -728,10 +734,16 @@ export class ThingsboardController {
     }
 
     try {
-      await this.thingsboardApi.addAssetLatestTelemetry(accessToken, id, telemetry);
+      await this.thingsboardApi.addAssetLatestTelemetry(
+        accessToken,
+        id,
+        telemetry,
+      );
       return { success: true };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to add latest asset telemetry');
+      throw new InternalServerErrorException(
+        'Failed to add latest asset telemetry',
+      );
     }
   }
 
@@ -758,9 +770,15 @@ export class ThingsboardController {
     }
 
     try {
-      return await this.thingsboardApi.fetchAssetLatestTelemetry(accessToken, id, keys);
+      return await this.thingsboardApi.fetchAssetLatestTelemetry(
+        accessToken,
+        id,
+        keys,
+      );
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch latest asset telemetry');
+      throw new InternalServerErrorException(
+        'Failed to fetch latest asset telemetry',
+      );
     }
   }
 
@@ -779,7 +797,9 @@ export class ThingsboardController {
     try {
       return await this.thingsboardApi.fetchAssetTelemetryKeys(accessToken, id);
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset telemetry keys');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset telemetry keys',
+      );
     }
   }
 
@@ -809,7 +829,9 @@ export class ThingsboardController {
         sortOrder,
       );
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset calculated fields');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset calculated fields',
+      );
     }
   }
 
@@ -824,7 +846,8 @@ export class ThingsboardController {
   async createAssetCalculatedField(
     @TbAccessToken() accessToken: string,
     @Param('id') id: string,
-    @Body() payload: {
+    @Body()
+    payload: {
       title: string;
       fieldType: 'simple' | 'script';
       expression: string;
@@ -950,7 +973,9 @@ export class ThingsboardController {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create asset calculated field');
+      throw new InternalServerErrorException(
+        'Failed to create asset calculated field',
+      );
     }
   }
 
@@ -1050,7 +1075,9 @@ export class ThingsboardController {
         endTime ? Number(endTime) : undefined,
       );
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset audit logs');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset audit logs',
+      );
     }
   }
 
@@ -1244,7 +1271,9 @@ export class ThingsboardController {
     try {
       return await this.thingsboardApi.fetchAssetProfileInfo(accessToken, name);
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset profile info');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset profile info',
+      );
     }
   }
 
@@ -1274,7 +1303,9 @@ export class ThingsboardController {
         textSearch,
       );
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch asset profile infos');
+      throw new InternalServerErrorException(
+        'Failed to fetch asset profile infos',
+      );
     }
   }
 
@@ -1595,8 +1626,10 @@ export class ThingsboardController {
     }
 
     const query = new FetchDeviceLatestTelemetryQuery(accessToken, id, keys);
-    const result: Result<Record<string, Array<{ ts: number; value: unknown }>>, ThingsboardApiException> =
-      await this.queryBus.execute(query);
+    const result: Result<
+      Record<string, Array<{ ts: number; value: unknown }>>,
+      ThingsboardApiException
+    > = await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (telemetry) => telemetry,
@@ -1688,12 +1721,14 @@ export class ThingsboardController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Create calculated field for device',
-    description: 'Create a calculated field using ThingsBoard calculatedField API',
+    description:
+      'Create a calculated field using ThingsBoard calculatedField API',
   })
   async createDeviceCalculatedField(
     @TbAccessToken() accessToken: string,
     @Param('id') id: string,
-    @Body() payload: {
+    @Body()
+    payload: {
       title: string;
       fieldType: 'simple' | 'script';
       expression: string;
@@ -1779,9 +1814,12 @@ export class ThingsboardController {
       {},
     );
 
-    const outputType = payload.outputType === 'ATTRIBUTES' ? 'ATTRIBUTES' : 'TIME_SERIES';
+    const outputType =
+      payload.outputType === 'ATTRIBUTES' ? 'ATTRIBUTES' : 'TIME_SERIES';
     const outputName =
-      payload.outputKey?.trim() || payload.title?.trim() || payload.expression.trim();
+      payload.outputKey?.trim() ||
+      payload.title?.trim() ||
+      payload.expression.trim();
 
     if (Object.keys(mappedArguments).length === 0) {
       throw new BadRequestException('At least one valid argument is required');

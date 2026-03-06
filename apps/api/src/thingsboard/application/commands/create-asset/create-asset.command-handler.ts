@@ -9,9 +9,10 @@ import {
 import { CreateAssetCommand, CreateAssetErrors } from './create-asset.command';
 
 @CommandHandler(CreateAssetCommand)
-export class CreateAssetCommandHandler
-  implements ICommandHandler<CreateAssetCommand, Result<Asset, CreateAssetErrors>>
-{
+export class CreateAssetCommandHandler implements ICommandHandler<
+  CreateAssetCommand,
+  Result<Asset, CreateAssetErrors>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

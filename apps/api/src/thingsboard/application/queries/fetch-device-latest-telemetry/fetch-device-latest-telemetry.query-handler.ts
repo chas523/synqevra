@@ -25,11 +25,12 @@ export class FetchDeviceLatestTelemetryQueryHandler implements IQueryHandler<
     const { accessToken, id, keys } = query;
 
     try {
-      const latestTelemetry = await this.thingsboardApiPort.fetchDeviceLatestTelemetry(
-        accessToken,
-        id,
-        keys,
-      );
+      const latestTelemetry =
+        await this.thingsboardApiPort.fetchDeviceLatestTelemetry(
+          accessToken,
+          id,
+          keys,
+        );
 
       return Ok(latestTelemetry);
     } catch (error) {

@@ -10,9 +10,10 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { FetchAssetsQuery } from './fetch-assets.query';
 
 @QueryHandler(FetchAssetsQuery)
-export class FetchAssetsQueryHandler
-  implements IQueryHandler<FetchAssetsQuery, Result<AssetsResponse, ThingsboardApiException>>
-{
+export class FetchAssetsQueryHandler implements IQueryHandler<
+  FetchAssetsQuery,
+  Result<AssetsResponse, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

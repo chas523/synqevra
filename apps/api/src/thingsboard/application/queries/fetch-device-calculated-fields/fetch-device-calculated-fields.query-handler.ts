@@ -25,14 +25,15 @@ export class FetchDeviceCalculatedFieldsQueryHandler implements IQueryHandler<
     const { accessToken, id, page, pageSize, sortProperty, sortOrder } = query;
 
     try {
-      const response = await this.thingsboardApiPort.fetchDeviceCalculatedFields(
-        accessToken,
-        id,
-        page,
-        pageSize,
-        sortProperty,
-        sortOrder,
-      );
+      const response =
+        await this.thingsboardApiPort.fetchDeviceCalculatedFields(
+          accessToken,
+          id,
+          page,
+          pageSize,
+          sortProperty,
+          sortOrder,
+        );
 
       return Ok(response);
     } catch (error) {
