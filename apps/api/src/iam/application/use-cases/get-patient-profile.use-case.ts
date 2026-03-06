@@ -9,7 +9,7 @@ export class GetPatientProfileUseCase {
   constructor(
     private readonly medplumClientPort: MedplumClientPort,
     private readonly patientRepository: PatientRepository,
-  ) {}
+  ) { }
 
   async execute(patientId: number, credentials: MedplumCredentials) {
     if (!credentials) {
@@ -18,25 +18,24 @@ export class GetPatientProfileUseCase {
 
     const { clientId, clientSecret } = credentials;
     const patientModel = await this.patientRepository.getPatientById(patientId);
-    console.log('Patient model: ', patientModel);
+
     if (!patientModel || !patientModel.email) {
       throw new NotFoundException('Patient not found');
     }
-    console.log('Patient email: ', patientModel.email);
-    const patient =
-      await this.medplumClientPort.findPatientProfileByEmailWithClientIdClientSecret(
-        patientModel.email,
-        clientId,
-        clientSecret,
-      );
-    console.log('Patient: ', patient);
 
+    const patient = await this.medplumClientPort.findPatientProfileByEmailWithClientIdClientSecret(
+      patientModel.email,
+      clientId,
+      clientSecret,
+    );
+
+    const name = patient?.name?.[0];
     return {
       id: patient?.id,
       email: patientModel.email,
-      firstName: patient?.name?.[0]?.given?.[0],
-      lastName: patient?.name?.[0]?.family,
-      role: Role.PATIENT,
+      firstName: name?.given?.[0] || '',
+      lastName: name?.family || '',
+      role: Role.PATIENT
     };
   }
 }

@@ -142,6 +142,60 @@ export class SettingsService {
     );
     return data;
   }
+
+  public static async getTrendzSettings(): Promise<{ enabled: boolean; baseUrl: string; apiKey: string }> {
+    const { data } = await proxyApi.get("thingsboard/trendz/settings");
+    return data;
+  }
+
+  public static async updateTrendzSettings(
+    settings: { enabled: boolean; baseUrl: string; apiKey: string }
+  ): Promise<{ enabled: boolean; baseUrl: string; apiKey: string }> {
+    const { data } = await proxyApi.post("thingsboard/trendz/settings", settings);
+    return data;
+  }
+
+  // AI Model methods
+  public static async getAiModels(
+    page: number = 0,
+    pageSize: number = 10,
+    sortProperty: string = "createdTime",
+    sortOrder: string = "DESC"
+  ): Promise<any> {
+    const { data } = await proxyApi.get(
+      `thingsboard/ai/model?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`
+    );
+    return data;
+  }
+
+  public static async saveAiModel(payload: any): Promise<any> {
+    const { data } = await proxyApi.post("thingsboard/ai/model", payload);
+    return data;
+  }
+
+  public static async deleteAiModel(modelId: string): Promise<any> {
+    const { data } = await proxyApi.delete(`thingsboard/ai/model/${modelId}`);
+    return data;
+  }
+
+  public static async checkAiModelConnectivity(payload: any): Promise<any> {
+    const { data } = await proxyApi.post("thingsboard/ai/model/chat", payload);
+    return data;
+  }
+
+  // Auto-commit settings
+  public static async getAutoCommitSettings(): Promise<any> {
+    const { data } = await proxyApi.get("thingsboard/autoCommitSettings");
+    return data;
+  }
+
+  public static async saveAutoCommitSettings(payload: any): Promise<any> {
+    const { data } = await proxyApi.post("thingsboard/autoCommitSettings", payload);
+    return data;
+  }
+
+  public static async deleteAutoCommitSettings(): Promise<any> {
+    const { data } = await proxyApi.delete("thingsboard/autoCommitSettings");
+    return data;
+  }
 }
-
-

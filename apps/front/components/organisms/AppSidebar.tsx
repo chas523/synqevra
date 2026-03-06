@@ -85,6 +85,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           items: [
             { href: "/security-settings", label: "Security Settings" },
             { href: "/security/2fa", label: "Two-factor authentication" },
+            { href: "/security-settings/oauth2/domains", label: "OAuth 2.0" },
           ],
         },
         { href: "/settings", icon: Settings, label: "Settings" },
@@ -129,6 +130,15 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
             { href: "/advanced/version-control", label: "Version control", icon: History },
           ],
         },
+        { href: "/settings/notifications", icon: Settings, label: "Settings" },
+        {
+          label: "Security",
+          icon: ShieldCheck,
+          items: [
+            { href: "/security-settings/auditLogs", label: "Audit Logs" },
+            { href: "/security-settings/oauth2/clients", label: "OAuth 2.0" },
+          ],
+        },
       ],
     },
   ],
@@ -157,8 +167,8 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.href}>
-                        <SidebarMenuSubButton asChild>
-                          <Link href={subItem.href}>
+                        <SidebarMenuSubButton asChild >
+                          <Link href={subItem.href} prefetch={false}>
                             {subItem.icon && <subItem.icon className="h-4 w-4" />}
                             <span>{subItem.label}</span>
                           </Link>
@@ -175,7 +185,7 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
         return (
           <SidebarMenuItem key={item.label}>
             <SidebarMenuButton asChild>
-              <Link href={item.href!}>
+              <Link href={item.href!} prefetch={false}>
                 {item.icon && <item.icon />}
                 <span>{item.label}</span>
               </Link>
@@ -288,6 +298,7 @@ export default function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
       </SidebarContent>
     </Sidebar>
   );
