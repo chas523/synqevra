@@ -19,6 +19,7 @@ import { THINGSBOARD_TELEMETRY_PORT } from './application/ports/thingsboard.tele
 
 // Command Handlers
 import { CreateDeviceCommandHandler } from './application/commands/create-device/create-device.command-handler';
+import { CreateAssetCommandHandler } from './application/commands/create-asset/create-asset.command-handler';
 import { DeleteDeviceCommandHandler } from './application/commands/delete-device/delete-device.command-handler';
 import { UpdateDeviceSharedAttributesCommandHandler } from './application/commands/update-device-shared-attributes/update-device-shared-attributes.command-handler';
 import { AddDeviceLatestTelemetryCommandHandler } from './application/commands/add-device-latest-telemetry/add-device-latest-telemetry.command-handler';
@@ -54,6 +55,7 @@ import { PreviewNotificationRequestCommandHandler } from './application/commands
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
+import { FetchAssetsQueryHandler } from './application/queries/fetch-assets/fetch-assets.query-handler';
 import { FetchDeviceByIdQueryHandler } from './application/queries/fetch-device-by-id/fetch-device-by-id.query.handler';
 import { FetchDeviceSharedAttributesQueryHandler } from './application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query-handler';
 import { FetchDeviceLatestTelemetryQueryHandler } from './application/queries/fetch-device-latest-telemetry/fetch-device-latest-telemetry.query-handler';
@@ -115,6 +117,7 @@ import { StorageService } from './application/services/storage.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
+  CreateAssetCommandHandler,
   DeleteDeviceCommandHandler,
   UpdateDeviceSharedAttributesCommandHandler,
   AddDeviceLatestTelemetryCommandHandler,
@@ -156,6 +159,7 @@ import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resou
 
 const queryHandlers = [
   FetchDevicesQueryHandler,
+  FetchAssetsQueryHandler,
   FetchDeviceByIdQueryHandler,
   FetchDeviceSharedAttributesQueryHandler,
   FetchDeviceLatestTelemetryQueryHandler,

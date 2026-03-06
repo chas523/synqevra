@@ -234,6 +234,70 @@ export abstract class ThingsboardApiPort {
     payload: CreateCalculatedFieldPayload,
   ): Promise<DeviceCalculatedField>;
 
+  // Asset operations
+  abstract fetchAssets(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    assetProfileId?: string,
+  ): Promise<AssetsResponse>;
+  abstract createAsset(
+    accessToken: string,
+    payload: CreateAssetRequest,
+  ): Promise<Asset>;
+  abstract fetchAsset(accessToken: string, id: string): Promise<Asset>;
+  abstract saveAsset(
+    accessToken: string,
+    payload: Partial<Asset> & { id: EntityId },
+  ): Promise<Asset>;
+  abstract addAssetLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void>;
+  abstract fetchAssetTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]>;
+  abstract fetchAssetLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse>;
+  abstract fetchAssetCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse>;
+  abstract makeAssetPublic(accessToken: string, id: string): Promise<Asset>;
+  abstract makeAssetPrivate(accessToken: string, id: string): Promise<Asset>;
+  abstract deleteAsset(accessToken: string, id: string): Promise<void>;
+  abstract fetchAssetProfileInfo(
+    accessToken: string,
+    profileName: string,
+  ): Promise<AssetProfileInfo>;
+  abstract fetchAssetProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<AssetProfileInfosResponse>;
+  abstract fetchCustomers(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<CustomersResponse>;
+
   // Admin operations
   abstract fetchTenants(
     sysAdminAccessToken: string,
@@ -761,7 +825,7 @@ export interface DeviceCalculatedFieldsResponse {
 
 export interface CreateCalculatedFieldPayload {
   entityId: {
-    entityType: 'DEVICE';
+    entityType: 'DEVICE' | 'ASSET';
     id: string;
   };
   configuration: {
@@ -782,6 +846,75 @@ export interface CreateCalculatedFieldPayload {
     failuresEnabled: boolean;
     allEnabled: boolean;
   };
+}
+
+export interface Asset {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  name: string;
+  type: string;
+  label: string | null;
+  assetProfileId: EntityId;
+  externalId?: string | null;
+  version: number;
+  customerTitle: string | null;
+  customerIsPublic: boolean;
+  assetProfileName: string;
+  additionalInfo?: {
+    description?: string;
+  };
+}
+
+export interface AssetsResponse {
+  data: Asset[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface CreateAssetRequest {
+  name: string;
+  label?: string | null;
+  assetProfileId: EntityId;
+  customerId: EntityId;
+  type?: string;
+  additionalInfo?: {
+    description?: string;
+  };
+}
+
+export interface AssetProfileInfo {
+  id: EntityId;
+  tenantId: EntityId;
+  name: string;
+  image?: string | null;
+  defaultDashboardId?: EntityId | null;
+}
+
+export interface AssetProfileInfosResponse {
+  data: AssetProfileInfo[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface CustomerInfo {
+  id: EntityId;
+  createdTime: number;
+  title: string;
+  tenantId: EntityId;
+  additionalInfo?: {
+    isPublic?: boolean;
+  };
+}
+
+export interface CustomersResponse {
+  data: CustomerInfo[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
 }
 
 export interface RelationInfo {

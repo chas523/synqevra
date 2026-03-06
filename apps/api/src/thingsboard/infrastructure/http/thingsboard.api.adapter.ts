@@ -9,6 +9,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import {
+  Asset,
+  AssetProfileInfo,
+  AssetProfileInfosResponse,
+  AssetsResponse,
+  CreateAssetRequest,
+  CustomerInfo,
+  CustomersResponse,
   CreateCalculatedFieldPayload,
   DeviceCalculatedField,
   DeviceCalculatedFieldsResponse,
@@ -564,6 +571,342 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to create calculated field in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssets(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    assetProfileId = '',
+  ): Promise<AssetsResponse> {
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      // Keep parity with ThingsBoard UI request shape.
+      params.append('assetProfileId', assetProfileId);
+
+      const url = `${this.THINGSBOARD_API_URL}/tenant/assetInfos?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<AssetsResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch assets from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createAsset(
+    accessToken: string,
+    payload: CreateAssetRequest,
+  ): Promise<Asset> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/asset`;
+      const response = await firstValueFrom(
+        this.httpService.post<Asset>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create asset in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAsset(accessToken: string, id: string): Promise<Asset> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/asset/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.get<Asset>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveAsset(
+    accessToken: string,
+    payload: Partial<Asset> & { id: EntityId },
+  ): Promise<Asset> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/asset`;
+      const response = await firstValueFrom(
+        this.httpService.post<Asset>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update asset in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async addAssetLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/ASSET/${id}/timeseries/LATEST_TELEMETRY`;
+      await firstValueFrom(
+        this.httpService.post(url, telemetry, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to add latest asset telemetry in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/ASSET/${id}/keys/timeseries`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset telemetry keys from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse> {
+    try {
+      const encodedKeys = encodeURIComponent(keys.join(','));
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/ASSET/${id}/values/timeseries?keys=${encodedKeys}&useStrictDataTypes=false`;
+      const response = await firstValueFrom(
+        this.httpService.get<LatestTelemetryResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch latest asset telemetry from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ASSET/${id}/calculatedFields?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get<DeviceCalculatedFieldsResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset calculated fields from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeAssetPublic(accessToken: string, id: string): Promise<Asset> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/public/asset/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.post<Asset>(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make asset public in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeAssetPrivate(accessToken: string, id: string): Promise<Asset> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/asset/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.delete<Asset>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make asset private in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteAsset(accessToken: string, id: string): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/asset/${id}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete asset in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetProfileInfo(
+    accessToken: string,
+    profileName: string,
+  ): Promise<AssetProfileInfo> {
+    try {
+      const encodedName = encodeURIComponent(profileName);
+      const url = `${this.THINGSBOARD_API_URL}/assetProfileInfo/${encodedName}`;
+      const response = await firstValueFrom(
+        this.httpService.get<AssetProfileInfo>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset profile info from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetProfileInfos(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'name',
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+    textSearch?: string,
+  ): Promise<AssetProfileInfosResponse> {
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/assetProfileInfos?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<AssetProfileInfosResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset profile infos from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchCustomers(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'title',
+    sortOrder: 'ASC' | 'DESC' = 'ASC',
+    textSearch?: string,
+  ): Promise<CustomersResponse> {
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/customers?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<CustomersResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch customers from ThingsBoard API',
         error,
         this.logger,
       );

@@ -14,7 +14,7 @@ export class DownloadWidgetTypeQueryHandler implements IQueryHandler<
   DownloadWidgetTypeQuery,
   Result<any, ThingsboardApiException>
 > {
-  constructor( 
+  constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
   ) {}
