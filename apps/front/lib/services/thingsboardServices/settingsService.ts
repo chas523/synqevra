@@ -182,4 +182,20 @@ export class SettingsService {
     const { data } = await proxyApi.post("thingsboard/ai/model/chat", payload);
     return data;
   }
+
+  // Auto-commit settings
+  public static async getAutoCommitSettings(): Promise<any> {
+    const { data } = await proxyApi.get("thingsboard/autoCommitSettings");
+    return data;
+  }
+
+  public static async saveAutoCommitSettings(payload: any): Promise<any> {
+    const { data } = await proxyApi.post("thingsboard/autoCommitSettings", payload);
+    return data;
+  }
+
+  public static async deleteAutoCommitSettings(): Promise<any> {
+    const { data } = await proxyApi.delete("thingsboard/autoCommitSettings");
+    return data;
+  }
 }

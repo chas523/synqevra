@@ -58,6 +58,10 @@ import { SaveTrendzSettingsCommandHandler } from './application/commands/save-tr
 import { SaveAiModelCommandHandler } from './application/commands/save-ai-model/save-ai-model.command-handler';
 import { DeleteAiModelCommandHandler } from './application/commands/delete-ai-model/delete-ai-model.command-handler';
 import { CheckAiModelConnectivityCommandHandler } from './application/commands/check-ai-model-connectivity/check-ai-model-connectivity.command-handler';
+import { SaveAutoCommitSettingsCommandHandler } from './application/commands/save-auto-commit-settings/save-auto-commit-settings.command-handler';
+import { DeleteAutoCommitSettingsCommandHandler } from './application/commands/delete-auto-commit-settings/delete-auto-commit-settings.command-handler';
+import { CreateVersionCommandHandler } from './application/commands/create-version/create-version.command-handler';
+import { RestoreVersionHandler } from './application/commands/restore-version/restore-version.handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -115,6 +119,17 @@ import { FetchVersionsQueryHandler } from './application/queries/fetch-versions/
 import { FetchBranchesQueryHandler } from './application/queries/fetch-branches/fetch-branches.query.handler';
 import { FetchTrendzSettingsQueryHandler } from './application/queries/fetch-trendz-settings/fetch-trendz-settings.query.handler';
 import { FetchAiModelsQueryHandler } from './application/queries/fetch-ai-models/fetch-ai-models.query.handler';
+import { FetchAutoCommitSettingsQueryHandler } from './application/queries/fetch-auto-commit-settings/fetch-auto-commit-settings.query.handler';
+import { FetchVersionCreationStatusQueryHandler } from './application/queries/fetch-version-creation-status/fetch-version-creation-status.query.handler';
+import { FetchEntitiesByTypeQueryHandler } from './application/queries/fetch-entities-by-type/fetch-entities-by-type.query.handler';
+import { FetchRestoreVersionStatusHandler } from './application/queries/fetch-restore-version-status/fetch-restore-version-status.handler';
+import { FetchAuditLogsQueryHandler } from './application/queries/fetch-audit-logs/fetch-audit-logs.handler';
+import { FetchDomainInfosQueryHandler } from './application/queries/fetch-domain-infos/fetch-domain-infos.handler';
+import { FetchOAuth2ClientInfosQueryHandler } from './application/queries/fetch-oauth2-client-infos/fetch-oauth2-client-infos.handler';
+import { CreateDomainCommandHandler } from './application/commands/create-domain/create-domain.handler';
+import { FetchDomainByIdQueryHandler } from './application/queries/fetch-domain-by-id/fetch-domain-by-id.handler';
+import { UpdateDomainCommandHandler } from './application/commands/update-domain/update-domain.handler';
+import { FetchOAuth2ConfigTemplateQueryHandler } from './application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -166,6 +181,12 @@ const commandHandlers = [
   SaveAiModelCommandHandler,
   DeleteAiModelCommandHandler,
   CheckAiModelConnectivityCommandHandler,
+  SaveAutoCommitSettingsCommandHandler,
+  DeleteAutoCommitSettingsCommandHandler,
+  CreateVersionCommandHandler,
+  RestoreVersionHandler,
+  CreateDomainCommandHandler,
+  UpdateDomainCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -224,6 +245,15 @@ const queryHandlers = [
   FetchBranchesQueryHandler,
   FetchTrendzSettingsQueryHandler,
   FetchAiModelsQueryHandler,
+  FetchAutoCommitSettingsQueryHandler,
+  FetchVersionCreationStatusQueryHandler,
+  FetchEntitiesByTypeQueryHandler,
+  FetchRestoreVersionStatusHandler,
+  FetchAuditLogsQueryHandler,
+  FetchDomainInfosQueryHandler,
+  FetchOAuth2ClientInfosQueryHandler,
+  FetchDomainByIdQueryHandler,
+  FetchOAuth2ConfigTemplateQueryHandler,
 ];
 
 @Module({

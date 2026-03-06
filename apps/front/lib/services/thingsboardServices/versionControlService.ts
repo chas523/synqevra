@@ -57,4 +57,30 @@ export class VersionControlService {
         const { data } = await proxyApi.get(url);
         return data;
     }
+
+    public static async createVersion(payload: any): Promise<string> {
+        const { data } = await proxyApi.post("thingsboard/entities/vc/version", payload);
+        return data;
+    }
+
+    public static async getVersionCreationStatus(requestId: string): Promise<any> {
+        const { data } = await proxyApi.get(`thingsboard/entities/vc/version/${requestId}/status`);
+        return data;
+    }
+
+    public static async getEntitiesByType(entityType: string, page: number = 0, pageSize: number = 50): Promise<any> {
+        const url = `thingsboard/entities/byType/${entityType}?page=${page}&pageSize=${pageSize}`;
+        const { data } = await proxyApi.get(url);
+        return data;
+    }
+
+    public static async restoreVersion(payload: any): Promise<any> {
+        const { data } = await proxyApi.post("thingsboard/entities/vc/entity", payload);
+        return data;
+    }
+
+    public static async getRestoreVersionStatus(requestId: string): Promise<any> {
+        const { data } = await proxyApi.get(`thingsboard/entities/vc/entity/${requestId}/status`);
+        return data;
+    }
 }

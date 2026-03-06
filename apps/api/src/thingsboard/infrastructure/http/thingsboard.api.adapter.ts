@@ -2787,5 +2787,299 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async getAutoCommitSettings(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/autoCommitSettings`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      // Return null if no settings exist (404)
+      if (error?.response?.status === 404) {
+        return null;
+      }
+      ThingsboardApiException.createException(
+        'Failed to fetch auto-commit settings from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveAutoCommitSettings(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/autoCommitSettings`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save auto-commit settings to ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteAutoCommitSettings(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/admin/autoCommitSettings`;
+      const response = await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete auto-commit settings from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  // Entity type → ThingsBoard API endpoint mapping for listing entities
+  private getEntityListEndpoint(entityType: string, page: number, pageSize: number): string {
+    const commonParams = `pageSize=${pageSize}&page=${page}`;
+
+    switch (entityType) {
+      case 'DASHBOARD':
+        return `/tenant/dashboards?${commonParams}&sortProperty=title&sortOrder=ASC`;
+      case 'CUSTOMER':
+        return `/customers?${commonParams}&sortProperty=title&sortOrder=ASC`;
+      case 'WIDGET_TYPE':
+        return `/widgetTypes?${commonParams}&sortProperty=name&sortOrder=ASC&tenantOnly=true&fullSearch=false&scadaFirst=false&deprecatedFilter=ALL`;
+      case 'WIDGETS_BUNDLE':
+        return `/widgetsBundles?${commonParams}&sortProperty=title&sortOrder=ASC&tenantOnly=true&fullSearch=false&scadaFirst=false`;
+      case 'TB_RESOURCE':
+        return `/resource/tenant?${commonParams}&sortProperty=title&sortOrder=ASC`;
+      case 'OTA_PACKAGE':
+        return `/otaPackages?${commonParams}&sortProperty=title&sortOrder=ASC`;
+
+      case 'DEVICE':
+        return `/tenant/deviceInfos?${commonParams}&sortProperty=name&sortOrder=ASC&type=`;
+      case 'ASSET':
+        return `/tenant/assetInfos?${commonParams}&sortProperty=name&sortOrder=ASC&type=`;
+      case 'ENTITY_VIEW':
+        return `/tenant/entityViewInfos?${commonParams}&sortProperty=name&sortOrder=ASC&type=`;
+      case 'DEVICE_PROFILE':
+        return `/deviceProfileInfos?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'ASSET_PROFILE':
+        return `/assetProfileInfos?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'RULE_CHAIN':
+        return `/ruleChains?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'NOTIFICATION_TEMPLATE':
+        return `/notification/templates?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'NOTIFICATION_TARGET':
+        return `/notification/targets?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'NOTIFICATION_RULE':
+        return `/notification/rules?${commonParams}&sortProperty=name&sortOrder=ASC`;
+      case 'AI_MODEL':
+        return `/ai/model?${commonParams}&sortProperty=name&sortOrder=ASC`;
+
+      default:
+        return `/tenant/${entityType.toLowerCase()}Infos?${commonParams}&sortProperty=name&sortOrder=ASC&type=`;
+    }
+  }
+
+  async createVersion(accessToken: string, payload: any): Promise<string> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/version`;
+      const response = await firstValueFrom(
+        this.httpService.post<string>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create version in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getVersionCreationStatus(accessToken: string, requestId: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/version/${requestId}/status`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get version creation status from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async restoreVersion(accessToken: string, payload: any): Promise<string> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/entity`;
+      const response = await firstValueFrom(
+        this.httpService.post<string>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to restore version in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getRestoreVersionStatus(accessToken: string, requestId: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/entity/${requestId}/status`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get restore version status from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getEntitiesByType(
+    accessToken: string,
+    entityType: string,
+    page: number,
+    pageSize: number,
+  ): Promise<any> {
+    try {
+      const endpoint = this.getEntityListEndpoint(entityType, page, pageSize);
+      const url = `${this.THINGSBOARD_API_URL}${endpoint}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch entities by type from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getAuditLogs(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; startTime: number; endTime: number; }): Promise<any> {
+    try {
+      const { pageSize, page, sortProperty, sortOrder, startTime, endTime } = params;
+      const url = `${this.THINGSBOARD_API_URL}/audit/logs?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}&startTime=${startTime}&endTime=${endTime}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch audit logs from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getDomainInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any> {
+    try {
+      const { pageSize, page, sortProperty, sortOrder } = params;
+      const url = `${this.THINGSBOARD_API_URL}/domain/infos?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to fetch domain infos', error, this.logger);
+    }
+  }
+
+  async getOAuth2ClientInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any> {
+    try {
+      const { pageSize, page, sortProperty, sortOrder } = params;
+      const url = `${this.THINGSBOARD_API_URL}/oauth2/client/infos?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to fetch OAuth2 client infos', error, this.logger);
+    }
+  }
+
+  async createDomain(accessToken: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any> {
+    try {
+      const idsParam = oauth2ClientIds.join(',');
+      const url = `${this.THINGSBOARD_API_URL}/domain?oauth2ClientIds=${idsParam}`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to create domain', error, this.logger);
+    }
+  }
+
+  async getDomainById(accessToken: string, domainId: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/domain/info/${domainId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to fetch domain by id', error, this.logger);
+    }
+  }
+
+  async updateDomain(accessToken: string, domainId: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any> {
+    try {
+      const idsParam = oauth2ClientIds.join(',');
+      const url = `${this.THINGSBOARD_API_URL}/domain?oauth2ClientIds=${idsParam}`;
+      const body = { ...payload, id: { entityType: 'DOMAIN', id: domainId } };
+      const response = await firstValueFrom(
+        this.httpService.post(url, body, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to update domain', error, this.logger);
+    }
+  }
+
+  async getOAuth2ConfigTemplate(accessToken: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/oauth2/config/template`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to fetch OAuth2 config templates', error, this.logger);
+    }
+  }
 }
 

@@ -11,6 +11,7 @@ import { useRepoSettingsInfo, useRepoSettings, useManageRepoSettings } from "@/h
 import { RepoSettings } from "@/types/versionControlTypes";
 import { Button } from "@/components/ui/button";
 import { AiModelsTab } from "./AiModelsTab";
+import { AutoCommitTab } from "./AutoCommitTab";
 
 const TABS = [
     { id: "notifications", label: "Notifications", icon: Bell },
@@ -352,7 +353,7 @@ export default function SettingsPage() {
             case "repository":
                 return <RepositoryTab />;
             case "auto-commit":
-                return <PlaceholderTab label="Auto-commit" />;
+                return <AutoCommitTab />;
             case "trendz":
                 return <TrendzTab />;
             case "ai-models":

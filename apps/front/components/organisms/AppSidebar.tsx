@@ -81,6 +81,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           items: [
             { href: "/security-settings", label: "Security Settings" },
             { href: "/security/2fa", label: "Two-factor authentication" },
+            { href: "/security-settings/oauth2/domains", label: "OAuth 2.0" },
           ],
         },
         { href: "/settings", icon: Settings, label: "Settings" },
@@ -116,6 +117,14 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           ],
         },
         { href: "/settings/notifications", icon: Settings, label: "Settings" },
+        {
+          label: "Security",
+          icon: ShieldCheck,
+          items: [
+            { href: "/security-settings/auditLogs", label: "Audit Logs" },
+            { href: "/security-settings/oauth2/clients", label: "OAuth 2.0" },
+          ],
+        },
       ],
     },
   ],
@@ -242,6 +251,7 @@ export default function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
       </SidebarContent>
     </Sidebar>
   );

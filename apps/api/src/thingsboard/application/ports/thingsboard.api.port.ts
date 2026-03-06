@@ -658,6 +658,32 @@ export abstract class ThingsboardApiPort {
   abstract deleteAiModel(accessToken: string, modelId: string): Promise<any>;
 
   abstract checkAiModelConnectivity(accessToken: string, payload: any): Promise<any>;
+
+  // Auto-commit settings
+  abstract getAutoCommitSettings(accessToken: string): Promise<any>;
+
+  abstract saveAutoCommitSettings(accessToken: string, payload: any): Promise<any>;
+
+  abstract deleteAutoCommitSettings(accessToken: string): Promise<any>;
+
+  // Version creation & entity listing
+  abstract createVersion(accessToken: string, payload: any): Promise<string>;
+  abstract getVersionCreationStatus(accessToken: string, requestId: string): Promise<any>;
+  abstract restoreVersion(accessToken: string, payload: any): Promise<string>;
+  abstract getRestoreVersionStatus(accessToken: string, requestId: string): Promise<any>;
+
+  abstract getEntitiesByType(accessToken: string, entityType: string, page: number, pageSize: number): Promise<any>;
+
+  // Audit logs
+  abstract getAuditLogs(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; startTime: number; endTime: number; }): Promise<any>;
+
+  // OAuth2 / Domains
+  abstract getDomainInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
+  abstract getOAuth2ClientInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
+  abstract createDomain(accessToken: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
+  abstract getDomainById(accessToken: string, domainId: string): Promise<any>;
+  abstract updateDomain(accessToken: string, domainId: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
+  abstract getOAuth2ConfigTemplate(accessToken: string): Promise<any>;
 }
 
 // Response types for new methods

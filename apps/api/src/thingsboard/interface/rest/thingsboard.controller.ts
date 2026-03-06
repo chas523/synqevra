@@ -181,6 +181,22 @@ import { FetchAiModelsQuery } from 'src/thingsboard/application/queries/fetch-ai
 import { SaveAiModelCommand } from 'src/thingsboard/application/commands/save-ai-model/save-ai-model.command';
 import { DeleteAiModelCommand } from 'src/thingsboard/application/commands/delete-ai-model/delete-ai-model.command';
 import { CheckAiModelConnectivityCommand } from 'src/thingsboard/application/commands/check-ai-model-connectivity/check-ai-model-connectivity.command';
+import { FetchAutoCommitSettingsQuery } from 'src/thingsboard/application/queries/fetch-auto-commit-settings/fetch-auto-commit-settings.query';
+import { SaveAutoCommitSettingsCommand } from 'src/thingsboard/application/commands/save-auto-commit-settings/save-auto-commit-settings.command';
+import { DeleteAutoCommitSettingsCommand } from 'src/thingsboard/application/commands/delete-auto-commit-settings/delete-auto-commit-settings.command';
+import { CreateVersionCommand } from 'src/thingsboard/application/commands/create-version/create-version.command';
+import { FetchVersionCreationStatusQuery } from 'src/thingsboard/application/queries/fetch-version-creation-status/fetch-version-creation-status.query';
+import { FetchEntitiesByTypeQuery } from 'src/thingsboard/application/queries/fetch-entities-by-type/fetch-entities-by-type.query';
+import { FetchRestoreVersionStatusQuery } from 'src/thingsboard/application/queries/fetch-restore-version-status/fetch-restore-version-status.query';
+import { RestoreVersionCommand } from 'src/thingsboard/application/commands/restore-version/restore-version.command';
+import { FetchAuditLogsQuery } from 'src/thingsboard/application/queries/fetch-audit-logs/fetch-audit-logs.query';
+import { FetchDomainInfosQuery } from 'src/thingsboard/application/queries/fetch-domain-infos/fetch-domain-infos.query';
+import { FetchOAuth2ClientInfosQuery } from 'src/thingsboard/application/queries/fetch-oauth2-client-infos/fetch-oauth2-client-infos.query';
+import { CreateDomainCommand } from 'src/thingsboard/application/commands/create-domain/create-domain.command';
+import { FetchDomainByIdQuery } from 'src/thingsboard/application/queries/fetch-domain-by-id/fetch-domain-by-id.query';
+import { UpdateDomainCommand } from 'src/thingsboard/application/commands/update-domain/update-domain.command';
+import { FetchOAuth2ConfigTemplateQuery } from 'src/thingsboard/application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.query';
+
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -2912,6 +2928,338 @@ export class ThingsboardController {
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
+    });
+  }
+
+  // Auto-commit settings endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/autoCommitSettings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get auto-commit settings', description: 'Get auto-commit settings configuration' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings retrieved' })
+  async getAutoCommitSettings(@TbAccessToken() accessToken: string) {
+    const query = new FetchAutoCommitSettingsQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/autoCommitSettings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save auto-commit settings', description: 'Save auto-commit settings configuration' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings saved' })
+  async saveAutoCommitSettings(
+    @TbAccessToken() accessToken: string,
+    @Body() body: any,
+  ) {
+    const command = new SaveAutoCommitSettingsCommand(accessToken, body);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/autoCommitSettings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete auto-commit settings', description: 'Delete auto-commit settings configuration' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings deleted' })
+  async deleteAutoCommitSettings(@TbAccessToken() accessToken: string) {
+    const command = new DeleteAutoCommitSettingsCommand(accessToken);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  // Version creation & entity listing endpoints
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/entities/vc/version')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create entities version', description: 'Create a new version of selected entities' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Version creation request ID returned' })
+  async createVersion(
+    @TbAccessToken() accessToken: string,
+    @Body() body: any,
+  ) {
+    const command = new CreateVersionCommand(accessToken, body);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/version/:requestId/status')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get version creation status', description: 'Poll for version creation status' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Version creation status' })
+  async getVersionCreationStatus(
+    @TbAccessToken() accessToken: string,
+    @Param('requestId') requestId: string,
+  ) {
+    const query = new FetchVersionCreationStatusQuery(accessToken, requestId);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/byType/:entityType')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get entities by type', description: 'List entities of a specific type' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Entities list' })
+  async getEntitiesByType(
+    @TbAccessToken() accessToken: string,
+    @Param('entityType') entityType: string,
+    @Query('page') page: string = '0',
+    @Query('pageSize') pageSize: string = '50',
+  ) {
+    const query = new FetchEntitiesByTypeQuery(
+      accessToken,
+      entityType,
+      parseInt(page, 10),
+      parseInt(pageSize, 10),
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/entities/vc/entity')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Restore version entities', description: 'Restores selected entities from a version' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Version restoration request ID' })
+  async restoreVersion(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    const command = new RestoreVersionCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (requestId: string) => requestId,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/entity/:requestId/status')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get restore version status', description: 'Poll for version restoration status' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Version restoration status' })
+  async getRestoreVersionStatus(
+    @TbAccessToken() accessToken: string,
+    @Param('requestId') requestId: string,
+  ) {
+    const query = new FetchRestoreVersionStatusQuery(accessToken, requestId);
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/audit/logs')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get audit logs', description: 'Fetch paginated audit logs' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Audit logs page' })
+  async getAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize: string = '10',
+    @Query('page') page: string = '0',
+    @Query('sortProperty') sortProperty: string = 'createdTime',
+    @Query('sortOrder') sortOrder: string = 'DESC',
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+  ) {
+    const query = new FetchAuditLogsQuery(accessToken, {
+      pageSize: parseInt(pageSize, 10),
+      page: parseInt(page, 10),
+      sortProperty,
+      sortOrder,
+      startTime: parseInt(startTime, 10),
+      endTime: parseInt(endTime, 10),
+    });
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/oauth2/domain/infos')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get domain infos' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getDomainInfos(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize: string = '10',
+    @Query('page') page: string = '0',
+    @Query('sortProperty') sortProperty: string = 'createdTime',
+    @Query('sortOrder') sortOrder: string = 'DESC',
+  ) {
+    const query = new FetchDomainInfosQuery(accessToken, {
+      pageSize: parseInt(pageSize, 10),
+      page: parseInt(page, 10),
+      sortProperty,
+      sortOrder,
+    });
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/oauth2/client/infos')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get OAuth2 client infos' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getOAuth2ClientInfos(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize: string = '50',
+    @Query('page') page: string = '0',
+    @Query('sortProperty') sortProperty: string = 'title',
+    @Query('sortOrder') sortOrder: string = 'ASC',
+  ) {
+    const query = new FetchOAuth2ClientInfosQuery(accessToken, {
+      pageSize: parseInt(pageSize, 10),
+      page: parseInt(page, 10),
+      sortProperty,
+      sortOrder,
+    });
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/oauth2/domain')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a domain' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async createDomain(
+    @TbAccessToken() accessToken: string,
+    @Query('oauth2ClientIds') oauth2ClientIds: string = '',
+    @Body() payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; },
+  ) {
+    const ids = oauth2ClientIds ? oauth2ClientIds.split(',').filter(Boolean) : [];
+    const command = new CreateDomainCommand(accessToken, payload, ids);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/oauth2/domain/info/:domainId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get domain by id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getDomainById(
+    @TbAccessToken() accessToken: string,
+    @Param('domainId') domainId: string,
+  ) {
+    const query = new FetchDomainByIdQuery(accessToken, domainId);
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/oauth2/domain/:domainId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a domain' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async updateDomain(
+    @TbAccessToken() accessToken: string,
+    @Param('domainId') domainId: string,
+    @Query('oauth2ClientIds') oauth2ClientIds: string = '',
+    @Body() payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; },
+  ) {
+    const ids = oauth2ClientIds ? oauth2ClientIds.split(',').filter(Boolean) : [];
+    const command = new UpdateDomainCommand(accessToken, domainId, payload, ids);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/oauth2/config/template')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get OAuth2 config templates' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getOAuth2ConfigTemplate(
+    @TbAccessToken() accessToken: string,
+  ) {
+    const query = new FetchOAuth2ConfigTemplateQuery(accessToken);
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
     });
   }
 }

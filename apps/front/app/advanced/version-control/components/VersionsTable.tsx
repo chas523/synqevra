@@ -9,6 +9,8 @@ import { Copy, Clock, RefreshCw, X, Link2Off, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Select from "@/components/ui/select";
+import { CreateVersionModal } from "./CreateVersionModal";
+import { RestoreVersionModal } from "./RestoreVersionModal";
 
 const PAGE_SIZE = 10;
 
@@ -32,6 +34,11 @@ export function VersionsTable({
     const [currentPage, setCurrentPage] = useState(0);
     const [sortProperty, setSortProperty] = useState("timestamp");
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    // Restore modal state
+    const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
+    const [versionToRestore, setVersionToRestore] = useState<{ id: string, name: string } | null>(null);
 
     const { branches, isLoading: isLoadingBranches } = useBranches(true);
 
@@ -133,87 +140,116 @@ export function VersionsTable({
     ];
 
     return (
-        <DataTable
-            title="Versions"
-            data={versions}
-            columns={columns}
-            getRowId={(entry) => entry.id}
-            isLoading={isLoading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalElements={totalElements}
-            pageSize={PAGE_SIZE}
-            onPageChange={handlePageChange}
-            sortProperty={sortProperty}
-            sortOrder={sortOrder}
-            onSortChange={handleSortChange}
-            onRefresh={() => mutate()}
-            rowActions={(entry) => (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => e.stopPropagation()}
-                    title="Restore version"
-                    className="text-muted-foreground"
-                >
-                    <Clock className="h-4 w-4" />
-                </Button>
-            )}
-            customAction={
-                <div className="flex items-center gap-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="inline-block">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => { }}
-                                        className="border rounded-lg"
-                                        disabled={isReadOnly}
-                                    >
-                                        <RefreshCw className="h-4 w-4 mr-2" />
-                                        Create entities version
-                                    </Button>
-                                </div>
-                            </TooltipTrigger>
-                            {isReadOnly && (
-                                <TooltipContent>
-                                    <p>Repository is read only</p>
-                                </TooltipContent>
-                            )}
-                        </Tooltip>
-                    </TooltipProvider>
+        <div className="flex flex-col gap-4">
+            <DataTable
+                title="Versions"
+                data={versions}
+                columns={columns}
+                getRowId={(entry) => entry.id}
+                isLoading={isLoading}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                pageSize={PAGE_SIZE}
+                onPageChange={handlePageChange}
+                sortProperty={sortProperty}
+                sortOrder={sortOrder}
+                onSortChange={handleSortChange}
+                onRefresh={() => mutate()}
+                rowActions={(entry) => (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setVersionToRestore({ id: entry.id, name: entry.name });
+                            setIsRestoreModalOpen(true);
+                        }}
+                        title="Restore version"
+                        className="text-muted-foreground"
+                        disabled={isReadOnly}
+                    >
+                        <Clock className="h-4 w-4" />
+                    </Button>
+                )}
+                customAction={
+                    <div className="flex items-center gap-2">
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="inline-block">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setIsCreateModalOpen(true)}
+                                            className="border rounded-lg"
+                                            disabled={isReadOnly}
+                                        >
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                            Create entities version
+                                        </Button>
+                                    </div>
+                                </TooltipTrigger>
+                                {isReadOnly && (
+                                    <TooltipContent>
+                                        <p>Repository is read only</p>
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </TooltipProvider>
 
-                    {onUnlink && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={onUnlink}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                        >
-                            <Link2Off className="h-4 w-4 mr-2" />
-                            Unlink
-                        </Button>
-                    )}
-                </div>
-            }
-            filterComponent={
-                <div className="flex items-center gap-2">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-muted-foreground dark:text-slate-400 font-medium ml-1 mb-0.5">Branch</span>
-                        <Select
-                            options={branchOptions}
-                            value={branch}
-                            onValueChange={onBranchChange}
-                            placeholder="Select branch"
-                            className="w-48"
-                            disabled={isLoadingBranches}
-                        />
+                        {onUnlink && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onUnlink}
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                            >
+                                <Link2Off className="h-4 w-4 mr-2" />
+                                Unlink
+                            </Button>
+                        )}
                     </div>
-                </div>
-            }
-            emptyMessage="No versions found."
-        />
+                }
+                filterComponent={
+                    <div className="flex items-center gap-2">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-muted-foreground dark:text-slate-400 font-medium ml-1 mb-0.5">Branch</span>
+                            <Select
+                                options={branchOptions}
+                                value={branch}
+                                onValueChange={onBranchChange}
+                                placeholder="Select branch"
+                                className="w-48"
+                                disabled={isLoadingBranches}
+                            />
+                        </div>
+                    </div>
+                }
+                emptyMessage="No versions found."
+            />
+
+            <CreateVersionModal
+                open={isCreateModalOpen}
+                onOpenChange={setIsCreateModalOpen}
+                branches={branches}
+                onSuccess={() => {
+                    mutate();
+                    if (entityType && entityId) {
+                        entityVersions.mutate();
+                    }
+                }}
+            />
+
+            {versionToRestore && (
+                <RestoreVersionModal
+                    open={isRestoreModalOpen}
+                    onOpenChange={setIsRestoreModalOpen}
+                    versionId={versionToRestore.id}
+                    versionName={versionToRestore.name}
+                    onSuccess={() => mutate()}
+                />
+            )}
+        </div>
     );
 }
