@@ -5,36 +5,34 @@ import { DeliveryMethodsResponse } from '../../../interface/rest/dtos/response/d
 import { ThingsboardApiException } from '../../../infrastructure/http/thingsboard.http.errors';
 import { Inject, Logger } from '@nestjs/common';
 import {
-    THINGSBOARD_API_PORT,
-    ThingsboardApiPort,
+  THINGSBOARD_API_PORT,
+  ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
 
-
 @QueryHandler(FetchDeliveryMethodsQuery)
-export class FetchDeliveryMethodsQueryHandler
-    implements
-    IQueryHandler<
-        FetchDeliveryMethodsQuery,
-        Result<DeliveryMethodsResponse, ThingsboardApiException>
-    > {
-    private readonly logger = new Logger(FetchDeliveryMethodsQueryHandler.name);
+export class FetchDeliveryMethodsQueryHandler implements IQueryHandler<
+  FetchDeliveryMethodsQuery,
+  Result<DeliveryMethodsResponse, ThingsboardApiException>
+> {
+  private readonly logger = new Logger(FetchDeliveryMethodsQueryHandler.name);
 
-    constructor(
-        @Inject(THINGSBOARD_API_PORT)
-        private readonly thingsboardApi: ThingsboardApiPort,
-    ) { }
+  constructor(
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApi: ThingsboardApiPort,
+  ) {}
 
-    async execute(
-        query: FetchDeliveryMethodsQuery,
-    ): Promise<Result<DeliveryMethodsResponse, ThingsboardApiException>> {
-        try {
-            const response =
-                await this.thingsboardApi.fetchDeliveryMethods(query.accessToken);
+  async execute(
+    query: FetchDeliveryMethodsQuery,
+  ): Promise<Result<DeliveryMethodsResponse, ThingsboardApiException>> {
+    try {
+      const response = await this.thingsboardApi.fetchDeliveryMethods(
+        query.accessToken,
+      );
 
-            return Ok(response);
-        } catch (error) {
-            this.logger.error('Error fetching delivery methods', error);
-            return Err(error as ThingsboardApiException);
-        }
+      return Ok(response);
+    } catch (error) {
+      this.logger.error('Error fetching delivery methods', error);
+      return Err(error as ThingsboardApiException);
     }
+  }
 }

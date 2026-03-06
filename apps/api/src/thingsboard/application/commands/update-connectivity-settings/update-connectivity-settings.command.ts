@@ -4,12 +4,12 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { ConnectivitySettingsDto } from 'src/thingsboard/interface/rest/dtos/response/connectivity-settings.response.dto';
 
 export class UpdateConnectivitySettingsCommand extends Command<
-    Result<ConnectivitySettingsDto, ThingsboardApiException>
+  Result<ConnectivitySettingsDto, ThingsboardApiException>
 > {
-    constructor(
-        public readonly settings: ConnectivitySettingsDto,
-        public readonly accessToken: string,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly settings: ConnectivitySettingsDto,
+    public readonly accessToken: string,
+  ) {
+    super();
+  }
 }

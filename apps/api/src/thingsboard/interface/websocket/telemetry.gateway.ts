@@ -33,7 +33,8 @@ import { WsTbAccessToken } from 'src/auth/decorators/ws-tb-access-token.decorato
   },
 })
 export class TelemetryGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -52,7 +53,7 @@ export class TelemetryGateway
   constructor(
     private readonly telemetryService: TelemetryService,
     private readonly parserService: TelemetryParserService,
-  ) { }
+  ) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`client connected: ${client.id}`);
@@ -290,7 +291,6 @@ export class TelemetryGateway
       this.server.emit('thingsboard-disconnected', { success: true });
     }
   }
-
 
   @UseGuards(ThingsboardWsAuthGuard)
   @SubscribeMessage('notifications-count')

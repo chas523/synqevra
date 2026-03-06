@@ -5,12 +5,12 @@ import { CreateNotificationTemplateRequestDto } from 'src/thingsboard/interface/
 import { NotificationTemplateDto } from 'src/thingsboard/interface/rest/dtos/response/notification-template.response.dto';
 
 export class CreateNotificationTemplateCommand extends Command<
-    Result<NotificationTemplateDto, ThingsboardApiException>
+  Result<NotificationTemplateDto, ThingsboardApiException>
 > {
-    constructor(
-        public readonly accessToken: string,
-        public readonly templateData: CreateNotificationTemplateRequestDto,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly accessToken: string,
+    public readonly templateData: CreateNotificationTemplateRequestDto,
+  ) {
+    super();
+  }
 }

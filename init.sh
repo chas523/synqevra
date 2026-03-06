@@ -26,12 +26,13 @@ sed -i \
   -e 's|http://api:3003/api/:path\*|http://localhost:3003/api/:path*|g' \
   -e 's|http://api:3003/fhir/:path\*|http://localhost:3003/fhir/:path*|g' \
   -e 's|http://thingsboard:8080/assets/:path\*|http://localhost:8088/assets/:path*|g' \
+  -e 's|http://minio:9000/public-assets/:path\*|http://localhost:9000/public-assets/:path*|g' \
   "$NEXT_CONFIG"
 echo "      Done."
 
 # ─── 3. Docker Compose – ThingsBoard install ─────────────────────────────────
 echo "[3/3] Running ThingsBoard CE install (INSTALL_TB=true, LOAD_DEMO=true) ..."
-echo "Note: If you're running this for the second time it will throw error, you can safely ignore it"
+echo "Note: If you're running this for the second time it will throw error, but you can safely ignore it"
 cd "$ROOT_DIR/backend"
 docker compose run --rm \
   -e INSTALL_TB=true \

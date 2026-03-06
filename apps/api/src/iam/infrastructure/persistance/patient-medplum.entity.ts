@@ -1,9 +1,4 @@
-import {
-    Entity,
-    PrimaryColumn,
-    ManyToOne,
-    JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Patient } from './patient.entity';
 
 /**
@@ -13,16 +8,16 @@ import { Patient } from './patient.entity';
  */
 @Entity('patients_medplum')
 export class PatientMedplum {
-    @PrimaryColumn()
-    patientId: number;
+  @PrimaryColumn()
+  patientId: number;
 
-    /**
-     * ID rekordu z tabeli `medplum` (zawiera client_id / client_secret)
-     */
-    @PrimaryColumn()
-    medplumId: number;
+  /**
+   * ID rekordu z tabeli `medplum` (zawiera client_id / client_secret)
+   */
+  @PrimaryColumn()
+  medplumId: number;
 
-    @ManyToOne(() => Patient)
-    @JoinColumn({ name: 'patientId' })
-    patient: Patient;
+  @ManyToOne(() => Patient)
+  @JoinColumn({ name: 'patientId' })
+  patient: Patient;
 }

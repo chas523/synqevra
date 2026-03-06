@@ -18,7 +18,7 @@ export class FetchTenantDevicesQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(FetchTenantDevicesQueryHandler.name);
 
@@ -26,7 +26,6 @@ export class FetchTenantDevicesQueryHandler implements IQueryHandler<
     query: FetchTenantDevicesQuery,
   ): Promise<Result<GetTenantDevicesResponse, TBAdminGetTenantDevicesError>> {
     try {
-
       const response = await this.thingsboardApi.fetchTenantDevices(
         query.accessToken,
         query.tenantId,

@@ -27,6 +27,7 @@ import { DeviceConnectivityForm } from "@/components/organisms/DeviceConnectivit
 import { SmsProviderSettingsForm } from "@/components/organisms/SmsProviderSettingsForm";
 import { SlackSettingsForm } from "@/components/organisms/SlackSettingsForm";
 import { MailServerSettingsForm } from "@/components/organisms/MailServerSettingsForm";
+import { GlobalWhitelabelForm } from "@/components/organisms/GlobalWhitelabelForm";
 import { MedplumSettings } from "@/components/organisms/MedplumSettings";
 import { GeneralSettingsDto, ConnectivitySettingsDto } from "@/types/generalSettingsTypes";
 import { SmsSettings, NotificationSettings } from "@/types/notificationSettingsTypes";
@@ -159,6 +160,7 @@ export const SystemSettingsPage = () => {
                             isSaving={isUpdatingGeneral}
                         />
                     )}
+                    <GlobalWhitelabelForm />
                     {connectivitySettings && (
                         <DeviceConnectivityForm
                             initialSettings={connectivitySettings}

@@ -13,6 +13,7 @@ export interface User {
     lastName: string;
     email: string;
     role: "ADMIN" | "MODERATOR" | "USER";
+    tenantId?: string | null;
 }
 
 const initialState: UserState = {

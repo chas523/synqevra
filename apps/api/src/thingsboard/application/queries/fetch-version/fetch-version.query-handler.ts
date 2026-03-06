@@ -17,7 +17,7 @@ export class FetchVersionQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     public readonly thingsboardApiRepository: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   async execute(
     query: FetchVersionQuery,

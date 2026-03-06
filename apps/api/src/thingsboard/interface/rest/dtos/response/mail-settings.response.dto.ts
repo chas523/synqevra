@@ -2,95 +2,95 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EntityIdDto, TenantIdDto } from './general-settings.response.dto';
 
 export class MailConfigDto {
-    @ApiProperty()
-    mailFrom: string;
+  @ApiProperty()
+  mailFrom: string;
 
-    @ApiProperty()
-    smtpProtocol: string;
+  @ApiProperty()
+  smtpProtocol: string;
 
-    @ApiProperty()
-    smtpHost: string;
+  @ApiProperty()
+  smtpHost: string;
 
-    @ApiProperty()
-    smtpPort: number;
+  @ApiProperty()
+  smtpPort: number;
 
-    @ApiPropertyOptional()
-    timeout?: number;
+  @ApiPropertyOptional()
+  timeout?: number;
 
-    @ApiProperty()
-    enableTls: boolean;
+  @ApiProperty()
+  enableTls: boolean;
 
-    @ApiPropertyOptional()
-    tlsVersion?: string;
+  @ApiPropertyOptional()
+  tlsVersion?: string;
 
-    @ApiPropertyOptional()
-    username?: string;
+  @ApiPropertyOptional()
+  username?: string;
 
-    @ApiPropertyOptional()
-    password?: string;
+  @ApiPropertyOptional()
+  password?: string;
 
-    @ApiProperty()
-    enableProxy: boolean;
+  @ApiProperty()
+  enableProxy: boolean;
 
-    @ApiPropertyOptional()
-    proxyHost?: string;
+  @ApiPropertyOptional()
+  proxyHost?: string;
 
-    @ApiPropertyOptional()
-    proxyPort?: number;
+  @ApiPropertyOptional()
+  proxyPort?: number;
 
-    @ApiPropertyOptional()
-    proxyUser?: string;
+  @ApiPropertyOptional()
+  proxyUser?: string;
 
-    @ApiPropertyOptional()
-    proxyPassword?: string;
+  @ApiPropertyOptional()
+  proxyPassword?: string;
 
-    @ApiProperty()
-    providerId: string;
+  @ApiProperty()
+  providerId: string;
 
-    @ApiProperty()
-    enableOauth2: boolean;
+  @ApiProperty()
+  enableOauth2: boolean;
 
-    @ApiPropertyOptional()
-    clientId?: string;
+  @ApiPropertyOptional()
+  clientId?: string;
 
-    @ApiPropertyOptional()
-    clientSecret?: string;
+  @ApiPropertyOptional()
+  clientSecret?: string;
 
-    @ApiPropertyOptional()
-    providerTenantId?: string;
+  @ApiPropertyOptional()
+  providerTenantId?: string;
 
-    @ApiPropertyOptional()
-    authUri?: string;
+  @ApiPropertyOptional()
+  authUri?: string;
 
-    @ApiPropertyOptional()
-    tokenUri?: string;
+  @ApiPropertyOptional()
+  tokenUri?: string;
 
-    @ApiPropertyOptional()
-    scope?: string[];
+  @ApiPropertyOptional()
+  scope?: string[];
 
-    @ApiPropertyOptional()
-    redirectUri?: string;
+  @ApiPropertyOptional()
+  redirectUri?: string;
 
-    @ApiPropertyOptional()
-    redirectUriProtocol?: string;
+  @ApiPropertyOptional()
+  redirectUriProtocol?: string;
 
-    @ApiPropertyOptional()
-    redirectUriDomain?: string;
+  @ApiPropertyOptional()
+  redirectUriDomain?: string;
 }
 
 export class MailSettingsDto {
-    @ApiProperty({ type: EntityIdDto })
-    id: EntityIdDto;
+  @ApiProperty({ type: EntityIdDto })
+  id: EntityIdDto;
 
-    @ApiProperty()
-    createdTime: number;
+  @ApiProperty()
+  createdTime: number;
 
-    @ApiProperty({ type: TenantIdDto })
-    tenantId: TenantIdDto;
+  @ApiProperty({ type: TenantIdDto })
+  tenantId: TenantIdDto;
 
-    @ApiProperty({ example: 'mail' })
-    key: string;
+  @ApiProperty({ example: 'mail' })
+  key: string;
 
-    @ApiProperty({ type: MailConfigDto })
-    jsonValue: MailConfigDto;
+  @ApiProperty({ type: MailConfigDto })
+  jsonValue: MailConfigDto;
 }

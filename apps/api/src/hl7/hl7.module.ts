@@ -48,4 +48,4 @@ import { HL7Controller } from './interface/rest/hl7.controller';
   exports: [BullModule],
   controllers: [HL7Controller],
 })
-export class Hl7Module { }
+export class Hl7Module {}

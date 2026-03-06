@@ -15,20 +15,27 @@ export class RefreshTokensUseCase {
     private readonly adminRepository: AdminRepository,
     private readonly connectionRepository: ConnectionRepository,
     private readonly tokenService: AuthService,
-  ) { }
+  ) {}
 
   async execute(command: RefreshTokensCommand): Promise<RefreshTokensResult> {
     const { userId, response } = command;
 
-    const connection = await this.connectionRepository.getConnectionByUserId(userId);
+    const connection =
+      await this.connectionRepository.getConnectionByUserId(userId);
     if (!connection || !connection.role) {
       throw new UnauthorizedException('User role not found');
     }
 
     const role = connection.role;
 
-    const accessToken = await this.tokenService.generateAccessToken(userId, role);
-    const refreshToken = await this.tokenService.generateRefreshToken(userId, role);
+    const accessToken = await this.tokenService.generateAccessToken(
+      userId,
+      role,
+    );
+    const refreshToken = await this.tokenService.generateRefreshToken(
+      userId,
+      role,
+    );
     const hashedRt = await argon2.hash(refreshToken);
 
     await this.userRepository.updateHashedRt(userId, hashedRt);
@@ -44,8 +51,14 @@ export class RefreshTokensUseCase {
     const { userId, response } = command;
     const role = Role.ADMIN;
 
-    const accessToken = await this.tokenService.generateAccessToken(userId, role);
-    const refreshToken = await this.tokenService.generateRefreshToken(userId, role);
+    const accessToken = await this.tokenService.generateAccessToken(
+      userId,
+      role,
+    );
+    const refreshToken = await this.tokenService.generateRefreshToken(
+      userId,
+      role,
+    );
     const hashedRt = await argon2.hash(refreshToken);
 
     await this.adminRepository.updateHashedRt(userId, hashedRt);

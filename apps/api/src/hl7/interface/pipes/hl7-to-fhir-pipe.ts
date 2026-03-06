@@ -18,9 +18,10 @@ export class Hl7ParsingError extends Error {
 }
 
 @Injectable()
-export class HL7ToFHIRPipe
-  implements PipeTransform<Hl7MessageDto, Promise<FhirMappedResourcesDto>>
-{
+export class HL7ToFHIRPipe implements PipeTransform<
+  Hl7MessageDto,
+  Promise<FhirMappedResourcesDto>
+> {
   private readonly logger = new Logger(HL7ToFHIRPipe.name);
   private readonly ORGANIZATION_ID = 'orgid';
   private readonly ORGANIZATION_NAME = 'organization name';

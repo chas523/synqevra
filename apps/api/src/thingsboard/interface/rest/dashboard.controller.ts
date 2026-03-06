@@ -11,7 +11,10 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { match, Result } from 'oxide.ts';
 import {
@@ -53,12 +56,14 @@ import { ThingsboardAuthGuard } from 'src/auth/guards/thingsboard-auth/thingsboa
 import { TbAccessToken } from 'src/auth/decorators/tb-access-token.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/iam/domain/enums/role.enum';
+import { StorageService } from '../../application/services/storage.service';
 
 @Controller('dashboard')
 export class DashboardController {
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
+    private readonly storageService: StorageService,
   ) {}
 
   @Roles(Role.ADMIN)
@@ -544,5 +549,106 @@ export class DashboardController {
         throw error;
       },
     });
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/tenants/:id/whitelabel')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'logoWhite', maxCount: 1 },
+      { name: 'logoDark', maxCount: 1 },
+    ]),
+  )
+  async uploadWhitelabelImages(
+    @Param('id') id: string,
+    @TbAccessToken() accessToken: string,
+    @UploadedFiles()
+    files: {
+      logoWhite?: Express.Multer.File[];
+      logoDark?: Express.Multer.File[];
+    },
+  ) {
+    const uploadedPaths: Record<string, string> = {};
+
+    try {
+      if (files?.logoWhite?.[0]) {
+        const path = await this.storageService.uploadFile(
+          files.logoWhite[0],
+          id,
+          `logo-white.svg`,
+        );
+        uploadedPaths.logoWhite = path;
+      }
+
+      if (files?.logoDark?.[0]) {
+        const path = await this.storageService.uploadFile(
+          files.logoDark[0],
+          id,
+          `logo-dark.svg`,
+        );
+        uploadedPaths.logoDark = path;
+      }
+
+      return {
+        success: true,
+        paths: uploadedPaths,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to upload whitelabel images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/settings/whitelabel')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'logoWhite', maxCount: 1 },
+      { name: 'logoDark', maxCount: 1 },
+    ]),
+  )
+  async uploadGlobalWhitelabelImages(
+    @TbAccessToken() accessToken: string,
+    @UploadedFiles()
+    files: {
+      logoWhite?: Express.Multer.File[];
+      logoDark?: Express.Multer.File[];
+    },
+  ) {
+    const uploadedPaths: Record<string, string> = {};
+
+    try {
+      if (files?.logoWhite?.[0]) {
+        const path = await this.storageService.uploadFile(
+          files.logoWhite[0],
+          'global',
+          `logo-white.svg`,
+        );
+        uploadedPaths.logoWhite = path;
+      }
+
+      if (files?.logoDark?.[0]) {
+        const path = await this.storageService.uploadFile(
+          files.logoDark[0],
+          'global',
+          `logo-dark.svg`,
+        );
+        uploadedPaths.logoDark = path;
+      }
+
+      return {
+        success: true,
+        paths: uploadedPaths,
+      };
+    } catch (error) {
+      throw new HttpException(
+        'Failed to upload global whitelabel images',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

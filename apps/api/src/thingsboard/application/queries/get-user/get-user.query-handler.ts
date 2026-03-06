@@ -15,13 +15,10 @@ import { AxiosError } from 'axios';
 import { ThingsboardUserResponseDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-user.response.dto';
 
 @QueryHandler(GetUserQuery)
-export class GetUserQueryHandler
-  implements
-    IQueryHandler<
-      GetUserQuery,
-      Result<ThingsboardUserResponseDto, GetUserError>
-    >
-{
+export class GetUserQueryHandler implements IQueryHandler<
+  GetUserQuery,
+  Result<ThingsboardUserResponseDto, GetUserError>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

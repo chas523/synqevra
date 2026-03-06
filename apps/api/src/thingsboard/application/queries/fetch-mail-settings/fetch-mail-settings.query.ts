@@ -1,5 +1,5 @@
-import { IQuery } from "@nestjs/cqrs";
+import { IQuery } from '@nestjs/cqrs';
 
 export class FetchMailSettingsQuery implements IQuery {
-    constructor(public readonly accessToken: string) { }
+  constructor(public readonly accessToken: string) {}
 }

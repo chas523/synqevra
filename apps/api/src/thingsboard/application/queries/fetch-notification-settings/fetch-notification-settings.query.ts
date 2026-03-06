@@ -5,9 +5,9 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { NotificationSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/notification-settings.response.dto';
 
 export class FetchNotificationSettingsQuery extends Query<
-    Result<NotificationSettingsDto, ThingsboardApiException>
+  Result<NotificationSettingsDto, ThingsboardApiException>
 > {
-    constructor(public readonly accessToken: string) {
-        super();
-    }
+  constructor(public readonly accessToken: string) {
+    super();
+  }
 }

@@ -5,17 +5,17 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { ResourcesPageResponseDto } from 'src/thingsboard/interface/rest/dtos/response/resource.response.dto';
 
 export class FetchResourcesQuery extends Query<
-    Result<ResourcesPageResponseDto, ThingsboardApiException>
+  Result<ResourcesPageResponseDto, ThingsboardApiException>
 > {
-    constructor(
-        public readonly accessToken: string,
-        public readonly page: number = 0,
-        public readonly pageSize: number = 10,
-        public readonly sortProperty: string = 'createdTime',
-        public readonly sortOrder: 'ASC' | 'DESC' = 'DESC',
-        public readonly resourceType?: string,
-        public readonly resourceSubType?: string,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly accessToken: string,
+    public readonly page: number = 0,
+    public readonly pageSize: number = 10,
+    public readonly sortProperty: string = 'createdTime',
+    public readonly sortOrder: 'ASC' | 'DESC' = 'DESC',
+    public readonly resourceType?: string,
+    public readonly resourceSubType?: string,
+  ) {
+    super();
+  }
 }

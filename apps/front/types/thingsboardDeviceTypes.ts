@@ -5,12 +5,20 @@ export interface EntityId {
 
 export interface Device {
   id: EntityId;
+  createdTime: number;
   name: string;
   type: string;
   label: string | null;
   version: number;
   deviceProfileName: string;
   active: boolean;
+  customerTitle: string | null;
+  customerIsPublic: boolean;
+  additionalInfo: {
+    gateway?: boolean;
+    overwriteActivityTime?: boolean;
+    description?: string;
+  } | null;
 }
 
 export interface CreateDeviceRequest {

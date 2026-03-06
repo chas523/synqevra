@@ -30,3 +30,7 @@ data:
   APP_NAME: 'tb x mp'
   MAIL_PORT: '2525'
   MAIL_HOST: 'sandbox.smtp.mailtrap.io'
+
+  # MinIO
+  MINIO_ENDPOINT: "http://minio:9000"
+  MINIO_BUCKET: "public-assets"

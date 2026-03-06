@@ -4,12 +4,12 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { SmsSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/sms-settings.response.dto';
 
 export class UpdateSmsSettingsCommand extends Command<
-    Result<SmsSettingsDto, ThingsboardApiException>
+  Result<SmsSettingsDto, ThingsboardApiException>
 > {
-    constructor(
-        public readonly settings: SmsSettingsDto,
-        public readonly accessToken: string,
-    ) {
-        super();
-    }
+  constructor(
+    public readonly settings: SmsSettingsDto,
+    public readonly accessToken: string,
+  ) {
+    super();
+  }
 }

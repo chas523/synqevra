@@ -5,9 +5,9 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { ConnectivitySettingsDto } from 'src/thingsboard/interface/rest/dtos/response/connectivity-settings.response.dto';
 
 export class FetchConnectivitySettingsQuery extends Query<
-    Result<ConnectivitySettingsDto, ThingsboardApiException>
+  Result<ConnectivitySettingsDto, ThingsboardApiException>
 > {
-    constructor(public readonly accessToken: string) {
-        super();
-    }
+  constructor(public readonly accessToken: string) {
+    super();
+  }
 }

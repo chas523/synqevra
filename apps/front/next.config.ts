@@ -16,17 +16,35 @@ const nextConfig: NextConfig = {
     "@mantine/hooks",
     "@mantine/notifications",
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9000",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "minio",
+        port: "9000",
+        pathname: "/**",
+      },
+      // If deployed onto an external bucket, the protocol/hostname would be added here
+      // For now we trust MinIO hosted locally and inside k8s via http.
+    ],
+  },
 
   async rewrites() {
     return {
       beforeFiles: [
         {
           source: "/api/:path*",
-          destination: "http://api:3003/api/:path*", // Internal K8s DNS
+          destination: "http://localhost:3003/api/:path*", // Internal K8s DNS (or localhost replaced by scripts)
         },
         {
           source: "/fhir/:path*",
-          destination: "http://api:3003/fhir/:path*", // Internal K8s DNS
+          destination: "http://localhost:3003/fhir/:path*", // Internal K8s DNS (or localhost replaced by scripts)
         },
         {
           source: "/tb-assets/:path*",

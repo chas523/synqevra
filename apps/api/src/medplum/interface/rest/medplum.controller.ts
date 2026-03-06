@@ -41,7 +41,7 @@ export class MedplumController {
     private readonly getPractitionerListUseCase: GetPractitionerListUseCase,
     private readonly getPractitionerByIdUseCase: GetPractitionerByIdUseCase,
     private readonly createMedplumTenantOrchestrator: CreateMedplumTenantOrchestrator,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(MedplumController.name);
 

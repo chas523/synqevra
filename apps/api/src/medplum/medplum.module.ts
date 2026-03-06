@@ -49,6 +49,11 @@ import { PasswordGeneratorService } from './application/services/password-genera
       useClass: MedplumRepositoryAdapter,
     },
   ],
-  exports: [MedplumClientPort, MedplumClientFactory, MedplumRepository, MedplumRollbackService],
+  exports: [
+    MedplumClientPort,
+    MedplumClientFactory,
+    MedplumRepository,
+    MedplumRollbackService,
+  ],
 })
-export class MedplumModule { }
+export class MedplumModule {}

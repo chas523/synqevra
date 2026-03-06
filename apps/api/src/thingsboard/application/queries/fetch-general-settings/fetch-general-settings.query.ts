@@ -5,9 +5,9 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { GeneralSettingsDto } from 'src/thingsboard/interface/rest/dtos/response/general-settings.response.dto';
 
 export class FetchGeneralSettingsQuery extends Query<
-    Result<GeneralSettingsDto, ThingsboardApiException>
+  Result<GeneralSettingsDto, ThingsboardApiException>
 > {
-    constructor(public readonly accessToken: string) {
-        super();
-    }
+  constructor(public readonly accessToken: string) {
+    super();
+  }
 }

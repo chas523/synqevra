@@ -1,62 +1,62 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WidgetBundleDto {
-    @ApiProperty()
-    id: {
-        entityType: string;
-        id: string;
-    };
+  @ApiProperty()
+  id: {
+    entityType: string;
+    id: string;
+  };
 
-    @ApiProperty()
-    createdTime: number;
+  @ApiProperty()
+  createdTime: number;
 
-    @ApiProperty()
-    tenantId: {
-        entityType: string;
-        id: string;
-    };
+  @ApiProperty()
+  tenantId: {
+    entityType: string;
+    id: string;
+  };
 
-    @ApiProperty()
-    alias: string;
+  @ApiProperty()
+  alias: string;
 
-    @ApiProperty()
-    title: string;
+  @ApiProperty()
+  title: string;
 
-    @ApiProperty()
-    image: string;
+  @ApiProperty()
+  image: string;
 
-    @ApiProperty()
-    scada: boolean;
+  @ApiProperty()
+  scada: boolean;
 
-    @ApiProperty()
-    description: string;
+  @ApiProperty()
+  description: string;
 
-    @ApiProperty()
-    order: number;
+  @ApiProperty()
+  order: number;
 
-    @ApiProperty()
-    externalId: {
-        entityType: string;
-        id: string;
-    } | null;
+  @ApiProperty()
+  externalId: {
+    entityType: string;
+    id: string;
+  } | null;
 
-    @ApiProperty()
-    version: number;
+  @ApiProperty()
+  version: number;
 
-    @ApiProperty()
-    name: string;
+  @ApiProperty()
+  name: string;
 }
 
 export class WidgetBundlesPageDto {
-    @ApiProperty({ type: [WidgetBundleDto] })
-    data: WidgetBundleDto[];
+  @ApiProperty({ type: [WidgetBundleDto] })
+  data: WidgetBundleDto[];
 
-    @ApiProperty()
-    totalPages: number;
+  @ApiProperty()
+  totalPages: number;
 
-    @ApiProperty()
-    totalElements: number;
+  @ApiProperty()
+  totalElements: number;
 
-    @ApiProperty()
-    hasNext: boolean;
+  @ApiProperty()
+  hasNext: boolean;
 }

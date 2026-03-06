@@ -9,10 +9,10 @@ import {
 } from '../../ports/thingsboard.api.port';
 
 @CommandHandler(DeleteTenantCommand)
-export class DeleteTenantCommandHandler
-  implements
-    ICommandHandler<DeleteTenantCommand, Result<void, ThingsboardApiException>>
-{
+export class DeleteTenantCommandHandler implements ICommandHandler<
+  DeleteTenantCommand,
+  Result<void, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,
@@ -38,7 +38,7 @@ export class DeleteTenantCommandHandler
     }
 
     try {
-      await this.thingsboardApiPort.deleteTenant(tenantId,sysAdminAccessToken);
+      await this.thingsboardApiPort.deleteTenant(tenantId, sysAdminAccessToken);
       return Ok(undefined);
     } catch (error) {
       return Err(

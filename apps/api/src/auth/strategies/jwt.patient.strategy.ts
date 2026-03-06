@@ -9,7 +9,10 @@ import { AuthJwtPayload } from '../types/auth-jwtPayload';
 import { Role } from '../../iam/domain/enums/role.enum';
 
 @Injectable()
-export class JwtPatientStrategy extends PassportStrategy(Strategy, 'jwt-patient') {
+export class JwtPatientStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-patient',
+) {
   constructor(
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
