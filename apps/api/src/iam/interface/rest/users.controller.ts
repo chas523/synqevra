@@ -22,7 +22,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UserRepository,
     private readonly getUserByTokenUseCase: GetUserByTokenUseCase,
-  ) { }
+  ) {}
 
   @Get('profile')
   @ApiBearerAuth()

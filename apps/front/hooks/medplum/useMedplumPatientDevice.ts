@@ -25,7 +25,7 @@ export const useMedplumPatientDevice = (
     error: patientsError,
     isLoading: isLoadingPatients,
     mutate: refreshPatients,
-  } = useSWR("medplum-patients", async () => {
+  } = useSWR(deviceId ? "medplum-patients" : null, async () => {
     const patients = await PatientService.fetchPatients();
     return patients.map(
       (patient) =>

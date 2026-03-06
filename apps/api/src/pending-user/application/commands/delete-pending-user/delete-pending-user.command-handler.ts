@@ -5,10 +5,10 @@ import { DeletePendingUserCommand } from './delete-pending-user.command';
 import { UserNotFoundError } from 'src/pending-user/domain/errors/pending-user.errors';
 
 @CommandHandler(DeletePendingUserCommand)
-export class DeletePendingUserCommandHandler
-  implements
-    ICommandHandler<DeletePendingUserCommand, Result<void, UserNotFoundError>>
-{
+export class DeletePendingUserCommandHandler implements ICommandHandler<
+  DeletePendingUserCommand,
+  Result<void, UserNotFoundError>
+> {
   async execute(
     command: DeletePendingUserCommand,
   ): Promise<Result<void, UserNotFoundError>> {

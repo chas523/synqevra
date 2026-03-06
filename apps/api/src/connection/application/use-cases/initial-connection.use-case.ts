@@ -40,7 +40,7 @@ export class InitialConnectionUseCase {
     private readonly validateTokenUseCase: ValidateTokenUseCase,
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly commandBus: CommandBus,
-  ) { }
+  ) {}
 
   async execute(
     command: InitialConnectionCommand,

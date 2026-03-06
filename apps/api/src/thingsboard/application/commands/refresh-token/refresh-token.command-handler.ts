@@ -20,13 +20,10 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { ThingsboardTokensResponseDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-tokens.response.dto';
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenCommandHandler
-  implements
-    ICommandHandler<
-      RefreshTokenCommand,
-      Result<ThingsboardTokensResponseDto, RefreshTokenError>
-    >
-{
+export class RefreshTokenCommandHandler implements ICommandHandler<
+  RefreshTokenCommand,
+  Result<ThingsboardTokensResponseDto, RefreshTokenError>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

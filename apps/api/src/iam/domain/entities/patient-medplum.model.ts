@@ -1,4 +1,4 @@
 export class PatientMedplumModel {
-    patientId: number;
-    medplumId: number;
+  patientId: number;
+  medplumId: number;
 }

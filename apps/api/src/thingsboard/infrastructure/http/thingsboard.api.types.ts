@@ -45,6 +45,43 @@ export interface Device {
   active: boolean;
 }
 
+export interface Asset {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  name: string;
+  type: string;
+  label: string | null;
+  assetProfileId: EntityId;
+  externalId?: string | null;
+  version: number;
+  customerTitle: string | null;
+  customerIsPublic: boolean;
+  assetProfileName: string;
+  additionalInfo?: {
+    description?: string;
+  };
+}
+
+export interface AssetProfileInfo {
+  id: EntityId;
+  tenantId: EntityId;
+  name: string;
+  image?: string | null;
+  defaultDashboardId?: EntityId | null;
+}
+
+export interface CustomerInfo {
+  id: EntityId;
+  createdTime: number;
+  title: string;
+  tenantId: EntityId;
+  additionalInfo?: {
+    isPublic?: boolean;
+  };
+}
+
 // /api/tenants{?pageSize,page,textSearch,sortProperty,sortOrder}
 export interface Tenant {
   id: EntityId;

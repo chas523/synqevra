@@ -45,4 +45,4 @@ import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
     },
   ],
 })
-export class AuthModule { }
+export class AuthModule {}

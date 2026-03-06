@@ -10,7 +10,7 @@ export class RegisterUserUseCase {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly tokenService: AuthService,
-  ) { }
+  ) {}
 
   async execute(command: RegisterUserCommand): Promise<RegisterUserResult> {
     const { createUserDto, response } = command;
@@ -23,10 +23,12 @@ export class RegisterUserUseCase {
     }
 
     const accessToken = await this.tokenService.generateAccessToken(
-      userModel.id, Role.USER
+      userModel.id,
+      Role.USER,
     );
     const refreshToken = await this.tokenService.generateRefreshToken(
-      userModel.id, Role.USER
+      userModel.id,
+      Role.USER,
     );
 
     this.tokenService.setTokenCookies(response, accessToken, refreshToken);

@@ -4,19 +4,19 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { NotificationTargetsResponse } from 'src/thingsboard/interface/rest/dtos/response/notification-target.response.dto';
 
 export interface NotificationTargetsQueryParams {
-    pageSize?: number;
-    page?: number;
-    sortProperty?: string;
-    sortOrder?: string;
+  pageSize?: number;
+  page?: number;
+  sortProperty?: string;
+  sortOrder?: string;
 }
 
 export class FetchNotificationTargetsQuery extends Query<
-    Result<NotificationTargetsResponse, ThingsboardApiException>
+  Result<NotificationTargetsResponse, ThingsboardApiException>
 > {
-    constructor(
-        public readonly accessToken: string,
-        public readonly params: NotificationTargetsQueryParams = {},
-    ) {
-        super();
-    }
+  constructor(
+    public readonly accessToken: string,
+    public readonly params: NotificationTargetsQueryParams = {},
+  ) {
+    super();
+  }
 }

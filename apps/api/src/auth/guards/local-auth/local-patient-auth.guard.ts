@@ -2,4 +2,4 @@ import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class LocalPatientAuthGuard extends AuthGuard('local-patient') { }
+export class LocalPatientAuthGuard extends AuthGuard('local-patient') {}

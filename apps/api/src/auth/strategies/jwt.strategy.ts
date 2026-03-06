@@ -31,8 +31,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   validate(payload: AuthJwtPayload) {
-
-    if (payload.role !== Role.PRACTITIONER && payload.role !== Role.MODERATOR) return null;
+    if (payload.role !== Role.PRACTITIONER && payload.role !== Role.MODERATOR)
+      return null;
     const userId = payload.sub;
     return this.authService.validateJwtUser(userId);
   }

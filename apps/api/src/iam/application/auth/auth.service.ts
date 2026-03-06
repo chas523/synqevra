@@ -33,7 +33,7 @@ export class AuthService {
     private readonly jwtTokenConfig: ConfigType<typeof jwtConfig>,
     @Inject(refreshJwtConfig.KEY)
     private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
-  ) { }
+  ) {}
 
   async generateAccessToken(userId: number, role: Role) {
     const payload: AuthJwtPayload = { sub: userId, role };

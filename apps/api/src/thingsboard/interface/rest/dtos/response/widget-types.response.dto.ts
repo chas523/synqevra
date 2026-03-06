@@ -2,75 +2,75 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EntityIdDto, TenantIdDto } from './general-settings.response.dto';
 
 export class WidgetBundleRefDto {
-    @ApiProperty({ type: EntityIdDto })
-    id: EntityIdDto;
+  @ApiProperty({ type: EntityIdDto })
+  id: EntityIdDto;
 
-    @ApiProperty()
-    name: string;
+  @ApiProperty()
+  name: string;
 }
 
 export class WidgetTypeDto {
-    @ApiProperty({ type: EntityIdDto })
-    id: EntityIdDto;
+  @ApiProperty({ type: EntityIdDto })
+  id: EntityIdDto;
 
-    @ApiProperty()
-    createdTime: number;
+  @ApiProperty()
+  createdTime: number;
 
-    @ApiProperty({ type: TenantIdDto })
-    tenantId: TenantIdDto;
+  @ApiProperty({ type: TenantIdDto })
+  tenantId: TenantIdDto;
 
-    @ApiProperty()
-    fqn: string;
+  @ApiProperty()
+  fqn: string;
 
-    @ApiProperty()
-    name: string;
+  @ApiProperty()
+  name: string;
 
-    @ApiProperty()
-    deprecated: boolean;
+  @ApiProperty()
+  deprecated: boolean;
 
-    @ApiProperty()
-    scada: boolean;
+  @ApiProperty()
+  scada: boolean;
 
-    @ApiProperty()
-    version: number;
+  @ApiProperty()
+  version: number;
 
-    @ApiPropertyOptional()
-    image?: string;
+  @ApiPropertyOptional()
+  image?: string;
 
-    @ApiPropertyOptional()
-    description?: string;
+  @ApiPropertyOptional()
+  description?: string;
 
-    @ApiProperty({ type: [String] })
-    tags: string[];
+  @ApiProperty({ type: [String] })
+  tags: string[];
 
-    @ApiProperty()
-    widgetType: string;
+  @ApiProperty()
+  widgetType: string;
 
-    @ApiProperty({ type: [WidgetBundleRefDto] })
-    bundles: WidgetBundleRefDto[];
+  @ApiProperty({ type: [WidgetBundleRefDto] })
+  bundles: WidgetBundleRefDto[];
 }
 
 export class WidgetTypesPageDto {
-    @ApiProperty({ type: [WidgetTypeDto] })
-    data: WidgetTypeDto[];
+  @ApiProperty({ type: [WidgetTypeDto] })
+  data: WidgetTypeDto[];
 
-    @ApiProperty()
-    totalPages: number;
+  @ApiProperty()
+  totalPages: number;
 
-    @ApiProperty()
-    totalElements: number;
+  @ApiProperty()
+  totalElements: number;
 
-    @ApiProperty()
-    hasNext: boolean;
+  @ApiProperty()
+  hasNext: boolean;
 }
 
 export class CreateWidgetTypeRequestDto {
-    @ApiProperty()
-    name: string;
+  @ApiProperty()
+  name: string;
 
-    @ApiProperty()
-    bundleAlias: string;
+  @ApiProperty()
+  bundleAlias: string;
 
-    @ApiProperty()
-    descriptor: any; // JSON descriptor
+  @ApiProperty()
+  descriptor: any; // JSON descriptor
 }

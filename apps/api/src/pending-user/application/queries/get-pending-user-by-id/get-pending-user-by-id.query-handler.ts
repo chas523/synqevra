@@ -10,13 +10,10 @@ import { UserNotFoundError } from 'src/pending-user/domain/errors/pending-user.e
 import { PendingUserModel } from 'src/pending-user/domain/models/pending-user.model';
 
 @QueryHandler(GetPendingUserByIdQuery)
-export class GetPendingUserByIdQueryHandler
-  implements
-    IQueryHandler<
-      GetPendingUserByIdQuery,
-      Result<PendingUserModel, UserNotFoundError>
-    >
-{
+export class GetPendingUserByIdQueryHandler implements IQueryHandler<
+  GetPendingUserByIdQuery,
+  Result<PendingUserModel, UserNotFoundError>
+> {
   constructor(
     @Inject(PENDING_USER_REPOSITORY_PORT)
     private readonly pendingUserRepository: PendingUserRepositoryPort,

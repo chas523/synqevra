@@ -1,6 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 
-
 import {
   TelemetryCommand,
   TelemetryResponse,
@@ -24,7 +23,7 @@ export class TelemetryService {
 
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   setMessageHandler(handler: (msg: TelemetryResponse) => void): void {
     this.telemetryPort.setMessageHandler(handler);
@@ -53,7 +52,12 @@ export class TelemetryService {
     }
   }
 
-  unsubscribe(cmdIdTypes: Map<number, 'ENTITY_COUNT' | 'ENTITY_DATA' | "NOTIFICATIONS_COUNT" | "NOTIFICATIONS">): void {
+  unsubscribe(
+    cmdIdTypes: Map<
+      number,
+      'ENTITY_COUNT' | 'ENTITY_DATA' | 'NOTIFICATIONS_COUNT' | 'NOTIFICATIONS'
+    >,
+  ): void {
     const result = this.telemetryPort.unsubscribe(cmdIdTypes);
     if (result.isErr()) {
       throw result.unwrapErr();

@@ -7,6 +7,8 @@ export type FetchDevicesProps = {
   accessToken: string;
   page?: number;
   pageSize?: number;
+  sortProperty?: string;
+  sortOrder?: 'ASC' | 'DESC';
 };
 
 export class FetchDevicesQuery extends Query<
@@ -15,11 +17,15 @@ export class FetchDevicesQuery extends Query<
   public readonly accessToken: string;
   public readonly page: number;
   public readonly pageSize: number;
+  public readonly sortProperty: string;
+  public readonly sortOrder: 'ASC' | 'DESC';
 
   constructor(props: FetchDevicesProps) {
     super();
     this.accessToken = props.accessToken;
     this.page = props.page ?? 0;
     this.pageSize = props.pageSize ?? 10;
+    this.sortProperty = props.sortProperty ?? 'createdTime';
+    this.sortOrder = props.sortOrder ?? 'DESC';
   }
 }

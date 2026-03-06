@@ -4,9 +4,9 @@ import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thi
 import { DeliveryMethodsResponse } from 'src/thingsboard/interface/rest/dtos/response/delivery-methods.response.dto';
 
 export class FetchDeliveryMethodsQuery extends Query<
-    Result<DeliveryMethodsResponse, ThingsboardApiException>
+  Result<DeliveryMethodsResponse, ThingsboardApiException>
 > {
-    constructor(public readonly accessToken: string) {
-        super();
-    }
+  constructor(public readonly accessToken: string) {
+    super();
+  }
 }

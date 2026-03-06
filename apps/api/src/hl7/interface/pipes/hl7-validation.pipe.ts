@@ -10,9 +10,10 @@ import { SUPPORTED_ADT_TYPES } from '../../infrastructure/utils/hl7-mapping.util
 import { getMessageType } from '../../infrastructure/utils/hl7-mapping.utils';
 
 @Injectable()
-export class Hl7ValidationPipe
-  implements PipeTransform<Hl7MessageDto, Hl7MessageDto>
-{
+export class Hl7ValidationPipe implements PipeTransform<
+  Hl7MessageDto,
+  Hl7MessageDto
+> {
   private readonly logger = new Logger(Hl7ValidationPipe.name);
 
   transform(value: Hl7MessageDto): Hl7MessageDto {

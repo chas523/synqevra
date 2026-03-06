@@ -10,13 +10,10 @@ import {
 } from '../../ports/thingsboard.api.port';
 
 @QueryHandler(FetchDeviceSharedAttributesQuery)
-export class FetchDeviceSharedAttributesQueryHandler
-  implements
-    IQueryHandler<
-      FetchDeviceSharedAttributesQuery,
-      Result<DeviceAttributes, ThingsboardApiException>
-    >
-{
+export class FetchDeviceSharedAttributesQueryHandler implements IQueryHandler<
+  FetchDeviceSharedAttributesQuery,
+  Result<DeviceAttributes, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,

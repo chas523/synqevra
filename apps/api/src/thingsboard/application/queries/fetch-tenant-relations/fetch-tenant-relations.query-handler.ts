@@ -20,7 +20,7 @@ export class FetchTenantRelationsQueryHandler implements IQueryHandler<
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   async execute(
     query: FetchTenantRelationsQuery,
@@ -28,7 +28,6 @@ export class FetchTenantRelationsQueryHandler implements IQueryHandler<
     const { tenantId, direction, accessToken } = query;
 
     try {
-
       const response = await this.thingsboardApi.fetchEntityRelations(
         accessToken!,
         'TENANT',
