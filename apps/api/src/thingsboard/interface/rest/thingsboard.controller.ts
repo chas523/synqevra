@@ -221,6 +221,7 @@ import { CreateDomainCommand } from 'src/thingsboard/application/commands/create
 import { FetchDomainByIdQuery } from 'src/thingsboard/application/queries/fetch-domain-by-id/fetch-domain-by-id.query';
 import { UpdateDomainCommand } from 'src/thingsboard/application/commands/update-domain/update-domain.command';
 import { FetchOAuth2ConfigTemplateQuery } from 'src/thingsboard/application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.query';
+import { SaveOAuth2ClientCommand } from 'src/thingsboard/application/commands/save-oauth2-client/save-oauth2-client.command';
 
 
 @ApiTags('ThingsBoard')
@@ -4738,6 +4739,24 @@ export class ThingsboardController {
   ) {
     const query = new FetchOAuth2ConfigTemplateQuery(accessToken);
     const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/oauth2/client')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save an OAuth2 client' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async saveOAuth2Client(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    const command = new SaveOAuth2ClientCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => { throw error; },

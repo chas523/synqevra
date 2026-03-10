@@ -6,7 +6,7 @@ import { Trash2, ChevronUp, Plus } from "lucide-react";
 import { SettingsService } from "@/lib/services/thingsboardServices/settingsService";
 import { VersionControlService } from "@/lib/services/thingsboardServices/versionControlService";
 import { useRepoSettingsInfo } from "@/hooks/thingsboard/version-control/useVersionControl";
-import { RepositorySettingsForm } from "../../advanced/version-control/components/RepositorySettingsForm";
+import { RepositorySettingsForm } from "@/components/organisms/RepositorySettingsForm";
 import { useManageRepoSettings } from "@/hooks/thingsboard/version-control/useVersionControl";
 import { RepoSettings } from "@/types/versionControlTypes";
 import { ENTITY_TYPE_CONFIGS, getEntityTypeConfig } from "@/lib/config/entityTypeConfig";

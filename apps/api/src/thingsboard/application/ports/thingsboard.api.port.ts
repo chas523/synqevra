@@ -823,6 +823,7 @@ export abstract class ThingsboardApiPort {
   abstract getDomainById(accessToken: string, domainId: string): Promise<any>;
   abstract updateDomain(accessToken: string, domainId: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
   abstract getOAuth2ConfigTemplate(accessToken: string): Promise<any>;
+  abstract saveOAuth2Client(accessToken: string, payload: any): Promise<any>;
 }
 
 // Response types for new methods

@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useDomainInfos } from "@/hooks/thingsboard/oauth2/useDomainInfos";
 import { DomainInfo, OAuth2ClientInfo } from "@/lib/services/thingsboardServices/oauth2Service";
-import { AddDomainModal } from "../components/AddDomainModal";
-import { DomainDetailPanel } from "../components/DomainDetailPanel";
+import { AddDomainModal } from "@/components/organisms/AddDomainModal";
+import { DomainDetailPanel } from "@/components/organisms/DomainDetailPanel";
 import { useAppSelector } from "@/lib/redux/store";
 
 const PAGE_SIZE = 10;
