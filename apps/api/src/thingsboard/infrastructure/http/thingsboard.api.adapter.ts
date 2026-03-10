@@ -3812,5 +3812,17 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       ThingsboardApiException.createException('Failed to fetch OAuth2 config templates', error, this.logger);
     }
   }
+
+  async saveOAuth2Client(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/oauth2/client`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, { headers: { Authorization: `Bearer ${accessToken}` } }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException('Failed to save OAuth2 client', error, this.logger);
+    }
+  }
 }
 

@@ -16,12 +16,15 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 import { JwtAdminStrategy } from './strategies/jwt.admin.strategy';
 import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
 import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
+import googleOAuthConfig from '../config/google-oauth.config';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    ConfigModule.forFeature(googleOAuthConfig),
     IamModule,
     ThingsboardModule,
   ],
@@ -34,6 +37,7 @@ import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
     JwtAdminStrategy,
     RefreshAdminStrategy,
     JwtPatientStrategy,
+    GoogleStrategy,
     // global guards
     {
       provide: APP_GUARD,
@@ -45,4 +49,4 @@ import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
     },
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

@@ -7,6 +7,8 @@ import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useOAuth2ClientInfos } from "@/hooks/thingsboard/oauth2/useOAuth2ClientInfos";
 import { OAuth2ClientInfo } from "@/lib/services/thingsboardServices/oauth2Service";
 import { useAppSelector } from "@/lib/redux/store";
+import { AddOAuth2ClientModal } from "../components/AddOAuth2ClientModal";
+import { OAuth2ClientDetailPanel } from "../components/OAuth2ClientDetailPanel";
 
 const PAGE_SIZE = 10;
 
@@ -51,6 +53,8 @@ export default function OAuth2ClientsPage() {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortProperty, setSortProperty] = useState("createdTime");
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState<OAuth2ClientInfo | null>(null);
 
     const { clients, totalPages, totalElements, isLoading, mutate } = useOAuth2ClientInfos(
         currentPage,
@@ -129,11 +133,25 @@ export default function OAuth2ClientsPage() {
                 sortOrder={sortOrder}
                 onSortChange={handleSortChange}
                 onRefresh={() => mutate()}
-                onAdd={() => {
-                    // TODO: Next step
-                }}
+                onAdd={() => setIsAddModalOpen(true)}
+                onRowClick={(item) => setSelectedClient(item)}
                 emptyMessage="No OAuth 2.0 clients configured yet."
                 addButtonLabel="Add"
+            />
+
+            <AddOAuth2ClientModal
+                open={isAddModalOpen}
+                onOpenChange={setIsAddModalOpen}
+                onSuccess={() => mutate()}
+            />
+
+            <OAuth2ClientDetailPanel
+                client={selectedClient}
+                onClose={() => setSelectedClient(null)}
+                onSaveSuccess={() => {
+                    mutate();
+                    setSelectedClient(null);
+                }}
             />
         </div>
     );

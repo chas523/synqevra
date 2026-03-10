@@ -28,7 +28,7 @@ export class InvitePractitionerUseCase {
     private readonly tokenGeneratorPort: TokenGeneratorPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) {}
+  ) { }
 
   async execute(
     command: InvitePractitionerCommand,
@@ -122,6 +122,7 @@ export class InvitePractitionerUseCase {
   ): string {
     return `
         <h2>Hello ${firstName}!</h2>
+        <p>You've been invited to Medboard project as Practitioner.</p>
         <p>To activate your account and set your password, click the link below:</p>
         <a href="${activationUrl}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
             Activate Account
