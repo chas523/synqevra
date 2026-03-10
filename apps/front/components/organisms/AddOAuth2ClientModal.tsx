@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { OAuth2ClientForm, OAuth2ClientPayload } from "./OAuth2ClientForm";
+import { OAuth2ClientForm, OAuth2ClientPayload } from "@/components/organisms/OAuth2ClientForm";
 import { OAuth2Service } from "@/lib/services/thingsboardServices/oauth2Service";
 import { useOAuth2ConfigTemplates } from "@/hooks/thingsboard/oauth2/useOAuth2ConfigTemplates";
 

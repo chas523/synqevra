@@ -4745,7 +4745,7 @@ export class ThingsboardController {
     });
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/oauth2/client')
   @ApiBearerAuth()

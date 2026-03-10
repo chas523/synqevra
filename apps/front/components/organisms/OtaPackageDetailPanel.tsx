@@ -5,8 +5,8 @@ import { EntityDetailPanel, TabConfig, ActionButton } from "@/components/templat
 import { OtaPackage } from "@/types/otaPackageTypes";
 import { OtaPackageService } from "@/lib/services/thingsboardServices/otaPackageService";
 import { useRepoSettingsInfo, useManageRepoSettings } from "@/hooks/thingsboard/version-control/useVersionControl";
-import { RepositorySettingsForm } from "../../version-control/components/RepositorySettingsForm";
-import { VersionsTable } from "../../version-control/components/VersionsTable";
+import { RepositorySettingsForm } from "@/components/organisms/RepositorySettingsForm";
+import { VersionsTable } from "@/components/organisms/VersionsTable";
 import { RepoSettings } from "@/types/versionControlTypes";
 import { Download, Trash2, Copy, ClipboardCopy } from "lucide-react";
 import { toast } from "sonner";

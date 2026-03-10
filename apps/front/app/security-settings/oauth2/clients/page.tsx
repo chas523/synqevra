@@ -7,8 +7,8 @@ import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useOAuth2ClientInfos } from "@/hooks/thingsboard/oauth2/useOAuth2ClientInfos";
 import { OAuth2ClientInfo } from "@/lib/services/thingsboardServices/oauth2Service";
 import { useAppSelector } from "@/lib/redux/store";
-import { AddOAuth2ClientModal } from "../components/AddOAuth2ClientModal";
-import { OAuth2ClientDetailPanel } from "../components/OAuth2ClientDetailPanel";
+import { AddOAuth2ClientModal } from "@/components/organisms/AddOAuth2ClientModal";
+import { OAuth2ClientDetailPanel } from "@/components/organisms/OAuth2ClientDetailPanel";
 
 const PAGE_SIZE = 10;
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { EntityDetailPanel } from "@/components/templates/EntityDetailPanel";
-import { OAuth2ClientForm, OAuth2ClientPayload } from "./OAuth2ClientForm";
+import { OAuth2ClientForm, OAuth2ClientPayload } from "@/components/organisms/OAuth2ClientForm";
 import { OAuth2Service, OAuth2ClientInfo } from "@/lib/services/thingsboardServices/oauth2Service";
 import { useOAuth2ConfigTemplates } from "@/hooks/thingsboard/oauth2/useOAuth2ConfigTemplates";
 

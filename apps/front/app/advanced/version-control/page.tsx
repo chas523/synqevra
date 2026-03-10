@@ -1,6 +1,6 @@
 "use client";
 
-import VersionControlPage from "./VersionControlPage";
+import VersionControlPage from "@/components/pages/VersionControlPage";
 
 export default function Page() {
     return <VersionControlPage />;
