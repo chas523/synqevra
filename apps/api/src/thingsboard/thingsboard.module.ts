@@ -148,6 +148,7 @@ import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
 import { StorageService } from './application/services/storage.service';
+import { SysAdminAuthService } from './application/services/sysadmin-auth.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -308,6 +309,7 @@ const queryHandlers = [
     TelemetryParserService,
     TelemetryGateway,
     StorageService,
+    SysAdminAuthService,
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [
@@ -317,6 +319,7 @@ const queryHandlers = [
     ThingsboardRollbackService,
     TelemetryService,
     StorageService,
+    SysAdminAuthService,
   ],
 })
 export class ThingsboardModule { }

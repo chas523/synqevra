@@ -819,6 +819,7 @@ export abstract class ThingsboardApiPort {
   // OAuth2 / Domains
   abstract getDomainInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
   abstract getOAuth2ClientInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
+  abstract getOAuth2ClientById(accessToken: string, id: string): Promise<any>;
   abstract createDomain(accessToken: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
   abstract getDomainById(accessToken: string, domainId: string): Promise<any>;
   abstract updateDomain(accessToken: string, domainId: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;

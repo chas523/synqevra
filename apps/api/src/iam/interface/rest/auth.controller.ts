@@ -41,7 +41,9 @@ import { InvitePractitionerResult } from '../../application/dto/invite-practitio
 import { GetUserProfileUseCase } from 'src/iam/application/use-cases/get-user-profile.use-case';
 import { UserProfileResult } from './dto/response/get-user-profile.response.dto';
 import { GoogleAuthGuard } from 'src/auth/guards/google-auth/google-auth.guard';
-
+import { SysAdminAuthService } from 'src/thingsboard/application/services/sysadmin-auth.service';
+import { THINGSBOARD_API_PORT, ThingsboardApiPort } from 'src/thingsboard/application/ports/thingsboard.api.port';
+import { Inject } from '@nestjs/common';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
@@ -53,6 +55,9 @@ export class AuthController {
     private readonly invitePractitionerUseCase: InvitePractitionerUseCase,
     private readonly getUserProfileUseCase: GetUserProfileUseCase,
     private readonly patientLoginUseCase: PatientLoginUseCase,
+    private readonly sysAdminAuthService: SysAdminAuthService,
+    @Inject(THINGSBOARD_API_PORT)
+    private readonly thingsboardApi: ThingsboardApiPort,
   ) { }
 
   @Public()
@@ -137,6 +142,27 @@ export class AuthController {
   }
 
   @Public()
+  @Get('google/available')
+  @ApiOperation({
+    summary: 'Check if Google OAuth2 is configured',
+    description: 'Checks ThingsBoard configuration to see if Google login is enabled',
+  })
+  async isGoogleAuthAvailable() {
+    try {
+      const token = await this.sysAdminAuthService.getAccessToken();
+      const allClientInfos = await this.thingsboardApi.getOAuth2ClientInfos(token, {
+        page: 0, pageSize: 50, sortProperty: 'createdTime', sortOrder: 'DESC'
+      });
+      const googleClientSummary = (allClientInfos?.data || []).find(
+        (client: any) => client.providerName.toLowerCase().includes('google')
+      );
+      return { available: !!googleClientSummary };
+    } catch (e) {
+      return { available: false };
+    }
+  }
+
+  @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
   async googleLogin() {
@@ -152,7 +178,6 @@ export class AuthController {
   ) {
 
     const frontUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
-
     if (req.user.status === 'NEW_PENDING_USER') {
       // newly created pending-user entity
       return res.redirect(`${frontUrl}/auth/login?status=new_pending`);

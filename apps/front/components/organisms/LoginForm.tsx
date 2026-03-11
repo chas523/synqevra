@@ -16,14 +16,24 @@ import {
 } from "../ui/card";
 import { GoogleSignInButton } from "../molecules/GoogleSignInButton";
 import { toast } from "sonner";
+import { OAuth2Service } from "@/lib/services/thingsboardServices/oauth2Service";
 
 const LoginForm = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { login, isLoading, error } = useLogin();
+  const [isGoogleAvailable, setIsGoogleAvailable] = useState(false);
 
   const role = pathname.endsWith('/admin') ? 'ADMIN' : 'USER';
+
+  useEffect(() => {
+    if (role === 'USER') {
+      OAuth2Service.checkGoogleAuthAvailable()
+        .then(res => setIsGoogleAvailable(res.available))
+        .catch(console.error);
+    }
+  }, [role]);
   useEffect(() => {
     const authStatus = searchParams?.get("status");
     if (authStatus) {
@@ -88,22 +98,24 @@ const LoginForm = () => {
               </CardDescription>
             </div>
 
-            {role === 'USER' && (
-              <>
-                <GoogleSignInButton />
+            {role === 'USER' ? (
+              isGoogleAvailable ? (
+                <>
+                  <GoogleSignInButton />
 
-                <div className="relative pt-2">
-                  <div className="absolute inset-0 flex items-center pt-2">
-                    <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+                  <div className="relative pt-2">
+                    <div className="absolute inset-0 flex items-center pt-2">
+                      <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase pt-2">
+                      <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 font-medium">
+                        Or log in with email
+                      </span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase pt-2">
-                    <span className="bg-white dark:bg-slate-800 px-2 text-slate-500 dark:text-slate-400 font-medium">
-                      Or log in with email
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+                </>
+              ) : null
+            ) : null}
           </CardHeader>
 
           <CardContent className="flex flex-col pt-0 gap-2">

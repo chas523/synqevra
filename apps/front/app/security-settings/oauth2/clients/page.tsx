@@ -21,9 +21,8 @@ function OAuth2Tabs() {
 
     if (role === "ADMIN") {
         tabs.push({ label: "Domains", href: "/security-settings/oauth2/domains" });
+        tabs.push({ label: "OAuth 2.0 clients", href: "/security-settings/oauth2/clients" });
     }
-
-    tabs.push({ label: "OAuth 2.0 clients", href: "/security-settings/oauth2/clients" });
 
     return (
         <div className="border-b border-slate-200 dark:border-slate-800 mb-6">
