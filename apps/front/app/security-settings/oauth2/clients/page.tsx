@@ -98,19 +98,6 @@ export default function OAuth2ClientsPage() {
                 </span>
             ),
         },
-        {
-            key: "platforms",
-            header: "Allowed platforms",
-            render: (item) => (
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                    {item.platforms && item.platforms.length > 0
-                        ? item.platforms
-                            .map((p) => (p === "IOS" ? "iOS" : p.charAt(0) + p.slice(1).toLowerCase()))
-                            .join(", ")
-                        : "—"}
-                </span>
-            ),
-        },
     ];
 
     return (
