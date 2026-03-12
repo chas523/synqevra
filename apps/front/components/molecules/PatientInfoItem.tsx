@@ -41,7 +41,7 @@ export function PatientInfoItem({
       <span
         className={cn(
           "text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1",
-          styles.label
+          styles.label,
         )}
       >
         {Icon && <Icon className="h-3 w-3" />}
@@ -50,7 +50,7 @@ export function PatientInfoItem({
       <span
         className={cn(
           "text-slate-900 dark:text-white font-semibold",
-          styles.value
+          styles.value,
         )}
       >
         {value}

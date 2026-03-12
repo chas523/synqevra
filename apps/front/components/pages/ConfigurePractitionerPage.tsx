@@ -76,7 +76,7 @@ const ConfigurePractitionerPage = ({
   }, [userData, reset]);
 
   const onSubmit: SubmitHandler<ConfigurePractitionerFormData> = async (
-    data
+    data,
   ) => {
     await configurePractitioner(data);
   };

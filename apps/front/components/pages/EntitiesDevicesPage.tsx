@@ -21,7 +21,9 @@ export const EntitiesDevicesPage = () => {
     useEntityDevices(currentPage, PAGE_SIZE, sortProperty, sortOrder);
 
   // Credentials dialog
-  const [credentialsDevice, setCredentialsDevice] = useState<Device | null>(null);
+  const [credentialsDevice, setCredentialsDevice] = useState<Device | null>(
+    null,
+  );
   const [credentialsOpen, setCredentialsOpen] = useState(false);
 
   // Add Device dialog
@@ -30,17 +32,20 @@ export const EntitiesDevicesPage = () => {
   // Side panel
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
 
-  const handleAddDeviceSubmit = useCallback(async (deviceData: any) => {
-    try {
-      await DeviceService.createDevice(deviceData);
-      toast.success(`Device "${deviceData.name}" created successfully`);
-      setAddDeviceOpen(false);
-      mutate();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to create device");
-      throw err;
-    }
-  }, [mutate]);
+  const handleAddDeviceSubmit = useCallback(
+    async (deviceData: any) => {
+      try {
+        await DeviceService.createDevice(deviceData);
+        toast.success(`Device "${deviceData.name}" created successfully`);
+        setAddDeviceOpen(false);
+        mutate();
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message || "Failed to create device");
+        throw err;
+      }
+    },
+    [mutate],
+  );
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -52,7 +57,7 @@ export const EntitiesDevicesPage = () => {
       setSortOrder(order);
       setCurrentPage(0);
     },
-    []
+    [],
   );
 
   const handleRefresh = useCallback(() => {
@@ -66,10 +71,12 @@ export const EntitiesDevicesPage = () => {
         toast.success(`"${device.name}" is now public`);
         mutate();
       } catch (err: any) {
-        toast.error(err?.response?.data?.message || "Failed to make device public");
+        toast.error(
+          err?.response?.data?.message || "Failed to make device public",
+        );
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleMakePrivate = useCallback(
@@ -79,10 +86,12 @@ export const EntitiesDevicesPage = () => {
         toast.success(`"${device.name}" is now private`);
         mutate();
       } catch (err: any) {
-        toast.error(err?.response?.data?.message || "Failed to make device private");
+        toast.error(
+          err?.response?.data?.message || "Failed to make device private",
+        );
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleDelete = useCallback(
@@ -95,7 +104,7 @@ export const EntitiesDevicesPage = () => {
         toast.error(err?.response?.data?.message || "Failed to delete device");
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleAssignToCustomer = useCallback((device: Device) => {
@@ -152,5 +161,3 @@ export const EntitiesDevicesPage = () => {
     </>
   );
 };
-
-

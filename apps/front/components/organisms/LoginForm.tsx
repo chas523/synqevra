@@ -21,7 +21,6 @@ const LoginForm = () => {
   const pathname = usePathname();
   const { login, isLoading, error } = useLogin();
 
-
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -41,11 +40,11 @@ const LoginForm = () => {
     if (!formData.email || !formData.password) return;
     if (!formData.email.includes("@")) return;
 
-    const role = pathname.endsWith('/admin') ? 'ADMIN' : 'USER';
+    const role = pathname.endsWith("/admin") ? "ADMIN" : "USER";
 
     try {
       await login(formData, role);
-      if (role === 'ADMIN') {
+      if (role === "ADMIN") {
         router.push("/dashboard");
       } else {
         router.push("/devices");

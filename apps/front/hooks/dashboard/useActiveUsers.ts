@@ -1,6 +1,7 @@
 import useSWR from "swr";
 import type {
-  ActiveUsersRequestOptions, AdminPanelUser,
+  ActiveUsersRequestOptions,
+  AdminPanelUser,
   PaginatedResponse,
 } from "@/lib/types/dashboardTypes";
 import { UserService } from "@/lib/services/userServices/userService";

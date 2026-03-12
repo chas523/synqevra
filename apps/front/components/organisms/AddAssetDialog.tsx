@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormField from '@/components/molecules/FormField';
-import LoadingButton from '@/components/atoms/LoadingButton';
-import { AssetService } from '@/lib/services/thingsboardServices/assetService';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import FormField from "@/components/molecules/FormField";
+import LoadingButton from "@/components/atoms/LoadingButton";
+import { AssetService } from "@/lib/services/thingsboardServices/assetService";
 import type {
   AssetProfileInfo,
   CreateAssetRequest,
   CustomerInfo,
-} from '@/types/thingsboardAssetTypes';
+} from "@/types/thingsboardAssetTypes";
 
 export interface AddAssetDialogProps {
   open: boolean;
@@ -18,7 +23,7 @@ export interface AddAssetDialogProps {
   isLoading?: boolean;
 }
 
-const DEFAULT_PROFILE_NAME = 'default';
+const DEFAULT_PROFILE_NAME = "default";
 
 export function AddAssetDialog({
   open,
@@ -31,11 +36,11 @@ export function AddAssetDialog({
   const [isBootstrapLoading, setIsBootstrapLoading] = useState(false);
 
   const [formData, setFormData] = useState<CreateAssetRequest>({
-    name: '',
-    label: '',
-    assetProfileId: '',
-    customerId: '',
-    description: '',
+    name: "",
+    label: "",
+    assetProfileId: "",
+    customerId: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -44,14 +49,22 @@ export function AddAssetDialog({
     const loadData = async () => {
       setIsBootstrapLoading(true);
       try {
-        const [defaultProfile, profileInfos, customerInfos] = await Promise.all([
-          AssetService.getAssetProfileInfoByName(DEFAULT_PROFILE_NAME),
-          AssetService.getAssetProfileInfos(0, 10, 'name', 'ASC', DEFAULT_PROFILE_NAME),
-          AssetService.getCustomers(0, 50, 'title', 'ASC'),
-        ]);
+        const [defaultProfile, profileInfos, customerInfos] = await Promise.all(
+          [
+            AssetService.getAssetProfileInfoByName(DEFAULT_PROFILE_NAME),
+            AssetService.getAssetProfileInfos(
+              0,
+              10,
+              "name",
+              "ASC",
+              DEFAULT_PROFILE_NAME,
+            ),
+            AssetService.getCustomers(0, 50, "title", "ASC"),
+          ],
+        );
 
         const mergedProfiles = profileInfos.data.some(
-          (profile) => profile.id?.id === defaultProfile.id?.id
+          (profile) => profile.id?.id === defaultProfile.id?.id,
         )
           ? profileInfos.data
           : [defaultProfile, ...profileInfos.data];
@@ -60,15 +73,21 @@ export function AddAssetDialog({
         setCustomers(customerInfos.data);
 
         const publicCustomer = customerInfos.data.find(
-          (customer) => customer.additionalInfo?.isPublic
+          (customer) => customer.additionalInfo?.isPublic,
         );
 
         setFormData((prev) => ({
           ...prev,
           assetProfileId:
-            prev.assetProfileId || defaultProfile.id?.id || mergedProfiles[0]?.id?.id || '',
+            prev.assetProfileId ||
+            defaultProfile.id?.id ||
+            mergedProfiles[0]?.id?.id ||
+            "",
           customerId:
-            prev.customerId || publicCustomer?.id?.id || customerInfos.data[0]?.id?.id || '',
+            prev.customerId ||
+            publicCustomer?.id?.id ||
+            customerInfos.data[0]?.id?.id ||
+            "",
         }));
       } finally {
         setIsBootstrapLoading(false);
@@ -88,7 +107,10 @@ export function AddAssetDialog({
     );
   }, [formData, isLoading, isBootstrapLoading]);
 
-  const handleInputChange = (field: keyof CreateAssetRequest, value: string) => {
+  const handleInputChange = (
+    field: keyof CreateAssetRequest,
+    value: string,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -102,18 +124,18 @@ export function AddAssetDialog({
     try {
       await onSubmit({
         name: formData.name.trim(),
-        label: formData.label?.trim() || '',
+        label: formData.label?.trim() || "",
         assetProfileId: formData.assetProfileId,
         customerId: formData.customerId,
-        description: formData.description?.trim() || '',
+        description: formData.description?.trim() || "",
       });
 
       setFormData({
-        name: '',
-        label: '',
-        assetProfileId: '',
-        customerId: '',
-        description: '',
+        name: "",
+        label: "",
+        assetProfileId: "",
+        customerId: "",
+        description: "",
       });
       onOpenChange(false);
     } catch {
@@ -135,7 +157,7 @@ export function AddAssetDialog({
             type="text"
             placeholder="Asset name"
             value={formData.name}
-            onChange={(event) => handleInputChange('name', event.target.value)}
+            onChange={(event) => handleInputChange("name", event.target.value)}
             required
           />
 
@@ -144,8 +166,8 @@ export function AddAssetDialog({
             name="label"
             type="text"
             placeholder="Optional label"
-            value={formData.label || ''}
-            onChange={(event) => handleInputChange('label', event.target.value)}
+            value={formData.label || ""}
+            onChange={(event) => handleInputChange("label", event.target.value)}
           />
 
           <div className="space-y-2">
@@ -153,7 +175,9 @@ export function AddAssetDialog({
             <select
               className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={formData.assetProfileId}
-              onChange={(event) => handleInputChange('assetProfileId', event.target.value)}
+              onChange={(event) =>
+                handleInputChange("assetProfileId", event.target.value)
+              }
               required
               disabled={isBootstrapLoading}
             >
@@ -173,7 +197,9 @@ export function AddAssetDialog({
             <select
               className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
               value={formData.customerId}
-              onChange={(event) => handleInputChange('customerId', event.target.value)}
+              onChange={(event) =>
+                handleInputChange("customerId", event.target.value)
+              }
               required
               disabled={isBootstrapLoading}
             >
@@ -193,8 +219,10 @@ export function AddAssetDialog({
             <textarea
               className="w-full min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
               placeholder="Optional description"
-              value={formData.description || ''}
-              onChange={(event) => handleInputChange('description', event.target.value)}
+              value={formData.description || ""}
+              onChange={(event) =>
+                handleInputChange("description", event.target.value)
+              }
             />
           </div>
 

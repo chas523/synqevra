@@ -11,7 +11,7 @@ import process from 'node:process';
 
 @Injectable()
 export class MedplumClientFactory {
-  constructor(private readonly repository: MedplumRepository) { }
+  constructor(private readonly repository: MedplumRepository) {}
 
   private readonly clientCache = new Map<number, Promise<MedplumClient>>();
   private readonly proxyCache = new Map<string, Promise<MedplumClient>>();

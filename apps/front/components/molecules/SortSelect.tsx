@@ -3,7 +3,8 @@ import {
   SelectAdmin as Select,
   SelectItem,
   SelectTrigger,
-  SelectValue, SelectContent
+  SelectValue,
+  SelectContent,
 } from "@/components/ui/admin_select";
 
 interface SortOption {

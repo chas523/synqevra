@@ -3,14 +3,14 @@ import { Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 export class DeleteOtaPackageCommand extends Command<
-    Result<void, ThingsboardApiException>
+  Result<void, ThingsboardApiException>
 > {
-    public readonly accessToken: string;
-    public readonly id: string;
+  public readonly accessToken: string;
+  public readonly id: string;
 
-    constructor(accessToken: string, id: string) {
-        super();
-        this.accessToken = accessToken;
-        this.id = id;
-    }
+  constructor(accessToken: string, id: string) {
+    super();
+    this.accessToken = accessToken;
+    this.id = id;
+  }
 }

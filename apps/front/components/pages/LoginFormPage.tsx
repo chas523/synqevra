@@ -14,14 +14,22 @@ const LoginFormPage = () => {
       <div className="mb-8 absolute top-8 sm:relative sm:top-0">
         {/* Light Theme Logo (Displayed on White background) */}
         <img
-          src={imgErrorLightTheme ? logoDarkStatic.src : "/public-assets/global/logo-dark.svg"}
+          src={
+            imgErrorLightTheme
+              ? logoDarkStatic.src
+              : "/public-assets/global/logo-dark.svg"
+          }
           alt="Platform Logo"
           className="h-10 w-auto dark:hidden"
           onError={() => setImgErrorLightTheme(true)}
         />
         {/* Dark Theme Logo (Displayed on Dark background) */}
         <img
-          src={imgErrorDarkTheme ? logoLightStatic.src : "/public-assets/global/logo-white.svg"}
+          src={
+            imgErrorDarkTheme
+              ? logoLightStatic.src
+              : "/public-assets/global/logo-white.svg"
+          }
           alt="Platform Logo"
           className="h-10 w-auto hidden dark:block"
           onError={() => setImgErrorDarkTheme(true)}

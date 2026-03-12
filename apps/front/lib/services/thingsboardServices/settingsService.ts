@@ -20,11 +20,11 @@ export class SettingsService {
   }
 
   public static async updateSecuritySettings(
-    settings: SecuritySettingsDto
+    settings: SecuritySettingsDto,
   ): Promise<SecuritySettingsDto> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/securitySettings",
-      settings
+      settings,
     );
     return data;
   }
@@ -35,28 +35,28 @@ export class SettingsService {
   }
 
   public static async updateGeneralSettings(
-    settings: GeneralSettingsDto
+    settings: GeneralSettingsDto,
   ): Promise<GeneralSettingsDto> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/settings/general",
-      settings
+      settings,
     );
     return data;
   }
 
   public static async getConnectivitySettings(): Promise<ConnectivitySettingsDto> {
     const { data } = await proxyApi.get(
-      "thingsboard/admin/settings/connectivity"
+      "thingsboard/admin/settings/connectivity",
     );
     return data;
   }
 
   public static async updateConnectivitySettings(
-    settings: ConnectivitySettingsDto
+    settings: ConnectivitySettingsDto,
   ): Promise<ConnectivitySettingsDto> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/settings/connectivity",
-      settings
+      settings,
     );
     return data;
   }
@@ -67,11 +67,11 @@ export class SettingsService {
   }
 
   public static async updateSmsSettings(
-    settings: SmsSettings
+    settings: SmsSettings,
   ): Promise<SmsSettings> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/settings/sms",
-      settings
+      settings,
     );
     return data;
   }
@@ -82,11 +82,11 @@ export class SettingsService {
   }
 
   public static async updateNotificationSettings(
-    settings: NotificationSettings
+    settings: NotificationSettings,
   ): Promise<NotificationSettings> {
     const { data } = await proxyApi.post(
       "thingsboard/notification/settings",
-      settings
+      settings,
     );
     return data;
   }
@@ -94,11 +94,11 @@ export class SettingsService {
   public static async getQueues(
     page: number = 0,
     pageSize: number = 10,
-    sortProperty: string = 'createdTime',
-    sortOrder: 'ASC' | 'DESC' = 'DESC'
+    sortProperty: string = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
   ): Promise<QueuesPageResponse> {
     const { data } = await proxyApi.get(
-      `thingsboard/queues?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`
+      `thingsboard/queues?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
     );
     return data;
   }
@@ -118,11 +118,11 @@ export class SettingsService {
   }
 
   public static async updateMailSettings(
-    settings: MailSettings
+    settings: MailSettings,
   ): Promise<MailSettings> {
     const { data } = await proxyApi.post(
       "thingsboard/admin/settings/mail",
-      settings
+      settings,
     );
     return data;
     return data;
@@ -134,24 +134,30 @@ export class SettingsService {
   }
 
   public static async updateTwoFaSettings(
-    settings: TwoFactorAuthSettings
+    settings: TwoFactorAuthSettings,
   ): Promise<TwoFactorAuthSettings> {
-    const { data } = await proxyApi.post(
-      "thingsboard/2fa/settings",
-      settings
-    );
+    const { data } = await proxyApi.post("thingsboard/2fa/settings", settings);
     return data;
   }
 
-  public static async getTrendzSettings(): Promise<{ enabled: boolean; baseUrl: string; apiKey: string }> {
+  public static async getTrendzSettings(): Promise<{
+    enabled: boolean;
+    baseUrl: string;
+    apiKey: string;
+  }> {
     const { data } = await proxyApi.get("thingsboard/trendz/settings");
     return data;
   }
 
-  public static async updateTrendzSettings(
-    settings: { enabled: boolean; baseUrl: string; apiKey: string }
-  ): Promise<{ enabled: boolean; baseUrl: string; apiKey: string }> {
-    const { data } = await proxyApi.post("thingsboard/trendz/settings", settings);
+  public static async updateTrendzSettings(settings: {
+    enabled: boolean;
+    baseUrl: string;
+    apiKey: string;
+  }): Promise<{ enabled: boolean; baseUrl: string; apiKey: string }> {
+    const { data } = await proxyApi.post(
+      "thingsboard/trendz/settings",
+      settings,
+    );
     return data;
   }
 
@@ -160,10 +166,10 @@ export class SettingsService {
     page: number = 0,
     pageSize: number = 10,
     sortProperty: string = "createdTime",
-    sortOrder: string = "DESC"
+    sortOrder: string = "DESC",
   ): Promise<any> {
     const { data } = await proxyApi.get(
-      `thingsboard/ai/model?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`
+      `thingsboard/ai/model?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
     );
     return data;
   }
@@ -190,7 +196,10 @@ export class SettingsService {
   }
 
   public static async saveAutoCommitSettings(payload: any): Promise<any> {
-    const { data } = await proxyApi.post("thingsboard/autoCommitSettings", payload);
+    const { data } = await proxyApi.post(
+      "thingsboard/autoCommitSettings",
+      payload,
+    );
     return data;
   }
 

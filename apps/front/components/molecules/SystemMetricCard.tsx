@@ -21,7 +21,7 @@ export function SystemMetricCard({
     <div
       className={cn(
         "relative min-h-0 gap-0  justify-between flex flex-col overflow-hidden",
-        className
+        className,
       )}
     >
       <CardHeader className="gap-0  min-w-0 flex-none">

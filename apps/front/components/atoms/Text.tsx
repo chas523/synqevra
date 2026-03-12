@@ -39,12 +39,12 @@ export const Text = ({
 
   const sizeClasses = size
     ? {
-      xs: "text-xs",
-      sm: "text-sm",
-      base: "text-base",
-      lg: "text-lg",
-      xl: "text-xl",
-    }[size]
+        xs: "text-xs",
+        sm: "text-sm",
+        base: "text-base",
+        lg: "text-lg",
+        xl: "text-xl",
+      }[size]
     : undefined;
 
   return (

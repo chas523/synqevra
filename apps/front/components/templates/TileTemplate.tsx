@@ -64,7 +64,7 @@ const TileTemplate = ({
         "gap-1 p-2 min-h-[200px] md:min-h-0",
         gridCols && "grid",
         gridCols && gridColsMap[gridCols],
-        className
+        className,
       )}
     >
       {children}

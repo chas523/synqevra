@@ -37,6 +37,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FetchDevicesQuery } from 'src/thingsboard/application/queries/fetch-devices/fetch-devices.query';
 import { FetchAssetsQuery } from 'src/thingsboard/application/queries/fetch-assets/fetch-assets.query';
+import { FetchEntityViewsQuery } from 'src/thingsboard/application/queries/fetch-entity-views/fetch-entity-views.query';
 import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
 import { FetchResourceInfoQuery } from 'src/thingsboard/application/queries/fetch-resource-info/fetch-resource-info.query';
 import { FetchDeviceRelationsQuery } from '../../application/queries/fetch-device-relations/fetch-device-relations.query';
@@ -50,6 +51,11 @@ import {
   CreateAssetErrors,
 } from 'src/thingsboard/application/commands/create-asset/create-asset.command';
 import {
+  CreateEntityViewCommand,
+  CreateEntityViewErrors,
+} from 'src/thingsboard/application/commands/create-entity-view/create-entity-view.command';
+import { FetchEntityViewTypesCommand } from 'src/thingsboard/application/commands/fetch-entity-view-types/fetch-entity-view-types.command';
+import {
   CreateDeviceCommand,
   CreateDeviceErrors,
 } from 'src/thingsboard/application/commands/create-device/create-device.command';
@@ -57,6 +63,7 @@ import { Device } from './dtos/response/thingsboard-created-device.response.dto'
 import type { CurrentUser } from 'src/auth/types/current-user';
 import { CreateDeviceRequest } from './dtos/request/thingsboard-device.request.dto';
 import { CreateAssetRequestDto } from './dtos/request/create-asset.request.dto';
+import { CreateEntityViewRequestDto } from './dtos/request/create-entity-view.request.dto';
 import { CreateNotificationTemplateRequestDto } from './dtos/request/create-notification-template.request.dto';
 import { CreateNotificationRuleRequestDto } from './dtos/request/create-notification-rule.request.dto';
 import { CreateNotificationRuleCommand } from '../../application/commands/create-notification-rule/create-notification-rule.command';
@@ -85,6 +92,9 @@ import { CreateDeviceCalculatedFieldCommand } from 'src/thingsboard/application/
 import { DevicesResponse } from './dtos/response/thingsboard-devices.response.dto';
 import { AssetsResponseDto } from './dtos/response/thingsboard-assets.response.dto';
 import { AssetResponseDto } from './dtos/response/thingsboard-asset.response.dto';
+import { EntityViewResponseDto } from './dtos/response/thingsboard-entity-view.response.dto';
+import { EntityViewsResponseDto } from './dtos/response/thingsboard-entity-views.response.dto';
+import { EntityViewTypeResponseDto } from './dtos/response/thingsboard-entity-view-type.response.dto';
 import { ThingsboardTokensResponseDto } from './dtos/response/thingsboard-tokens.response.dto';
 import { ThingsboardUserResponseDto } from './dtos/response/thingsboard-user.response.dto';
 import { SecuritySettingsDto } from './dtos/request/thingsboard-security-settings.request.dto';
@@ -184,6 +194,8 @@ import {
   AssetProfileInfosResponse,
   CustomersResponse,
   EntityAuditLogsResponse,
+  EntityViewTypeInfo,
+  EntityView,
   ThingsboardApiPort,
 } from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { FetchOtaPackagesQuery } from 'src/thingsboard/application/queries/fetch-ota-packages/fetch-ota-packages.query';
@@ -222,7 +234,6 @@ import { FetchDomainByIdQuery } from 'src/thingsboard/application/queries/fetch-
 import { UpdateDomainCommand } from 'src/thingsboard/application/commands/update-domain/update-domain.command';
 import { FetchOAuth2ConfigTemplateQuery } from 'src/thingsboard/application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.query';
 
-
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
 export class ThingsboardController {
@@ -232,7 +243,7 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -541,6 +552,549 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Get(['/entity-views/types', '/entityView/types'])
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get entity view types',
+    description: 'Fetch entity view types from ThingsBoard',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Entity view types retrieved successfully',
+    type: EntityViewTypeResponseDto,
+    isArray: true,
+  })
+  async getEntityViewTypes(@TbAccessToken() accessToken: string) {
+    const command = new FetchEntityViewTypesCommand({ accessToken });
+    const result: Result<EntityViewTypeInfo[], ThingsboardApiException> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (entityViewTypes) => entityViewTypes,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get list of entity views',
+    description: 'Fetch paginated list of entity view infos from ThingsBoard',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 0 })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'sortProperty',
+    required: false,
+    type: String,
+    example: 'createdTime',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['ASC', 'DESC'],
+    example: 'DESC',
+  })
+  @ApiQuery({ name: 'type', required: false, type: String, example: '' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'List of entity views retrieved successfully',
+    type: EntityViewsResponseDto,
+  })
+  async getEntityViews(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('type') type = '',
+  ) {
+    const query = new FetchEntityViewsQuery({
+      accessToken,
+      page: Number(page),
+      pageSize: Number(pageSize),
+      sortProperty,
+      sortOrder,
+      type,
+    });
+
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (entityViewsResponse) => entityViewsResponse,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/entity-views')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a new entity view',
+    description: 'Create a new entity view in ThingsBoard',
+  })
+  @ApiBody({ type: CreateEntityViewRequestDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Entity view created successfully',
+    type: EntityViewResponseDto,
+  })
+  async createEntityView(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: CreateEntityViewRequestDto,
+  ) {
+    const attributeKeys = {
+      cs: payload.clientAttributes ?? [],
+      sh: payload.sharedAttributes ?? [],
+      ss: payload.serverAttributes ?? [],
+    };
+
+    const timeseriesKeys = payload.timeSeries ?? [];
+
+    const command = new CreateEntityViewCommand({
+      accessToken,
+      payload: {
+        entityId: {
+          entityType: payload.entityType,
+          id: payload.entityId,
+        },
+        name: payload.name,
+        type: payload.type,
+        keys: {
+          attributes: attributeKeys,
+          timeseries: timeseriesKeys,
+        },
+        startTimeMs: payload.startTimeMs ?? 0,
+        endTimeMs: payload.endTimeMs ?? 0,
+        additionalInfo: {
+          description: payload.description ?? '',
+        },
+      },
+    });
+
+    const result: Result<EntityView, CreateEntityViewErrors> =
+      await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (entityView) => entityView,
+      Err: (error: CreateEntityViewErrors) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get entity view by ID',
+    description: 'Retrieve detailed information about a specific entity view',
+  })
+  async getEntityView(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityView(accessToken, id);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch entity view');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Put('/entity-views/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update entity view by ID',
+    description: 'Update selected entity view details in ThingsBoard',
+  })
+  async updateEntityView(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() payload: Record<string, unknown>,
+  ) {
+    try {
+      return await this.thingsboardApi.saveEntityView(accessToken, {
+        ...payload,
+        id: {
+          entityType: 'ENTITY_VIEW',
+          id,
+        },
+      } as any);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update entity view');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/attributes')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get entity view server attributes',
+    description: 'Retrieve server attributes for a specific entity view',
+  })
+  async getEntityViewAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    try {
+      return await this.thingsboardApi.fetchEntityAttributes(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        scope,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view attributes',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/entity-views/:id/attributes')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update entity view server attributes',
+    description: 'Update server attributes for a specific entity view',
+  })
+  async postEntityViewAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() attributes: Record<string, any>,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    if (scope !== 'SERVER_SCOPE' && scope !== 'SHARED_SCOPE') {
+      throw new BadRequestException(
+        'Only SERVER_SCOPE and SHARED_SCOPE are allowed for updates',
+      );
+    }
+
+    try {
+      await this.thingsboardApi.saveEntityAttributes(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        scope,
+        attributes,
+      );
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to update entity view attributes',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/telemetry/latest')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get latest entity view telemetry',
+    description:
+      'Retrieve latest telemetry values for selected entity view keys',
+  })
+  async getEntityViewLatestTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('keys') keysParam: string,
+  ) {
+    const keys = (keysParam || '')
+      .split(',')
+      .map((key) => key.trim())
+      .filter(Boolean);
+
+    if (!keys.length) {
+      throw new BadRequestException('Query parameter "keys" is required');
+    }
+
+    try {
+      return await this.thingsboardApi.fetchEntityViewLatestTelemetry(
+        accessToken,
+        id,
+        keys,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch latest entity view telemetry',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/telemetry/latest/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get latest entity view telemetry keys',
+    description: 'Retrieve all known latest telemetry keys for an entity view',
+  })
+  async getEntityViewLatestTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityViewTelemetryKeys(
+        accessToken,
+        id,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view telemetry keys',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/alarms')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get entity view alarms' })
+  async getEntityViewAlarms(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAlarms(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        Number(page),
+        Number(pageSize),
+        statusList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        severityList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view alarms',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/events')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get entity view events' })
+  async getEntityViewEvents(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('eventType') eventType?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityEvents(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        Number(page),
+        Number(pageSize),
+        eventType,
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view events',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/audit-logs')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get entity view audit logs' })
+  async getEntityViewAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAuditLogs(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        Number(page),
+        Number(pageSize),
+        sortProperty,
+        sortOrder,
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view audit logs',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entity-views/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get entity view relations' })
+  async getEntityViewRelations(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('direction') direction?: 'FROM' | 'TO',
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityRelations(
+        accessToken,
+        'ENTITY_VIEW',
+        id,
+        direction || 'FROM',
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch entity view relations',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/entity-views/:id/make-public')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make entity view public (assign to public customer)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Entity view made public successfully',
+    type: EntityViewResponseDto,
+  })
+  async makeEntityViewPublic(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.makeEntityViewPublic(accessToken, id);
+    } catch (error) {
+      if (
+        error instanceof ThingsboardApiException &&
+        (error.statusCode === HttpStatus.BAD_REQUEST ||
+          error.statusCode === HttpStatus.NOT_FOUND)
+      ) {
+        return {
+          success: true,
+          info: true,
+          message: error.message || 'Entity view is already public',
+        };
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to make entity view public',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/entity-views/:id/make-private')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make entity view private (unassign from customer)',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Entity view made private successfully',
+    type: EntityViewResponseDto,
+  })
+  async makeEntityViewPrivate(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.makeEntityViewPrivate(accessToken, id);
+    } catch (error) {
+      if (
+        error instanceof ThingsboardApiException &&
+        (error.statusCode === HttpStatus.BAD_REQUEST ||
+          error.statusCode === HttpStatus.NOT_FOUND)
+      ) {
+        return {
+          success: true,
+          info: true,
+          message: error.message || 'Entity view is already private',
+        };
+      }
+
+      throw new InternalServerErrorException(
+        'Failed to make entity view private',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/entity-views/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete entity view' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Entity view deleted successfully',
+  })
+  async deleteEntityView(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      await this.thingsboardApi.deleteEntityView(accessToken, id);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete entity view');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/assets/:id/make-public')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Make asset public (assign to public customer)' })
@@ -753,6 +1307,31 @@ export class ThingsboardController {
     }
   }
 
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/assets/:id/attributes/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset attribute keys',
+    description: 'Retrieve attribute keys for a specific asset',
+  })
+  async getAssetAttributeKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAttributeKeys(
+        accessToken,
+        'ASSET',
+        id,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch asset attribute keys',
+      );
+    }
+  }
+
   @Roles(Role.MODERATOR)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/assets/:id/telemetry/latest')
@@ -895,11 +1474,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         timeSeriesKey?: string;
         name?: string;
@@ -935,7 +1514,7 @@ export class ThingsboardController {
 
         const refKey =
           argument.entityType === 'current_entity' ||
-            argument.entityType === 'current_tenant'
+          argument.entityType === 'current_tenant'
             ? argument.timeSeriesKey?.trim()
             : argument.name?.trim();
 
@@ -993,11 +1572,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -1484,6 +2063,31 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/attributes/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device attribute keys',
+    description: 'Retrieve attribute keys for a specific device',
+  })
+  async getDeviceAttributeKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAttributeKeys(
+        accessToken,
+        'DEVICE',
+        id,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch device attribute keys',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Put('/devices/:id/attributes')
   @ApiBearerAuth()
   @ApiOperation({
@@ -1776,11 +2380,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         timeSeriesKey?: string;
         name?: string;
@@ -1816,7 +2420,7 @@ export class ThingsboardController {
 
         const refKey =
           argument.entityType === 'current_entity' ||
-            argument.entityType === 'current_tenant'
+          argument.entityType === 'current_tenant'
             ? argument.timeSeriesKey?.trim()
             : argument.name?.trim();
 
@@ -1874,11 +2478,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-              scope:
-                payload.attributeScope === 'SHARED_SCOPE'
-                  ? 'SHARED_SCOPE'
-                  : 'SERVER_SCOPE',
-            }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -2597,7 +3201,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -2711,7 +3315,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -4044,9 +4648,7 @@ export class ThingsboardController {
     status: HttpStatus.OK,
     description: 'Repository settings info retrieved',
   })
-  async getRepoSettingsInfo(
-    @TbAccessToken() accessToken: string,
-  ) {
+  async getRepoSettingsInfo(@TbAccessToken() accessToken: string) {
     const query = new FetchRepoSettingsInfoQuery(accessToken);
     const result = await this.queryBus.execute(query);
 
@@ -4070,9 +4672,7 @@ export class ThingsboardController {
     status: HttpStatus.OK,
     description: 'Repository settings retrieved',
   })
-  async getRepoSettings(
-    @TbAccessToken() accessToken: string,
-  ) {
+  async getRepoSettings(@TbAccessToken() accessToken: string) {
     const query = new FetchRepoSettingsQuery(accessToken);
     const result = await this.queryBus.execute(query);
 
@@ -4090,7 +4690,8 @@ export class ThingsboardController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Check repository access',
-    description: 'Check if the repository is accessible with the given credentials',
+    description:
+      'Check if the repository is accessible with the given credentials',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -4187,7 +4788,8 @@ export class ThingsboardController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get entity versions',
-    description: 'Retrieve paginated list of version control versions for a specific entity',
+    description:
+      'Retrieve paginated list of version control versions for a specific entity',
   })
   @ApiParam({ name: 'entityType', required: true, type: String })
   @ApiParam({ name: 'entityId', required: true, type: String })
@@ -4287,7 +4889,10 @@ export class ThingsboardController {
     summary: 'Get Trendz settings',
     description: 'Retrieve Trendz integration settings',
   })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Trendz settings retrieved' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trendz settings retrieved',
+  })
   async getTrendzSettings(@TbAccessToken() accessToken: string) {
     const query = new FetchTrendzSettingsQuery(accessToken);
     const result = await this.queryBus.execute(query);
@@ -4329,7 +4934,10 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/ai/model')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get AI models', description: 'Get paginated list of AI models' })
+  @ApiOperation({
+    summary: 'Get AI models',
+    description: 'Get paginated list of AI models',
+  })
   @ApiResponse({ status: HttpStatus.OK, description: 'AI models retrieved' })
   async getAiModels(
     @TbAccessToken() accessToken: string,
@@ -4338,7 +4946,13 @@ export class ThingsboardController {
     @Query('sortProperty') sortProperty: string = 'createdTime',
     @Query('sortOrder') sortOrder: string = 'DESC',
   ) {
-    const query = new FetchAiModelsQuery(accessToken, page, pageSize, sortProperty, sortOrder);
+    const query = new FetchAiModelsQuery(
+      accessToken,
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+    );
     const result = await this.queryBus.execute(query);
 
     return match(result, {
@@ -4353,12 +4967,12 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Post('/ai/model')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Save AI model', description: 'Create or update an AI model' })
+  @ApiOperation({
+    summary: 'Save AI model',
+    description: 'Create or update an AI model',
+  })
   @ApiResponse({ status: HttpStatus.OK, description: 'AI model saved' })
-  async saveAiModel(
-    @TbAccessToken() accessToken: string,
-    @Body() body: any,
-  ) {
+  async saveAiModel(@TbAccessToken() accessToken: string, @Body() body: any) {
     const command = new SaveAiModelCommand(accessToken, body);
     const result = await this.commandBus.execute(command);
 
@@ -4374,7 +4988,10 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Delete('/ai/model/:id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete AI model', description: 'Delete an AI model by ID' })
+  @ApiOperation({
+    summary: 'Delete AI model',
+    description: 'Delete an AI model by ID',
+  })
   @ApiResponse({ status: HttpStatus.OK, description: 'AI model deleted' })
   async deleteAiModel(
     @TbAccessToken() accessToken: string,
@@ -4395,8 +5012,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Post('/ai/model/chat')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Check AI model connectivity', description: 'Test connectivity of an AI model configuration' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Connectivity check result' })
+  @ApiOperation({
+    summary: 'Check AI model connectivity',
+    description: 'Test connectivity of an AI model configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Connectivity check result',
+  })
   async checkAiModelConnectivity(
     @TbAccessToken() accessToken: string,
     @Body() body: any,
@@ -4417,8 +5040,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/autoCommitSettings')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get auto-commit settings', description: 'Get auto-commit settings configuration' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings retrieved' })
+  @ApiOperation({
+    summary: 'Get auto-commit settings',
+    description: 'Get auto-commit settings configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Auto-commit settings retrieved',
+  })
   async getAutoCommitSettings(@TbAccessToken() accessToken: string) {
     const query = new FetchAutoCommitSettingsQuery(accessToken);
     const result = await this.queryBus.execute(query);
@@ -4435,8 +5064,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Post('/autoCommitSettings')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Save auto-commit settings', description: 'Save auto-commit settings configuration' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings saved' })
+  @ApiOperation({
+    summary: 'Save auto-commit settings',
+    description: 'Save auto-commit settings configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Auto-commit settings saved',
+  })
   async saveAutoCommitSettings(
     @TbAccessToken() accessToken: string,
     @Body() body: any,
@@ -4456,8 +5091,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Delete('/autoCommitSettings')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete auto-commit settings', description: 'Delete auto-commit settings configuration' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Auto-commit settings deleted' })
+  @ApiOperation({
+    summary: 'Delete auto-commit settings',
+    description: 'Delete auto-commit settings configuration',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Auto-commit settings deleted',
+  })
   async deleteAutoCommitSettings(@TbAccessToken() accessToken: string) {
     const command = new DeleteAutoCommitSettingsCommand(accessToken);
     const result = await this.commandBus.execute(command);
@@ -4475,12 +5116,15 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Post('/entities/vc/version')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create entities version', description: 'Create a new version of selected entities' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Version creation request ID returned' })
-  async createVersion(
-    @TbAccessToken() accessToken: string,
-    @Body() body: any,
-  ) {
+  @ApiOperation({
+    summary: 'Create entities version',
+    description: 'Create a new version of selected entities',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Version creation request ID returned',
+  })
+  async createVersion(@TbAccessToken() accessToken: string, @Body() body: any) {
     const command = new CreateVersionCommand(accessToken, body);
     const result = await this.commandBus.execute(command);
 
@@ -4496,8 +5140,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/entities/vc/version/:requestId/status')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get version creation status', description: 'Poll for version creation status' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Version creation status' })
+  @ApiOperation({
+    summary: 'Get version creation status',
+    description: 'Poll for version creation status',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Version creation status',
+  })
   async getVersionCreationStatus(
     @TbAccessToken() accessToken: string,
     @Param('requestId') requestId: string,
@@ -4517,7 +5167,10 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/entities/byType/:entityType')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get entities by type', description: 'List entities of a specific type' })
+  @ApiOperation({
+    summary: 'Get entities by type',
+    description: 'List entities of a specific type',
+  })
   @ApiResponse({ status: HttpStatus.OK, description: 'Entities list' })
   async getEntitiesByType(
     @TbAccessToken() accessToken: string,
@@ -4545,8 +5198,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Post('/entities/vc/entity')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Restore version entities', description: 'Restores selected entities from a version' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Version restoration request ID' })
+  @ApiOperation({
+    summary: 'Restore version entities',
+    description: 'Restores selected entities from a version',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Version restoration request ID',
+  })
   async restoreVersion(
     @TbAccessToken() accessToken: string,
     @Body() payload: any,
@@ -4566,8 +5225,14 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/entities/vc/entity/:requestId/status')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get restore version status', description: 'Poll for version restoration status' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Version restoration status' })
+  @ApiOperation({
+    summary: 'Get restore version status',
+    description: 'Poll for version restoration status',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Version restoration status',
+  })
   async getRestoreVersionStatus(
     @TbAccessToken() accessToken: string,
     @Param('requestId') requestId: string,
@@ -4587,7 +5252,10 @@ export class ThingsboardController {
   @UseGuards(ThingsboardAuthGuard)
   @Get('/audit/logs')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get audit logs', description: 'Fetch paginated audit logs' })
+  @ApiOperation({
+    summary: 'Get audit logs',
+    description: 'Fetch paginated audit logs',
+  })
   @ApiResponse({ status: HttpStatus.OK, description: 'Audit logs page' })
   async getAuditLogs(
     @TbAccessToken() accessToken: string,
@@ -4638,7 +5306,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -4664,7 +5334,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -4677,14 +5349,19 @@ export class ThingsboardController {
   async createDomain(
     @TbAccessToken() accessToken: string,
     @Query('oauth2ClientIds') oauth2ClientIds: string = '',
-    @Body() payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; },
+    @Body()
+    payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
   ) {
-    const ids = oauth2ClientIds ? oauth2ClientIds.split(',').filter(Boolean) : [];
+    const ids = oauth2ClientIds
+      ? oauth2ClientIds.split(',').filter(Boolean)
+      : [];
     const command = new CreateDomainCommand(accessToken, payload, ids);
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -4702,7 +5379,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -4716,14 +5395,24 @@ export class ThingsboardController {
     @TbAccessToken() accessToken: string,
     @Param('domainId') domainId: string,
     @Query('oauth2ClientIds') oauth2ClientIds: string = '',
-    @Body() payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; },
+    @Body()
+    payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
   ) {
-    const ids = oauth2ClientIds ? oauth2ClientIds.split(',').filter(Boolean) : [];
-    const command = new UpdateDomainCommand(accessToken, domainId, payload, ids);
+    const ids = oauth2ClientIds
+      ? oauth2ClientIds.split(',').filter(Boolean)
+      : [];
+    const command = new UpdateDomainCommand(
+      accessToken,
+      domainId,
+      payload,
+      ids,
+    );
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -4733,14 +5422,14 @@ export class ThingsboardController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get OAuth2 config templates' })
   @ApiResponse({ status: HttpStatus.OK })
-  async getOAuth2ConfigTemplate(
-    @TbAccessToken() accessToken: string,
-  ) {
+  async getOAuth2ConfigTemplate(@TbAccessToken() accessToken: string) {
     const query = new FetchOAuth2ConfigTemplateQuery(accessToken);
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 }

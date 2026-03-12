@@ -2,259 +2,279 @@
 
 import { useState } from "react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
-import { TimeWindowPicker, TimeWindowValue } from "@/components/molecules/TimeWindowPicker";
+import {
+  TimeWindowPicker,
+  TimeWindowValue,
+} from "@/components/molecules/TimeWindowPicker";
 import { useAuditLogs } from "@/hooks/thingsboard/audit-logs/useAuditLogs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { MoreHorizontal } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 interface AuditLogEntry {
-    id: { id: string };
-    createdTime: number;
-    entityId: { entityType: string; id: string };
-    entityName: string;
-    userId: { id: string };
-    userName: string;
-    actionType: string;
-    actionData: any;
-    actionStatus: string;
-    actionFailureDetails: string;
+  id: { id: string };
+  createdTime: number;
+  entityId: { entityType: string; id: string };
+  entityName: string;
+  userId: { id: string };
+  userName: string;
+  actionType: string;
+  actionData: any;
+  actionStatus: string;
+  actionFailureDetails: string;
 }
 
 // ─── Action status badge ────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
-    const isSuccess = status === "SUCCESS";
-    return (
-        <Badge
-            className={`text-xs font-medium ${isSuccess
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                }`}
-        >
-            {status.charAt(0) + status.slice(1).toLowerCase()}
-        </Badge>
-    );
+  const isSuccess = status === "SUCCESS";
+  return (
+    <Badge
+      className={`text-xs font-medium ${
+        isSuccess
+          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+      }`}
+    >
+      {status.charAt(0) + status.slice(1).toLowerCase()}
+    </Badge>
+  );
 }
 
 // ─── JSON viewer dialog ─────────────────────────────────────────────────────
 function AuditLogDetailsDialog({
-    log,
-    onClose,
+  log,
+  onClose,
 }: {
-    log: AuditLogEntry | null;
-    onClose: () => void;
+  log: AuditLogEntry | null;
+  onClose: () => void;
 }) {
-    if (!log) return null;
-    const json = JSON.stringify(log.actionData, null, 2);
+  if (!log) return null;
+  const json = JSON.stringify(log.actionData, null, 2);
 
-    // Syntax highlight helper
-    const highlighted = json
-        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, (match) => {
-            let cls = "text-amber-600 dark:text-amber-400"; // number / bool / null
-            if (/^"/.test(match)) {
-                if (/:$/.test(match)) {
-                    cls = "text-rose-600 dark:text-rose-400"; // key
-                } else {
-                    cls = "text-emerald-600 dark:text-emerald-400"; // string value
-                }
-            }
-            return `<span class="${cls}">${match}</span>`;
-        });
+  // Syntax highlight helper
+  const highlighted = json.replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
+    (match) => {
+      let cls = "text-amber-600 dark:text-amber-400"; // number / bool / null
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = "text-rose-600 dark:text-rose-400"; // key
+        } else {
+          cls = "text-emerald-600 dark:text-emerald-400"; // string value
+        }
+      }
+      return `<span class="${cls}">${match}</span>`;
+    },
+  );
 
-    return (
-        <Dialog open={!!log} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[540px] max-h-[85vh] flex flex-col p-0 gap-0">
-                <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                    <DialogTitle className="dark:text-white">Audit log details</DialogTitle>
-                </DialogHeader>
-                <div className="flex-1 overflow-y-auto p-6 space-y-3">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Action data</p>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4 overflow-x-auto">
-                        <pre
-                            className="text-xs font-mono leading-relaxed whitespace-pre dark:text-slate-100"
-                            dangerouslySetInnerHTML={{ __html: highlighted }}
-                        />
-                    </div>
-                </div>
-                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-                    <Button variant="outline" onClick={onClose} className="dark:text-white dark:border-slate-600">
-                        Close
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
+  return (
+    <Dialog open={!!log} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[540px] max-h-[85vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <DialogTitle className="dark:text-white">
+            Audit log details
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 overflow-y-auto p-6 space-y-3">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            Action data
+          </p>
+          <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4 overflow-x-auto">
+            <pre
+              className="text-xs font-mono leading-relaxed whitespace-pre dark:text-slate-100"
+              dangerouslySetInnerHTML={{ __html: highlighted }}
+            />
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="dark:text-white dark:border-slate-600"
+          >
+            Close
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 // ─── Main page component ────────────────────────────────────────────────────
 const PAGE_SIZE = 10;
 
 export default function AuditLogsPage() {
-    const [currentPage, setCurrentPage] = useState(0);
-    const [sortProperty, setSortProperty] = useState("createdTime");
-    const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
-    const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [sortProperty, setSortProperty] = useState("createdTime");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+  const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null);
 
-    // Default to "last 1 day"
-    const [timeWindow, setTimeWindow] = useState<TimeWindowValue>({
-        mode: "last",
-        lastMs: 86400000,
-        lastLabel: "1 day",
+  // Default to "last 1 day"
+  const [timeWindow, setTimeWindow] = useState<TimeWindowValue>({
+    mode: "last",
+    lastMs: 86400000,
+    lastLabel: "1 day",
+  });
+
+  // Store computed timestamps to avoid infinite queries caused by Date.now() in render
+  const [timestamps, setTimestamps] = useState<{
+    startTime: number;
+    endTime: number;
+  }>(() => {
+    const end = Date.now();
+    const start = end - 86400000;
+    return { startTime: start, endTime: end };
+  });
+
+  const { logs, totalPages, totalElements, isLoading, mutate } = useAuditLogs(
+    { startTime: timestamps.startTime, endTime: timestamps.endTime },
+    currentPage,
+    PAGE_SIZE,
+    sortProperty,
+    sortOrder,
+  );
+
+  const handleTimeWindowChange = (val: TimeWindowValue) => {
+    setTimeWindow(val);
+
+    let start = 0;
+    let end = Date.now();
+    if (val.mode === "last") {
+      start = end - (val.lastMs ?? 86400000);
+    } else if (val.mode === "range" || val.mode === "relative") {
+      start = val.startTime?.getTime() ?? end - 86400000;
+      end = val.endTime?.getTime() ?? end;
+    }
+
+    setTimestamps({ startTime: start, endTime: end });
+    setCurrentPage(0);
+  };
+
+  const handleSortChange = (property: string, order: "ASC" | "DESC") => {
+    setSortProperty(property);
+    setSortOrder(order);
+    setCurrentPage(0);
+  };
+
+  const formatTimestamp = (ms: number) => {
+    return new Date(ms).toLocaleString("pl-PL", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
+  };
 
-    // Store computed timestamps to avoid infinite queries caused by Date.now() in render
-    const [timestamps, setTimestamps] = useState<{ startTime: number; endTime: number }>(() => {
-        const end = Date.now();
-        const start = end - 86400000;
-        return { startTime: start, endTime: end };
-    });
+  const columns: DataTableColumn<AuditLogEntry>[] = [
+    {
+      key: "createdTime",
+      header: "Timestamp",
+      sortable: true,
+      render: (item) => (
+        <span className="text-slate-900 dark:text-slate-100 text-sm">
+          {formatTimestamp(item.createdTime)}
+        </span>
+      ),
+    },
+    {
+      key: "entityType",
+      header: "Entity type",
+      render: (item) => (
+        <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+          {item.entityId.entityType.charAt(0) +
+            item.entityId.entityType.slice(1).toLowerCase()}
+        </span>
+      ),
+    },
+    {
+      key: "entityName",
+      header: "Entity name",
+      render: (item) => (
+        <span className="dark:text-slate-200 text-sm">{item.entityName}</span>
+      ),
+    },
+    {
+      key: "userName",
+      header: "User",
+      render: (item) => (
+        <span className="text-blue-600 dark:text-blue-400 text-sm">
+          {item.userName}
+        </span>
+      ),
+    },
+    {
+      key: "actionType",
+      header: "Type",
+      render: (item) => (
+        <span className="dark:text-slate-200 text-sm">
+          {item.actionType.charAt(0) + item.actionType.slice(1).toLowerCase()}
+        </span>
+      ),
+    },
+    {
+      key: "actionStatus",
+      header: "Status",
+      render: (item) => <StatusBadge status={item.actionStatus} />,
+    },
+    {
+      key: "details",
+      header: "Details",
+      render: (item) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelectedLog(item);
+          }}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
 
-    const { logs, totalPages, totalElements, isLoading, mutate } = useAuditLogs(
-        { startTime: timestamps.startTime, endTime: timestamps.endTime },
-        currentPage,
-        PAGE_SIZE,
-        sortProperty,
-        sortOrder,
-    );
-
-    const handleTimeWindowChange = (val: TimeWindowValue) => {
-        setTimeWindow(val);
-
-        let start = 0;
-        let end = Date.now();
-        if (val.mode === "last") {
-            start = end - (val.lastMs ?? 86400000);
-        } else if (val.mode === "range" || val.mode === "relative") {
-            start = val.startTime?.getTime() ?? end - 86400000;
-            end = val.endTime?.getTime() ?? end;
+  return (
+    <div className="p-6">
+      <DataTable
+        title="Audit Logs"
+        data={logs}
+        columns={columns}
+        getRowId={(item) => item.id.id}
+        isLoading={isLoading}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        sortProperty={sortProperty}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        onRefresh={() => mutate()}
+        onRowClick={(item) => setSelectedLog(item)}
+        emptyMessage="No audit log entries found for the selected time window."
+        filterComponent={
+          <TimeWindowPicker
+            value={timeWindow}
+            onChange={handleTimeWindowChange}
+          />
         }
+      />
 
-        setTimestamps({ startTime: start, endTime: end });
-        setCurrentPage(0);
-    };
-
-    const handleSortChange = (property: string, order: "ASC" | "DESC") => {
-        setSortProperty(property);
-        setSortOrder(order);
-        setCurrentPage(0);
-    };
-
-    const formatTimestamp = (ms: number) => {
-        return new Date(ms).toLocaleString("pl-PL", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-        });
-    };
-
-    const columns: DataTableColumn<AuditLogEntry>[] = [
-        {
-            key: "createdTime",
-            header: "Timestamp",
-            sortable: true,
-            render: (item) => (
-                <span className="text-slate-900 dark:text-slate-100 text-sm">
-                    {formatTimestamp(item.createdTime)}
-                </span>
-            ),
-        },
-        {
-            key: "entityType",
-            header: "Entity type",
-            render: (item) => (
-                <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
-                    {item.entityId.entityType.charAt(0) + item.entityId.entityType.slice(1).toLowerCase()}
-                </span>
-            ),
-        },
-        {
-            key: "entityName",
-            header: "Entity name",
-            render: (item) => (
-                <span className="dark:text-slate-200 text-sm">{item.entityName}</span>
-            ),
-        },
-        {
-            key: "userName",
-            header: "User",
-            render: (item) => (
-                <span className="text-blue-600 dark:text-blue-400 text-sm">{item.userName}</span>
-            ),
-        },
-        {
-            key: "actionType",
-            header: "Type",
-            render: (item) => (
-                <span className="dark:text-slate-200 text-sm">
-                    {item.actionType.charAt(0) + item.actionType.slice(1).toLowerCase()}
-                </span>
-            ),
-        },
-        {
-            key: "actionStatus",
-            header: "Status",
-            render: (item) => <StatusBadge status={item.actionStatus} />,
-        },
-        {
-            key: "details",
-            header: "Details",
-            render: (item) => (
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedLog(item);
-                    }}
-                >
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
-            ),
-        },
-    ];
-
-    return (
-        <div className="p-6">
-            <DataTable
-                title="Audit Logs"
-                data={logs}
-                columns={columns}
-                getRowId={(item) => item.id.id}
-                isLoading={isLoading}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalElements={totalElements}
-                pageSize={PAGE_SIZE}
-                onPageChange={setCurrentPage}
-                sortProperty={sortProperty}
-                sortOrder={sortOrder}
-                onSortChange={handleSortChange}
-                onRefresh={() => mutate()}
-                onRowClick={(item) => setSelectedLog(item)}
-                emptyMessage="No audit log entries found for the selected time window."
-                filterComponent={
-                    <TimeWindowPicker
-                        value={timeWindow}
-                        onChange={handleTimeWindowChange}
-                    />
-                }
-            />
-
-            <AuditLogDetailsDialog
-                log={selectedLog}
-                onClose={() => setSelectedLog(null)}
-            />
-        </div>
-    );
+      <AuditLogDetailsDialog
+        log={selectedLog}
+        onClose={() => setSelectedLog(null)}
+      />
+    </div>
+  );
 }

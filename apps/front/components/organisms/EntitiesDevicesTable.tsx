@@ -84,7 +84,7 @@ export const EntitiesDevicesTable = ({
         setLoadingDeviceId(null);
       }
     },
-    []
+    [],
   );
 
   const columns: DataTableColumn<Device>[] = [
@@ -122,7 +122,11 @@ export const EntitiesDevicesTable = ({
       header: "Public",
       sortable: false,
       render: (device) => (
-        <Checkbox checked={device.customerIsPublic} disabled className="cursor-default" />
+        <Checkbox
+          checked={device.customerIsPublic}
+          disabled
+          className="cursor-default"
+        />
       ),
     },
     {

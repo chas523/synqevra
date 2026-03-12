@@ -50,7 +50,10 @@ const TELEMETRY_TYPES: Array<{ value: TelemetryType; label: string }> = [
   { value: "json", label: "JSON" },
 ];
 
-const parseTelemetryValue = (type: TelemetryType, rawValue: string): unknown => {
+const parseTelemetryValue = (
+  type: TelemetryType,
+  rawValue: string,
+): unknown => {
   if (type === "string") {
     return rawValue;
   }
@@ -117,7 +120,7 @@ export function AssetLatestTelemetryTabContent({
 
   const { data: attributes, isLoading: isLoadingAttributes } = useSWR(
     assetId ? ["assetAttributes", assetId] : null,
-    async () => AssetService.fetchAssetSharedAttributes(assetId)
+    async () => AssetService.fetchAssetSharedAttributes(assetId),
   );
 
   const configuredKeys = useMemo(() => {
@@ -125,7 +128,9 @@ export function AssetLatestTelemetryTabContent({
       return [] as string[];
     }
 
-    const telemetryKeysAttribute = attributes.find((attribute) => attribute.key === "telemetry_keys")?.value;
+    const telemetryKeysAttribute = attributes.find(
+      (attribute) => attribute.key === "telemetry_keys",
+    )?.value;
 
     if (Array.isArray(telemetryKeysAttribute)) {
       return telemetryKeysAttribute
@@ -155,16 +160,15 @@ export function AssetLatestTelemetryTabContent({
     assetId && telemetryKeys.length > 0
       ? ["assetLatestTelemetry", assetId, telemetryKeys.join(",")]
       : null,
-    async () => AssetService.fetchAssetLatestTelemetry(assetId, telemetryKeys)
+    async () => AssetService.fetchAssetLatestTelemetry(assetId, telemetryKeys),
   );
 
   const {
     data: allTelemetryKeys,
     isLoading: isLoadingAllTelemetryKeys,
     mutate: mutateAllTelemetryKeys,
-  } = useSWR(
-    assetId ? ["assetLatestTelemetryKeys", assetId] : null,
-    async () => AssetService.fetchAssetLatestTelemetryKeys(assetId)
+  } = useSWR(assetId ? ["assetLatestTelemetryKeys", assetId] : null, async () =>
+    AssetService.fetchAssetLatestTelemetryKeys(assetId),
   );
 
   const {
@@ -175,7 +179,8 @@ export function AssetLatestTelemetryTabContent({
     assetId && allTelemetryKeys && allTelemetryKeys.length > 0
       ? ["assetLatestTelemetryAll", assetId, allTelemetryKeys.join(",")]
       : null,
-    async () => AssetService.fetchAssetLatestTelemetry(assetId, allTelemetryKeys || [])
+    async () =>
+      AssetService.fetchAssetLatestTelemetry(assetId, allTelemetryKeys || []),
   );
 
   const rows: TelemetryRow[] = useMemo(() => {
@@ -185,12 +190,15 @@ export function AssetLatestTelemetryTabContent({
 
     return Object.entries(latestTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
-      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>((current, item) => {
-        if (!current || item.ts > current.ts) {
-          return item;
-        }
-        return current;
-      }, null);
+      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
+        (current, item) => {
+          if (!current || item.ts > current.ts) {
+            return item;
+          }
+          return current;
+        },
+        null,
+      );
 
       return {
         id: `${key}-${index}`,
@@ -208,12 +216,15 @@ export function AssetLatestTelemetryTabContent({
 
     return Object.entries(allLatestTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
-      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>((current, item) => {
-        if (!current || item.ts > current.ts) {
-          return item;
-        }
-        return current;
-      }, null);
+      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
+        (current, item) => {
+          if (!current || item.ts > current.ts) {
+            return item;
+          }
+          return current;
+        },
+        null,
+      );
 
       return {
         id: `all-${key}-${index}`,
@@ -230,9 +241,7 @@ export function AssetLatestTelemetryTabContent({
         key: "lastUpdateTs",
         header: "Last update time",
         render: (row) =>
-          row.lastUpdateTs
-            ? new Date(row.lastUpdateTs).toLocaleString()
-            : "-",
+          row.lastUpdateTs ? new Date(row.lastUpdateTs).toLocaleString() : "-",
         className: "w-1/3 text-slate-700",
       },
       {
@@ -246,7 +255,7 @@ export function AssetLatestTelemetryTabContent({
         className: "font-mono text-sm text-slate-600",
       },
     ],
-    []
+    [],
   );
 
   const valuePlaceholder = useMemo(() => {
@@ -299,8 +308,12 @@ export function AssetLatestTelemetryTabContent({
 
     setIsSubmitting(true);
     try {
-      await AssetService.addAssetLatestTelemetry(assetId, { [key]: parsedValue });
-      setManualKeys((current) => (current.includes(key) ? current : [...current, key]));
+      await AssetService.addAssetLatestTelemetry(assetId, {
+        [key]: parsedValue,
+      });
+      setManualKeys((current) =>
+        current.includes(key) ? current : [...current, key],
+      );
       await mutateLatestTelemetry();
       await mutateAllTelemetryKeys();
       await mutateAllLatestTelemetry();
@@ -344,7 +357,11 @@ export function AssetLatestTelemetryTabContent({
         }
       />
 
-      <Accordion type="single" collapsible className="w-full rounded-md border px-4">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full rounded-md border px-4"
+      >
         <AccordionItem value="all-latest-telemetry" className="border-b-0">
           <AccordionTrigger className="text-sm font-medium">
             Show all latest telemetry (unfiltered)
@@ -368,7 +385,10 @@ export function AssetLatestTelemetryTabContent({
         </AccordionItem>
       </Accordion>
 
-      <Dialog open={isDialogOpen} onOpenChange={(open) => (!isSubmitting ? setIsDialogOpen(open) : null)}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => (!isSubmitting ? setIsDialogOpen(open) : null)}
+      >
         <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>Add telemetry</DialogTitle>
@@ -391,7 +411,9 @@ export function AssetLatestTelemetryTabContent({
                 <Label>Type</Label>
                 <SelectAdmin
                   value={telemetryType}
-                  onValueChange={(value) => setTelemetryType(value as TelemetryType)}
+                  onValueChange={(value) =>
+                    setTelemetryType(value as TelemetryType)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger className="w-full">
@@ -399,7 +421,10 @@ export function AssetLatestTelemetryTabContent({
                   </SelectTrigger>
                   <SelectContent>
                     {TELEMETRY_TYPES.map((typeOption) => (
-                      <SelectItem key={typeOption.value} value={typeOption.value}>
+                      <SelectItem
+                        key={typeOption.value}
+                        value={typeOption.value}
+                      >
                         {typeOption.label}
                       </SelectItem>
                     ))}
@@ -421,10 +446,19 @@ export function AssetLatestTelemetryTabContent({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Adding..." : "Add"}
             </Button>
           </DialogFooter>

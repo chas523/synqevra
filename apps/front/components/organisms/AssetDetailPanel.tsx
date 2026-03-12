@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { EntityDetailPanel, TabConfig } from "@/components/templates/EntityDetailPanel";
+import {
+  EntityDetailPanel,
+  TabConfig,
+} from "@/components/templates/EntityDetailPanel";
 import { AssetDetailsTabContent } from "./AssetDetailsTabContent";
 import { AssetAttributesTabContent } from "./AssetAttributesTabContent";
 import { AssetLatestTelemetryTabContent } from "./AssetLatestTelemetryTabContent";
@@ -47,12 +50,16 @@ export function AssetDetailPanel({
       {
         id: "telemetry",
         label: "Latest telemetry",
-        content: <AssetLatestTelemetryTabContent assetId={asset.id?.id ?? ""} />,
+        content: (
+          <AssetLatestTelemetryTabContent assetId={asset.id?.id ?? ""} />
+        ),
       },
       {
         id: "calculated-fields",
         label: "Calculated fields",
-        content: <AssetCalculatedFieldsTabContent assetId={asset.id?.id ?? ""} />,
+        content: (
+          <AssetCalculatedFieldsTabContent assetId={asset.id?.id ?? ""} />
+        ),
       },
       {
         id: "alarms",
@@ -77,7 +84,11 @@ export function AssetDetailPanel({
       {
         id: "version-control",
         label: "Version control",
-        content: <div className="p-4 text-center text-slate-500">Version control coming soon</div>,
+        content: (
+          <div className="p-4 text-center text-slate-500">
+            Version control coming soon
+          </div>
+        ),
       },
     ];
   }, [asset]);

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useRef, useState } from "react";
@@ -147,15 +147,15 @@ const InvitePractitionerModal = ({
                 status === "loading"
                   ? "loading"
                   : status === "success"
-                  ? "success"
-                  : "error"
+                    ? "success"
+                    : "error"
               }
               title={
                 status === "loading"
                   ? "Sending Invitation"
                   : status === "success"
-                  ? "Success!"
-                  : "Error"
+                    ? "Success!"
+                    : "Error"
               }
               messages={["Preparing invitation...", "Sending email..."]}
               successMessage="Invitation sent successfully!"

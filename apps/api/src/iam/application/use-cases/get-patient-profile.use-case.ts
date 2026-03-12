@@ -9,7 +9,7 @@ export class GetPatientProfileUseCase {
   constructor(
     private readonly medplumClientPort: MedplumClientPort,
     private readonly patientRepository: PatientRepository,
-  ) { }
+  ) {}
 
   async execute(patientId: number, credentials: MedplumCredentials) {
     if (!credentials) {
@@ -23,11 +23,12 @@ export class GetPatientProfileUseCase {
       throw new NotFoundException('Patient not found');
     }
 
-    const patient = await this.medplumClientPort.findPatientProfileByEmailWithClientIdClientSecret(
-      patientModel.email,
-      clientId,
-      clientSecret,
-    );
+    const patient =
+      await this.medplumClientPort.findPatientProfileByEmailWithClientIdClientSecret(
+        patientModel.email,
+        clientId,
+        clientSecret,
+      );
 
     const name = patient?.name?.[0];
     return {
@@ -35,7 +36,7 @@ export class GetPatientProfileUseCase {
       email: patientModel.email,
       firstName: name?.given?.[0] || '',
       lastName: name?.family || '',
-      role: Role.PATIENT
+      role: Role.PATIENT,
     };
   }
 }

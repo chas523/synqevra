@@ -22,7 +22,7 @@ export function PatientAssignmentCompact({
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<PatientShort | null>(
-    null
+    null,
   );
 
   //TODO - fire request to searchPatientsBySearchPhrase.

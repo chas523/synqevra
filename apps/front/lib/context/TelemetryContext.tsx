@@ -105,7 +105,7 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
       "commands-sent",
       (data: { success: boolean; topic: string; count: number }) => {
         console.log(`commands sent: ${data.topic} (${data.count})`);
-      }
+      },
     );
 
     socket.on("error", (data: { message: string; topic?: string }) => {
@@ -168,10 +168,12 @@ export function TelemetryProvider({ children }: { children: React.ReactNode }) {
   const markNotificationsAsRead = useCallback(
     (ids: string[]) => {
       if (socketRef.current && isThingsboardConnected) {
-        socketRef.current.emit("mark-notifications-read", { notifications: ids });
+        socketRef.current.emit("mark-notifications-read", {
+          notifications: ids,
+        });
       }
     },
-    [isThingsboardConnected]
+    [isThingsboardConnected],
   );
 
   return (
@@ -198,7 +200,7 @@ export function useTelemetryContext() {
   const context = useContext(TelemetryContext);
   if (!context) {
     throw new Error(
-      "useTelemetryContext must be used within TelemetryProvider."
+      "useTelemetryContext must be used within TelemetryProvider.",
     );
   }
   return context;

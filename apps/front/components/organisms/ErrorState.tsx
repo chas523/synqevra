@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {ErrorMessageAtom as ErrorMessage} from "@/components/atoms/ErrorMessage";
+import { ErrorMessageAtom as ErrorMessage } from "@/components/atoms/ErrorMessage";
 
 interface ErrorStateProps {
   title: string;

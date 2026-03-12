@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { EntityDetailPanel, TabConfig } from "@/components/templates/EntityDetailPanel";
+import {
+  EntityDetailPanel,
+  TabConfig,
+} from "@/components/templates/EntityDetailPanel";
 import { DeviceDetailsTabContent } from "./DeviceDetailsTabContent";
 import { DeviceAttributesTabContent } from "./DeviceAttributesTabContent";
 import { DeviceLatestTelemetryTabContent } from "./DeviceLatestTelemetryTabContent";
@@ -48,12 +51,16 @@ export function DeviceDetailPanel({
       {
         id: "telemetry",
         label: "Latest telemetry",
-        content: <DeviceLatestTelemetryTabContent deviceId={device.id?.id ?? ""} />,
+        content: (
+          <DeviceLatestTelemetryTabContent deviceId={device.id?.id ?? ""} />
+        ),
       },
       {
         id: "calculated-fields",
         label: "Calculated fields",
-        content: <DeviceCalculatedFieldsTabContent deviceId={device.id?.id ?? ""} />,
+        content: (
+          <DeviceCalculatedFieldsTabContent deviceId={device.id?.id ?? ""} />
+        ),
       },
       {
         id: "alarms",
@@ -78,7 +85,11 @@ export function DeviceDetailPanel({
       {
         id: "version-control",
         label: "Version control",
-        content: <div className="p-4 text-center text-slate-500">Version control coming soon</div>,
+        content: (
+          <div className="p-4 text-center text-slate-500">
+            Version control coming soon
+          </div>
+        ),
       },
     ];
   }, [device]);

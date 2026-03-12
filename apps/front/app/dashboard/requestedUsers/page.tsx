@@ -1,5 +1,4 @@
-import {RequestedUsersPage} from "@/components/pages/RequestedUsersPage";
-
+import { RequestedUsersPage } from "@/components/pages/RequestedUsersPage";
 
 const RequestedUsers = () => {
   return <RequestedUsersPage />;

@@ -1,4 +1,4 @@
-import {Text} from "@/components/atoms/Text";
+import { Text } from "@/components/atoms/Text";
 
 interface EmptyStateProps {
   icon: React.ReactNode;

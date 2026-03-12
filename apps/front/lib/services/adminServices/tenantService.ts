@@ -69,7 +69,10 @@ export class TenantService {
 
       return this.mapTenantProfilesResponse(response.data, options.limit ?? 20);
     } catch (err: unknown) {
-      const message = extractErrorMessage(err, "Failed to fetch tenant profiles");
+      const message = extractErrorMessage(
+        err,
+        "Failed to fetch tenant profiles",
+      );
       throw new Error(message);
     }
   }
@@ -140,10 +143,10 @@ export class TenantService {
     try {
       let url = `/dashboard/tenant-profiles/${profileId}/alarms?page=${page}&pageSize=${pageSize}`;
       if (statusList && statusList.length > 0) {
-        url += `&statusList=${statusList.join(',')}`;
+        url += `&statusList=${statusList.join(",")}`;
       }
       if (severityList && severityList.length > 0) {
-        url += `&severityList=${severityList.join(',')}`;
+        url += `&severityList=${severityList.join(",")}`;
       }
       if (startTime !== undefined) {
         url += `&startTime=${startTime}`;
@@ -161,7 +164,6 @@ export class TenantService {
       throw new Error(message);
     }
   }
-
 
   public static async getTenantById(tenantId: string): Promise<Tenant> {
     try {
@@ -349,10 +351,10 @@ export class TenantService {
     try {
       let url = `/dashboard/tenants/${tenantId}/alarms?page=${page}&pageSize=${pageSize}`;
       if (statusList && statusList.length > 0) {
-        url += `&statusList=${statusList.join(',')}`;
+        url += `&statusList=${statusList.join(",")}`;
       }
       if (severityList && severityList.length > 0) {
-        url += `&severityList=${severityList.join(',')}`;
+        url += `&severityList=${severityList.join(",")}`;
       }
       if (startTime !== undefined) {
         url += `&startTime=${startTime}`;
@@ -487,10 +489,7 @@ export class TenantService {
     relation: any,
   ): Promise<void> {
     try {
-      await proxyApi.post(
-        `/dashboard/tenants/${tenantId}/relations`,
-        relation,
-      );
+      await proxyApi.post(`/dashboard/tenants/${tenantId}/relations`, relation);
     } catch (err: unknown) {
       const message = extractErrorMessage(
         err,
@@ -509,7 +508,10 @@ export class TenantService {
       );
       return response.data;
     } catch (err: unknown) {
-      console.warn(`Failed to fetch connection status for tenant ${tenantId}`, err);
+      console.warn(
+        `Failed to fetch connection status for tenant ${tenantId}`,
+        err,
+      );
       // Return null or default state on failure, or rethrow if critical
       return { medplum: null };
     }
@@ -657,4 +659,3 @@ export interface EntityRelation {
   fromName?: string;
   toName?: string;
 }
-

@@ -7,18 +7,20 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getImagePreviewUrl = (link?: string): string => {
-  if (!link) return '';
-  if (link.startsWith('data:') || link.startsWith('http')) return link;
+  if (!link) return "";
+  if (link.startsWith("data:") || link.startsWith("http")) return link;
 
   // Handle ThingsBoard specific prefix
   let cleanLink = link;
-  if (link.startsWith('tb-image;')) {
-    cleanLink = link.replace('tb-image;', '');
+  if (link.startsWith("tb-image;")) {
+    cleanLink = link.replace("tb-image;", "");
   }
 
   // Use the frontend proxy route that handles image downloads and previews correctly
   // Pattern taken from ScadaSymbolsTable.tsx and ImageGalleryTable.tsx
-  const previewLink = cleanLink.endsWith('/preview') ? cleanLink : `${cleanLink}/preview`;
+  const previewLink = cleanLink.endsWith("/preview")
+    ? cleanLink
+    : `${cleanLink}/preview`;
   return `/api/thingsboard/images/download/${encodeURIComponent(previewLink)}`;
 };
 

@@ -100,14 +100,14 @@ const NotificationButton = () => {
                       key={notification.id.id}
                       className={cn(
                         "flex gap-3 p-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 group",
-                        !isRead && "bg-blue-50/50 dark:bg-blue-900/10"
+                        !isRead && "bg-blue-50/50 dark:bg-blue-900/10",
                       )}
                     >
                       <div className="flex-1 space-y-1">
                         <p
                           className={cn(
                             "text-sm font-medium leading-none",
-                            !isRead && "text-blue-600 dark:text-blue-400"
+                            !isRead && "text-blue-600 dark:text-blue-400",
                           )}
                         >
                           {notification.subject || "Notification"}
@@ -124,7 +124,9 @@ const NotificationButton = () => {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 shrink-0 text-slate-400 hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/40"
-                          onClick={(e) => handleMarkAsRead(notification.id.id, e)}
+                          onClick={(e) =>
+                            handleMarkAsRead(notification.id.id, e)
+                          }
                           title="Mark as read"
                         >
                           <Check className="h-4 w-4" />

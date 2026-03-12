@@ -82,6 +82,29 @@ export interface CustomerInfo {
   };
 }
 
+export interface EntityView {
+  id: EntityId;
+  createdTime: number;
+  entityId: EntityId;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  name: string;
+  type: string;
+  keys?: {
+    timeseries?: Record<string, unknown> | null;
+    attributes?: Record<string, unknown> | null;
+  };
+  startTimeMs?: number;
+  endTimeMs?: number;
+  externalId?: string | null;
+  version?: number;
+  customerTitle?: string | null;
+  customerIsPublic?: boolean;
+  additionalInfo?: {
+    description?: string;
+  };
+}
+
 // /api/tenants{?pageSize,page,textSearch,sortProperty,sortOrder}
 export interface Tenant {
   id: EntityId;

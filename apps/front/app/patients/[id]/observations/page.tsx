@@ -20,7 +20,7 @@ const Page = () => {
   const { observations, isLoadingObservations, observationsError } =
     useMedplumObservationsByPatientId(
       patientId,
-      OBSERVATIONS_COUNT_ON_OBSERVATION_PAGE
+      OBSERVATIONS_COUNT_ON_OBSERVATION_PAGE,
     );
 
   if (!patientId) {

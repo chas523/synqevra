@@ -1,10 +1,10 @@
 "use client";
 
-import {useState} from "react";
-import {TenantsListPage} from "@/components/pages/TenantsListPage";
-import {usePagination, useSortFilter, useTenants} from "@/hooks/dashboard";
-import {SORT_OPTIONS} from "@/lib/constants";
-import type {TenantsRequestOptions} from "@/lib/types/dashboardTypes";
+import { useState } from "react";
+import { TenantsListPage } from "@/components/pages/TenantsListPage";
+import { usePagination, useSortFilter, useTenants } from "@/hooks/dashboard";
+import { SORT_OPTIONS } from "@/lib/constants";
+import type { TenantsRequestOptions } from "@/lib/types/dashboardTypes";
 
 export const TenantsPage = () => {
   const [options, setOptions] = useState<TenantsRequestOptions>({

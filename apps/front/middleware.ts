@@ -11,7 +11,7 @@ export function middleware(req: NextRequest) {
   const alwaysPublic = ["/", "/dashboard/requestedUsers"];
 
   const isGuestRoute = publicForGuests.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
   const isAlwaysPublic = alwaysPublic.some((route) => pathname === route);
 

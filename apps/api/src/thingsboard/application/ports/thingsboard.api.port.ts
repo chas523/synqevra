@@ -303,6 +303,49 @@ export abstract class ThingsboardApiPort {
     textSearch?: string,
   ): Promise<CustomersResponse>;
 
+  // Entity View operations
+  abstract fetchEntityViews(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    type?: string,
+  ): Promise<EntityViewsResponse>;
+  abstract fetchEntityViewTypes(
+    accessToken: string,
+  ): Promise<EntityViewTypeInfo[]>;
+  abstract createEntityView(
+    accessToken: string,
+    payload: CreateEntityViewRequest,
+  ): Promise<EntityView>;
+  abstract fetchEntityView(
+    accessToken: string,
+    id: string,
+  ): Promise<EntityView>;
+  abstract saveEntityView(
+    accessToken: string,
+    payload: Partial<EntityView> & { id: EntityId },
+  ): Promise<EntityView>;
+  abstract fetchEntityViewTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]>;
+  abstract fetchEntityViewLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse>;
+  abstract makeEntityViewPublic(
+    accessToken: string,
+    id: string,
+  ): Promise<EntityView>;
+  abstract makeEntityViewPrivate(
+    accessToken: string,
+    id: string,
+  ): Promise<EntityView>;
+  abstract deleteEntityView(accessToken: string, id: string): Promise<void>;
+
   // Admin operations
   abstract fetchTenants(
     sysAdminAccessToken: string,
@@ -501,6 +544,12 @@ export abstract class ThingsboardApiPort {
     entityId: string,
     scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
   ): Promise<TenantAttributesResponse>;
+
+  abstract fetchEntityAttributeKeys(
+    sysAdminAccessToken: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<string[]>;
 
   abstract fetchEntityAlarms(
     sysAdminAccessToken: string,
@@ -734,15 +783,9 @@ export abstract class ThingsboardApiPort {
     payload: CreateOtaPackageRequestDto,
   ): Promise<OtaPackageDto>;
 
-  abstract deleteOtaPackage(
-    accessToken: string,
-    id: string,
-  ): Promise<void>;
+  abstract deleteOtaPackage(accessToken: string, id: string): Promise<void>;
 
-  abstract downloadOtaPackage(
-    accessToken: string,
-    id: string,
-  ): Promise<Buffer>;
+  abstract downloadOtaPackage(accessToken: string, id: string): Promise<Buffer>;
 
   abstract fetchDeviceProfileInfos(
     accessToken: string,
@@ -790,38 +833,96 @@ export abstract class ThingsboardApiPort {
   abstract saveTrendzSettings(accessToken: string, payload: any): Promise<any>;
 
   // AI Model operations
-  abstract getAiModels(accessToken: string, page: number, pageSize: number, sortProperty: string, sortOrder: string): Promise<any>;
+  abstract getAiModels(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: string,
+  ): Promise<any>;
 
   abstract saveAiModel(accessToken: string, payload: any): Promise<any>;
 
   abstract deleteAiModel(accessToken: string, modelId: string): Promise<any>;
 
-  abstract checkAiModelConnectivity(accessToken: string, payload: any): Promise<any>;
+  abstract checkAiModelConnectivity(
+    accessToken: string,
+    payload: any,
+  ): Promise<any>;
 
   // Auto-commit settings
   abstract getAutoCommitSettings(accessToken: string): Promise<any>;
 
-  abstract saveAutoCommitSettings(accessToken: string, payload: any): Promise<any>;
+  abstract saveAutoCommitSettings(
+    accessToken: string,
+    payload: any,
+  ): Promise<any>;
 
   abstract deleteAutoCommitSettings(accessToken: string): Promise<any>;
 
   // Version creation & entity listing
   abstract createVersion(accessToken: string, payload: any): Promise<string>;
-  abstract getVersionCreationStatus(accessToken: string, requestId: string): Promise<any>;
+  abstract getVersionCreationStatus(
+    accessToken: string,
+    requestId: string,
+  ): Promise<any>;
   abstract restoreVersion(accessToken: string, payload: any): Promise<string>;
-  abstract getRestoreVersionStatus(accessToken: string, requestId: string): Promise<any>;
+  abstract getRestoreVersionStatus(
+    accessToken: string,
+    requestId: string,
+  ): Promise<any>;
 
-  abstract getEntitiesByType(accessToken: string, entityType: string, page: number, pageSize: number): Promise<any>;
+  abstract getEntitiesByType(
+    accessToken: string,
+    entityType: string,
+    page: number,
+    pageSize: number,
+  ): Promise<any>;
 
   // Audit logs
-  abstract getAuditLogs(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; startTime: number; endTime: number; }): Promise<any>;
+  abstract getAuditLogs(
+    accessToken: string,
+    params: {
+      pageSize: number;
+      page: number;
+      sortProperty: string;
+      sortOrder: string;
+      startTime: number;
+      endTime: number;
+    },
+  ): Promise<any>;
 
   // OAuth2 / Domains
-  abstract getDomainInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
-  abstract getOAuth2ClientInfos(accessToken: string, params: { pageSize: number; page: number; sortProperty: string; sortOrder: string; }): Promise<any>;
-  abstract createDomain(accessToken: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
+  abstract getDomainInfos(
+    accessToken: string,
+    params: {
+      pageSize: number;
+      page: number;
+      sortProperty: string;
+      sortOrder: string;
+    },
+  ): Promise<any>;
+  abstract getOAuth2ClientInfos(
+    accessToken: string,
+    params: {
+      pageSize: number;
+      page: number;
+      sortProperty: string;
+      sortOrder: string;
+    },
+  ): Promise<any>;
+  abstract createDomain(
+    accessToken: string,
+    payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
+    oauth2ClientIds: string[],
+  ): Promise<any>;
   abstract getDomainById(accessToken: string, domainId: string): Promise<any>;
-  abstract updateDomain(accessToken: string, domainId: string, payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean; }, oauth2ClientIds: string[]): Promise<any>;
+  abstract updateDomain(
+    accessToken: string,
+    domainId: string,
+    payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
+    oauth2ClientIds: string[],
+  ): Promise<any>;
   abstract getOAuth2ConfigTemplate(accessToken: string): Promise<any>;
 }
 
@@ -1024,6 +1125,58 @@ export interface CustomersResponse {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+}
+
+export interface EntityView {
+  id: EntityId;
+  createdTime: number;
+  entityId: EntityId;
+  tenantId: EntityId;
+  customerId?: EntityId;
+  name: string;
+  type: string;
+  keys?: {
+    timeseries?: Record<string, unknown> | string[] | null;
+    attributes?: Record<string, unknown> | null;
+  };
+  startTimeMs?: number;
+  endTimeMs?: number;
+  externalId?: string | null;
+  version?: number;
+  customerTitle?: string | null;
+  customerIsPublic?: boolean;
+  additionalInfo?: {
+    description?: string;
+  };
+}
+
+export interface EntityViewsResponse {
+  data: EntityView[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface EntityViewTypeInfo {
+  tenantId: EntityId;
+  entityType: 'ENTITY_VIEW';
+  type: string;
+}
+
+export interface CreateEntityViewRequest {
+  entityId: EntityId;
+  name: string;
+  type: string;
+  keys?: {
+    timeseries?: Record<string, unknown> | string[] | null;
+    attributes?: Record<string, unknown> | null;
+  };
+  startTimeMs?: number;
+  endTimeMs?: number;
+  customerId?: EntityId;
+  additionalInfo?: {
+    description?: string;
+  };
 }
 
 export interface RelationInfo {

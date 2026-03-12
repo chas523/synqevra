@@ -15,7 +15,7 @@ export interface UseMedplumPatientDeviceResult {
 }
 
 export const useMedplumPatientDevice = (
-  deviceId?: string
+  deviceId?: string,
 ): UseMedplumPatientDeviceResult => {
   const [isAssigning, setIsAssigning] = useState(false);
   const [assignError, setAssignError] = useState<Error | null>(null);
@@ -34,16 +34,16 @@ export const useMedplumPatientDevice = (
           name: patient.name || [],
           photo: patient.photo,
           telecom: patient.telecom?.filter(
-            (t) => t.system === "phone" && t.use === "mobile"
+            (t) => t.system === "phone" && t.use === "mobile",
           ),
-        } as PatientShort)
+        }) as PatientShort,
     );
   });
 
   // Assign patient to device function
   const assignPatientToDevice = async (
     patientId: string,
-    targetDeviceId: string
+    targetDeviceId: string,
   ) => {
     const finalDeviceId = targetDeviceId || deviceId;
 
@@ -57,7 +57,7 @@ export const useMedplumPatientDevice = (
     try {
       const result = await PatientService.assignPatientToDevice(
         patientId,
-        finalDeviceId
+        finalDeviceId,
       );
       return result;
     } catch (err) {

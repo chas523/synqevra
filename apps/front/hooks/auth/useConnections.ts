@@ -18,7 +18,7 @@ export function useTokenValidation(token?: string) {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   return {
@@ -35,7 +35,7 @@ export function useEstablishConnection(token: string) {
   const [success, setSuccess] = useState(false);
 
   async function establishConnection(
-    thingsboardConnectionForm: ApiData
+    thingsboardConnectionForm: ApiData,
   ): Promise<ConnectionResponse | undefined> {
     setLoading(true);
     setError(null);
@@ -45,7 +45,7 @@ export function useEstablishConnection(token: string) {
       console.log("in hook before");
       const response = await ConnectionService.establishConnection(
         thingsboardConnectionForm,
-        token
+        token,
       );
       console.log("in hook after");
       // Save data to localStorage as thingsboard object
@@ -64,7 +64,7 @@ export function useEstablishConnection(token: string) {
     } catch (err) {
       const errorMessage = extractErrorMessage(
         err,
-        "Connection not established"
+        "Connection not established",
       );
       setError(errorMessage);
     } finally {
@@ -91,7 +91,7 @@ export function useConfiguratePractitioner(token: string) {
   const [success, setSuccess] = useState(false);
 
   async function configurePractitioner(
-    data: ConfigurePractitionerData
+    data: ConfigurePractitionerData,
   ): Promise<void> {
     setLoading(true);
     setError(null);
@@ -103,7 +103,7 @@ export function useConfiguratePractitioner(token: string) {
     } catch (err) {
       const errorMessage = extractErrorMessage(
         err,
-        "Failed to configure practitioner"
+        "Failed to configure practitioner",
       );
       setError(errorMessage);
     } finally {
@@ -124,7 +124,7 @@ export function useGetUserByToken(token?: string) {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   return {

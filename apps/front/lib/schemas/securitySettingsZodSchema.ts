@@ -81,7 +81,7 @@ export const configureSecuritySettingsSchema = z
     {
       message: "Maximum password length must be greater than minimum length",
       path: ["passwordPolicy", "maximumLength"],
-    }
+    },
   );
 
 export type ConfigureSecuritySettingsFormData = z.infer<

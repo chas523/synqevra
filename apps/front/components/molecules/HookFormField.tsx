@@ -26,7 +26,7 @@ export interface HookFormFieldProps<T extends FieldValues = FieldValues> {
 
 const getNestedError = (
   errors: FieldErrors,
-  path: string
+  path: string,
 ): string | undefined => {
   const keys = path.split(".");
   let current: any = errors;

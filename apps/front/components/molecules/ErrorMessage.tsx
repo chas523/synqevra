@@ -17,7 +17,11 @@ const ErrorMessage = ({
   const textAlignClass = `text-${align}`;
 
   return (
-    <Text size="xs" color="error" className={`${allStyles.join(" ")} ${textAlignClass}`}>
+    <Text
+      size="xs"
+      color="error"
+      className={`${allStyles.join(" ")} ${textAlignClass}`}
+    >
       {message}
     </Text>
   );

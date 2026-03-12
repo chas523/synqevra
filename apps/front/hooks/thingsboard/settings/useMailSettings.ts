@@ -6,35 +6,35 @@ import { SettingsService } from "@/lib/services/thingsboardServices/settingsServ
 import { MailSettings } from "@/types/mailSettingsTypes";
 
 export const useMailSettings = () => {
-    const {
-        data: mailSettings,
-        error: mailError,
-        isLoading: mailLoading,
-        mutate,
-    } = useSWR<MailSettings>("mail-settings", () =>
-        SettingsService.getMailSettings()
-    );
+  const {
+    data: mailSettings,
+    error: mailError,
+    isLoading: mailLoading,
+    mutate,
+  } = useSWR<MailSettings>("mail-settings", () =>
+    SettingsService.getMailSettings(),
+  );
 
-    return { mailSettings, mailError, mailLoading, mutate };
+  return { mailSettings, mailError, mailLoading, mutate };
 };
 
 export const useUpdateMailSettings = () => {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-    const updateMailSettings = async (mailSettings: MailSettings) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const settings = await SettingsService.updateMailSettings(mailSettings);
-            return settings;
-        } catch (err) {
-            setError(err as Error);
-            throw err;
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const updateMailSettings = async (mailSettings: MailSettings) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const settings = await SettingsService.updateMailSettings(mailSettings);
+      return settings;
+    } catch (err) {
+      setError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return { updateMailSettings, isLoading, error };
+  return { updateMailSettings, isLoading, error };
 };

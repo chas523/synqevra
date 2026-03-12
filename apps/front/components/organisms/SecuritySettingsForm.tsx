@@ -53,7 +53,7 @@ export const SecuritySettingsForm = ({
   } = form;
 
   const onSubmit: SubmitHandler<ConfigureSecuritySettingsFormData> = async (
-    data
+    data,
   ) => {
     await onSave(data);
   };

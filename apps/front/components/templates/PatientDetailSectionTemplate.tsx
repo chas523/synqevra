@@ -22,7 +22,7 @@ export function PatientDetailSection({
     <div
       className={cn(
         "rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-4 shadow-sm dark:shadow-xl",
-        className
+        className,
       )}
     >
       <div className="mb-3 flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2">

@@ -89,70 +89,81 @@ export class DeviceService {
     page = 0,
     pageSize = 10,
     sortProperty = "createdTime",
-    sortOrder: "ASC" | "DESC" = "DESC"
+    sortOrder: "ASC" | "DESC" = "DESC",
   ): Promise<DevicesResponse> {
     const { data } = await proxyApi.get(
-      `/thingsboard/devices?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`
+      `/thingsboard/devices?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
     );
     return data;
   }
 
   public static async fetchDevice(id: string): Promise<DeviceDetails> {
     const { data } = await proxyApi.get<DeviceDetails>(
-      `/thingsboard/devices/${id}`
+      `/thingsboard/devices/${id}`,
     );
     return data;
   }
 
   public static async updateDevice(
     id: string,
-    payload: Partial<DeviceDetails>
+    payload: Partial<DeviceDetails>,
   ): Promise<DeviceDetails> {
     const { data } = await proxyApi.put<DeviceDetails>(
       `/thingsboard/devices/${id}`,
-      payload
+      payload,
     );
     return data;
   }
 
   public static async createDevice(
-    payload: CreateDeviceRequest
+    payload: CreateDeviceRequest,
   ): Promise<Device> {
     const { data } = await proxyApi.post<Device>(
       "/thingsboard/devices",
-      payload
+      payload,
     );
     return data;
   }
 
   public static async fetchDeviceSharedAttributes(
-    id: string
+    id: string,
   ): Promise<DeviceAttributes> {
     const { data } = await proxyApi.get<DeviceAttributes>(
-      `/thingsboard/devices/${id}/attributes`
+      `/thingsboard/devices/${id}/attributes`,
     );
     return data;
   }
+
+  public static async fetchDeviceAttributeKeys(id: string): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/devices/${id}/attributes/keys`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
   public static async updateDeviceSharedAttributes(
     id: string,
-    attributes: Record<string, any>
+    attributes: Record<string, any>,
   ): Promise<void> {
     await proxyApi.put<any>(
       `/thingsboard/devices/${id}/attributes`,
-      attributes
+      attributes,
     );
   }
 
   public static async addDeviceLatestTelemetry(
     id: string,
-    telemetry: Record<string, unknown>
+    telemetry: Record<string, unknown>,
   ): Promise<void> {
-    await proxyApi.post(`/thingsboard/devices/${id}/telemetry/latest`, telemetry);
+    await proxyApi.post(
+      `/thingsboard/devices/${id}/telemetry/latest`,
+      telemetry,
+    );
   }
 
   public static async fetchDeviceLatestTelemetry(
     id: string,
-    keys: string[]
+    keys: string[],
   ): Promise<DeviceLatestTelemetryResponse> {
     const params = new URLSearchParams();
     if (keys.length > 0) {
@@ -160,16 +171,16 @@ export class DeviceService {
     }
 
     const { data } = await proxyApi.get<DeviceLatestTelemetryResponse>(
-      `/thingsboard/devices/${id}/telemetry/latest?${params.toString()}`
+      `/thingsboard/devices/${id}/telemetry/latest?${params.toString()}`,
     );
     return data;
   }
 
   public static async fetchDeviceLatestTelemetryKeys(
-    id: string
+    id: string,
   ): Promise<string[]> {
     const { data } = await proxyApi.get<string[]>(
-      `/thingsboard/devices/${id}/telemetry/latest/keys`
+      `/thingsboard/devices/${id}/telemetry/latest/keys`,
     );
     return Array.isArray(data) ? data : [];
   }
@@ -179,10 +190,10 @@ export class DeviceService {
     page = 0,
     pageSize = 10,
     sortProperty = "createdTime",
-    sortOrder: "ASC" | "DESC" = "DESC"
+    sortOrder: "ASC" | "DESC" = "DESC",
   ): Promise<DeviceCalculatedFieldsResponse> {
     const { data } = await proxyApi.get<DeviceCalculatedFieldsResponse>(
-      `/thingsboard/devices/${id}/calculated-fields?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`
+      `/thingsboard/devices/${id}/calculated-fields?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
     );
     return data;
   }
@@ -213,11 +224,11 @@ export class DeviceService {
       failuresEnabled?: boolean;
       allEnabled?: boolean;
       decimalsByDefault?: number;
-    }
+    },
   ): Promise<DeviceCalculatedField> {
     const { data } = await proxyApi.post<DeviceCalculatedField>(
       `/thingsboard/devices/${id}/calculated-fields`,
-      payload
+      payload,
     );
     return data;
   }
@@ -228,21 +239,21 @@ export class DeviceService {
 
   public static async makeDevicePublic(id: string): Promise<any> {
     const { data } = await proxyApi.post<any>(
-      `/thingsboard/devices/${id}/make-public`
+      `/thingsboard/devices/${id}/make-public`,
     );
     return data;
   }
 
   public static async makeDevicePrivate(id: string): Promise<any> {
     const { data } = await proxyApi.delete<any>(
-      `/thingsboard/devices/${id}/make-private`
+      `/thingsboard/devices/${id}/make-private`,
     );
     return data;
   }
 
   public static async getDeviceCredentials(deviceId: string): Promise<any> {
     const { data } = await proxyApi.get<any>(
-      `/thingsboard/devices/${deviceId}/credentials`
+      `/thingsboard/devices/${deviceId}/credentials`,
     );
     return data;
   }
@@ -250,7 +261,7 @@ export class DeviceService {
   public static async saveDeviceCredentials(credentials: any): Promise<any> {
     const { data } = await proxyApi.post<any>(
       `/thingsboard/devices/credentials`,
-      credentials
+      credentials,
     );
     return data;
   }
@@ -262,7 +273,7 @@ export class DeviceService {
     statusList?: string[],
     severityList?: string[],
     startTime?: number,
-    endTime?: number
+    endTime?: number,
   ): Promise<any> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -270,12 +281,13 @@ export class DeviceService {
     });
 
     if (statusList?.length) params.append("statusList", statusList.join(","));
-    if (severityList?.length) params.append("severityList", severityList.join(","));
+    if (severityList?.length)
+      params.append("severityList", severityList.join(","));
     if (startTime) params.append("startTime", startTime.toString());
     if (endTime) params.append("endTime", endTime.toString());
 
     const { data } = await proxyApi.get<any>(
-      `/thingsboard/devices/${deviceId}/alarms?${params.toString()}`
+      `/thingsboard/devices/${deviceId}/alarms?${params.toString()}`,
     );
     return data;
   }
@@ -286,7 +298,7 @@ export class DeviceService {
     pageSize = 10,
     eventType?: string,
     startTime?: number,
-    endTime?: number
+    endTime?: number,
   ): Promise<any> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -298,7 +310,7 @@ export class DeviceService {
     if (endTime) params.append("endTime", endTime.toString());
 
     const { data } = await proxyApi.get<any>(
-      `/thingsboard/devices/${deviceId}/events?${params.toString()}`
+      `/thingsboard/devices/${deviceId}/events?${params.toString()}`,
     );
     return data;
   }
@@ -310,7 +322,7 @@ export class DeviceService {
     sortProperty = "createdTime",
     sortOrder: "ASC" | "DESC" = "DESC",
     startTime?: number,
-    endTime?: number
+    endTime?: number,
   ): Promise<DeviceAuditLogsResponse> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -323,17 +335,17 @@ export class DeviceService {
     if (endTime) params.append("endTime", endTime.toString());
 
     const { data } = await proxyApi.get<DeviceAuditLogsResponse>(
-      `/thingsboard/devices/${deviceId}/audit-logs?${params.toString()}`
+      `/thingsboard/devices/${deviceId}/audit-logs?${params.toString()}`,
     );
     return data;
   }
 
   public static async getDeviceRelations(
     deviceId: string,
-    direction: "FROM" | "TO" = "FROM"
+    direction: "FROM" | "TO" = "FROM",
   ): Promise<any[]> {
     const { data } = await proxyApi.get<any[]>(
-      `/thingsboard/devices/${deviceId}/relations?direction=${direction}`
+      `/thingsboard/devices/${deviceId}/relations?direction=${direction}`,
     );
     return data;
   }
@@ -343,7 +355,7 @@ export class DeviceService {
     pageSize = 100,
     sortProperty = "name",
     sortOrder: "ASC" | "DESC" = "ASC",
-    textSearch?: string
+    textSearch?: string,
   ): Promise<PagedThingsboardResponse<DeviceProfileInfo>> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -356,9 +368,9 @@ export class DeviceService {
       params.append("textSearch", textSearch.trim());
     }
 
-    const { data } = await proxyApi.get<PagedThingsboardResponse<DeviceProfileInfo>>(
-      `/thingsboard/device-profile-infos?${params.toString()}`
-    );
+    const { data } = await proxyApi.get<
+      PagedThingsboardResponse<DeviceProfileInfo>
+    >(`/thingsboard/device-profile-infos?${params.toString()}`);
     return data;
   }
 
@@ -369,7 +381,7 @@ export class DeviceService {
     pageSize = 100,
     sortProperty = "createdTime",
     sortOrder: "ASC" | "DESC" = "DESC",
-    textSearch?: string
+    textSearch?: string,
   ): Promise<PagedThingsboardResponse<OtaPackageInfo>> {
     const params = new URLSearchParams({
       type,
@@ -384,9 +396,9 @@ export class DeviceService {
       params.append("textSearch", textSearch.trim());
     }
 
-    const { data } = await proxyApi.get<PagedThingsboardResponse<OtaPackageInfo>>(
-      `/thingsboard/ota-packages?${params.toString()}`
-    );
+    const { data } = await proxyApi.get<
+      PagedThingsboardResponse<OtaPackageInfo>
+    >(`/thingsboard/ota-packages?${params.toString()}`);
     return data;
   }
 }
