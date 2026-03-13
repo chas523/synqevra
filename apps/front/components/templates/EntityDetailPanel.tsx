@@ -179,7 +179,7 @@ export function EntityDetailPanel({
           )}
 
           {/* Tab Contents */}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 min-h-0">
             {tabs.map((tab) => (
               <TabsContent
                 key={tab.id}

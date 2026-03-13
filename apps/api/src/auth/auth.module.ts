@@ -16,6 +16,7 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 import { JwtAdminStrategy } from './strategies/jwt.admin.strategy';
 import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
 import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
     JwtAdminStrategy,
     RefreshAdminStrategy,
     JwtPatientStrategy,
+    GoogleStrategy,
     // global guards
     {
       provide: APP_GUARD,

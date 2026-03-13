@@ -7,8 +7,8 @@ import {
   useManageOtaPackage,
 } from "@/hooks/thingsboard/ota-packages/useOtaPackages";
 import { OtaPackage } from "@/types/otaPackageTypes";
-import { AddOtaPackageModal } from "./components/AddOtaPackageModal";
-import { OtaPackageDetailPanel } from "./components/OtaPackageDetailPanel";
+import { AddOtaPackageModal } from "@/components/organisms/AddOtaPackageModal";
+import { OtaPackageDetailPanel } from "@/components/organisms/OtaPackageDetailPanel";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Download, Trash2 } from "lucide-react";

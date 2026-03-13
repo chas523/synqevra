@@ -18,8 +18,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Select from "@/components/ui/select";
-import { CreateVersionModal } from "./CreateVersionModal";
-import { RestoreVersionModal } from "./RestoreVersionModal";
+import { CreateVersionModal } from "@/components/organisms/CreateVersionModal";
+import { RestoreVersionModal } from "@/components/organisms/RestoreVersionModal";
 
 const PAGE_SIZE = 10;
 

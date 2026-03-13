@@ -4107,6 +4107,24 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async getOAuth2ClientById(accessToken: string, id: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/oauth2/client/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch OAuth2 client by id',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async createDomain(
     accessToken: string,
     payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
@@ -4185,6 +4203,24 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch OAuth2 config templates',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveOAuth2Client(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/oauth2/client`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save OAuth2 client',
         error,
         this.logger,
       );

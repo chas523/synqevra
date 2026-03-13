@@ -1,4 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
+import { ValidateGoogleUserUseCase } from './application/use-cases/validate-google-user.use-case';
 import { UsersController } from './interface/rest/users.controller';
 import { AdminController } from './interface/rest/admin.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -58,6 +60,7 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    CqrsModule,
     ThingsboardModule,
     forwardRef(() => ConnectionModule),
     forwardRef(() => MedplumModule),
@@ -84,6 +87,7 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     GetUserProfileUseCase,
     PatientLoginUseCase,
     GetPatientProfileUseCase,
+    ValidateGoogleUserUseCase,
 
     { provide: UserRepository, useClass: UserRepositoryAdapter },
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },
@@ -114,6 +118,7 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     PatientRepository,
     PatientMedplumRepository,
     PatientAuthGuard,
+    ValidateGoogleUserUseCase,
   ],
 })
 export class IamModule {}

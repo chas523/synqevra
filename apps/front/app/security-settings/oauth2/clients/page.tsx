@@ -7,6 +7,8 @@ import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useOAuth2ClientInfos } from "@/hooks/thingsboard/oauth2/useOAuth2ClientInfos";
 import { OAuth2ClientInfo } from "@/lib/services/thingsboardServices/oauth2Service";
 import { useAppSelector } from "@/lib/redux/store";
+import { AddOAuth2ClientModal } from "@/components/organisms/AddOAuth2ClientModal";
+import { OAuth2ClientDetailPanel } from "@/components/organisms/OAuth2ClientDetailPanel";
 
 const PAGE_SIZE = 10;
 
@@ -19,12 +21,11 @@ function OAuth2Tabs() {
 
   if (role === "ADMIN") {
     tabs.push({ label: "Domains", href: "/security-settings/oauth2/domains" });
+    tabs.push({
+      label: "OAuth 2.0 clients",
+      href: "/security-settings/oauth2/clients",
+    });
   }
-
-  tabs.push({
-    label: "OAuth 2.0 clients",
-    href: "/security-settings/oauth2/clients",
-  });
 
   return (
     <div className="border-b border-slate-200 dark:border-slate-800 mb-6">
@@ -55,6 +56,10 @@ export default function OAuth2ClientsPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortProperty, setSortProperty] = useState("createdTime");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<OAuth2ClientInfo | null>(
+    null,
+  );
 
   const { clients, totalPages, totalElements, isLoading, mutate } =
     useOAuth2ClientInfos(currentPage, PAGE_SIZE, sortProperty, sortOrder);
@@ -95,21 +100,6 @@ export default function OAuth2ClientsPage() {
         </span>
       ),
     },
-    {
-      key: "platforms",
-      header: "Allowed platforms",
-      render: (item) => (
-        <span className="text-sm text-slate-700 dark:text-slate-300">
-          {item.platforms && item.platforms.length > 0
-            ? item.platforms
-                .map((p) =>
-                  p === "IOS" ? "iOS" : p.charAt(0) + p.slice(1).toLowerCase(),
-                )
-                .join(", ")
-            : "—"}
-        </span>
-      ),
-    },
   ];
 
   return (
@@ -131,11 +121,25 @@ export default function OAuth2ClientsPage() {
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
         onRefresh={() => mutate()}
-        onAdd={() => {
-          // TODO: Next step
-        }}
+        onAdd={() => setIsAddModalOpen(true)}
+        onRowClick={(item) => setSelectedClient(item)}
         emptyMessage="No OAuth 2.0 clients configured yet."
         addButtonLabel="Add"
+      />
+
+      <AddOAuth2ClientModal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onSuccess={() => mutate()}
+      />
+
+      <OAuth2ClientDetailPanel
+        client={selectedClient}
+        onClose={() => setSelectedClient(null)}
+        onSaveSuccess={() => {
+          mutate();
+          setSelectedClient(null);
+        }}
       />
     </div>
   );

@@ -144,12 +144,14 @@ import { CreateDomainCommandHandler } from './application/commands/create-domain
 import { FetchDomainByIdQueryHandler } from './application/queries/fetch-domain-by-id/fetch-domain-by-id.handler';
 import { UpdateDomainCommandHandler } from './application/commands/update-domain/update-domain.handler';
 import { FetchOAuth2ConfigTemplateQueryHandler } from './application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.handler';
+import { SaveOAuth2ClientCommandHandler } from './application/commands/save-oauth2-client/save-oauth2-client.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
 import { ThingsboardRollbackService } from './application/services/thingsboard-rollback.service';
 import { TelemetryParserService } from './application/services/telemetry-parser.service';
 import { StorageService } from './application/services/storage.service';
+import { SysAdminAuthService } from './application/services/sysadmin-auth.service';
 
 const commandHandlers = [
   CreateDeviceCommandHandler,
@@ -206,6 +208,7 @@ const commandHandlers = [
   RestoreVersionHandler,
   CreateDomainCommandHandler,
   UpdateDomainCommandHandler,
+  SaveOAuth2ClientCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -312,6 +315,7 @@ const queryHandlers = [
     TelemetryParserService,
     TelemetryGateway,
     StorageService,
+    SysAdminAuthService,
   ],
   controllers: [ThingsboardController, DashboardController],
   exports: [
@@ -321,6 +325,7 @@ const queryHandlers = [
     ThingsboardRollbackService,
     TelemetryService,
     StorageService,
+    SysAdminAuthService,
   ],
 })
 export class ThingsboardModule {}

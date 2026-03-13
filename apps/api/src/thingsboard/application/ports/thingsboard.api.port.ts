@@ -916,6 +916,7 @@ export abstract class ThingsboardApiPort {
       sortOrder: string;
     },
   ): Promise<any>;
+  abstract getOAuth2ClientById(accessToken: string, id: string): Promise<any>;
   abstract createDomain(
     accessToken: string,
     payload: { name: string; oauth2Enabled: boolean; propagateToEdge: boolean },
@@ -929,6 +930,7 @@ export abstract class ThingsboardApiPort {
     oauth2ClientIds: string[],
   ): Promise<any>;
   abstract getOAuth2ConfigTemplate(accessToken: string): Promise<any>;
+  abstract saveOAuth2Client(accessToken: string, payload: any): Promise<any>;
 }
 
 // Response types for new methods

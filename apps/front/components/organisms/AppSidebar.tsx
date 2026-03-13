@@ -162,7 +162,6 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           icon: ShieldCheck,
           items: [
             { href: "/security-settings/auditLogs", label: "Audit Logs" },
-            { href: "/security-settings/oauth2/clients", label: "OAuth 2.0" },
           ],
         },
       ],

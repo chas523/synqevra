@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import SystemSettingsPage from "@/components/pages/SystemSettingsPage";
 
 export default function SettingsRoute() {
-  redirect("/settings/notifications");
+  return <SystemSettingsPage />;
 }
