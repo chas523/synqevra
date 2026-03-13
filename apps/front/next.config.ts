@@ -4,10 +4,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     optimizePackageImports: [
-      '@mantine/core',
-      '@mantine/hooks',
-      '@medplum/react',
-      'lucide-react'
+      "@mantine/core",
+      "@mantine/hooks",
+      "@medplum/react",
+      "lucide-react",
     ],
   },
   transpilePackages: [

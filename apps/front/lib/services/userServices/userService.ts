@@ -10,7 +10,6 @@ import type {
 } from "@/lib/types/dashboardTypes";
 import { buildQueryParams, extractErrorMessage } from "@/lib/utils";
 
-
 // Mock data for testing
 const mockPendingUsers: PendingUser[] = [
   {
@@ -205,5 +204,4 @@ export class UserService {
   // } catch (err) {
   //   throw new Error(extractErrorMessage(err));
   // }
-
 }

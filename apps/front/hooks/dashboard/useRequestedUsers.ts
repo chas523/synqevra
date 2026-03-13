@@ -1,11 +1,10 @@
 import useSWR from "swr";
-import {UserService} from "@/lib/services/userServices/userService";
+import { UserService } from "@/lib/services/userServices/userService";
 import type {
   PaginatedResponse,
   PendingUser,
   RequestedAccessUsersRequestOptions,
 } from "@/lib/types/dashboardTypes";
-
 
 interface UseRequestedUsersResult {
   data: PaginatedResponse<PendingUser> | undefined;

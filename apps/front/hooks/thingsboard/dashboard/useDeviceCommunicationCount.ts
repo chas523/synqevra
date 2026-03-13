@@ -13,7 +13,8 @@ import {
  * Automatically requests data on connection and updates in real-time.
  */
 export function useDeviceCommunicationCount() {
-  const { socket, isThingsboardConnected, requestMsgCount } = useTelemetryContext();
+  const { socket, isThingsboardConnected, requestMsgCount } =
+    useTelemetryContext();
 
   const [metricsHistory, setMetricsHistory] = useState<MsgCount[]>([]);
 

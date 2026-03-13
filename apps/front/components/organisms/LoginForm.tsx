@@ -25,12 +25,12 @@ const LoginForm = () => {
   const { login, isLoading, error } = useLogin();
   const [isGoogleAvailable, setIsGoogleAvailable] = useState(false);
 
-  const role = pathname.endsWith('/admin') ? 'ADMIN' : 'USER';
+  const role = pathname.endsWith("/admin") ? "ADMIN" : "USER";
 
   useEffect(() => {
-    if (role === 'USER') {
+    if (role === "USER") {
       OAuth2Service.checkGoogleAuthAvailable()
-        .then(res => setIsGoogleAvailable(res.available))
+        .then((res) => setIsGoogleAvailable(res.available))
         .catch(console.error);
     }
   }, [role]);
@@ -39,11 +39,17 @@ const LoginForm = () => {
     if (authStatus) {
       setTimeout(() => {
         if (authStatus === "new_pending") {
-          toast.success("Konto zostało pomyślnie zgłoszone! Poczekaj na weryfikację przez administratora.");
+          toast.success(
+            "Konto zostało pomyślnie zgłoszone! Poczekaj na weryfikację przez administratora.",
+          );
         } else if (authStatus === "existing_activation") {
-          toast.info("Już otrzymałeś email aktywacyjny. Sprawdź swoją skrzynkę.");
+          toast.info(
+            "Już otrzymałeś email aktywacyjny. Sprawdź swoją skrzynkę.",
+          );
         } else if (authStatus === "existing_pending") {
-          toast.info("Twoje zgłoszenie nadal oczekuje na weryfikację przez administratora.");
+          toast.info(
+            "Twoje zgłoszenie nadal oczekuje na weryfikację przez administratora.",
+          );
         }
       }, 0);
 
@@ -74,7 +80,7 @@ const LoginForm = () => {
 
     try {
       await login(formData, role);
-      if (role === 'ADMIN') {
+      if (role === "ADMIN") {
         router.push("/dashboard");
       } else {
         router.push("/devices");
@@ -88,17 +94,21 @@ const LoginForm = () => {
     <div className="max-w-sm w-full mx-auto">
       <form className="space-y-4" onSubmit={handleSubmit}>
         <Card className="py-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-lg">
-          <CardHeader className={`relative text-center ${role === 'USER' ? 'pb-4 space-y-4' : 'pb-3'}`}>
-            <div className={role === 'USER' ? 'space-y-1.5' : ''}>
+          <CardHeader
+            className={`relative text-center ${role === "USER" ? "pb-4 space-y-4" : "pb-3"}`}
+          >
+            <div className={role === "USER" ? "space-y-1.5" : ""}>
               <CardTitle className="text-xl text-slate-900 dark:text-white">
                 Log in to account
               </CardTitle>
               <CardDescription className="text-sm text-slate-600 dark:text-slate-400">
-                {role === 'USER' ? 'Choose your preferred login method' : 'Enter your credentials to log in to this app'}
+                {role === "USER"
+                  ? "Choose your preferred login method"
+                  : "Enter your credentials to log in to this app"}
               </CardDescription>
             </div>
 
-            {role === 'USER' ? (
+            {role === "USER" ? (
               isGoogleAvailable ? (
                 <>
                   <GoogleSignInButton />

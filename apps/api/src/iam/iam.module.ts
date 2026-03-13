@@ -121,4 +121,4 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     ValidateGoogleUserUseCase,
   ],
 })
-export class IamModule { }
+export class IamModule {}

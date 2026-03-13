@@ -14,7 +14,7 @@ export function useLogin() {
     setSuccess(false);
 
     try {
-      if (role === 'ADMIN') {
+      if (role === "ADMIN") {
         await AuthService.loginAdminRequest(loginForm);
       } else {
         await AuthService.loginRequest(loginForm);
@@ -66,7 +66,7 @@ export function useLogout() {
     setSuccess(false);
 
     try {
-      if (role === 'ADMIN') {
+      if (role === "ADMIN") {
         await AuthService.logoutAdminRequest();
         router.push("/auth/login/admin");
       } else {
@@ -108,4 +108,3 @@ export function useLogout() {
 
 //   return { logout, isLoading, error, success };
 // }
-

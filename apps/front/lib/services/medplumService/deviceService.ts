@@ -3,10 +3,10 @@ import type {} from "@/types/thingsboardDeviceTypes";
 
 export class MedplumDeviceService {
   public static async fetchMedplumDevice(
-    deviceId: string
+    deviceId: string,
   ): Promise<MedplumDevice> {
     const { data } = await proxyApi.get<MedplumDevice>(
-      `/medplum/device/${deviceId}`
+      `/medplum/device/${deviceId}`,
     );
 
     const result = {

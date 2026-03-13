@@ -3,7 +3,10 @@
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
-import { TimeRangeFilter, TimeRange } from "@/components/molecules/TimeRangeFilter";
+import {
+  TimeRangeFilter,
+  TimeRange,
+} from "@/components/molecules/TimeRangeFilter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -49,11 +52,14 @@ export function DeviceAuditLogsTabContent({
         "createdTime",
         "DESC",
         timeRange.startTime,
-        timeRange.endTime
-      )
+        timeRange.endTime,
+      ),
   );
 
-  const handlePageChange = useCallback((newPage: number) => setPage(newPage), []);
+  const handlePageChange = useCallback(
+    (newPage: number) => setPage(newPage),
+    [],
+  );
   const handleRefresh = useCallback(() => {
     mutate();
   }, [mutate]);
@@ -121,7 +127,7 @@ export function DeviceAuditLogsTabContent({
         ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -156,7 +162,9 @@ export function DeviceAuditLogsTabContent({
           </DialogHeader>
 
           <div className="space-y-2 py-2">
-            <div className="text-sm font-medium text-slate-600">Action data</div>
+            <div className="text-sm font-medium text-slate-600">
+              Action data
+            </div>
             <pre className="max-h-90 overflow-auto rounded border bg-slate-50 p-3 text-xs font-mono text-slate-700">
               {selectedDetails}
             </pre>

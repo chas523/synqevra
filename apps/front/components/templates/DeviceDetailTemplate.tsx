@@ -35,12 +35,12 @@ export interface DeviceDetailTemplateProps {
   onRemoveLimit: (key: string) => void;
   onRemoveSpecificThreshold: (
     parameterKey: string,
-    thresholdType: string
+    thresholdType: string,
   ) => void;
   onAddParameter: (
     parameterKey: string,
     thresholdType: string,
-    value: string
+    value: string,
   ) => void;
   onAddTelemetry: (key: string) => void;
   updating: boolean;
@@ -113,7 +113,7 @@ const DeviceDetailTemplate = ({
   }
 
   const configuredParameters = medicalParameters.filter((param) =>
-    limits.telemetry_keys.includes(param.key)
+    limits.telemetry_keys.includes(param.key),
   );
 
   return (
@@ -185,7 +185,9 @@ const DeviceDetailTemplate = ({
         {hasMedplum && (
           <PatientAssignmentCompact
             patientList={medplumPatientDeviceHook.patientList}
-            currentPatient={medplumDeviceHook.medplumDevice?.patient || undefined}
+            currentPatient={
+              medplumDeviceHook.medplumDevice?.patient || undefined
+            }
             isLoadingPatients={medplumPatientDeviceHook.isLoadingPatients}
             isAssigning={medplumPatientDeviceHook.isAssigning}
             onAssign={medplumPatientDeviceHook.onAssignPatient}

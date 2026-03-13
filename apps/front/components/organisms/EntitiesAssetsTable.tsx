@@ -1,12 +1,16 @@
 "use client";
 
-import { useCallback, useState } from 'react';
-import { DataTable, DataTableColumn } from '@/components/molecules/DataTable';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Globe, Loader2, Lock, Trash2 } from 'lucide-react';
-import type { Asset } from '@/types/thingsboardAssetTypes';
+import { useCallback, useState } from "react";
+import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Globe, Loader2, Lock, Trash2 } from "lucide-react";
+import type { Asset } from "@/types/thingsboardAssetTypes";
 
 interface EntitiesAssetsTableProps {
   assets: Asset[];
@@ -16,8 +20,8 @@ interface EntitiesAssetsTableProps {
   totalElements: number;
   pageSize: number;
   sortProperty: string;
-  sortOrder: 'ASC' | 'DESC';
-  onSortChange: (property: string, order: 'ASC' | 'DESC') => void;
+  sortOrder: "ASC" | "DESC";
+  onSortChange: (property: string, order: "ASC" | "DESC") => void;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
   onAdd: () => void;
@@ -28,13 +32,13 @@ interface EntitiesAssetsTableProps {
 }
 
 const formatDate = (timestamp?: number) => {
-  if (!timestamp) return '-';
-  return new Date(timestamp).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
+  if (!timestamp) return "-";
+  return new Date(timestamp).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -60,7 +64,7 @@ export const EntitiesAssetsTable = ({
 
   const runAction = useCallback(
     async (asset: Asset, action: (a: Asset) => Promise<void>) => {
-      const id = asset.id?.id ?? '';
+      const id = asset.id?.id ?? "";
       setLoadingAssetId(id);
       try {
         await action(asset);
@@ -68,43 +72,43 @@ export const EntitiesAssetsTable = ({
         setLoadingAssetId(null);
       }
     },
-    []
+    [],
   );
 
   const columns: DataTableColumn<Asset>[] = [
     {
-      key: 'createdTime',
-      header: 'Created time',
+      key: "createdTime",
+      header: "Created time",
       sortable: true,
       render: (asset) => formatDate(asset.createdTime),
     },
     {
-      key: 'name',
-      header: 'Name',
+      key: "name",
+      header: "Name",
       sortable: true,
-      className: 'font-medium text-primary',
+      className: "font-medium text-primary",
     },
     {
-      key: 'assetProfileName',
-      header: 'Asset profile',
+      key: "assetProfileName",
+      header: "Asset profile",
       sortable: true,
-      render: (asset) => asset.assetProfileName || '-',
+      render: (asset) => asset.assetProfileName || "-",
     },
     {
-      key: 'label',
-      header: 'Label',
+      key: "label",
+      header: "Label",
       sortable: true,
-      render: (asset) => asset.label ?? '-',
+      render: (asset) => asset.label ?? "-",
     },
     {
-      key: 'customerTitle',
-      header: 'Customer',
+      key: "customerTitle",
+      header: "Customer",
       sortable: true,
-      render: (asset) => asset.customerTitle ?? '-',
+      render: (asset) => asset.customerTitle ?? "-",
     },
     {
-      key: 'customerIsPublic',
-      header: 'Public',
+      key: "customerIsPublic",
+      header: "Public",
       sortable: false,
       render: (asset) => (
         <Checkbox
@@ -117,7 +121,7 @@ export const EntitiesAssetsTable = ({
   ];
 
   const rowActions = (asset: Asset) => {
-    const id = asset.id?.id ?? '';
+    const id = asset.id?.id ?? "";
     const isThisLoading = loadingAssetId === id;
 
     return (
@@ -188,7 +192,7 @@ export const EntitiesAssetsTable = ({
       title="Assets"
       data={assets}
       columns={columns}
-      getRowId={(asset) => asset.id?.id ?? ''}
+      getRowId={(asset) => asset.id?.id ?? ""}
       isLoading={isLoading}
       currentPage={currentPage}
       totalPages={totalPages}

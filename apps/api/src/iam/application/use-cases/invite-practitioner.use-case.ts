@@ -28,7 +28,7 @@ export class InvitePractitionerUseCase {
     private readonly tokenGeneratorPort: TokenGeneratorPort,
     @Inject(THINGSBOARD_REPOSITORY_PORT)
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
-  ) { }
+  ) {}
 
   async execute(
     command: InvitePractitionerCommand,

@@ -53,7 +53,7 @@ const ObservationDateGroup = ({
       <div
         className={cn(
           "transition-all duration-300 ease-in-out overflow-hidden",
-          isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+          isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <div className="px-4 py-4 space-y-1 border-t border-slate-200 dark:border-white/10">

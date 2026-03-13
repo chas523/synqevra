@@ -9,10 +9,10 @@ interface PatientHeaderProps {
 const PatientHeader = ({ patient }: PatientHeaderProps) => {
   const lastUpdated = patient.meta?.lastUpdated
     ? new Date(patient.meta.lastUpdated).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
     : null;
 
   return (
@@ -21,10 +21,11 @@ const PatientHeader = ({ patient }: PatientHeaderProps) => {
         {!patient.deceasedBoolean ? (
           <Badge
             variant={patient.active ? "default" : "secondary"}
-            className={`text-xs transition-all ${patient.active
+            className={`text-xs transition-all ${
+              patient.active
                 ? "bg-emerald-100 text-emerald-700 border border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 dark:hover:bg-emerald-500/30"
                 : "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-700/50 dark:text-slate-400 dark:border-slate-600/50"
-              }`}
+            }`}
           >
             <Activity className="mr-1 h-3 w-3" />
             {patient.active ? "Active" : "Inactive"}

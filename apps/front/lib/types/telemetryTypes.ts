@@ -124,4 +124,3 @@ export interface Notification {
   createdTime: number;
   read?: boolean; // Frontend state
 }
-

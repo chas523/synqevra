@@ -23,7 +23,7 @@ export function StatCard({
     <div
       className={cn(
         "relative min-h-0 gap-0 justify-between overflow-hidden flex flex-col",
-        className
+        className,
       )}
     >
       <CardHeader className="gap-0 px-2 py-0.5 flex-none">

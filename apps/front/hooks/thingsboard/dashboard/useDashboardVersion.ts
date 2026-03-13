@@ -5,7 +5,7 @@ import useSWR from "swr";
 export const useDashboardVersion = () => {
   const { data, error, isLoading } = useSWR<DashboardVersionResponse>(
     "dashboard-version",
-    () => DashboardVersionService.getThingsboardVersion()
+    () => DashboardVersionService.getThingsboardVersion(),
   );
 
   return {

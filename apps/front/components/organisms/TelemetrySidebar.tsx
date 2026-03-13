@@ -42,7 +42,7 @@ export function TelemetrySidebar({
     (t) =>
       !configuredKeys.includes(t.key) &&
       (t.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.key.toLowerCase().includes(searchQuery.toLowerCase()))
+        t.key.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   return (

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { extractErrorMessage } from "@/lib/utils";
@@ -43,7 +43,7 @@ const DeviceForm = ({
 
   const handleInputChange = (
     field: keyof CreateDeviceRequest,
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({
       ...prev,

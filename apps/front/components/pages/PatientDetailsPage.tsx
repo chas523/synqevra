@@ -42,7 +42,7 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
   const { observations, isLoadingObservations, observationsError } =
     useMedplumObservationsByPatientId(
       patient.id,
-      OBSERVATIONS_COUNT_ON_USER_DETAILS_PAGE
+      OBSERVATIONS_COUNT_ON_USER_DETAILS_PAGE,
     );
 
   const getFullName = () => {

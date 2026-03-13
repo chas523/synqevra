@@ -328,12 +328,15 @@ export interface NotificationTemplate {
   name: string;
   notificationType: string;
   configuration: {
-    deliveryMethodsTemplates: Record<string, {
-      method: string;
-      enabled: boolean;
-      body?: string;
-      subject?: string;
-    }>;
+    deliveryMethodsTemplates: Record<
+      string,
+      {
+        method: string;
+        enabled: boolean;
+        body?: string;
+        subject?: string;
+      }
+    >;
   };
 }
 

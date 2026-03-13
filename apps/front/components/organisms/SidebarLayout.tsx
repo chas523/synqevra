@@ -8,14 +8,24 @@ import logo from "@/public/logo.svg";
 import logoWhite from "@/public/logo-white.svg";
 import { useLogout } from "@/hooks/auth/useAuth";
 import { Button } from "../ui/button";
-import { LogOutIcon, Moon, Sun, Loader2, User, ShieldCheck } from "lucide-react";
+import {
+  LogOutIcon,
+  Moon,
+  Sun,
+  Loader2,
+  User,
+  ShieldCheck,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState, useEffect, useRef } from "react";
 import NotificationButton from "../molecules/NotificationButton";
 import { useTelemetryContext } from "@/lib/context/TelemetryContext";
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch, useAppSelector } from "@/lib/redux/store";
-import { fetchUserInformations, clearUser } from "@/lib/redux/slices/userSlice/userSlice";
+import {
+  fetchUserInformations,
+  clearUser,
+} from "@/lib/redux/slices/userSlice/userSlice";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -30,8 +40,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
 
-  const userStatus = useAppSelector((state) => state.user.status)
-  const user = useAppSelector((state) => state.user.user)
+  const userStatus = useAppSelector((state) => state.user.status);
+  const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
 
   const prevPathRef = useRef(pathname);
@@ -40,7 +50,8 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     //we check if component is mounted (because useeffect only runs on client)
     setMounted(true);
 
-    const wasAuth = prevPathRef.current === "/" || prevPathRef.current.includes("/auth");
+    const wasAuth =
+      prevPathRef.current === "/" || prevPathRef.current.includes("/auth");
     const isLoggedIn = !(pathname === "/" || pathname.includes("/auth"));
 
     if (wasAuth && isLoggedIn) {
@@ -78,7 +89,11 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   // Public routes - show header with logo
-  if (pathname === "/" || pathname.includes("/auth") || pathname.includes("/dashboard/requestedUsers")) {
+  if (
+    pathname === "/" ||
+    pathname.includes("/auth") ||
+    pathname.includes("/dashboard/requestedUsers")
+  ) {
     return (
       <div
         suppressHydrationWarning

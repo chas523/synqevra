@@ -33,7 +33,7 @@ export class PatientController {
   constructor(
     private readonly patientLoginUseCase: PatientLoginUseCase,
     private readonly getPatientProfileUseCase: GetPatientProfileUseCase,
-  ) { }
+  ) {}
 
   @Public()
   @UseGuards(LocalPatientAuthGuard)
@@ -84,10 +84,10 @@ export class PatientController {
   @Roles(Role.PATIENT)
   @UseGuards(PatientAuthGuard)
   @Get('profile')
-  async patientProfile(@ActiveUser() patient: CurrentUser, @MedplumSecrets() credentials: MedplumCredentials) {
-    return this.getPatientProfileUseCase.execute(
-      patient.id,
-      credentials,
-    );
+  async patientProfile(
+    @ActiveUser() patient: CurrentUser,
+    @MedplumSecrets() credentials: MedplumCredentials,
+  ) {
+    return this.getPatientProfileUseCase.execute(patient.id, credentials);
   }
 }

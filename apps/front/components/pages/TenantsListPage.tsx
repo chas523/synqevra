@@ -146,12 +146,14 @@ export function TenantsListPage({
                   <div
                     key={tenant.id.id}
                     onClick={() => handleTenantClick(tenant)}
-                    onKeyDown={(e) => e.key === "Enter" && handleTenantClick(tenant)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleTenantClick(tenant)
+                    }
                     className={cn(
                       "p-4 border rounded-lg cursor-pointer transition-colors",
                       isSelected
                         ? "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-300 dark:border-cyan-700"
-                        : "hover:bg-gray-50 dark:hover:bg-slate-800/50"
+                        : "hover:bg-gray-50 dark:hover:bg-slate-800/50",
                     )}
                   >
                     <div className="flex items-start justify-between">
@@ -161,7 +163,9 @@ export function TenantsListPage({
                           <h3 className="font-medium text-gray-900 dark:text-white">
                             {tenant.title}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-slate-400">{tenant.name}</p>
+                          <p className="text-sm text-gray-500 dark:text-slate-400">
+                            {tenant.name}
+                          </p>
 
                           <div className="mt-2 space-y-1">
                             {tenant.email && (
@@ -248,4 +252,3 @@ export function TenantsListPage({
     </>
   );
 }
-

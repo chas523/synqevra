@@ -18,7 +18,9 @@ export const useDeviceDetail = (deviceId: string) => {
   const deviceHook = useDevice(deviceId);
   const updateHook = useUpdateDeviceAttributes(deviceId);
   const { hasMedplum } = useConnectionStatus();
-  const medplumPatientDeviceHook = useMedplumPatientDevice(hasMedplum ? deviceId : undefined);
+  const medplumPatientDeviceHook = useMedplumPatientDevice(
+    hasMedplum ? deviceId : undefined,
+  );
   const medplumDeviceHook = useMedplumDevice(hasMedplum ? deviceId : undefined);
 
   console.log("devicehook", deviceHook);
@@ -42,7 +44,8 @@ export const useDeviceDetail = (deviceId: string) => {
 
   console.log("telemetryKeys", telemetryKeys);
   console.log("currentLimits", currentLimits);
-  const isLoading = deviceHook.isLoading || (hasMedplum && medplumDeviceHook.isLoadingDevice);
+  const isLoading =
+    deviceHook.isLoading || (hasMedplum && medplumDeviceHook.isLoadingDevice);
   const hasParameters = Object.keys(limits).length > 0;
   console.log("limits", limits);
 
@@ -97,7 +100,7 @@ export const useDeviceDetail = (deviceId: string) => {
         }
       });
     },
-    []
+    [],
   );
 
   const handleAddTelemetryKey = useCallback((parameterKey: string) => {
@@ -139,8 +142,8 @@ export const useDeviceDetail = (deviceId: string) => {
           const existingValues = Array.isArray(existingParam[thresholdType])
             ? existingParam[thresholdType]
             : existingParam[thresholdType] !== undefined
-            ? [String(existingParam[thresholdType])]
-            : [];
+              ? [String(existingParam[thresholdType])]
+              : [];
 
           return {
             ...prev,
@@ -156,7 +159,7 @@ export const useDeviceDetail = (deviceId: string) => {
         }
       });
     },
-    []
+    [],
   );
 
   const handleSaveChanges = useCallback(async () => {
@@ -174,7 +177,7 @@ export const useDeviceDetail = (deviceId: string) => {
       try {
         await medplumPatientDeviceHook.assignPatientToDevice(
           selectedPatientId,
-          deviceId
+          deviceId,
         );
         medplumDeviceHook.refreshDevice();
       } catch (error) {
@@ -182,7 +185,7 @@ export const useDeviceDetail = (deviceId: string) => {
         throw error;
       }
     },
-    [medplumPatientDeviceHook, deviceId, medplumDeviceHook]
+    [medplumPatientDeviceHook, deviceId, medplumDeviceHook],
   );
 
   return {

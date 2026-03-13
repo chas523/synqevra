@@ -13,7 +13,7 @@ import type {} from "@/types/thingsboardDeviceTypes";
 export class PractitionerService {
   public static async fetchPractitioners(): Promise<Practitioner[]> {
     const response = await proxyApi.get<Practitioner[]>(
-      `/medplum/practitioners`
+      `/medplum/practitioners`,
     );
     const data = response.data ?? [];
     return data;
@@ -80,7 +80,7 @@ export class PractitionerService {
   //   }
 
   public static async invite(
-    futurePractitionerData: FuturePractitionerData
+    futurePractitionerData: FuturePractitionerData,
   ): Promise<void> {
     await proxyApi.post<void>(`/auth/invite`, futurePractitionerData);
   }
@@ -95,13 +95,13 @@ export class PractitionerService {
       userDescription?: string;
       password: string;
       confirmPassword: string;
-    }
+    },
   ): Promise<void> {
     await proxyApi.post<void>(
       `/connection/confirm-practitioner?token=${token}`,
       {
         ...data,
-      }
+      },
     );
   }
 }

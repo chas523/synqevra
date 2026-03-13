@@ -1,20 +1,20 @@
 "use client";
 
-import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
-import { AddAssetDialog } from '@/components/organisms/AddAssetDialog';
-import { AssetDetailPanel } from '@/components/organisms/AssetDetailPanel';
-import { EntitiesAssetsTable } from '@/components/organisms/EntitiesAssetsTable';
-import { useEntityAssets } from '@/hooks/thingsboard/asset/useEntityAssets';
-import { AssetService } from '@/lib/services/thingsboardServices/assetService';
-import type { Asset, CreateAssetRequest } from '@/types/thingsboardAssetTypes';
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { AddAssetDialog } from "@/components/organisms/AddAssetDialog";
+import { AssetDetailPanel } from "@/components/organisms/AssetDetailPanel";
+import { EntitiesAssetsTable } from "@/components/organisms/EntitiesAssetsTable";
+import { useEntityAssets } from "@/hooks/thingsboard/asset/useEntityAssets";
+import { AssetService } from "@/lib/services/thingsboardServices/assetService";
+import type { Asset, CreateAssetRequest } from "@/types/thingsboardAssetTypes";
 
 const PAGE_SIZE = 10;
 
 export const EntitiesAssetsPage = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [sortProperty, setSortProperty] = useState('createdTime');
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [sortProperty, setSortProperty] = useState("createdTime");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [addAssetOpen, setAddAssetOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
 
@@ -29,31 +29,31 @@ export const EntitiesAssetsPage = () => {
         setAddAssetOpen(false);
         mutate();
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || 'Failed to create asset');
+        toast.error(error?.response?.data?.message || "Failed to create asset");
         throw error;
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleSortChange = useCallback(
-    (property: string, order: 'ASC' | 'DESC') => {
+    (property: string, order: "ASC" | "DESC") => {
       setSortProperty(property);
       setSortOrder(order);
       setCurrentPage(0);
     },
-    []
+    [],
   );
 
   const handleMakePublic = useCallback(
     async (asset: Asset) => {
       try {
-        const response = await AssetService.makeAssetPublic(asset.id?.id ?? '');
+        const response = await AssetService.makeAssetPublic(asset.id?.id ?? "");
 
         if (
-          typeof response === 'object' &&
+          typeof response === "object" &&
           response !== null &&
-          'info' in response &&
+          "info" in response &&
           response.info
         ) {
           toast.info(response.message || `"${asset.name}" is already public`);
@@ -63,21 +63,25 @@ export const EntitiesAssetsPage = () => {
 
         mutate();
       } catch (error: any) {
-        toast.info(error?.response?.data?.message || 'Asset public state unchanged');
+        toast.info(
+          error?.response?.data?.message || "Asset public state unchanged",
+        );
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleMakePrivate = useCallback(
     async (asset: Asset) => {
       try {
-        const response = await AssetService.makeAssetPrivate(asset.id?.id ?? '');
+        const response = await AssetService.makeAssetPrivate(
+          asset.id?.id ?? "",
+        );
 
         if (
-          typeof response === 'object' &&
+          typeof response === "object" &&
           response !== null &&
-          'info' in response &&
+          "info" in response &&
           response.info
         ) {
           toast.info(response.message || `"${asset.name}" is already private`);
@@ -87,23 +91,25 @@ export const EntitiesAssetsPage = () => {
 
         mutate();
       } catch (error: any) {
-        toast.info(error?.response?.data?.message || 'Asset private state unchanged');
+        toast.info(
+          error?.response?.data?.message || "Asset private state unchanged",
+        );
       }
     },
-    [mutate]
+    [mutate],
   );
 
   const handleDelete = useCallback(
     async (asset: Asset) => {
       try {
-        await AssetService.deleteAsset(asset.id?.id ?? '');
+        await AssetService.deleteAsset(asset.id?.id ?? "");
         toast.success(`"${asset.name}" deleted`);
         mutate();
       } catch (error: any) {
-        toast.error(error?.response?.data?.message || 'Failed to delete asset');
+        toast.error(error?.response?.data?.message || "Failed to delete asset");
       }
     },
-    [mutate]
+    [mutate],
   );
 
   return (

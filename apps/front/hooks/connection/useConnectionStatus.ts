@@ -12,14 +12,14 @@ export function useConnectionStatus() {
     "/connection/me/status",
     async () => {
       const response = await proxyApi.get<ConnectionStatus>(
-        "/connection/me/status"
+        "/connection/me/status",
       );
       return response.data;
     },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   return {

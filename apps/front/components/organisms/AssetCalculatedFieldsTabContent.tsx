@@ -4,7 +4,10 @@ import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
-import { AssetService, AssetCalculatedField } from "@/lib/services/thingsboardServices/assetService";
+import {
+  AssetService,
+  AssetCalculatedField,
+} from "@/lib/services/thingsboardServices/assetService";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -113,7 +116,7 @@ export function AssetCalculatedFieldsTabContent({
     arguments: [],
   });
   const [argumentForm, setArgumentForm] = useState<AddArgumentForm>(
-    createEmptyArgumentForm()
+    createEmptyArgumentForm(),
   );
   const [isCustomTimeSeriesKey, setIsCustomTimeSeriesKey] = useState(false);
 
@@ -136,7 +139,7 @@ export function AssetCalculatedFieldsTabContent({
       revalidateOnReconnect: false,
       revalidateIfStale: false,
       dedupingInterval: 5 * 60 * 1000,
-    }
+    },
   );
 
   const { data, isLoading, mutate } = useSWR(
@@ -147,8 +150,8 @@ export function AssetCalculatedFieldsTabContent({
         page,
         pageSize,
         "createdTime",
-        "DESC"
-      )
+        "DESC",
+      ),
   );
 
   const columns: DataTableColumn<AssetCalculatedField>[] = useMemo(
@@ -179,7 +182,7 @@ export function AssetCalculatedFieldsTabContent({
         render: (item) => item.configuration?.output?.name || "-",
       },
     ],
-    []
+    [],
   );
 
   const resetForm = () => {
@@ -214,7 +217,8 @@ export function AssetCalculatedFieldsTabContent({
       ...prev,
       outputType: value,
       // Scope applies only to attribute output.
-      attributeScope: value === "ATTRIBUTES" ? prev.attributeScope : "SERVER_SCOPE",
+      attributeScope:
+        value === "ATTRIBUTES" ? prev.attributeScope : "SERVER_SCOPE",
     }));
   };
 
@@ -238,7 +242,7 @@ export function AssetCalculatedFieldsTabContent({
       toast.error(
         isCurrentScope(argumentForm.entityType)
           ? "Time series key is required"
-          : "Name is required"
+          : "Name is required",
       );
       return;
     }
@@ -289,12 +293,20 @@ export function AssetCalculatedFieldsTabContent({
     }
 
     if (!expression) {
-      toast.error(form.fieldType === "simple" ? "Expression is required" : "Script is required");
+      toast.error(
+        form.fieldType === "simple"
+          ? "Expression is required"
+          : "Script is required",
+      );
       return;
     }
 
     if (isSimpleMode && !outputKey) {
-      toast.error(outputType === "TIME_SERIES" ? "Time series key is required" : "Attribute key is required");
+      toast.error(
+        outputType === "TIME_SERIES"
+          ? "Time series key is required"
+          : "Attribute key is required",
+      );
       return;
     }
 
@@ -329,7 +341,7 @@ export function AssetCalculatedFieldsTabContent({
       await mutate();
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || "Failed to create calculated field"
+        error?.response?.data?.message || "Failed to create calculated field",
       );
     } finally {
       setIsSubmitting(false);
@@ -390,7 +402,9 @@ export function AssetCalculatedFieldsTabContent({
               <Label>Type</Label>
               <SelectAdmin
                 value={form.fieldType}
-                onValueChange={(value) => handleFieldTypeChange(value as FieldType)}
+                onValueChange={(value) =>
+                  handleFieldTypeChange(value as FieldType)
+                }
                 disabled={isSubmitting}
               >
                 <SelectTrigger className="w-55">
@@ -417,7 +431,9 @@ export function AssetCalculatedFieldsTabContent({
               </div>
 
               {form.arguments.length === 0 ? (
-                <div className="text-sm text-slate-500">No arguments added yet.</div>
+                <div className="text-sm text-slate-500">
+                  No arguments added yet.
+                </div>
               ) : (
                 <div className="rounded-md border">
                   <table className="w-full text-sm">
@@ -434,15 +450,22 @@ export function AssetCalculatedFieldsTabContent({
                           ? argument.timeSeriesKey
                           : argument.name;
                         return (
-                          <tr key={argument.id} className="border-b last:border-b-0">
-                            <td className="px-3 py-2">{argument.argumentName}</td>
+                          <tr
+                            key={argument.id}
+                            className="border-b last:border-b-0"
+                          >
+                            <td className="px-3 py-2">
+                              {argument.argumentName}
+                            </td>
                             <td className="px-3 py-2">{keyLabel}</td>
                             <td className="px-3 py-2 text-right">
                               <Button
                                 type="button"
                                 variant="ghost"
                                 className="text-red-600 hover:text-red-700"
-                                onClick={() => handleRemoveArgument(argument.id)}
+                                onClick={() =>
+                                  handleRemoveArgument(argument.id)
+                                }
                                 disabled={isSubmitting}
                               >
                                 Delete
@@ -488,7 +511,8 @@ export function AssetCalculatedFieldsTabContent({
             <div className="grid grid-cols-2 gap-3">
               <div
                 className={
-                  form.fieldType === "simple" && form.outputType === "TIME_SERIES"
+                  form.fieldType === "simple" &&
+                  form.outputType === "TIME_SERIES"
                     ? "col-span-2 space-y-1.5"
                     : "space-y-1.5"
                 }
@@ -496,7 +520,9 @@ export function AssetCalculatedFieldsTabContent({
                 <Label>Output type</Label>
                 <SelectAdmin
                   value={form.outputType}
-                  onValueChange={(value) => handleOutputTypeChange(value as OutputType)}
+                  onValueChange={(value) =>
+                    handleOutputTypeChange(value as OutputType)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger className="w-full">
@@ -526,8 +552,12 @@ export function AssetCalculatedFieldsTabContent({
                       <SelectValue placeholder="Select attribute scope" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="SERVER_SCOPE">Server attributes</SelectItem>
-                      <SelectItem value="SHARED_SCOPE">Shared attributes</SelectItem>
+                      <SelectItem value="SERVER_SCOPE">
+                        Server attributes
+                      </SelectItem>
+                      <SelectItem value="SHARED_SCOPE">
+                        Shared attributes
+                      </SelectItem>
                     </SelectContent>
                   </SelectAdmin>
                 </div>
@@ -538,21 +568,32 @@ export function AssetCalculatedFieldsTabContent({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="cf-output-key">
-                    {form.outputType === "TIME_SERIES" ? "Time series key*" : "Attribute key*"}
+                    {form.outputType === "TIME_SERIES"
+                      ? "Time series key*"
+                      : "Attribute key*"}
                   </Label>
                   <Input
                     id="cf-output-key"
                     value={form.outputKey}
                     onChange={(e) =>
-                      setForm((prev) => ({ ...prev, outputKey: e.target.value }))
+                      setForm((prev) => ({
+                        ...prev,
+                        outputKey: e.target.value,
+                      }))
                     }
-                    placeholder={form.outputType === "TIME_SERIES" ? "e.g. temperatureC" : "e.g. avgTemp"}
+                    placeholder={
+                      form.outputType === "TIME_SERIES"
+                        ? "e.g. temperatureC"
+                        : "e.g. avgTemp"
+                    }
                     disabled={isSubmitting}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="cf-decimals-by-default">Decimals by default</Label>
+                  <Label htmlFor="cf-decimals-by-default">
+                    Decimals by default
+                  </Label>
                   <Input
                     id="cf-decimals-by-default"
                     type="number"
@@ -583,7 +624,11 @@ export function AssetCalculatedFieldsTabContent({
             >
               Cancel
             </Button>
-            <Button type="button" onClick={handleCreate} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleCreate}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Adding..." : "Add"}
             </Button>
           </DialogFooter>
@@ -613,7 +658,10 @@ export function AssetCalculatedFieldsTabContent({
                 id="arg-name"
                 value={argumentForm.argumentName}
                 onChange={(e) =>
-                  setArgumentForm((prev) => ({ ...prev, argumentName: e.target.value }))
+                  setArgumentForm((prev) => ({
+                    ...prev,
+                    argumentName: e.target.value,
+                  }))
                 }
                 placeholder="e.g. a"
                 disabled={isSubmitting}
@@ -718,7 +766,9 @@ export function AssetCalculatedFieldsTabContent({
                             {key}
                           </SelectItem>
                         ))}
-                        <SelectItem value="__custom__">Custom key...</SelectItem>
+                        <SelectItem value="__custom__">
+                          Custom key...
+                        </SelectItem>
                       </SelectContent>
                     </SelectAdmin>
 
@@ -754,13 +804,16 @@ export function AssetCalculatedFieldsTabContent({
                 {argumentForm.entityType === "current_entity" &&
                   argumentForm.argumentType === "latest_telemetry" &&
                   isTelemetryKeysLoading && (
-                    <p className="text-xs text-slate-500">Loading telemetry keys...</p>
+                    <p className="text-xs text-slate-500">
+                      Loading telemetry keys...
+                    </p>
                   )}
                 {argumentForm.entityType === "current_entity" &&
                   argumentForm.argumentType === "latest_telemetry" &&
                   telemetryKeysError && (
                     <p className="text-xs text-red-600">
-                      Could not load telemetry keys. You can still type a key manually.
+                      Could not load telemetry keys. You can still type a key
+                      manually.
                     </p>
                   )}
               </div>
@@ -808,7 +861,11 @@ export function AssetCalculatedFieldsTabContent({
             >
               Cancel
             </Button>
-            <Button type="button" onClick={handleAddArgument} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleAddArgument}
+              disabled={isSubmitting}
+            >
               Add argument
             </Button>
           </DialogFooter>

@@ -42,7 +42,10 @@ import { GetUserProfileUseCase } from 'src/iam/application/use-cases/get-user-pr
 import { UserProfileResult } from './dto/response/get-user-profile.response.dto';
 import { GoogleAuthGuard } from 'src/auth/guards/google-auth/google-auth.guard';
 import { SysAdminAuthService } from 'src/thingsboard/application/services/sysadmin-auth.service';
-import { THINGSBOARD_API_PORT, ThingsboardApiPort } from 'src/thingsboard/application/ports/thingsboard.api.port';
+import {
+  THINGSBOARD_API_PORT,
+  ThingsboardApiPort,
+} from 'src/thingsboard/application/ports/thingsboard.api.port';
 import { Inject } from '@nestjs/common';
 @ApiTags('Authentication')
 @Controller('auth')
@@ -58,7 +61,7 @@ export class AuthController {
     private readonly sysAdminAuthService: SysAdminAuthService,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   @Public()
   @HttpCode(HttpStatus.CREATED)
@@ -145,16 +148,23 @@ export class AuthController {
   @Get('google/available')
   @ApiOperation({
     summary: 'Check if Google OAuth2 is configured',
-    description: 'Checks ThingsBoard configuration to see if Google login is enabled',
+    description:
+      'Checks ThingsBoard configuration to see if Google login is enabled',
   })
   async isGoogleAuthAvailable() {
     try {
       const token = await this.sysAdminAuthService.getAccessToken();
-      const allClientInfos = await this.thingsboardApi.getOAuth2ClientInfos(token, {
-        page: 0, pageSize: 50, sortProperty: 'createdTime', sortOrder: 'DESC'
-      });
+      const allClientInfos = await this.thingsboardApi.getOAuth2ClientInfos(
+        token,
+        {
+          page: 0,
+          pageSize: 50,
+          sortProperty: 'createdTime',
+          sortOrder: 'DESC',
+        },
+      );
       const googleClientSummary = (allClientInfos?.data || []).find(
-        (client: any) => client.providerName.toLowerCase().includes('google')
+        (client: any) => client.providerName.toLowerCase().includes('google'),
       );
       return { available: !!googleClientSummary };
     } catch (e) {
@@ -165,9 +175,7 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
-  async googleLogin() {
-
-  }
+  async googleLogin() {}
 
   @Public()
   @UseGuards(GoogleAuthGuard)
@@ -176,7 +184,6 @@ export class AuthController {
     @Req() req: Request & { user: any },
     @Res({ passthrough: true }) res: Response,
   ) {
-
     const frontUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
     if (req.user.status === 'NEW_PENDING_USER') {
       // newly created pending-user entity
@@ -184,7 +191,9 @@ export class AuthController {
     } else if (req.user.status === 'EXISTING_PENDING_USER') {
       // existing, accepted pending user - already received activation e-mail (if isPending is false in your edit logic)
       if (req.user.isPending) {
-        return res.redirect(`${frontUrl}/auth/login?status=existing_activation`);
+        return res.redirect(
+          `${frontUrl}/auth/login?status=existing_activation`,
+        );
       }
       // existing pending user, but not yet accepted by admins
       return res.redirect(`${frontUrl}/auth/login?status=existing_pending`);

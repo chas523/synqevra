@@ -1,6 +1,5 @@
-import {LoadingSpinner} from "@/components/atoms/LoadingSpinner";
-import {ButtonAtom as Button} from "@/components/atoms/ButtonAtom";
-
+import { LoadingSpinner } from "@/components/atoms/LoadingSpinner";
+import { ButtonAtom as Button } from "@/components/atoms/ButtonAtom";
 
 interface LoadingButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {

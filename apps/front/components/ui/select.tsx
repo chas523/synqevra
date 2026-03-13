@@ -56,12 +56,17 @@ const Select = ({
         disabled={disabled}
         className="w-full bg-background border border-input rounded-lg px-4 py-2.5 text-foreground text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-between hover:bg-muted/50"
       >
-        <span className={selectedOption ? "text-foreground" : "text-muted-foreground"}>
+        <span
+          className={
+            selectedOption ? "text-foreground" : "text-muted-foreground"
+          }
+        >
           {selectedOption?.label || placeholder}
         </span>
         <ChevronDownIcon
-          className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`h-4 w-4 text-muted-foreground transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
@@ -91,4 +96,3 @@ const Select = ({
 };
 
 export default Select;
-

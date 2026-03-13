@@ -1,6 +1,6 @@
 import { useState } from "react";
-import {UserService} from "@/lib/services/userServices/userService";
-import {MailRecipient} from "@/lib/types/dashboardTypes";
+import { UserService } from "@/lib/services/userServices/userService";
+import { MailRecipient } from "@/lib/types/dashboardTypes";
 
 interface UseSendEmailActivationResult {
   sendEmailActivation: (mailRecipient: MailRecipient) => Promise<void>;

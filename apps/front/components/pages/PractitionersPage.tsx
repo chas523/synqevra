@@ -10,7 +10,7 @@ import LoadingOverlayInformation from "../molecules/LoadingOverlayInformation";
 import InvitePractitionerModal from "../organisms/InvitePractitionerModal";
 
 const PractitionersPage = (
-  medplumPractitioners: UseMedplumPractitionerResult
+  medplumPractitioners: UseMedplumPractitionerResult,
 ) => {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);

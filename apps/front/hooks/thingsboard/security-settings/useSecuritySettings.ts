@@ -9,7 +9,7 @@ export const useSecuritySettings = () => {
     error: securityError,
     isLoading: securityLoading,
   } = useSWR<SecuritySettingsDto>("security-settings", () =>
-    SettingsService.getSecuritySettings()
+    SettingsService.getSecuritySettings(),
   );
 
   return { securitySettings, securityError, securityLoading };
@@ -20,7 +20,7 @@ export const useUpdateSecuritySettings = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const updateSecuritySettings = async (
-    securitySettingsDto: SecuritySettingsDto
+    securitySettingsDto: SecuritySettingsDto,
   ) => {
     setIsLoading(true);
     setError(null);

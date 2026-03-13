@@ -66,8 +66,16 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
       items: [
         { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { href: "/dashboard/tenants", icon: Building2, label: "Tenants" },
-        { href: "/dashboard/tenant-profiles", icon: PersonStanding, label: "Tenant Profiles" },
-        { href: "/dashboard/notifications", icon: BellIcon, label: "Notification Center" },
+        {
+          href: "/dashboard/tenant-profiles",
+          icon: PersonStanding,
+          label: "Tenant Profiles",
+        },
+        {
+          href: "/dashboard/notifications",
+          icon: BellIcon,
+          label: "Notification Center",
+        },
         {
           label: "Resources",
           icon: FolderOpen,
@@ -75,7 +83,10 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
             { href: "/resources/widgets-library", label: "Widgets Library" },
             { href: "/resources/image-gallery", label: "Image gallery" },
             { href: "/resources/scada-symbols", label: "SCADA Symbols" },
-            { href: "/resources/javascript-library", label: "JavaScript library" },
+            {
+              href: "/resources/javascript-library",
+              label: "JavaScript library",
+            },
             { href: "/resources/resource-library", label: "Resource library" },
           ],
         },
@@ -100,14 +111,22 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
         { href: "/devices", icon: Settings, label: "Devices" },
         { href: "/patients", icon: PersonStanding, label: "Patients" },
         { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
-        { href: "/dashboard/notifications", icon: BellIcon, label: "Notification Center" },
+        {
+          href: "/dashboard/notifications",
+          icon: BellIcon,
+          label: "Notification Center",
+        },
         {
           label: "Entities",
           icon: Layers,
           items: [
             { href: "/entities/devices", label: "Devices", icon: Settings },
             { href: "/entities/assets", label: "Assets", icon: Box },
-            { href: "/entities/entity-views", label: "Entity views", icon: Eye },
+            {
+              href: "/entities/entity-views",
+              label: "Entity views",
+              icon: Eye,
+            },
             { href: "/entities/gateways", label: "Gateways", icon: Radio },
           ],
         },
@@ -118,7 +137,10 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
             { href: "/resources/widgets-library", label: "Widgets Library" },
             { href: "/resources/image-gallery", label: "Image gallery" },
             { href: "/resources/scada-symbols", label: "SCADA Symbols" },
-            { href: "/resources/javascript-library", label: "JavaScript library" },
+            {
+              href: "/resources/javascript-library",
+              label: "JavaScript library",
+            },
             { href: "/resources/resource-library", label: "Resource library" },
           ],
         },
@@ -127,7 +149,11 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           icon: Wrench,
           items: [
             { href: "/advanced/ota-updates", label: "OTA updates", icon: Cpu },
-            { href: "/advanced/version-control", label: "Version control", icon: History },
+            {
+              href: "/advanced/version-control",
+              label: "Version control",
+              icon: History,
+            },
           ],
         },
         { href: "/settings/notifications", icon: Settings, label: "Settings" },
@@ -149,11 +175,7 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
       {items.map((item) => {
         if (item.items) {
           return (
-            <Collapsible
-              key={item.label}
-              className="group/collapsible"
-              defaultOpen={item.label === "Resources"}
-            >
+            <Collapsible key={item.label} className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton>
@@ -166,9 +188,11 @@ const NavMenuItems = ({ items }: { items: NavItem[] }) => {
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.href}>
-                        <SidebarMenuSubButton asChild >
+                        <SidebarMenuSubButton asChild>
                           <Link href={subItem.href} prefetch={false}>
-                            {subItem.icon && <subItem.icon className="h-4 w-4" />}
+                            {subItem.icon && (
+                              <subItem.icon className="h-4 w-4" />
+                            )}
                             <span>{subItem.label}</span>
                           </Link>
                         </SidebarMenuSubButton>
@@ -205,8 +229,12 @@ export default function AppSidebar() {
   const user = useAppSelector((state) => state.user.user);
   const role = user?.role;
 
-  const [imgErrorDarkTheme, setImgErrorDarkTheme] = useState<'none' | 'tenant_failed' | 'global_failed'>('none');
-  const [imgErrorLightTheme, setImgErrorLightTheme] = useState<'none' | 'tenant_failed' | 'global_failed'>('none');
+  const [imgErrorDarkTheme, setImgErrorDarkTheme] = useState<
+    "none" | "tenant_failed" | "global_failed"
+  >("none");
+  const [imgErrorLightTheme, setImgErrorLightTheme] = useState<
+    "none" | "tenant_failed" | "global_failed"
+  >("none");
   const tenantId = user?.tenantId;
 
   useEffect(() => {
@@ -215,32 +243,38 @@ export default function AppSidebar() {
 
   useEffect(() => {
     // Reset errors if user changes
-    setImgErrorDarkTheme('none');
-    setImgErrorLightTheme('none');
+    setImgErrorDarkTheme("none");
+    setImgErrorLightTheme("none");
   }, [tenantId]);
 
-  const groups = role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
+  const groups =
+    role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
 
-  const getLogoSrc = (theme: 'dark' | 'light') => {
-    const errorState = theme === 'dark' ? imgErrorDarkTheme : imgErrorLightTheme;
+  const getLogoSrc = (theme: "dark" | "light") => {
+    const errorState =
+      theme === "dark" ? imgErrorDarkTheme : imgErrorLightTheme;
 
     // If all MinIO fetches failed, fallback to local static assets
-    if (errorState === 'global_failed') {
-      return theme === 'dark' ? logoLightStatic.src : logoDarkStatic.src;
+    if (errorState === "global_failed") {
+      return theme === "dark" ? logoLightStatic.src : logoDarkStatic.src;
     }
 
-    const useTenant = tenantId && errorState !== 'tenant_failed';
-    const prefix = useTenant ? tenantId : 'global';
+    const useTenant = tenantId && errorState !== "tenant_failed";
+    const prefix = useTenant ? tenantId : "global";
     // Dark theme uses the white logo, light theme uses the dark logo
-    const filename = theme === 'dark' ? 'logo-dark.svg' : 'logo-white.svg';
+    const filename = theme === "dark" ? "logo-dark.svg" : "logo-white.svg";
     return `/public-assets/${prefix}/${filename}`;
   };
 
-  const handleImageError = (theme: 'dark' | 'light') => {
-    if (theme === 'dark') {
-      setImgErrorDarkTheme(prev => prev === 'none' && tenantId ? 'tenant_failed' : 'global_failed');
+  const handleImageError = (theme: "dark" | "light") => {
+    if (theme === "dark") {
+      setImgErrorDarkTheme((prev) =>
+        prev === "none" && tenantId ? "tenant_failed" : "global_failed",
+      );
     } else {
-      setImgErrorLightTheme(prev => prev === 'none' && tenantId ? 'tenant_failed' : 'global_failed');
+      setImgErrorLightTheme((prev) =>
+        prev === "none" && tenantId ? "tenant_failed" : "global_failed",
+      );
     }
   };
 
@@ -257,17 +291,17 @@ export default function AppSidebar() {
               <Link href="/">
                 {/* Light Theme Logo */}
                 <img
-                  src={getLogoSrc('light')}
+                  src={getLogoSrc("light")}
                   alt="Logo"
                   className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity dark:hidden"
-                  onError={() => handleImageError('light')}
+                  onError={() => handleImageError("light")}
                 />
                 {/* Dark Theme Logo */}
                 <img
-                  src={getLogoSrc('dark')}
+                  src={getLogoSrc("dark")}
                   alt="Logo"
                   className="ml-2 h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity hidden dark:block"
-                  onError={() => handleImageError('dark')}
+                  onError={() => handleImageError("dark")}
                 />
               </Link>
             </SidebarMenuButton>
@@ -290,16 +324,22 @@ export default function AppSidebar() {
             <SidebarGroupContent>
               <NavMenuItems
                 items={[
-                  { href: "/patients", icon: PersonStanding, label: "Patients" },
-                  { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
+                  {
+                    href: "/patients",
+                    icon: PersonStanding,
+                    label: "Patients",
+                  },
+                  {
+                    href: "/practitioners",
+                    icon: Stethoscope,
+                    label: "Practitioners",
+                  },
                 ]}
               />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
-
       </SidebarContent>
     </Sidebar>
   );
 }
-

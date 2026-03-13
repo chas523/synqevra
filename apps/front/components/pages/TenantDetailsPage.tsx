@@ -30,7 +30,9 @@ interface TenantDetailsPageProps {
 export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
   const router = useRouter();
 
-  const { data: tenantsData, isLoading: tenantLoading } = useTenants({ limit: 100 });
+  const { data: tenantsData, isLoading: tenantLoading } = useTenants({
+    limit: 100,
+  });
   const tenant = tenantsData?.data.find((t) => t.id.id === tenantId);
 
   const [usersOptions, setUsersOptions] = useState<TenantsRequestOptions>({

@@ -18,7 +18,7 @@ export const useMedplumPractitioners = (): UseMedplumPractitionerResult => {
     isLoading: isLoadingPractitioners,
     mutate: refreshPractitioners,
   } = useSWR("medplum-practitioners", () =>
-    PractitionerService.fetchPractitioners()
+    PractitionerService.fetchPractitioners(),
   );
   console.log(practitionerList);
   return {
@@ -34,7 +34,7 @@ export const useInviteMedplumPractitioner = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const invitePractitioner = async (
-    practitionerData: FuturePractitionerData
+    practitionerData: FuturePractitionerData,
   ) => {
     setLoading(true);
     setError(null);

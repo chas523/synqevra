@@ -1,7 +1,7 @@
 "use client";
 import { Users } from "lucide-react";
 import { useState } from "react";
-import {BaseListPage} from "@/components/pages/BaseListPage";
+import { BaseListPage } from "@/components/pages/BaseListPage";
 import {
   useFormFilter,
   usePagination,

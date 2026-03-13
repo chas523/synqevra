@@ -20,7 +20,9 @@ export class AuthService {
     }
   }
 
-  public static async loginAdminRequest(formData: LoginFormData): Promise<void> {
+  public static async loginAdminRequest(
+    formData: LoginFormData,
+  ): Promise<void> {
     try {
       await proxyApi.post("/admin/login", {
         email: formData.email,

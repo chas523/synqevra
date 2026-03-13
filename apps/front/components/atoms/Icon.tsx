@@ -9,7 +9,14 @@ import {
 } from "lucide-react";
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
-  name: "info" | "loading" | "error" | "success" | "mail" | "users" | "calendar";
+  name:
+    | "info"
+    | "loading"
+    | "error"
+    | "success"
+    | "mail"
+    | "users"
+    | "calendar";
   size?: "sm" | "md" | "lg";
 }
 

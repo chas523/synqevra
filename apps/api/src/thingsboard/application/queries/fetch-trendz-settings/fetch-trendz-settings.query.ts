@@ -3,9 +3,9 @@ import { Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 export class FetchTrendzSettingsQuery extends Query<
-    Result<any, ThingsboardApiException>
+  Result<any, ThingsboardApiException>
 > {
-    constructor(public readonly accessToken: string) {
-        super();
-    }
+  constructor(public readonly accessToken: string) {
+    super();
+  }
 }

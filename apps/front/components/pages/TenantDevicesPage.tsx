@@ -48,7 +48,9 @@ const formatDate = (timestamp: number): string => {
 export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
   const router = useRouter();
 
-  const { data: tenantsData, isLoading: tenantLoading } = useTenants({ limit: 100 });
+  const { data: tenantsData, isLoading: tenantLoading } = useTenants({
+    limit: 100,
+  });
   const tenant = tenantsData?.data.find((t) => t.id.id === tenantId);
 
   const [devicesOptions, setDevicesOptions] = useState<TenantsRequestOptions>({

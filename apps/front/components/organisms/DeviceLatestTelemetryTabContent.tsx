@@ -50,7 +50,10 @@ const TELEMETRY_TYPES: Array<{ value: TelemetryType; label: string }> = [
   { value: "json", label: "JSON" },
 ];
 
-const parseTelemetryValue = (type: TelemetryType, rawValue: string): unknown => {
+const parseTelemetryValue = (
+  type: TelemetryType,
+  rawValue: string,
+): unknown => {
   if (type === "string") {
     return rawValue;
   }
@@ -117,7 +120,7 @@ export function DeviceLatestTelemetryTabContent({
 
   const { data: attributes, isLoading: isLoadingAttributes } = useSWR(
     deviceId ? ["deviceAttributes", deviceId] : null,
-    async () => DeviceService.fetchDeviceSharedAttributes(deviceId)
+    async () => DeviceService.fetchDeviceSharedAttributes(deviceId),
   );
 
   const configuredKeys = useMemo(() => {
@@ -125,7 +128,9 @@ export function DeviceLatestTelemetryTabContent({
       return [] as string[];
     }
 
-    const telemetryKeysAttribute = attributes.find((attribute) => attribute.key === "telemetry_keys")?.value;
+    const telemetryKeysAttribute = attributes.find(
+      (attribute) => attribute.key === "telemetry_keys",
+    )?.value;
 
     if (Array.isArray(telemetryKeysAttribute)) {
       return telemetryKeysAttribute
@@ -155,7 +160,8 @@ export function DeviceLatestTelemetryTabContent({
     deviceId && telemetryKeys.length > 0
       ? ["deviceLatestTelemetry", deviceId, telemetryKeys.join(",")]
       : null,
-    async () => DeviceService.fetchDeviceLatestTelemetry(deviceId, telemetryKeys)
+    async () =>
+      DeviceService.fetchDeviceLatestTelemetry(deviceId, telemetryKeys),
   );
 
   const {
@@ -164,7 +170,7 @@ export function DeviceLatestTelemetryTabContent({
     mutate: mutateAllTelemetryKeys,
   } = useSWR(
     deviceId ? ["deviceLatestTelemetryKeys", deviceId] : null,
-    async () => DeviceService.fetchDeviceLatestTelemetryKeys(deviceId)
+    async () => DeviceService.fetchDeviceLatestTelemetryKeys(deviceId),
   );
 
   const {
@@ -175,7 +181,11 @@ export function DeviceLatestTelemetryTabContent({
     deviceId && allTelemetryKeys && allTelemetryKeys.length > 0
       ? ["deviceLatestTelemetryAll", deviceId, allTelemetryKeys.join(",")]
       : null,
-    async () => DeviceService.fetchDeviceLatestTelemetry(deviceId, allTelemetryKeys || [])
+    async () =>
+      DeviceService.fetchDeviceLatestTelemetry(
+        deviceId,
+        allTelemetryKeys || [],
+      ),
   );
 
   const rows: TelemetryRow[] = useMemo(() => {
@@ -185,12 +195,15 @@ export function DeviceLatestTelemetryTabContent({
 
     return Object.entries(latestTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
-      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>((current, item) => {
-        if (!current || item.ts > current.ts) {
-          return item;
-        }
-        return current;
-      }, null);
+      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
+        (current, item) => {
+          if (!current || item.ts > current.ts) {
+            return item;
+          }
+          return current;
+        },
+        null,
+      );
 
       return {
         id: `${key}-${index}`,
@@ -208,12 +221,15 @@ export function DeviceLatestTelemetryTabContent({
 
     return Object.entries(allLatestTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
-      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>((current, item) => {
-        if (!current || item.ts > current.ts) {
-          return item;
-        }
-        return current;
-      }, null);
+      const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
+        (current, item) => {
+          if (!current || item.ts > current.ts) {
+            return item;
+          }
+          return current;
+        },
+        null,
+      );
 
       return {
         id: `all-${key}-${index}`,
@@ -230,9 +246,7 @@ export function DeviceLatestTelemetryTabContent({
         key: "lastUpdateTs",
         header: "Last update time",
         render: (row) =>
-          row.lastUpdateTs
-            ? new Date(row.lastUpdateTs).toLocaleString()
-            : "-",
+          row.lastUpdateTs ? new Date(row.lastUpdateTs).toLocaleString() : "-",
         className: "w-1/3 text-slate-700",
       },
       {
@@ -246,7 +260,7 @@ export function DeviceLatestTelemetryTabContent({
         className: "font-mono text-sm text-slate-600",
       },
     ],
-    []
+    [],
   );
 
   const valuePlaceholder = useMemo(() => {
@@ -299,8 +313,12 @@ export function DeviceLatestTelemetryTabContent({
 
     setIsSubmitting(true);
     try {
-      await DeviceService.addDeviceLatestTelemetry(deviceId, { [key]: parsedValue });
-      setManualKeys((current) => (current.includes(key) ? current : [...current, key]));
+      await DeviceService.addDeviceLatestTelemetry(deviceId, {
+        [key]: parsedValue,
+      });
+      setManualKeys((current) =>
+        current.includes(key) ? current : [...current, key],
+      );
       await mutateLatestTelemetry();
       await mutateAllTelemetryKeys();
       await mutateAllLatestTelemetry();
@@ -344,7 +362,11 @@ export function DeviceLatestTelemetryTabContent({
         }
       />
 
-      <Accordion type="single" collapsible className="w-full rounded-md border px-4">
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full rounded-md border px-4"
+      >
         <AccordionItem value="all-latest-telemetry" className="border-b-0">
           <AccordionTrigger className="text-sm font-medium">
             Show all latest telemetry (unfiltered)
@@ -368,7 +390,10 @@ export function DeviceLatestTelemetryTabContent({
         </AccordionItem>
       </Accordion>
 
-      <Dialog open={isDialogOpen} onOpenChange={(open) => (!isSubmitting ? setIsDialogOpen(open) : null)}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => (!isSubmitting ? setIsDialogOpen(open) : null)}
+      >
         <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>Add telemetry</DialogTitle>
@@ -391,7 +416,9 @@ export function DeviceLatestTelemetryTabContent({
                 <Label>Type</Label>
                 <SelectAdmin
                   value={telemetryType}
-                  onValueChange={(value) => setTelemetryType(value as TelemetryType)}
+                  onValueChange={(value) =>
+                    setTelemetryType(value as TelemetryType)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger className="w-full">
@@ -399,7 +426,10 @@ export function DeviceLatestTelemetryTabContent({
                   </SelectTrigger>
                   <SelectContent>
                     {TELEMETRY_TYPES.map((typeOption) => (
-                      <SelectItem key={typeOption.value} value={typeOption.value}>
+                      <SelectItem
+                        key={typeOption.value}
+                        value={typeOption.value}
+                      >
                         {typeOption.label}
                       </SelectItem>
                     ))}
@@ -421,10 +451,19 @@ export function DeviceLatestTelemetryTabContent({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={handleClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Adding..." : "Add"}
             </Button>
           </DialogFooter>

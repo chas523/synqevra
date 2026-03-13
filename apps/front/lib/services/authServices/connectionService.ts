@@ -14,11 +14,11 @@ export interface GetUserByTokenDto {
 
 export class ConnectionService {
   public static async checkTokenValidation(
-    token: string
+    token: string,
   ): Promise<TokenValidationResponse> {
     try {
       const { data } = await proxyApi.get(
-        `/connection/checkValidation?token=${encodeURIComponent(token)}`
+        `/connection/checkValidation?token=${encodeURIComponent(token)}`,
       );
       return data;
     } catch (err: unknown) {
@@ -27,11 +27,11 @@ export class ConnectionService {
   }
 
   public static async getUserByToken(
-    token: string
+    token: string,
   ): Promise<GetUserByTokenDto> {
     try {
       const { data } = await proxyApi.get(
-        `/user/by-token?token=${encodeURIComponent(token)}`
+        `/user/by-token?token=${encodeURIComponent(token)}`,
       );
       return data;
     } catch (err: unknown) {
@@ -41,7 +41,7 @@ export class ConnectionService {
 
   public static async establishConnection(
     formData: ApiData,
-    token?: string
+    token?: string,
   ): Promise<ConnectionResponse> {
     try {
       const url = token

@@ -1,4 +1,4 @@
-import { EntitiesAssetsPage } from '@/components/pages/EntitiesAssetsPage';
+import { EntitiesAssetsPage } from "@/components/pages/EntitiesAssetsPage";
 
 export default function Page() {
   return <EntitiesAssetsPage />;

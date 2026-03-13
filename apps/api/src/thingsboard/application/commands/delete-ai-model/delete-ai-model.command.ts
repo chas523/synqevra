@@ -2,11 +2,13 @@ import { Command } from '@nestjs/cqrs';
 import { Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
-export class DeleteAiModelCommand extends Command<Result<any, ThingsboardApiException>> {
-    constructor(
-        public readonly accessToken: string,
-        public readonly modelId: string,
-    ) {
-        super();
-    }
+export class DeleteAiModelCommand extends Command<
+  Result<any, ThingsboardApiException>
+> {
+  constructor(
+    public readonly accessToken: string,
+    public readonly modelId: string,
+  ) {
+    super();
+  }
 }

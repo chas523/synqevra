@@ -1,7 +1,7 @@
 import { TenantProfilesPage } from "@/components/pages/TenantProfilesPage";
 
 const TenantProfiles = () => {
-    return <TenantProfilesPage />;
+  return <TenantProfilesPage />;
 };
 
 export default TenantProfiles;
