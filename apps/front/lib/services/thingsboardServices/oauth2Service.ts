@@ -109,4 +109,9 @@ export class OAuth2Service {
         const { data } = await proxyApi.post(`thingsboard/oauth2/client`, payload);
         return data;
     }
+
+    public static async checkGoogleAuthAvailable(): Promise<{ available: boolean }> {
+        const { data } = await proxyApi.get(`auth/google/available`);
+        return data;
+    }
 }

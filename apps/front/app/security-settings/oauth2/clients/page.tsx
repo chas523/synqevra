@@ -21,9 +21,8 @@ function OAuth2Tabs() {
 
     if (role === "ADMIN") {
         tabs.push({ label: "Domains", href: "/security-settings/oauth2/domains" });
+        tabs.push({ label: "OAuth 2.0 clients", href: "/security-settings/oauth2/clients" });
     }
-
-    tabs.push({ label: "OAuth 2.0 clients", href: "/security-settings/oauth2/clients" });
 
     return (
         <div className="border-b border-slate-200 dark:border-slate-800 mb-6">
@@ -96,19 +95,6 @@ export default function OAuth2ClientsPage() {
             render: (item) => (
                 <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                     {item.title}
-                </span>
-            ),
-        },
-        {
-            key: "platforms",
-            header: "Allowed platforms",
-            render: (item) => (
-                <span className="text-sm text-slate-700 dark:text-slate-300">
-                    {item.platforms && item.platforms.length > 0
-                        ? item.platforms
-                            .map((p) => (p === "IOS" ? "iOS" : p.charAt(0) + p.slice(1).toLowerCase()))
-                            .join(", ")
-                        : "—"}
                 </span>
             ),
         },

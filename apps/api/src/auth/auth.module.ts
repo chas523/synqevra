@@ -16,7 +16,6 @@ import { ThingsboardModule } from '../thingsboard/thingsboard.module';
 import { JwtAdminStrategy } from './strategies/jwt.admin.strategy';
 import { RefreshAdminStrategy } from './strategies/refresh.admin.strategy';
 import { JwtPatientStrategy } from './strategies/jwt.patient.strategy';
-import googleOAuthConfig from '../config/google-oauth.config';
 import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
@@ -24,7 +23,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
-    ConfigModule.forFeature(googleOAuthConfig),
     IamModule,
     ThingsboardModule,
   ],
