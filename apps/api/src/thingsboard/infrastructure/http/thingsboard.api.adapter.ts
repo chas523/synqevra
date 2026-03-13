@@ -477,6 +477,28 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchGatewayDockerCompose(
+    accessToken: string,
+    deviceId: string,
+  ): Promise<Buffer> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/device-connectivity/gateway-launch/${deviceId}/docker-compose/download`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          responseType: 'arraybuffer',
+        }),
+      );
+      return Buffer.from(response.data as ArrayBuffer);
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to download gateway docker-compose from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async addDeviceLatestTelemetry(
     accessToken: string,
     id: string,
@@ -2161,9 +2183,14 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     entityType: string,
     entityId: string,
     scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    keys?: string[],
   ): Promise<any[]> {
     try {
-      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/attributes/${scope}`;
+      const keysQuery =
+        Array.isArray(keys) && keys.length > 0
+          ? `?keys=${encodeURIComponent(keys.join(','))}`
+          : '';
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/attributes/${scope}${keysQuery}`;
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers: { Authorization: `Bearer ${sysAdminAccessToken}` },

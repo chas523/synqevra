@@ -197,6 +197,10 @@ export abstract class ThingsboardApiPort {
     id: string,
     attributes: Record<string, any>,
   ): Promise<void>;
+  abstract fetchGatewayDockerCompose(
+    accessToken: string,
+    deviceId: string,
+  ): Promise<Buffer>;
   abstract addDeviceLatestTelemetry(
     accessToken: string,
     id: string,
@@ -543,6 +547,7 @@ export abstract class ThingsboardApiPort {
     entityType: string,
     entityId: string,
     scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    keys?: string[],
   ): Promise<TenantAttributesResponse>;
 
   abstract fetchEntityAttributeKeys(

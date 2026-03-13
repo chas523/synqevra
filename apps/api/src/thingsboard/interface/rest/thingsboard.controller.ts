@@ -433,6 +433,389 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Get('/gateways')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get list of gateways',
+    description:
+      'Fetch paginated list of gateways with enabled connectors and version',
+  })
+  async getGateways(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const normalizedPage = Math.max(0, Number(page));
+    const normalizedPageSize = Math.max(1, Number(pageSize));
+    const batchSize = 100;
+    const allDevices: any[] = [];
+    let currentPage = 0;
+    let hasNext = true;
+
+    while (hasNext) {
+      const response = await this.thingsboardApi.fetchDevices(
+        accessToken,
+        currentPage,
+        batchSize,
+        sortProperty,
+        sortOrder,
+      );
+
+      allDevices.push(...((response?.data as any[]) ?? []));
+      hasNext = Boolean(response?.hasNext);
+      currentPage += 1;
+
+      if (currentPage > 1000) {
+        break;
+      }
+    }
+
+    const gateways = allDevices.filter((device) =>
+      Boolean(device?.additionalInfo?.gateway),
+    );
+
+    const startIndex = normalizedPage * normalizedPageSize;
+    const pagedGateways = gateways.slice(
+      startIndex,
+      startIndex + normalizedPageSize,
+    );
+
+    const data = await Promise.all(
+      pagedGateways.map(async (gateway) => {
+        const gatewayId = gateway?.id?.id;
+        let attributes: Array<{ key: string; value: unknown }> = [];
+
+        if (gatewayId) {
+          try {
+            attributes = (await this.thingsboardApi.fetchDeviceSharedAttributes(
+              accessToken,
+              gatewayId,
+            )) as Array<{ key: string; value: unknown }>;
+          } catch (error) {
+            this.logger.warn(
+              `Failed to fetch shared attributes for gateway ${gatewayId}`,
+            );
+          }
+        }
+
+        const attributeMap = new Map(
+          attributes.map((attribute) => [attribute.key, attribute.value]),
+        );
+
+        const connectorsValue =
+          attributeMap.get('active_connectors') ??
+          attributeMap.get('activeConnectors');
+        const versionValue =
+          attributeMap.get('Version') ?? attributeMap.get('version');
+
+        let enabledConnectors = 0;
+        if (typeof connectorsValue === 'string' && connectorsValue.length > 0) {
+          try {
+            const parsed = JSON.parse(connectorsValue);
+            enabledConnectors = Array.isArray(parsed) ? parsed.length : 0;
+          } catch {
+            enabledConnectors = 0;
+          }
+        } else if (Array.isArray(connectorsValue)) {
+          enabledConnectors = connectorsValue.length;
+        }
+
+        return {
+          ...gateway,
+          enabledConnectors,
+          gatewayVersion:
+            typeof versionValue === 'string'
+              ? versionValue
+              : versionValue != null
+                ? String(versionValue)
+                : null,
+        };
+      }),
+    );
+
+    return {
+      data,
+      totalPages: Math.ceil(gateways.length / normalizedPageSize),
+      totalElements: gateways.length,
+      hasNext: startIndex + normalizedPageSize < gateways.length,
+    };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/gateways/:id/configuration')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get gateway configuration data',
+    description:
+      'Fetch client attributes, specific shared attributes, and credentials for a gateway device',
+  })
+  async getGatewayConfiguration(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const CONFIG_KEYS = [
+      'general_configuration',
+      'grpc_configuration',
+      'logs_configuration',
+      'storage_configuration',
+      'RemoteLoggingLevel',
+      'mode',
+    ];
+
+    const [clientAttributes, allShared, credentials] = await Promise.all([
+      this.thingsboardApi
+        .fetchEntityAttributes(accessToken, 'DEVICE', id, 'CLIENT_SCOPE')
+        .catch(() => []),
+      this.thingsboardApi
+        .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SHARED_SCOPE')
+        .catch(() => []),
+      this.thingsboardApi
+        .getDeviceCredentials(accessToken, id)
+        .catch(() => null),
+    ]);
+
+    const sharedAttributes = (allShared as any[]).filter((attr) =>
+      CONFIG_KEYS.includes(attr?.key),
+    );
+
+    return { clientAttributes, sharedAttributes, credentials };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/gateways/:id/docker-compose')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Download docker-compose.yml for a gateway',
+    description:
+      'Proxy download of docker-compose.yml from ThingsBoard device-connectivity API',
+  })
+  async getGatewayDockerCompose(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Res() res: any,
+  ) {
+    const fileBuffer = await this.thingsboardApi.fetchGatewayDockerCompose(
+      accessToken,
+      id,
+    );
+    res.set({
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': 'attachment; filename="docker-compose.yml"',
+    });
+    res.send(fileBuffer);
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/gateways/:id/connectors')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get gateway connectors data',
+    description:
+      'Fetch active and inactive connectors, gateway version and active connector details',
+  })
+  async getGatewayConnectors(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const [activeAttr, inactiveAttr, versionAttr, sharedAll] =
+      await Promise.all([
+        this.thingsboardApi
+          .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SHARED_SCOPE', [
+            'active_connectors',
+          ])
+          .catch(() => []),
+        this.thingsboardApi
+          .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SERVER_SCOPE', [
+            'inactive_connectors',
+          ])
+          .catch(() => []),
+        this.thingsboardApi
+          .fetchEntityAttributes(accessToken, 'DEVICE', id, 'CLIENT_SCOPE', [
+            'Version',
+          ])
+          .catch(() => []),
+        this.thingsboardApi
+          .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SHARED_SCOPE')
+          .catch(() => []),
+      ]);
+
+    const activeConnectorsRaw = (activeAttr as any[]).find(
+      (attr) => attr?.key === 'active_connectors',
+    )?.value;
+    const inactiveConnectorsRaw = (inactiveAttr as any[]).find(
+      (attr) => attr?.key === 'inactive_connectors',
+    )?.value;
+    const versionRaw = (versionAttr as any[]).find(
+      (attr) => attr?.key === 'Version',
+    )?.value;
+
+    const activeConnectors = Array.isArray(activeConnectorsRaw)
+      ? activeConnectorsRaw.map((name) => String(name))
+      : [];
+    const inactiveConnectors = Array.isArray(inactiveConnectorsRaw)
+      ? inactiveConnectorsRaw.map((name) => String(name))
+      : [];
+
+    const sharedMap = new Map<string, any>(
+      (sharedAll as any[])
+        .filter((attr) => attr?.key)
+        .map((attr) => [String(attr.key), attr.value]),
+    );
+
+    const connectors = activeConnectors.map((name) => ({
+      name,
+      status: inactiveConnectors.includes(name) ? 'inactive' : 'active',
+      config: sharedMap.get(name) ?? null,
+    }));
+
+    return {
+      activeConnectors,
+      inactiveConnectors,
+      version: versionRaw != null ? String(versionRaw) : null,
+      connectors,
+    };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/gateways/:id/connectors')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Add gateway connector',
+    description:
+      'Adds connector name to active_connectors and creates connector configuration in shared attributes',
+  })
+  async addGatewayConnector(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    payload: {
+      name: string;
+      type?: string;
+      logLevel?: string;
+      useDefaults?: boolean;
+      sendDataOnlyOnChange?: boolean;
+    },
+  ) {
+    const name = String(payload?.name ?? '').trim();
+    if (!name) {
+      throw new BadRequestException('Connector name is required');
+    }
+
+    const connectorType = String(payload?.type ?? 'mqtt').trim() || 'mqtt';
+    const logLevel = String(payload?.logLevel ?? 'INFO').trim() || 'INFO';
+
+    const [activeAttr, existingConnectorAttr] = await Promise.all([
+      this.thingsboardApi
+        .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SHARED_SCOPE', [
+          'active_connectors',
+        ])
+        .catch(() => []),
+      this.thingsboardApi
+        .fetchEntityAttributes(accessToken, 'DEVICE', id, 'SHARED_SCOPE', [
+          name,
+        ])
+        .catch(() => []),
+    ]);
+
+    const existingConnector = (existingConnectorAttr as any[]).find(
+      (attr) => attr?.key === name,
+    );
+
+    if (existingConnector) {
+      throw new BadRequestException(`Connector "${name}" already exists`);
+    }
+
+    const activeRaw = (activeAttr as any[]).find(
+      (attr) => attr?.key === 'active_connectors',
+    )?.value;
+    const activeConnectors = Array.isArray(activeRaw)
+      ? activeRaw.map((item) => String(item))
+      : [];
+    const nextActiveConnectors = Array.from(
+      new Set([...activeConnectors, name]),
+    );
+
+    await this.thingsboardApi.saveEntityAttributes(
+      accessToken,
+      'DEVICE',
+      id,
+      'SHARED_SCOPE',
+      {
+        active_connectors: nextActiveConnectors,
+      },
+    );
+
+    const connectorConfig = {
+      type: connectorType,
+      name,
+      logLevel,
+      useDefaults:
+        typeof payload?.useDefaults === 'boolean' ? payload.useDefaults : true,
+      sendDataOnlyOnChange:
+        typeof payload?.sendDataOnlyOnChange === 'boolean'
+          ? payload.sendDataOnlyOnChange
+          : false,
+      configurationJson: {
+        broker: {
+          name: 'Default Local Broker',
+          host: '127.0.0.1',
+          port: 1883,
+          clientId: 'ThingsBoard_gateway',
+          version: 5,
+          maxMessageNumberPerWorker: 10,
+          maxNumberOfWorkers: 100,
+          sendDataOnlyOnChange: false,
+          security: {
+            type: 'basic',
+            username: 'user',
+            password: 'password',
+          },
+        },
+        mapping: [
+          {
+            topicFilter: 'sensor/data',
+            converter: {
+              type: 'json',
+              deviceNameJsonExpression: '${serialNumber}',
+              deviceTypeJsonExpression: '${sensorType}',
+              sendDataOnlyOnChange: false,
+              timeout: 60000,
+              attributes: [
+                { type: 'string', key: 'model', value: '${sensorModel}' },
+              ],
+              timeseries: [
+                { type: 'double', key: 'temperature', value: '${temp}' },
+                { type: 'double', key: 'humidity', value: '${hum}' },
+              ],
+            },
+          },
+        ],
+      },
+      configuration: `${name}.json`,
+      ts: Date.now(),
+    };
+
+    await this.thingsboardApi.saveEntityAttributes(
+      accessToken,
+      'DEVICE',
+      id,
+      'SHARED_SCOPE',
+      {
+        [name]: connectorConfig,
+      },
+    );
+
+    return { success: true, name };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/assets')
   @ApiBearerAuth()
   @ApiOperation({
