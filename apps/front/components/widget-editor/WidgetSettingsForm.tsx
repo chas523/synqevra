@@ -130,7 +130,7 @@ export function WidgetSettingsForm() {
         <Label>Description</Label>
         <Textarea
           placeholder="Enter description"
-          className="min-h-[100px] resize-y"
+          className="min-h-25 resize-y"
           value={widgetType.description || ""}
           onChange={handleDescriptionChange}
         />

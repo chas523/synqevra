@@ -29,9 +29,7 @@ export function SystemMetricCard({
           <span className="text-[10px] lg:text-xs text-muted-foreground truncate min-w-0">
             {label}
           </span>
-          {checked && (
-            <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
-          )}
+          {checked && <Check className="h-3 w-3 text-green-600 shrink-0" />}
         </div>
       </CardHeader>
       <CardContent className=" flex-1 flex items-end">

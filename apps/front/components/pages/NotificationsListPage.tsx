@@ -71,7 +71,7 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
 
   if (!iconConfig?.enabled) {
     return (
-      <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0" />
+      <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-1 shrink-0" />
     );
   }
 
@@ -80,7 +80,7 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
   if (icon.startsWith("mdi:")) {
     return (
       <div
-        className="mt-1 flex-shrink-0"
+        className="mt-1 shrink-0"
         style={{
           WebkitMaskImage: `url(/tb-assets/mdi/${icon.substring(4)}.svg)`,
           maskImage: `url(/tb-assets/mdi/${icon.substring(4)}.svg)`,
@@ -100,7 +100,7 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
 
   return (
     <span
-      className="material-icons mt-1 flex-shrink-0 select-none"
+      className="material-icons mt-1 shrink-0 select-none"
       style={{
         color: color || "#6B7280",
         fontSize: "20px",

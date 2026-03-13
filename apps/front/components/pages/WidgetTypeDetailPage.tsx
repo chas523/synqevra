@@ -153,7 +153,7 @@ export const WidgetTypeDetailPage = ({ id }: WidgetTypeDetailPageProps) => {
             <CardTitle>Descriptor (JSON)</CardTitle>
           </CardHeader>
           <CardContent>
-            <pre className="bg-muted p-4 rounded-md overflow-auto max-h-[500px] text-xs">
+            <pre className="bg-muted p-4 rounded-md overflow-auto max-h-125 text-xs">
               {JSON.stringify(widgetType.descriptor, null, 2)}
             </pre>
           </CardContent>

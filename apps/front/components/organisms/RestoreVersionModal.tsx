@@ -306,7 +306,7 @@ export function RestoreVersionModal({
   if (result) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px] p-6 text-center">
+        <DialogContent className="sm:max-w-100 p-6 text-center">
           <DialogHeader>
             <DialogTitle className="dark:text-white text-xl mx-auto mb-4">
               Restoration Result
@@ -494,7 +494,7 @@ function EntityRestoreEntryCard({
       </div>
 
       <div className="p-4 flex flex-col md:flex-row gap-6">
-        <div className="w-[240px] space-y-1.5 flex-shrink-0">
+        <div className="w-60 space-y-1.5 shrink-0">
           <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
             Type*
           </label>

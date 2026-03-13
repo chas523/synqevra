@@ -145,7 +145,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
   // Dashboard routes - show sidebar with header
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-[#0a0f1e] dark:via-[#111827] dark:to-[#0f1419]">
+    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-[#0a0f1e] dark:via-[#111827] dark:to-[#0f1419]">
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div
@@ -179,14 +179,14 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             <div className="flex items-center gap-3">
               {user && (
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/60 dark:hover:bg-white/10">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-linear-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
                     {user.role === "ADMIN" ? (
                       <ShieldCheck className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
                     ) : (
                       <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     )}
                   </div>
-                  <div className="flex flex-col leading-tight hidden sm:flex">
+                  <div className="flex-col leading-tight hidden sm:flex">
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                       {user.firstName} {user.lastName}
                     </span>
@@ -212,7 +212,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               </Button>
               <Button
                 size="lg"
-                className="cursor-pointer gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
+                className="cursor-pointer gap-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
                 onClick={handleLogout}
               >
                 {isLoading ? (

@@ -165,7 +165,7 @@ const DeviceDetailTemplate = ({
             <button
               onClick={onSaveChanges}
               disabled={updating}
-              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 text-white rounded-lg font-medium transition-all disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-slate-700 disabled:to-slate-700 text-white rounded-lg font-medium transition-all disabled:cursor-not-allowed"
             >
               {updating ? (
                 <>
@@ -196,7 +196,7 @@ const DeviceDetailTemplate = ({
 
         <div className="bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/30">
+            <div className="p-2 bg-linear-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/30">
               <Activity className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
             </div>
             <div>

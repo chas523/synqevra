@@ -90,7 +90,7 @@ export function TenantProfileMultiSelect({
   return (
     <div className="space-y-2 relative" ref={searchRef}>
       <Label>{label}</Label>
-      <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[42px] bg-background">
+      <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-10.5 bg-background">
         {selectedProfiles.map((profile) => (
           <Badge key={profile.id.id} variant="secondary" className="gap-1 pr-1">
             {profile.name}
@@ -105,7 +105,7 @@ export function TenantProfileMultiSelect({
           </Badge>
         ))}
         <input
-          className="flex-1 bg-transparent outline-none min-w-[120px] text-sm"
+          className="flex-1 bg-transparent outline-none min-w-30 text-sm"
           placeholder={selectedProfiles.length === 0 ? placeholder : ""}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -120,7 +120,7 @@ export function TenantProfileMultiSelect({
 
       {/* Dropdown Results */}
       {showResults && searchResults.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-popover text-popover-foreground border rounded-md shadow-md max-h-[200px] overflow-auto py-1">
+        <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-popover text-popover-foreground border rounded-md shadow-md max-h-50 overflow-auto py-1">
           {searchResults.map((profile) => (
             <button
               key={profile.id.id}

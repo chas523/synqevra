@@ -136,7 +136,7 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
                 </h1>
                 <p className="text-gray-500 mt-1">{tenant.name}</p>
 
-                <div className="mt-4 grid grid-cols-1 md: grid-cols-2 gap-4">
+                <div className="mt-4 grid md: grid-cols-2 gap-4">
                   {tenant.email && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Mail className="h-4 w-4 text-gray-400" />

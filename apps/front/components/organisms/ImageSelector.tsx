@@ -66,7 +66,7 @@ export const ImageSelector = ({
   };
 
   return (
-    <div className="flex flex-col h-[500px] gap-4">
+    <div className="flex flex-col h-125 gap-4">
       <div className="flex items-center justify-between gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

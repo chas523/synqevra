@@ -168,7 +168,7 @@ export const WidgetTypesTable = ({
           { value: "DEPRECATED", label: "Deprecated" },
         ]}
         placeholder="All"
-        className="w-[180px]"
+        className="w-45"
       />
     </div>
   );

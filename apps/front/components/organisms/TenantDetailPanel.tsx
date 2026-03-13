@@ -458,7 +458,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                 { value: "FROM", label: "From" },
                 { value: "TO", label: "To" },
               ]}
-              className="w-[100px]"
+              className="w-25"
             />
           </div>
         </div>
@@ -498,7 +498,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="flex flex-col gap-1 min-w-[150px]">
+                    <div className="flex flex-col gap-1 min-w-37.5">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
                           Type
@@ -515,7 +515,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                           Name
                         </span>
                         <span
-                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[150px]"
+                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-37.5"
                           title={relation.fromName}
                         >
                           {relation.from.id === tenant.id.id
@@ -525,9 +525,9 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                       </div>
                     </div>
 
-                    <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
 
-                    <div className="flex flex-col gap-1 min-w-[150px]">
+                    <div className="flex flex-col gap-1 min-w-37.5">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
                           Type
@@ -544,7 +544,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                           Name
                         </span>
                         <span
-                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[150px]"
+                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-37.5"
                           title={relation.toName}
                         >
                           {relation.to.id === tenant.id.id

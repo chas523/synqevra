@@ -97,7 +97,7 @@ const ActivatePage = ({ token }: ConnectionFormProps) => {
         success={success}
         onClose={handleModalClose}
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 transition-colors">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6 transition-colors">
         <div className="max-w-6xl mx-auto space-y-6">
           <HeroSection
             title="Configure Your Account"
