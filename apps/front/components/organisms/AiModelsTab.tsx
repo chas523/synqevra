@@ -376,8 +376,8 @@ function AiModelModal({
           <DialogHeader>
             <DialogTitle className="dark:text-white">
               {connectivityResult?.status === "SUCCESS"
-                ? "✅ Connection successful"
-                : "❌ Connection failed"}
+                ? "Connection successful"
+                : "Connection failed"}
             </DialogTitle>
             <DialogDescription className="sr-only">
               Connectivity check result

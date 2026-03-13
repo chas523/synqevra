@@ -205,7 +205,7 @@ export class TelemetryParserService {
   }
 
   parseNotificationCount(
-    response: TelemetryResponse | any,
+    response: TelemetryResponse,
   ): { count: number; cmdId: number } | null {
     try {
       if (
@@ -225,7 +225,7 @@ export class TelemetryParserService {
   }
 
   parseNotifications(
-    response: TelemetryResponse | any,
+    response: TelemetryResponse,
   ): { notifications: any[]; count: number; cmdId: number } | null {
     try {
       if (

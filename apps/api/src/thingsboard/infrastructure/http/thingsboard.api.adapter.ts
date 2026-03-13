@@ -7,6 +7,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import {
   Asset,
@@ -2852,7 +2853,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     imageSubType: string = 'IMAGE',
   ): Promise<any> {
     try {
-      const FormData = require('form-data');
       const formData = new FormData();
       formData.append('file', file, { filename: fileName });
       formData.append('title', title);

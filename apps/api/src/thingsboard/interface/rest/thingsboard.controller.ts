@@ -530,7 +530,8 @@ export class ThingsboardController {
             typeof versionValue === 'string'
               ? versionValue
               : versionValue != null
-                ? String(versionValue)
+                ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
+                  String(versionValue)
                 : null,
         };
       }),
