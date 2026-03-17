@@ -35,6 +35,7 @@ describe('MedplumRegistrationService', () => {
   const mockStartNewProject = jest.fn();
   const mockGetActiveLogin = jest.fn();
   const mockSearchResources = jest.fn();
+  const mockDeleteResource = jest.fn();
 
   const dto: CreateProjectDto = {
     firstName: 'John',
@@ -51,6 +52,7 @@ describe('MedplumRegistrationService', () => {
       startNewProject: mockStartNewProject,
       getActiveLogin: mockGetActiveLogin,
       searchResources: mockSearchResources,
+      deleteResource: mockDeleteResource,
       getBaseUrl: () => 'http://host.docker.internal:8103',
     }));
   };
@@ -103,6 +105,7 @@ describe('MedplumRegistrationService', () => {
 
     const loginState = {
       project: { reference: 'Project/123' },
+      profile: { reference: 'User/456' },
     } as LoginState;
 
     mockStartNewUser.mockResolvedValue(registrationResponse);
@@ -182,5 +185,28 @@ describe('MedplumRegistrationService', () => {
     await expect(service.registerAndGetClientApp(dto)).rejects.toThrow(
       'Failed to register user or create project',
     );
+  });
+
+  it('should rollback created Medplum user when project creation fails', async () => {
+    const registrationResponse = {
+      login: 'mockLogin',
+      code: '200',
+    };
+
+    const loginState = {
+      profile: { reference: 'User/123' },
+    } as LoginState;
+
+    mockStartNewUser.mockResolvedValue(registrationResponse);
+    mockProcessCode.mockResolvedValue(undefined);
+    mockGetActiveLogin.mockReturnValue(loginState);
+    mockStartNewProject.mockRejectedValue(new Error('Project create failed'));
+    mockSearchResources.mockResolvedValue([]);
+
+    await expect(service.registerAndGetClientApp(dto)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
+
+    expect(mockDeleteResource).toHaveBeenCalledWith('User', '123');
   });
 });

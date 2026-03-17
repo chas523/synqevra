@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useConnectionStatus } from "@/hooks/connection/useConnectionStatus";
 import { useAppSelector } from "@/lib/redux/store";
 
 import logoDarkStatic from "@/public/logo.svg";
@@ -46,6 +47,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
+const WHITELABEL_LOGO_UPDATED_EVENT = "whitelabel-logo-updated";
+const WHITELABEL_LOGO_VERSION_KEY = "whitelabel-logo-version";
 
 interface NavItem {
   label: string;
@@ -228,6 +232,8 @@ export default function AppSidebar() {
   const [mounted, setMounted] = useState(false);
   const user = useAppSelector((state) => state.user.user);
   const role = user?.role;
+  const { hasMedplum, isLoading: isConnectionStatusLoading } =
+    useConnectionStatus();
 
   const [imgErrorDarkTheme, setImgErrorDarkTheme] = useState<
     "none" | "tenant_failed" | "global_failed"
@@ -235,6 +241,7 @@ export default function AppSidebar() {
   const [imgErrorLightTheme, setImgErrorLightTheme] = useState<
     "none" | "tenant_failed" | "global_failed"
   >("none");
+  const [logoVersion, setLogoVersion] = useState("0");
   const tenantId = user?.tenantId;
 
   useEffect(() => {
@@ -247,8 +254,43 @@ export default function AppSidebar() {
     setImgErrorLightTheme("none");
   }, [tenantId]);
 
+  useEffect(() => {
+    const currentVersion =
+      window.localStorage.getItem(WHITELABEL_LOGO_VERSION_KEY) || "0";
+    setLogoVersion(currentVersion);
+
+    const onLogoUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
+      const nextVersion =
+        customEvent.detail ||
+        window.localStorage.getItem(WHITELABEL_LOGO_VERSION_KEY) ||
+        Date.now().toString();
+      setLogoVersion(nextVersion);
+      // Reset error fallback state so the freshly uploaded tenant logo is tried again
+      setImgErrorDarkTheme("none");
+      setImgErrorLightTheme("none");
+    };
+
+    window.addEventListener(WHITELABEL_LOGO_UPDATED_EVENT, onLogoUpdated);
+
+    return () => {
+      window.removeEventListener(WHITELABEL_LOGO_UPDATED_EVENT, onLogoUpdated);
+    };
+  }, []);
+
   const groups =
     role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
+  const shouldShowPatientsNavigation = isConnectionStatusLoading || hasMedplum;
+  const visibleGroups = groups.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => {
+      if (role !== "ADMIN" && item.href === "/patients") {
+        return shouldShowPatientsNavigation;
+      }
+
+      return true;
+    }),
+  }));
 
   const getLogoSrc = (theme: "dark" | "light") => {
     const errorState =
@@ -263,7 +305,7 @@ export default function AppSidebar() {
     const prefix = useTenant ? tenantId : "global";
     // Dark theme uses the white logo, light theme uses the dark logo
     const filename = theme === "dark" ? "logo-dark.svg" : "logo-white.svg";
-    return `/public-assets/${prefix}/${filename}`;
+    return `/public-assets/${prefix}/${filename}?v=${logoVersion}`;
   };
 
   const handleImageError = (theme: "dark" | "light") => {
@@ -309,7 +351,7 @@ export default function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {groups.map((group) => (
+        {visibleGroups.map((group) => (
           <SidebarGroup key={group.label}>
             <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -318,27 +360,30 @@ export default function AppSidebar() {
           </SidebarGroup>
         ))}
 
-        {mounted && medplumEnabled && role === "ADMIN" && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Medplum</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <NavMenuItems
-                items={[
-                  {
-                    href: "/patients",
-                    icon: PersonStanding,
-                    label: "Patients",
-                  },
-                  {
-                    href: "/practitioners",
-                    icon: Stethoscope,
-                    label: "Practitioners",
-                  },
-                ]}
-              />
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        {mounted &&
+          medplumEnabled &&
+          role === "ADMIN" &&
+          shouldShowPatientsNavigation && (
+            <SidebarGroup>
+              <SidebarGroupLabel>Medplum</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <NavMenuItems
+                  items={[
+                    {
+                      href: "/patients",
+                      icon: PersonStanding,
+                      label: "Patients",
+                    },
+                    {
+                      href: "/practitioners",
+                      icon: Stethoscope,
+                      label: "Practitioners",
+                    },
+                  ]}
+                />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
       </SidebarContent>
     </Sidebar>
   );

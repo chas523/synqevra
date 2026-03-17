@@ -724,6 +724,8 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
 }
 
 function WhitelabelTabContent({ tenantId }: { tenantId: string }) {
+  const WHITELABEL_LOGO_UPDATED_EVENT = "whitelabel-logo-updated";
+  const WHITELABEL_LOGO_VERSION_KEY = "whitelabel-logo-version";
   const [logoWhiteFile, setLogoWhiteFile] = useState<File | null>(null);
   const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -750,6 +752,14 @@ function WhitelabelTabContent({ tenantId }: { tenantId: string }) {
       if (!response.success) {
         throw new Error("Error during file upload");
       }
+
+      const version = Date.now().toString();
+      window.localStorage.setItem(WHITELABEL_LOGO_VERSION_KEY, version);
+      window.dispatchEvent(
+        new CustomEvent(WHITELABEL_LOGO_UPDATED_EVENT, {
+          detail: version,
+        }),
+      );
 
       toast.success("Files uploaded successfully.");
       // Optional: reset file inputs after successful upload

@@ -14,6 +14,7 @@ import {
   TimeRangeFilter,
   TimeRange,
 } from "@/components/molecules/TimeRangeFilter";
+import { Input } from "@/components/ui/input";
 
 interface AssetAlarmsTabContentProps {
   assetId: string;
@@ -22,6 +23,7 @@ interface AssetAlarmsTabContentProps {
 export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusList, setStatusList] = useState<string[]>([]);
   const [severityList, setSeverityList] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
@@ -134,6 +136,29 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
     [],
   );
 
+  const filteredAlarms = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return data?.data || [];
+    }
+
+    return (data?.data || []).filter((alarm) => {
+      const originatorName = String(alarm.originatorName || "").toLowerCase();
+      const type = String(alarm.type || "").toLowerCase();
+      const severity = String(alarm.severity || "").toLowerCase();
+      const status = String(alarm.status || "").toLowerCase();
+
+      return (
+        originatorName.includes(query) ||
+        type.includes(query) ||
+        severity.includes(query) ||
+        status.includes(query)
+      );
+    });
+  }, [data?.data, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -148,17 +173,34 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
 
       <DataTable
         title="Alarms"
-        data={data?.data || []}
+        data={filteredAlarms}
         columns={columns}
         getRowId={(row) => row.id.id}
         isLoading={isLoading}
-        currentPage={page}
-        pageSize={pageSize}
-        totalPages={data?.totalPages || 0}
-        totalElements={data?.totalElements || 0}
-        onPageChange={handlePageChange}
+        currentPage={isSearching ? 0 : page}
+        pageSize={isSearching ? filteredAlarms.length || 10 : pageSize}
+        totalPages={isSearching ? 1 : data?.totalPages || 0}
+        totalElements={
+          isSearching ? filteredAlarms.length : data?.totalElements || 0
+        }
+        onPageChange={isSearching ? () => {} : handlePageChange}
         onRefresh={handleRefresh}
-        emptyMessage="No alarms found for this asset."
+        filterComponent={
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="w-full sm:w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search alarm..."
+              />
+            </div>
+          </div>
+        }
+        emptyMessage={
+          isSearching
+            ? "No alarms match your search."
+            : "No alarms found for this asset."
+        }
         loadingMessage="Loading alarms..."
       />
     </div>

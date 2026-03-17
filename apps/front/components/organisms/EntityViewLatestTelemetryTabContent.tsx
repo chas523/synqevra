@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
 import { EntityViewService } from "@/lib/services/thingsboardServices/entityViewService";
 
 interface EntityViewLatestTelemetryTabContentProps {
@@ -37,6 +38,7 @@ export function EntityViewLatestTelemetryTabContent({
   entityViewId,
 }: EntityViewLatestTelemetryTabContentProps) {
   const [manualKeys, setManualKeys] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: attributes, isLoading: isLoadingAttributes } = useSWR(
     entityViewId ? ["entityViewAttributesForTelemetry", entityViewId] : null,
@@ -158,6 +160,24 @@ export function EntityViewLatestTelemetryTabContent({
     });
   }, [allLatestTelemetry]);
 
+  const filteredRows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return rows;
+    }
+
+    return rows.filter((row) => row.key.toLowerCase().includes(query));
+  }, [rows, searchQuery]);
+
+  const filteredAllRows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return allRows;
+    }
+
+    return allRows.filter((row) => row.key.toLowerCase().includes(query));
+  }, [allRows, searchQuery]);
+
   const columns: DataTableColumn<TelemetryRow>[] = useMemo(
     () => [
       {
@@ -181,23 +201,38 @@ export function EntityViewLatestTelemetryTabContent({
     [],
   );
 
+  const filterComponent = (
+    <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="w-full sm:w-64">
+        <Input
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search telemetry key..."
+        />
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       <DataTable
         title="Latest telemetry"
-        data={rows}
+        data={filteredRows}
         columns={columns}
         getRowId={(row) => row.id}
         isLoading={isLoadingAttributes || isLoadingTelemetry}
         currentPage={0}
-        pageSize={rows.length || 10}
+        pageSize={filteredRows.length || 10}
         totalPages={1}
-        totalElements={rows.length}
+        totalElements={filteredRows.length}
         onPageChange={() => {}}
+        filterComponent={filterComponent}
         emptyMessage={
-          telemetryKeys.length === 0
-            ? "No telemetry keys configured for this entity view."
-            : "No telemetry found for selected keys."
+          searchQuery.trim()
+            ? "No telemetry keys match your search."
+            : telemetryKeys.length === 0
+              ? "No telemetry keys configured for this entity view."
+              : "No telemetry found for selected keys."
         }
         loadingMessage="Loading latest telemetry..."
       />
@@ -214,16 +249,21 @@ export function EntityViewLatestTelemetryTabContent({
           <AccordionContent className="pt-2">
             <DataTable
               title="All latest telemetry"
-              data={allRows}
+              data={filteredAllRows}
               columns={columns}
               getRowId={(row) => row.id}
               isLoading={isLoadingAllTelemetryKeys || isLoadingAllTelemetry}
               currentPage={0}
-              pageSize={allRows.length || 10}
+              pageSize={filteredAllRows.length || 10}
               totalPages={1}
-              totalElements={allRows.length}
+              totalElements={filteredAllRows.length}
               onPageChange={() => {}}
-              emptyMessage="No latest telemetry found for this entity view."
+              filterComponent={filterComponent}
+              emptyMessage={
+                searchQuery.trim()
+                  ? "No telemetry keys match your search."
+                  : "No latest telemetry found for this entity view."
+              }
               loadingMessage="Loading all latest telemetry..."
             />
           </AccordionContent>

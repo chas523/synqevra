@@ -18,6 +18,54 @@ import process from 'node:process';
 export class MedplumRegistrationService {
   private readonly logger = new Logger(MedplumRegistrationService.name);
 
+  private extractResourceId(
+    reference: string | undefined,
+    expectedType: string,
+  ): string | null {
+    if (!reference) {
+      return null;
+    }
+
+    const [resourceType, resourceId] = reference.split('/');
+    if (resourceType !== expectedType || !resourceId) {
+      return null;
+    }
+
+    return resourceId;
+  }
+
+  private async rollbackCreatedUser(
+    medplum: MedplumClient,
+    userId: string,
+  ): Promise<void> {
+    try {
+      const memberships = await medplum.searchResources('ProjectMembership', {
+        user: `User/${userId}`,
+      });
+
+      for (const membership of memberships) {
+        if (!membership.id) {
+          continue;
+        }
+
+        try {
+          await medplum.deleteResource('ProjectMembership', membership.id);
+        } catch (membershipDeleteError) {
+          this.logger.warn(
+            `Failed to delete ProjectMembership ${membership.id} during rollback: ${membershipDeleteError instanceof Error ? membershipDeleteError.message : String(membershipDeleteError)}`,
+          );
+        }
+      }
+
+      await medplum.deleteResource('User', userId);
+      this.logger.warn(`Rolled back Medplum User/${userId}`);
+    } catch (rollbackError) {
+      this.logger.error(
+        `Failed to rollback Medplum User/${userId}: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`,
+      );
+    }
+  }
+
   async registerAndGetClientApp(
     dto: CreateProjectDto,
   ): Promise<{ clientId: string; clientSecret: string }> {
@@ -43,6 +91,9 @@ export class MedplumRegistrationService {
       storage,
     });
 
+    let createdUserId: string | null = null;
+    let userCreated = false;
+
     try {
       this.logger.log('Connection to Medplum');
 
@@ -53,9 +104,16 @@ export class MedplumRegistrationService {
         password: dto.password,
         recaptchaToken: '',
       });
+      userCreated = true;
       this.logger.debug('Registration', registration);
       if (registration.code) {
         await medplum.processCode(registration.code);
+
+        const registrationLogin = medplum.getActiveLogin();
+        createdUserId = this.extractResourceId(
+          registrationLogin?.profile?.reference,
+          'User',
+        );
       }
 
       const projectResponse: LoginAuthenticationResponse =
@@ -128,6 +186,10 @@ export class MedplumRegistrationService {
       };
     } catch (error) {
       this.logger.error('Error during Medplum registration:', error);
+
+      if (userCreated && createdUserId) {
+        await this.rollbackCreatedUser(medplum, createdUserId);
+      }
 
       if (
         error instanceof Error &&

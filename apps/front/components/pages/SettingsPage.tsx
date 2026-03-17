@@ -388,7 +388,7 @@ function PlaceholderTab({ label }: { label: string }) {
     <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-400">
         <p className="text-sm">
-          <span className="font-medium dark:text-white">{label}</span> — coming
+          <span className="font-medium dark:text-white">{label}</span> - coming
           soon
         </p>
       </div>

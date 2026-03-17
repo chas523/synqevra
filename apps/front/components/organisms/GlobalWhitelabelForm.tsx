@@ -15,6 +15,9 @@ import { TenantService } from "@/lib/services/adminServices/tenantService";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
 
+const WHITELABEL_LOGO_UPDATED_EVENT = "whitelabel-logo-updated";
+const WHITELABEL_LOGO_VERSION_KEY = "whitelabel-logo-version";
+
 export const GlobalWhitelabelForm = () => {
   const formId = useId();
   const [logoWhiteFile, setLogoWhiteFile] = useState<File | null>(null);
@@ -41,6 +44,14 @@ export const GlobalWhitelabelForm = () => {
       if (!response.success) {
         throw new Error("Error during file upload");
       }
+
+      const version = Date.now().toString();
+      window.localStorage.setItem(WHITELABEL_LOGO_VERSION_KEY, version);
+      window.dispatchEvent(
+        new CustomEvent(WHITELABEL_LOGO_UPDATED_EVENT, {
+          detail: version,
+        }),
+      );
 
       toast.success("Global whitelabel files uploaded successfully.");
     } catch (error) {

@@ -159,6 +159,7 @@ export const EntitiesDevicesTable = ({
   const rowActions = (device: Device) => {
     const id = device.id?.id ?? "";
     const isThisLoading = loadingDeviceId === id;
+    const isPublic = Boolean(device.customerIsPublic);
 
     return (
       <div className="flex items-center gap-0.5">
@@ -169,7 +170,7 @@ export const EntitiesDevicesTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-blue-500"
-              disabled={isThisLoading}
+              disabled={isThisLoading || isPublic}
               onClick={(e) => {
                 e.stopPropagation();
                 if (onMakePublic) runAction(device, onMakePublic);
@@ -192,7 +193,7 @@ export const EntitiesDevicesTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-slate-700"
-              disabled={isThisLoading}
+              disabled={isThisLoading || !isPublic}
               onClick={(e) => {
                 e.stopPropagation();
                 if (onMakePrivate) runAction(device, onMakePrivate);

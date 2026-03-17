@@ -80,13 +80,10 @@ import {
   TokenRefreshError,
   ThingsboardConnectionNotFoundError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
-import { FetchDeviceSharedAttributesQuery } from 'src/thingsboard/application/queries/fetch-device-shared-attributes/fetch-device-shared-attributes.query';
 import { FetchDeviceLatestTelemetryQuery } from 'src/thingsboard/application/queries/fetch-device-latest-telemetry/fetch-device-latest-telemetry.query';
 import { FetchDeviceTelemetryKeysQuery } from 'src/thingsboard/application/queries/fetch-device-telemetry-keys/fetch-device-telemetry-keys.query';
 import { FetchDeviceCalculatedFieldsQuery } from 'src/thingsboard/application/queries/fetch-device-calculated-fields/fetch-device-calculated-fields.query';
 import { FetchDeviceAuditLogsQuery } from 'src/thingsboard/application/queries/fetch-device-audit-logs/fetch-device-audit-logs.query';
-import { DeviceAttributes } from './dtos/response/thingsboard-device-attributes.response.dto';
-import { UpdateDeviceSharedAttributesCommand } from 'src/thingsboard/application/commands/update-device-shared-attributes/update-device-shared-attributes.command';
 import { AddDeviceLatestTelemetryCommand } from 'src/thingsboard/application/commands/add-device-latest-telemetry/add-device-latest-telemetry.command';
 import { CreateDeviceCalculatedFieldCommand } from 'src/thingsboard/application/commands/create-device-calculated-field/create-device-calculated-field.command';
 import { DevicesResponse } from './dtos/response/thingsboard-devices.response.dto';
@@ -1385,6 +1382,107 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Post('/entity-views/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save a relation for an entity view' })
+  async saveEntityViewRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: 'FROM' | 'TO';
+    },
+  ) {
+    if (
+      !body.relatedEntityId ||
+      !body.relatedEntityType ||
+      !body.relationType
+    ) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      const relation =
+        body.direction === 'FROM'
+          ? {
+              from: { id, entityType: 'ENTITY_VIEW' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
+          : {
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ENTITY_VIEW' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
+      await this.thingsboardApi.saveRelation(accessToken, relation as any);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to save entity view relation',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/entity-views/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a relation for an entity view' })
+  async deleteEntityViewRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('relatedEntityId') relatedEntityId: string,
+    @Query('relatedEntityType') relatedEntityType: string,
+    @Query('relationType') relationType: string,
+    @Query('direction') direction: 'FROM' | 'TO',
+  ) {
+    if (!relatedEntityId || !relatedEntityType || !relationType) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      if (direction === 'FROM') {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          id,
+          'ENTITY_VIEW',
+          relationType,
+          relatedEntityId,
+          relatedEntityType,
+        );
+      } else {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          relatedEntityId,
+          relatedEntityType,
+          relationType,
+          id,
+          'ENTITY_VIEW',
+        );
+      }
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to delete entity view relation',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/entity-views/:id/make-public')
   @ApiBearerAuth()
   @ApiOperation({
@@ -2106,6 +2204,103 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Post('/assets/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save a relation for an asset' })
+  async saveAssetRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: 'FROM' | 'TO';
+    },
+  ) {
+    if (
+      !body.relatedEntityId ||
+      !body.relatedEntityType ||
+      !body.relationType
+    ) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      const relation =
+        body.direction === 'FROM'
+          ? {
+              from: { id, entityType: 'ASSET' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
+          : {
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ASSET' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
+      await this.thingsboardApi.saveRelation(accessToken, relation as any);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to save asset relation');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/assets/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a relation for an asset' })
+  async deleteAssetRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('relatedEntityId') relatedEntityId: string,
+    @Query('relatedEntityType') relatedEntityType: string,
+    @Query('relationType') relationType: string,
+    @Query('direction') direction: 'FROM' | 'TO',
+  ) {
+    if (!relatedEntityId || !relatedEntityType || !relationType) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      if (direction === 'FROM') {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          id,
+          'ASSET',
+          relationType,
+          relatedEntityId,
+          relatedEntityType,
+        );
+      } else {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          relatedEntityId,
+          relatedEntityType,
+          relationType,
+          id,
+          'ASSET',
+        );
+      }
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete asset relation');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id')
   @ApiBearerAuth()
   @ApiOperation({
@@ -2433,17 +2628,30 @@ export class ThingsboardController {
   async getDeviceAttributes(
     @TbAccessToken() accessToken: string,
     @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
   ) {
-    const query = new FetchDeviceSharedAttributesQuery(accessToken, id);
-    const result: Result<DeviceAttributes, ThingsboardApiException> =
-      await this.queryBus.execute(query);
+    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase();
 
-    return match(result, {
-      Ok: (attributes: DeviceAttributes) => attributes,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    try {
+      return await this.thingsboardApi.fetchEntityAttributes(
+        accessToken,
+        'DEVICE',
+        id,
+        scope,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch device attributes',
+      );
+    }
   }
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -2526,21 +2734,31 @@ export class ThingsboardController {
     @TbAccessToken() accessToken: string,
     @Param('id') id: string,
     @Body() attributes: Record<string, any>,
+    @Query('scope') scopeParam?: string,
   ) {
-    const command = new UpdateDeviceSharedAttributesCommand(
-      accessToken,
-      id,
-      attributes,
-    );
-    const result: Result<void, ThingsboardApiException> =
-      await this.commandBus.execute(command);
+    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase();
 
-    return match(result, {
-      Ok: () => ({ success: true }),
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    if (scope !== 'SERVER_SCOPE' && scope !== 'SHARED_SCOPE') {
+      throw new BadRequestException(
+        'Only SERVER_SCOPE and SHARED_SCOPE are allowed for updates',
+      );
+    }
+
+    try {
+      await this.thingsboardApi.saveEntityAttributes(
+        accessToken,
+        'DEVICE',
+        id,
+        scope,
+        attributes,
+      );
+
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to update device attributes',
+      );
+    }
   }
 
   @Roles(Role.MODERATOR)
@@ -2981,6 +3199,105 @@ export class ThingsboardController {
         throw new InternalServerErrorException(error.message);
       },
     });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save a relation for a device' })
+  async saveDeviceRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: 'FROM' | 'TO';
+    },
+  ) {
+    if (
+      !body.relatedEntityId ||
+      !body.relatedEntityType ||
+      !body.relationType
+    ) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      const relation =
+        body.direction === 'FROM'
+          ? {
+              from: { id, entityType: 'DEVICE' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
+          : {
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'DEVICE' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
+      await this.thingsboardApi.saveRelation(accessToken, relation as any);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to save device relation');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/devices/:id/relations')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a relation for a device' })
+  async deleteDeviceRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('relatedEntityId') relatedEntityId: string,
+    @Query('relatedEntityType') relatedEntityType: string,
+    @Query('relationType') relationType: string,
+    @Query('direction') direction: 'FROM' | 'TO',
+  ) {
+    if (!relatedEntityId || !relatedEntityType || !relationType) {
+      throw new BadRequestException(
+        'relatedEntityId, relatedEntityType and relationType are required',
+      );
+    }
+    try {
+      if (direction === 'FROM') {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          id,
+          'DEVICE',
+          relationType,
+          relatedEntityId,
+          relatedEntityType,
+        );
+      } else {
+        await this.thingsboardApi.deleteRelation(
+          accessToken,
+          relatedEntityId,
+          relatedEntityType,
+          relationType,
+          id,
+          'DEVICE',
+        );
+      }
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to delete device relation',
+      );
+    }
   }
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)

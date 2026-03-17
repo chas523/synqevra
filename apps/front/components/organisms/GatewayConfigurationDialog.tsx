@@ -1305,7 +1305,7 @@ export function GatewayConfigurationDialog({
         <DialogHeader>
           <DialogTitle>
             Gateway Configuration
-            {gateway ? ` — ${gateway.name}` : ""}
+            {gateway ? ` - ${gateway.name}` : ""}
           </DialogTitle>
         </DialogHeader>
 
