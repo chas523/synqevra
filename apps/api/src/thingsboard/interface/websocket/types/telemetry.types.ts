@@ -196,6 +196,8 @@ export interface TelemetryResponse {
   errorCode: number;
   errorMsg: string | null;
   allowedEntities?: number;
+  totalUnreadCount?: number;
+  notifications?: Notification[];
   cmdUpdateType:
     | 'ENTITY_DATA'
     | 'COUNT_DATA'

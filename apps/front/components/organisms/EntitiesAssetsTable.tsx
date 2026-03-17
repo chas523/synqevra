@@ -123,6 +123,7 @@ export const EntitiesAssetsTable = ({
   const rowActions = (asset: Asset) => {
     const id = asset.id?.id ?? "";
     const isThisLoading = loadingAssetId === id;
+    const isPublic = Boolean(asset.customerIsPublic);
 
     return (
       <div className="flex items-center gap-0.5">
@@ -132,7 +133,7 @@ export const EntitiesAssetsTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-blue-500"
-              disabled={isThisLoading}
+              disabled={isThisLoading || isPublic}
               onClick={(event) => {
                 event.stopPropagation();
                 if (onMakePublic) runAction(asset, onMakePublic);
@@ -154,7 +155,7 @@ export const EntitiesAssetsTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-slate-700"
-              disabled={isThisLoading}
+              disabled={isThisLoading || !isPublic}
               onClick={(event) => {
                 event.stopPropagation();
                 if (onMakePrivate) runAction(asset, onMakePrivate);

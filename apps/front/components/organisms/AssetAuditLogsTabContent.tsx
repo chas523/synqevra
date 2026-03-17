@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   AssetAuditLog,
   AssetService,
@@ -29,6 +30,7 @@ export function AssetAuditLogsTabContent({
 }: AssetAuditLogsTabContentProps) {
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedDetails, setSelectedDetails] = useState<string>("{}");
@@ -130,6 +132,29 @@ export function AssetAuditLogsTabContent({
     [],
   );
 
+  const filteredAuditLogs = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return data?.data || [];
+    }
+
+    return (data?.data || []).filter((row) => {
+      const action = String(row.actionType || "").toLowerCase();
+      const status = String(row.actionStatus || "").toLowerCase();
+      const user = String(row.userName || "").toLowerCase();
+      const entity = String(row.entityName || "").toLowerCase();
+
+      return (
+        action.includes(query) ||
+        status.includes(query) ||
+        user.includes(query) ||
+        entity.includes(query)
+      );
+    });
+  }, [data?.data, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -138,20 +163,37 @@ export function AssetAuditLogsTabContent({
 
       <DataTable
         title="Audit logs"
-        data={data?.data || []}
+        data={filteredAuditLogs}
         columns={columns}
         getRowId={(row) =>
           row.id?.id ||
           `${row.createdTime}-${row.actionType}-${row.userName || "unknown"}`
         }
         isLoading={isLoading}
-        currentPage={page}
-        pageSize={pageSize}
-        totalPages={data?.totalPages || 0}
-        totalElements={data?.totalElements || 0}
-        onPageChange={handlePageChange}
+        currentPage={isSearching ? 0 : page}
+        pageSize={isSearching ? filteredAuditLogs.length || 10 : pageSize}
+        totalPages={isSearching ? 1 : data?.totalPages || 0}
+        totalElements={
+          isSearching ? filteredAuditLogs.length : data?.totalElements || 0
+        }
+        onPageChange={isSearching ? () => {} : handlePageChange}
         onRefresh={handleRefresh}
-        emptyMessage="No audit logs found for this asset."
+        filterComponent={
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="w-full sm:w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search audit log..."
+              />
+            </div>
+          </div>
+        }
+        emptyMessage={
+          isSearching
+            ? "No audit logs match your search."
+            : "No audit logs found for this asset."
+        }
         loadingMessage="Loading audit logs..."
       />
 

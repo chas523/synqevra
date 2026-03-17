@@ -76,6 +76,7 @@ const toEpoch = (value: unknown): number | null => {
 export function AssetAttributesTabContent({
   assetId,
 }: AssetAttributesTabContentProps) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [attributeKey, setAttributeKey] = useState("");
@@ -180,6 +181,13 @@ export function AssetAttributesTabContent({
     );
   }, [attributes]);
 
+  const filteredDataArray = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return dataArray;
+
+    return dataArray.filter((row) => row.key.toLowerCase().includes(query));
+  }, [dataArray, searchQuery]);
+
   const columns: DataTableColumn<AttributeRow>[] = useMemo(
     () => [
       {
@@ -207,18 +215,29 @@ export function AssetAttributesTabContent({
     <div className="space-y-4">
       <DataTable
         title="Server Attributes"
-        data={dataArray}
+        data={filteredDataArray}
         columns={columns}
         getRowId={(row) => row.id}
         isLoading={isLoading}
         currentPage={0}
-        pageSize={dataArray.length || 10}
+        pageSize={filteredDataArray.length || 10}
         totalPages={1}
-        totalElements={dataArray.length}
+        totalElements={filteredDataArray.length}
         onPageChange={() => {}}
         onRefresh={() => {
           mutate();
         }}
+        filterComponent={
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="w-full sm:w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search attribute key..."
+              />
+            </div>
+          </div>
+        }
         customAction={
           <Button
             type="button"
@@ -228,7 +247,11 @@ export function AssetAttributesTabContent({
             Add attribute
           </Button>
         }
-        emptyMessage="No attributes found for this asset."
+        emptyMessage={
+          searchQuery.trim()
+            ? "No attributes match your search."
+            : "No attributes found for this asset."
+        }
         loadingMessage="Loading attributes..."
       />
 

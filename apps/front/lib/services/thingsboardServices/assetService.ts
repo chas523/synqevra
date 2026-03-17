@@ -333,6 +333,32 @@ export class AssetService {
     return data;
   }
 
+  public static async saveAssetRelation(
+    assetId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.post(`/thingsboard/assets/${assetId}/relations`, params);
+  }
+
+  public static async deleteAssetRelation(
+    assetId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.delete(`/thingsboard/assets/${assetId}/relations`, {
+      params,
+    });
+  }
+
   public static async getAssetProfileInfoByName(
     name: string,
   ): Promise<AssetProfileInfo> {

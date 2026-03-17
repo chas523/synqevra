@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTablePagination } from "./DataTablePagination";
+import { cn } from "@/lib/utils";
 import {
   ArrowDown,
   ArrowUp,
@@ -58,6 +59,7 @@ export interface DataTableProps<T> {
   loadingMessage?: string;
   addButtonLabel?: string;
   customAction?: ReactNode;
+  tableClassName?: string;
 }
 
 export function DataTable<T>({
@@ -83,6 +85,7 @@ export function DataTable<T>({
   loadingMessage = "Loading...",
   addButtonLabel,
   customAction,
+  tableClassName,
 }: DataTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -135,12 +138,12 @@ export function DataTable<T>({
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="flex items-center gap-4">
+      <CardHeader className="flex flex-col gap-4 pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-4">
           <CardTitle className="text-xl font-bold">{title}</CardTitle>
           {filterComponent}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex shrink-0 items-center space-x-2 self-end sm:self-auto">
           {customAction}
           {onAdd && (
             <Button
@@ -169,7 +172,7 @@ export function DataTable<T>({
       </CardHeader>
       <CardContent>
         <div className="rounded-md border overflow-x-auto">
-          <Table className="min-w-max">
+          <Table className={cn("min-w-max", tableClassName)}>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12.5">

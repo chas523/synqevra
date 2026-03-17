@@ -70,6 +70,7 @@ export function EntityViewAttributesTabContent({
   entityViewId,
 }: EntityViewAttributesTabContentProps) {
   const [scope, setScope] = useState<AttributeScope>("SERVER_SCOPE");
+  const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [attributeKey, setAttributeKey] = useState("");
@@ -203,6 +204,13 @@ export function EntityViewAttributesTabContent({
     );
   }, [attributes]);
 
+  const filteredDataArray = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return dataArray;
+
+    return dataArray.filter((row) => row.key.toLowerCase().includes(query));
+  }, [dataArray, searchQuery]);
+
   const columns: DataTableColumn<AttributeRow>[] = useMemo(
     () => [
       {
@@ -236,37 +244,52 @@ export function EntityViewAttributesTabContent({
               ? "Shared Attributes"
               : "Client Attributes"
         }
-        data={dataArray}
+        data={filteredDataArray}
         columns={columns}
         getRowId={(row) => row.id}
         isLoading={isLoading}
         currentPage={0}
-        pageSize={dataArray.length || 10}
+        pageSize={filteredDataArray.length || 10}
         totalPages={1}
-        totalElements={dataArray.length}
+        totalElements={filteredDataArray.length}
         onPageChange={() => {}}
         onRefresh={() => {
           mutate();
         }}
         filterComponent={
-          <div className="w-52">
-            <SelectAdmin
-              value={scope}
-              onValueChange={(value) => {
-                const nextScope = value as AttributeScope;
-                setScope(nextScope);
-                setDialogOpen(false);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select attributes scope" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="SERVER_SCOPE">Server attributes</SelectItem>
-                <SelectItem value="CLIENT_SCOPE">Client attributes</SelectItem>
-                <SelectItem value="SHARED_SCOPE">Shared attributes</SelectItem>
-              </SelectContent>
-            </SelectAdmin>
+          <div className="flex items-center gap-2">
+            <div className="w-52">
+              <SelectAdmin
+                value={scope}
+                onValueChange={(value) => {
+                  const nextScope = value as AttributeScope;
+                  setScope(nextScope);
+                  setDialogOpen(false);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select attributes scope" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SERVER_SCOPE">
+                    Server attributes
+                  </SelectItem>
+                  <SelectItem value="CLIENT_SCOPE">
+                    Client attributes
+                  </SelectItem>
+                  <SelectItem value="SHARED_SCOPE">
+                    Shared attributes
+                  </SelectItem>
+                </SelectContent>
+              </SelectAdmin>
+            </div>
+            <div className="w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search attribute key..."
+              />
+            </div>
           </div>
         }
         customAction={
@@ -280,7 +303,11 @@ export function EntityViewAttributesTabContent({
             </Button>
           ) : undefined
         }
-        emptyMessage="No attributes found for this entity view."
+        emptyMessage={
+          searchQuery.trim()
+            ? "No attributes match your search."
+            : "No attributes found for this entity view."
+        }
         loadingMessage="Loading attributes..."
       />
 

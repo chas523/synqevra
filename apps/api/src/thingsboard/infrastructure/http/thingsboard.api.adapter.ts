@@ -7,6 +7,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import {
   Asset,
@@ -113,6 +114,10 @@ interface JwtPayload {
 export class ThingsboardApiAdapter implements ThingsboardApiPort {
   private readonly logger = new Logger(ThingsboardApiAdapter.name);
   private readonly deviceTelemetryKeysCache = new Map<
+    string,
+    { expiresAt: number; keys: string[] }
+  >();
+  private readonly assetTelemetryKeysCache = new Map<
     string,
     { expiresAt: number; keys: string[] }
   >();
@@ -511,6 +516,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
+
+      this.deviceTelemetryKeysCache.delete(id);
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to add latest device telemetry in ThingsBoard API',
@@ -707,6 +714,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
+
+      this.assetTelemetryKeysCache.delete(id);
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to add latest asset telemetry in ThingsBoard API',
@@ -721,13 +730,26 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     id: string,
   ): Promise<string[]> {
     try {
+      const now = Date.now();
+      const cached = this.assetTelemetryKeysCache.get(id);
+      if (cached && cached.expiresAt > now) {
+        return cached.keys;
+      }
+
       const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/ASSET/${id}/keys/timeseries`;
       const response = await firstValueFrom(
         this.httpService.get<string[]>(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
-      return Array.isArray(response.data) ? response.data : [];
+
+      const keys = Array.isArray(response.data) ? response.data : [];
+      this.assetTelemetryKeysCache.set(id, {
+        keys,
+        expiresAt: now + this.DEVICE_TELEMETRY_KEYS_TTL_MS,
+      });
+
+      return keys;
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch asset telemetry keys from ThingsBoard API',
@@ -2852,7 +2874,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     imageSubType: string = 'IMAGE',
   ): Promise<any> {
     try {
-      const FormData = require('form-data');
       const formData = new FormData();
       formData.append('file', file, { filename: fileName });
       formData.append('title', title);

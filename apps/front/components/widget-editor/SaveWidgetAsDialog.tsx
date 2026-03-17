@@ -125,7 +125,7 @@ export const SaveWidgetAsDialog: React.FC<SaveWidgetAsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Save Widget As</DialogTitle>
           <DialogDescription>

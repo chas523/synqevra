@@ -466,7 +466,7 @@ export const SendNotificationDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-visible flex flex-col">
+        <DialogContent className="sm:max-w-175 max-h-[90vh] overflow-visible flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -766,7 +766,7 @@ function Step1Setup({
             Loading recipient groups...
           </div>
         ) : (
-          <div className="space-y-2 border rounded-lg p-3 max-h-[200px] overflow-y-auto">
+          <div className="space-y-2 border rounded-lg p-3 max-h-50 overflow-y-auto">
             {recipientGroupsArray.map((group: NotificationTarget) => (
               <div key={group.id.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -961,7 +961,7 @@ function Step3Review({
               {/* Icon Logic: Use preview data if available, otherwise local state */}
               {(processedTemplate?.additionalConfig?.icon?.enabled ||
                 (notificationType === "SCRATCH" && iconEnabled)) && (
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {/* Handle icon rendering logic here - might need to read from processedTemplate if in template mode */}
                   {notificationType === "TEMPLATE" ? (
                     <Bell className="h-10 w-10 text-gray-500" /> // Simplified for template preview for now or parse mdi/material from config
@@ -1042,7 +1042,7 @@ function Step3Review({
             <h3 className="text-sm font-medium">
               Recipients ({selectedRecipients.length})
             </h3>
-            <div className="border rounded-md max-h-[200px] overflow-y-auto">
+            <div className="border rounded-md max-h-50 overflow-y-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0">
                   <tr>

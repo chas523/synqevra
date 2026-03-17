@@ -268,6 +268,36 @@ export class EntityViewService {
     return data;
   }
 
+  public static async saveEntityViewRelation(
+    entityViewId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.post(
+      `/thingsboard/entity-views/${entityViewId}/relations`,
+      params,
+    );
+  }
+
+  public static async deleteEntityViewRelation(
+    entityViewId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.delete(
+      `/thingsboard/entity-views/${entityViewId}/relations`,
+      { params },
+    );
+  }
+
   public static async makeEntityViewPublic(
     id: string,
   ): Promise<

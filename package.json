@@ -9,7 +9,6 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "dev:front": "turbo run dev --filter=front",
-    "dev:admin":  "turbo run dev --filter=admin-app",
     "dev:api": "turbo run dev --filter=api"
   },
   "license": "ISC",

@@ -46,6 +46,8 @@ export interface DeviceCalculatedFieldsResponse {
   hasNext: boolean;
 }
 
+type AttributeScope = "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE";
+
 export interface DeviceAuditLog {
   id?: { id?: string };
   createdTime: number;
@@ -129,7 +131,25 @@ export class DeviceService {
     id: string,
   ): Promise<DeviceAttributes> {
     const { data } = await proxyApi.get<DeviceAttributes>(
-      `/thingsboard/devices/${id}/attributes`,
+      `/thingsboard/devices/${id}/attributes?scope=SHARED_SCOPE`,
+    );
+    return data;
+  }
+
+  public static async fetchDeviceServerAttributes(
+    id: string,
+  ): Promise<DeviceAttributes> {
+    const { data } = await proxyApi.get<DeviceAttributes>(
+      `/thingsboard/devices/${id}/attributes?scope=SERVER_SCOPE`,
+    );
+    return data;
+  }
+
+  public static async fetchDeviceClientAttributes(
+    id: string,
+  ): Promise<DeviceAttributes> {
+    const { data } = await proxyApi.get<DeviceAttributes>(
+      `/thingsboard/devices/${id}/attributes?scope=CLIENT_SCOPE`,
     );
     return data;
   }
@@ -145,8 +165,23 @@ export class DeviceService {
     id: string,
     attributes: Record<string, any>,
   ): Promise<void> {
+    await DeviceService.updateDeviceAttributes(id, "SHARED_SCOPE", attributes);
+  }
+
+  public static async updateDeviceServerAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ): Promise<void> {
+    await DeviceService.updateDeviceAttributes(id, "SERVER_SCOPE", attributes);
+  }
+
+  public static async updateDeviceAttributes(
+    id: string,
+    scope: Exclude<AttributeScope, "CLIENT_SCOPE">,
+    attributes: Record<string, any>,
+  ): Promise<void> {
     await proxyApi.put<any>(
-      `/thingsboard/devices/${id}/attributes`,
+      `/thingsboard/devices/${id}/attributes?scope=${scope}`,
       attributes,
     );
   }
@@ -348,6 +383,32 @@ export class DeviceService {
       `/thingsboard/devices/${deviceId}/relations?direction=${direction}`,
     );
     return data;
+  }
+
+  public static async saveDeviceRelation(
+    deviceId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.post(`/thingsboard/devices/${deviceId}/relations`, params);
+  }
+
+  public static async deleteDeviceRelation(
+    deviceId: string,
+    params: {
+      relatedEntityId: string;
+      relatedEntityType: string;
+      relationType: string;
+      direction: "FROM" | "TO";
+    },
+  ): Promise<void> {
+    await proxyApi.delete(`/thingsboard/devices/${deviceId}/relations`, {
+      params,
+    });
   }
 
   public static async getDeviceProfileInfos(

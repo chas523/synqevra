@@ -36,7 +36,7 @@ type OutputType = "TIME_SERIES" | "ATTRIBUTES";
 type AttributeScope = "SERVER_SCOPE" | "SHARED_SCOPE";
 type EntityType =
   | "current_entity"
-  | "asset"
+  | "device"
   | "asset"
   | "customer"
   | "current_tenant";
@@ -74,7 +74,7 @@ interface AddArgumentForm {
 
 const ENTITY_OPTIONS: Array<{ value: EntityType; label: string }> = [
   { value: "current_entity", label: "Current entity" },
-  { value: "asset", label: "asset" },
+  { value: "device", label: "Device" },
   { value: "asset", label: "Asset" },
   { value: "customer", label: "Customer" },
   { value: "current_tenant", label: "Current tenant" },
@@ -102,6 +102,7 @@ export function AssetCalculatedFieldsTabContent({
 }: AssetCalculatedFieldsTabContentProps) {
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isArgumentDialogOpen, setIsArgumentDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -184,6 +185,27 @@ export function AssetCalculatedFieldsTabContent({
     ],
     [],
   );
+
+  const filteredCalculatedFields = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return data?.data || [];
+    }
+
+    return (data?.data || []).filter((item) => {
+      const name = item.name?.toLowerCase() || "";
+      const expression = item.configuration?.expression?.toLowerCase() || "";
+      const outputName = item.configuration?.output?.name?.toLowerCase() || "";
+
+      return (
+        name.includes(query) ||
+        expression.includes(query) ||
+        outputName.includes(query)
+      );
+    });
+  }, [data?.data, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
 
   const resetForm = () => {
     setForm({
@@ -352,17 +374,38 @@ export function AssetCalculatedFieldsTabContent({
     <div className="space-y-4">
       <DataTable
         title="Calculated fields"
-        data={data?.data || []}
+        data={filteredCalculatedFields}
         columns={columns}
         getRowId={(row) => row.id.id}
         isLoading={isLoading}
-        currentPage={page}
-        pageSize={pageSize}
-        totalPages={data?.totalPages || 0}
-        totalElements={data?.totalElements || 0}
-        onPageChange={setPage}
+        currentPage={isSearching ? 0 : page}
+        pageSize={
+          isSearching ? filteredCalculatedFields.length || 10 : pageSize
+        }
+        totalPages={isSearching ? 1 : data?.totalPages || 0}
+        totalElements={
+          isSearching
+            ? filteredCalculatedFields.length
+            : data?.totalElements || 0
+        }
+        onPageChange={isSearching ? () => {} : setPage}
         onRefresh={mutate}
-        emptyMessage="No calculated fields found for this asset."
+        filterComponent={
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="w-full sm:w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search calculated field..."
+              />
+            </div>
+          </div>
+        }
+        emptyMessage={
+          isSearching
+            ? "No calculated fields match your search."
+            : "No calculated fields found for this asset."
+        }
         loadingMessage="Loading calculated fields..."
         customAction={
           <Button

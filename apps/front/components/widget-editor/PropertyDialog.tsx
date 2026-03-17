@@ -124,7 +124,7 @@ export function PropertyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-125 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {property ? "Edit property" : "Add property"}
@@ -290,10 +290,10 @@ export function PropertyDialog({
 
                 <div className="space-y-2">
                   <Label>Display condition function: f(property, model)</Label>
-                  <div className="relative border rounded-md min-h-[100px] bg-gray-50 dark:bg-slate-900">
+                  <div className="relative border rounded-md min-h-25 bg-gray-50 dark:bg-slate-900">
                     {/* Simple Monaco editor placeholder or actual editor if feasible. For now textarea */}
                     <textarea
-                      className="w-full h-full min-h-[100px] p-2 bg-transparent outline-none text-sm font-mono"
+                      className="w-full h-full min-h-25 p-2 bg-transparent outline-none text-sm font-mono"
                       value={formData.displayCondition || ""}
                       onChange={(e) =>
                         handleChange("displayCondition", e.target.value)

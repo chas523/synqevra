@@ -36,7 +36,7 @@ export function PatientContactItem({
   return (
     <div className="flex items-center gap-2 rounded-lg bg-slate-50 dark:bg-white/5 p-2 transition-colors hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10">
       <div
-        className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${iconBgColor}`}
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${iconBgColor}`}
       >
         <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
       </div>

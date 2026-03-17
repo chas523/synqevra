@@ -205,15 +205,20 @@ export class TelemetryParserService {
   }
 
   parseNotificationCount(
-    response: TelemetryResponse | any,
+    response: TelemetryResponse,
   ): { count: number; cmdId: number } | null {
     try {
+      const unreadCount = response.totalUnreadCount;
       if (
         response.cmdUpdateType === 'NOTIFICATIONS_COUNT' ||
-        (response.cmdId === 1 && typeof response.totalUnreadCount === 'number')
+        (response.cmdId === 1 && typeof unreadCount === 'number')
       ) {
+        if (typeof unreadCount !== 'number') {
+          return null;
+        }
+
         return {
-          count: response.totalUnreadCount,
+          count: unreadCount,
           cmdId: response.cmdId,
         };
       }
@@ -225,16 +230,21 @@ export class TelemetryParserService {
   }
 
   parseNotifications(
-    response: TelemetryResponse | any,
+    response: TelemetryResponse,
   ): { notifications: any[]; count: number; cmdId: number } | null {
     try {
+      const unreadCount = response.totalUnreadCount;
       if (
         response.cmdUpdateType === 'NOTIFICATIONS' ||
         (response.cmdId === 10 && Array.isArray(response.notifications))
       ) {
+        if (typeof unreadCount !== 'number') {
+          return null;
+        }
+
         return {
           notifications: response.notifications || [],
-          count: response.totalUnreadCount, // It also returns updated count
+          count: unreadCount, // It also returns updated count
           cmdId: response.cmdId,
         };
       }

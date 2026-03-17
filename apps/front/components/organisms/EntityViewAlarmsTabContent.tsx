@@ -13,10 +13,27 @@ import {
   TimeRangeFilter,
   TimeRange,
 } from "@/components/molecules/TimeRangeFilter";
+import { Input } from "@/components/ui/input";
 import { EntityViewService } from "@/lib/services/thingsboardServices/entityViewService";
 
 interface EntityViewAlarmsTabContentProps {
   entityViewId: string;
+}
+
+interface EntityViewAlarm {
+  id: { id: string };
+  createdTime: number;
+  originatorName?: string;
+  type?: string;
+  severity?: string;
+  status?: string;
+}
+
+interface EntityViewAlarmsResponse {
+  data: EntityViewAlarm[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
 }
 
 export function EntityViewAlarmsTabContent({
@@ -24,11 +41,12 @@ export function EntityViewAlarmsTabContent({
 }: EntityViewAlarmsTabContentProps) {
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusList, setStatusList] = useState<string[]>([]);
   const [severityList, setSeverityList] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR<EntityViewAlarmsResponse>(
     entityViewId
       ? [
           "entityViewAlarms",
@@ -72,7 +90,7 @@ export function EntityViewAlarmsTabContent({
     setPage(0);
   }, []);
 
-  const columns: DataTableColumn<any>[] = useMemo(
+  const columns: DataTableColumn<EntityViewAlarm>[] = useMemo(
     () => [
       {
         key: "createdTime",
@@ -105,7 +123,7 @@ export function EntityViewAlarmsTabContent({
         key: "status",
         header: "Status",
         render: (alarm) => {
-          const isCleared = alarm.status.includes("CLEARED");
+          const isCleared = String(alarm.status ?? "").includes("CLEARED");
           return (
             <Badge
               variant="outline"
@@ -121,6 +139,29 @@ export function EntityViewAlarmsTabContent({
     ],
     [],
   );
+
+  const filteredAlarms = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return data?.data || [];
+    }
+
+    return (data?.data || []).filter((alarm: EntityViewAlarm) => {
+      const originatorName = String(alarm.originatorName || "").toLowerCase();
+      const type = String(alarm.type || "").toLowerCase();
+      const severity = String(alarm.severity || "").toLowerCase();
+      const status = String(alarm.status || "").toLowerCase();
+
+      return (
+        originatorName.includes(query) ||
+        type.includes(query) ||
+        severity.includes(query) ||
+        status.includes(query)
+      );
+    });
+  }, [data?.data, searchQuery]);
+
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <div className="space-y-4">
@@ -142,17 +183,34 @@ export function EntityViewAlarmsTabContent({
 
       <DataTable
         title="Alarms"
-        data={data?.data || []}
+        data={filteredAlarms}
         columns={columns}
         getRowId={(row) => row.id.id}
         isLoading={isLoading}
-        currentPage={page}
-        pageSize={pageSize}
-        totalPages={data?.totalPages || 0}
-        totalElements={data?.totalElements || 0}
-        onPageChange={setPage}
+        currentPage={isSearching ? 0 : page}
+        pageSize={isSearching ? filteredAlarms.length || 10 : pageSize}
+        totalPages={isSearching ? 1 : data?.totalPages || 0}
+        totalElements={
+          isSearching ? filteredAlarms.length : data?.totalElements || 0
+        }
+        onPageChange={isSearching ? () => {} : setPage}
         onRefresh={() => mutate()}
-        emptyMessage="No alarms found for this entity view."
+        filterComponent={
+          <div className="flex flex-1 flex-wrap items-center gap-2">
+            <div className="w-full sm:w-64">
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search alarm..."
+              />
+            </div>
+          </div>
+        }
+        emptyMessage={
+          isSearching
+            ? "No alarms match your search."
+            : "No alarms found for this entity view."
+        }
         loadingMessage="Loading alarms..."
       />
     </div>

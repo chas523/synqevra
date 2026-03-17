@@ -16,8 +16,8 @@ export function PreviewPanel() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gray-100 dark:bg-slate-900/50">
-        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-auto min-h-[300px]">
-          <div className="aspect-[4/3] w-full bg-gray-50 dark:bg-slate-900 flex items-center justify-center relative overflow-hidden group">
+        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-auto min-h-75">
+          <div className="aspect-4/3 w-full bg-gray-50 dark:bg-slate-900 flex items-center justify-center relative overflow-hidden group">
             {widgetType.image ? (
               <img
                 src={getImagePreviewUrl(widgetType.image)}
@@ -33,7 +33,7 @@ export function PreviewPanel() {
             ) : (
               <ImageOff className="text-gray-300 h-16 w-16" />
             )}
-            <div className="fallback-icon hidden absolute inset-0 flex items-center justify-center">
+            <div className="fallback-icon hidden absolute inset-0 items-center justify-center">
               <ImageOff className="text-gray-300 h-16 w-16" />
             </div>
           </div>

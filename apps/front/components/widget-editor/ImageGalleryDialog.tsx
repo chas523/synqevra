@@ -92,7 +92,7 @@ export function ImageGalleryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] h-[80vh] flex flex-col p-0 gap-0 bg-white dark:bg-slate-950">
+      <DialogContent className="sm:max-w-225 h-[80vh] flex flex-col p-0 gap-0 bg-white dark:bg-slate-950">
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
           <DialogTitle className="text-lg font-semibold">
             Image gallery
@@ -202,7 +202,7 @@ export function ImageGalleryDialog({
                                     `}
                   onClick={() => setSelectedImage(img)}
                 >
-                  <div className="h-10 w-10 flex-shrink-0 bg-gray-100 dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                  <div className="h-10 w-10 shrink-0 bg-gray-100 dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden">
                     <img
                       src={getImagePreviewUrl(img.link)}
                       alt={img.title}

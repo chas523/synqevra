@@ -22,7 +22,7 @@ export function DetailPanelField({
 }: DetailPanelFieldProps) {
   const displayValue =
     isEmpty || !value ? (
-      <span className="text-slate-400 dark:text-slate-500 italic">—</span>
+      <span className="text-slate-400 dark:text-slate-500 italic">-</span>
     ) : isLink && href ? (
       <a
         href={href}

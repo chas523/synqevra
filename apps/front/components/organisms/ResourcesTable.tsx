@@ -136,7 +136,7 @@ export const ResourcesTable = ({
         })),
       ]}
       placeholder="Resource type"
-      className="w-[180px]"
+      className="w-45"
     />
   );
 

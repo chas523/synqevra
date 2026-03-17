@@ -132,7 +132,7 @@ const PatientDetailsPage = ({ patient }: PatientCardProps) => {
             <Button
               onClick={() => router.push(`/patients/${patient.id}/edit`)}
               size="lg"
-              className="gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
+              className="gap-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
             >
               <Edit className="h-4 w-4" />
               Edit Patient

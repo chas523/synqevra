@@ -69,15 +69,15 @@ pipelines:
             - docker push registry.digitalocean.com/medboard-registry/front:1.0.0
 
             # Update Frontend tag
-            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/32-frontend.yaml
-            # - grep -n "image:" k8s/32-frontend.yaml
+            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/31-frontend.yaml
+            # - grep -n "image:" k8s/31-frontend.yaml
 
             # Deploy frontend
             - pipe: atlassian/kubectl-run:3.12.0
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
                 KUBECTL_COMMAND: 'apply'
-                RESOURCE_PATH: 'k8s/32-frontend.yaml'
+                RESOURCE_PATH: 'k8s/31-frontend.yaml'
             - pipe: atlassian/kubectl-run:3.12.0
               variables:
                 KUBE_CONFIG: $KUBE_CONFIG
@@ -96,8 +96,7 @@ pipelines:
           script:
             # Remove local job copies of frontend and api yaml files to avoid redeployment
             - rm -f k8s/30-api.yaml
-            - rm -f k8s/32-frontend.yaml
-            - rm -f k8s/31-admin.yaml
+            - rm -f k8s/31-frontend.yaml
 
             # Deploy other k8s resources
             - pipe: atlassian/kubectl-run:3.12.0

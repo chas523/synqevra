@@ -99,7 +99,7 @@ export function ModulesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-150 max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Modules</DialogTitle>
         </DialogHeader>

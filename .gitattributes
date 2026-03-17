@@ -1,0 +1,25 @@
+# Global line endings policy for the whole monorepo
+* text=auto eol=lf
+
+# Keep Windows scripts in CRLF for better local tooling compatibility
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Shell scripts should stay LF
+*.sh text eol=lf
+
+# Common binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

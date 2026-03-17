@@ -61,7 +61,7 @@ const TileTemplate = ({
       className={cn(
         colSpanMap[colSpan],
         rowSpanMap[rowSpan],
-        "gap-1 p-2 min-h-[200px] md:min-h-0",
+        "gap-1 p-2 min-h-50 md:min-h-0",
         gridCols && "grid",
         gridCols && gridColsMap[gridCols],
         className,

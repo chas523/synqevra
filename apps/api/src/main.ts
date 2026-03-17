@@ -16,7 +16,6 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_ORIGIN?.split(',') || [
       'http://localhost:3000',
-      'http://localhost:3002',
       'http://localhost:8088',
     ],
     credentials: true,
@@ -51,7 +50,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3003;
   await app.listen(port);
-  logger.log(`✅ Server running on port ${port}`);
+  logger.log(`Server running on port ${port}`);
 }
 
 bootstrap().catch((err) => {

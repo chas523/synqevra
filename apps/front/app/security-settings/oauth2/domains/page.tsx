@@ -59,7 +59,7 @@ function OAuth2Tabs() {
 function OAuth2ClientChips({ clients }: { clients: OAuth2ClientInfo[] }) {
   if (!clients || clients.length === 0)
     return (
-      <span className="text-slate-400 dark:text-slate-500 text-sm">—</span>
+      <span className="text-slate-400 dark:text-slate-500 text-sm">-</span>
     );
   return (
     <div className="flex flex-wrap gap-1">

@@ -27,7 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/admin_select";
-import { DeviceService } from "@/lib/services/thingsboardServices/deviceService";
+import {
+  DeviceLatestTelemetryResponse,
+  DeviceService,
+} from "@/lib/services/thingsboardServices/deviceService";
 
 interface DeviceLatestTelemetryTabContentProps {
   deviceId: string;
@@ -108,15 +111,48 @@ const formatValue = (value: unknown): string => {
   }
 };
 
+const mergeTelemetryResponse = (
+  serverTelemetry: DeviceLatestTelemetryResponse | undefined,
+  optimisticTelemetry: DeviceLatestTelemetryResponse,
+  allowedKeys?: string[],
+): DeviceLatestTelemetryResponse => {
+  const merged: DeviceLatestTelemetryResponse = {
+    ...(serverTelemetry || {}),
+  };
+
+  Object.entries(optimisticTelemetry).forEach(([key, points]) => {
+    if (allowedKeys && !allowedKeys.includes(key)) {
+      return;
+    }
+
+    if (!Array.isArray(points) || points.length === 0) {
+      return;
+    }
+
+    const optimisticPoint = points[0];
+    const currentPoint = Array.isArray(merged[key])
+      ? merged[key][0]
+      : undefined;
+
+    if (!currentPoint || optimisticPoint.ts >= currentPoint.ts) {
+      merged[key] = [optimisticPoint];
+    }
+  });
+
+  return merged;
+};
+
 export function DeviceLatestTelemetryTabContent({
   deviceId,
 }: DeviceLatestTelemetryTabContentProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [optimisticTelemetry, setOptimisticTelemetry] =
+    useState<DeviceLatestTelemetryResponse>({});
   const [telemetryKey, setTelemetryKey] = useState("");
   const [telemetryType, setTelemetryType] = useState<TelemetryType>("string");
   const [telemetryValue, setTelemetryValue] = useState("");
-  const [manualKeys, setManualKeys] = useState<string[]>([]);
 
   const { data: attributes, isLoading: isLoadingAttributes } = useSWR(
     deviceId ? ["deviceAttributes", deviceId] : null,
@@ -148,20 +184,16 @@ export function DeviceLatestTelemetryTabContent({
     return [] as string[];
   }, [attributes]);
 
-  const telemetryKeys = useMemo(() => {
-    return Array.from(new Set([...configuredKeys, ...manualKeys]));
-  }, [configuredKeys, manualKeys]);
-
   const {
     data: latestTelemetry,
     isLoading: isLoadingTelemetry,
     mutate: mutateLatestTelemetry,
   } = useSWR(
-    deviceId && telemetryKeys.length > 0
-      ? ["deviceLatestTelemetry", deviceId, telemetryKeys.join(",")]
+    deviceId && configuredKeys.length > 0
+      ? ["deviceLatestTelemetry", deviceId, configuredKeys.join(",")]
       : null,
     async () =>
-      DeviceService.fetchDeviceLatestTelemetry(deviceId, telemetryKeys),
+      DeviceService.fetchDeviceLatestTelemetry(deviceId, configuredKeys),
   );
 
   const {
@@ -189,11 +221,17 @@ export function DeviceLatestTelemetryTabContent({
   );
 
   const rows: TelemetryRow[] = useMemo(() => {
-    if (!latestTelemetry) {
+    const mergedTelemetry = mergeTelemetryResponse(
+      latestTelemetry,
+      optimisticTelemetry,
+      configuredKeys,
+    );
+
+    if (Object.keys(mergedTelemetry).length === 0) {
       return [];
     }
 
-    return Object.entries(latestTelemetry).map(([key, values], index) => {
+    return Object.entries(mergedTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
       const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
         (current, item) => {
@@ -212,14 +250,19 @@ export function DeviceLatestTelemetryTabContent({
         lastUpdateTs: latestPoint ? latestPoint.ts : null,
       };
     });
-  }, [latestTelemetry]);
+  }, [configuredKeys, latestTelemetry, optimisticTelemetry]);
 
   const allRows: TelemetryRow[] = useMemo(() => {
-    if (!allLatestTelemetry) {
+    const mergedTelemetry = mergeTelemetryResponse(
+      allLatestTelemetry,
+      optimisticTelemetry,
+    );
+
+    if (Object.keys(mergedTelemetry).length === 0) {
       return [];
     }
 
-    return Object.entries(allLatestTelemetry).map(([key, values], index) => {
+    return Object.entries(mergedTelemetry).map(([key, values], index) => {
       const points = Array.isArray(values) ? values : [];
       const latestPoint = points.reduce<{ ts: number; value: unknown } | null>(
         (current, item) => {
@@ -238,7 +281,25 @@ export function DeviceLatestTelemetryTabContent({
         lastUpdateTs: latestPoint ? latestPoint.ts : null,
       };
     });
-  }, [allLatestTelemetry]);
+  }, [allLatestTelemetry, optimisticTelemetry]);
+
+  const filteredRows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return rows;
+    }
+
+    return rows.filter((row) => row.key.toLowerCase().includes(query));
+  }, [rows, searchQuery]);
+
+  const filteredAllRows = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return allRows;
+    }
+
+    return allRows.filter((row) => row.key.toLowerCase().includes(query));
+  }, [allRows, searchQuery]);
 
   const columns: DataTableColumn<TelemetryRow>[] = useMemo(
     () => [
@@ -289,6 +350,18 @@ export function DeviceLatestTelemetryTabContent({
     setIsDialogOpen(false);
   };
 
+  const filterComponent = (
+    <div className="flex flex-1 flex-wrap items-center gap-2">
+      <div className="w-full sm:w-64">
+        <Input
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search telemetry key..."
+        />
+      </div>
+    </div>
+  );
+
   const handleSubmit = async () => {
     const key = telemetryKey.trim();
 
@@ -316,9 +389,12 @@ export function DeviceLatestTelemetryTabContent({
       await DeviceService.addDeviceLatestTelemetry(deviceId, {
         [key]: parsedValue,
       });
-      setManualKeys((current) =>
-        current.includes(key) ? current : [...current, key],
-      );
+
+      setOptimisticTelemetry((current) => ({
+        ...current,
+        [key]: [{ ts: Date.now(), value: parsedValue }],
+      }));
+
       await mutateLatestTelemetry();
       await mutateAllTelemetryKeys();
       await mutateAllLatestTelemetry();
@@ -336,19 +412,22 @@ export function DeviceLatestTelemetryTabContent({
     <div className="space-y-4">
       <DataTable
         title="Latest telemetry"
-        data={rows}
+        data={filteredRows}
         columns={columns}
         getRowId={(row) => row.id}
         isLoading={isLoadingAttributes || isLoadingTelemetry}
         currentPage={0}
-        pageSize={rows.length || 10}
+        pageSize={filteredRows.length || 10}
         totalPages={1}
-        totalElements={rows.length}
+        totalElements={filteredRows.length}
         onPageChange={() => {}}
+        filterComponent={filterComponent}
         emptyMessage={
-          telemetryKeys.length === 0
-            ? "No telemetry keys configured for this device."
-            : "No telemetry found for selected keys."
+          searchQuery.trim()
+            ? "No telemetry keys match your search."
+            : configuredKeys.length === 0
+              ? "No telemetry keys configured for this device."
+              : "No telemetry found for selected keys."
         }
         loadingMessage="Loading latest telemetry..."
         customAction={
@@ -374,16 +453,21 @@ export function DeviceLatestTelemetryTabContent({
           <AccordionContent className="pt-2">
             <DataTable
               title="All latest telemetry"
-              data={allRows}
+              data={filteredAllRows}
               columns={columns}
               getRowId={(row) => row.id}
               isLoading={isLoadingAllTelemetryKeys || isLoadingAllTelemetry}
               currentPage={0}
-              pageSize={allRows.length || 10}
+              pageSize={filteredAllRows.length || 10}
               totalPages={1}
-              totalElements={allRows.length}
+              totalElements={filteredAllRows.length}
               onPageChange={() => {}}
-              emptyMessage="No latest telemetry found for this device."
+              filterComponent={filterComponent}
+              emptyMessage={
+                searchQuery.trim()
+                  ? "No telemetry keys match your search."
+                  : "No latest telemetry found for this device."
+              }
               loadingMessage="Loading all latest telemetry..."
             />
           </AccordionContent>

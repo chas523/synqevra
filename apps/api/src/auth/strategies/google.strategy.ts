@@ -34,6 +34,7 @@ export class GoogleStrategy extends PassportStrategy(CustomStrategy, 'google') {
   /**
    * Main entry point. Automatically called by Passport/NestJS.
    */
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   async authenticate(req: Request, options?: any) {
     try {
       // 1. Fetch current keys (clientId/Secret) from the ThingsBoard database
@@ -114,7 +115,9 @@ export class GoogleStrategy extends PassportStrategy(CustomStrategy, 'google') {
             `${process.env.BACKEND_API_URL}/auth/google/callback`,
           scope: ['email', 'profile'],
         },
+
         // Function called after successful data retrieval from Google
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         async (accessToken, refreshToken, profile, done) => {
           try {
             const user = await this.validate(profile);

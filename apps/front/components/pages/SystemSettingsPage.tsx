@@ -181,7 +181,6 @@ export const SystemSettingsPage = () => {
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
-          <MedplumSettings />
           {generalSettings && (
             <GeneralSettingsForm
               initialSettings={generalSettings}

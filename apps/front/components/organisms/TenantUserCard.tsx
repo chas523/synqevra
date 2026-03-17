@@ -18,7 +18,7 @@ export function TenantUserCard({ user, onViewDetails }: TenantUserCardProps) {
     <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3 flex-1">
-          <User className="h-5 w-5 text-gray-400 mt-1 flex-shrink-0" />
+          <User className="h-5 w-5 text-gray-400 mt-1 shrink-0" />
           <div className="flex-1 min-w-0">
             <h3 className="font-medium text-gray-900">{fullName}</h3>
             <p className="text-sm text-gray-500">{user.email}</p>

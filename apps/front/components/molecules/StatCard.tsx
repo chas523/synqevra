@@ -33,7 +33,7 @@ export function StatCard({
           </span>
           {addButton && (
             <Plus
-              className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground flex-shrink-0"
+              className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground shrink-0"
               onClick={onAddClick}
             />
           )}

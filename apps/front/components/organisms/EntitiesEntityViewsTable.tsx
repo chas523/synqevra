@@ -126,6 +126,7 @@ export const EntitiesEntityViewsTable = ({
   const rowActions = (entityView: EntityView) => {
     const id = entityView.id?.id ?? "";
     const isThisLoading = loadingId === id;
+    const isPublic = Boolean(entityView.customerIsPublic);
 
     return (
       <div className="flex items-center gap-0.5">
@@ -135,7 +136,7 @@ export const EntitiesEntityViewsTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-blue-500"
-              disabled={isThisLoading}
+              disabled={isThisLoading || isPublic}
               onClick={(event) => {
                 event.stopPropagation();
                 if (onMakePublic) runAction(entityView, onMakePublic);
@@ -157,7 +158,7 @@ export const EntitiesEntityViewsTable = ({
               variant="ghost"
               size="icon"
               className="h-7 w-7 text-muted-foreground hover:text-slate-700"
-              disabled={isThisLoading}
+              disabled={isThisLoading || !isPublic}
               onClick={(event) => {
                 event.stopPropagation();
                 if (onMakePrivate) runAction(entityView, onMakePrivate);

@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
+const shouldUseStandaloneOutput =
+  process.env.CI === "true" || process.env.NEXT_STANDALONE === "true";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: shouldUseStandaloneOutput ? "standalone" : undefined,
   experimental: {
     optimizePackageImports: [
       "@mantine/core",

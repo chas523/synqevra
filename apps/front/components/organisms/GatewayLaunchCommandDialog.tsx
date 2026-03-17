@@ -51,7 +51,7 @@ export function GatewayLaunchCommandDialog({
         <DialogHeader>
           <DialogTitle>
             Launch IoT Gateway
-            {gateway ? ` — ${gateway.name}` : ""}
+            {gateway ? ` - ${gateway.name}` : ""}
           </DialogTitle>
         </DialogHeader>
 
