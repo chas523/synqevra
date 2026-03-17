@@ -20,6 +20,22 @@ interface EntityViewAlarmsTabContentProps {
   entityViewId: string;
 }
 
+interface EntityViewAlarm {
+  id: { id: string };
+  createdTime: number;
+  originatorName?: string;
+  type?: string;
+  severity?: string;
+  status?: string;
+}
+
+interface EntityViewAlarmsResponse {
+  data: EntityViewAlarm[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export function EntityViewAlarmsTabContent({
   entityViewId,
 }: EntityViewAlarmsTabContentProps) {
@@ -30,7 +46,7 @@ export function EntityViewAlarmsTabContent({
   const [severityList, setSeverityList] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR<EntityViewAlarmsResponse>(
     entityViewId
       ? [
           "entityViewAlarms",
@@ -74,7 +90,7 @@ export function EntityViewAlarmsTabContent({
     setPage(0);
   }, []);
 
-  const columns: DataTableColumn<any>[] = useMemo(
+  const columns: DataTableColumn<EntityViewAlarm>[] = useMemo(
     () => [
       {
         key: "createdTime",
@@ -107,7 +123,7 @@ export function EntityViewAlarmsTabContent({
         key: "status",
         header: "Status",
         render: (alarm) => {
-          const isCleared = alarm.status.includes("CLEARED");
+          const isCleared = String(alarm.status ?? "").includes("CLEARED");
           return (
             <Badge
               variant="outline"
@@ -130,7 +146,7 @@ export function EntityViewAlarmsTabContent({
       return data?.data || [];
     }
 
-    return (data?.data || []).filter((alarm) => {
+    return (data?.data || []).filter((alarm: EntityViewAlarm) => {
       const originatorName = String(alarm.originatorName || "").toLowerCase();
       const type = String(alarm.type || "").toLowerCase();
       const severity = String(alarm.severity || "").toLowerCase();

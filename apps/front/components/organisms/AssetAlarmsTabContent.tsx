@@ -20,6 +20,22 @@ interface AssetAlarmsTabContentProps {
   assetId: string;
 }
 
+interface AssetAlarm {
+  id: { id: string };
+  createdTime: number;
+  originatorName?: string;
+  type?: string;
+  severity?: string;
+  status?: string;
+}
+
+interface AssetAlarmsResponse {
+  data: AssetAlarm[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -28,7 +44,7 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
   const [severityList, setSeverityList] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR<AssetAlarmsResponse>(
     assetId
       ? [
           "assetAlarms",
@@ -86,7 +102,7 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
     setPage(0);
   }, []);
 
-  const columns: DataTableColumn<any>[] = useMemo(
+  const columns: DataTableColumn<AssetAlarm>[] = useMemo(
     () => [
       {
         key: "createdTime",
@@ -119,7 +135,7 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
         key: "status",
         header: "Status",
         render: (alarm) => {
-          const isCleared = alarm.status.includes("CLEARED");
+          const isCleared = String(alarm.status ?? "").includes("CLEARED");
           return (
             <Badge
               variant="outline"
@@ -142,7 +158,7 @@ export function AssetAlarmsTabContent({ assetId }: AssetAlarmsTabContentProps) {
       return data?.data || [];
     }
 
-    return (data?.data || []).filter((alarm) => {
+    return (data?.data || []).filter((alarm: AssetAlarm) => {
       const originatorName = String(alarm.originatorName || "").toLowerCase();
       const type = String(alarm.type || "").toLowerCase();
       const severity = String(alarm.severity || "").toLowerCase();

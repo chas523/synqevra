@@ -20,6 +20,22 @@ interface DeviceAlarmsTabContentProps {
   deviceId: string;
 }
 
+interface DeviceAlarm {
+  id: { id: string };
+  createdTime: number;
+  originatorName?: string;
+  type?: string;
+  severity?: string;
+  status?: string;
+}
+
+interface DeviceAlarmsResponse {
+  data: DeviceAlarm[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export function DeviceAlarmsTabContent({
   deviceId,
 }: DeviceAlarmsTabContentProps) {
@@ -30,7 +46,7 @@ export function DeviceAlarmsTabContent({
   const [severityList, setSeverityList] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>({ type: "ALL_TIME" });
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR<DeviceAlarmsResponse>(
     deviceId
       ? [
           "deviceAlarms",
@@ -88,7 +104,7 @@ export function DeviceAlarmsTabContent({
     setPage(0);
   }, []);
 
-  const columns: DataTableColumn<any>[] = useMemo(
+  const columns: DataTableColumn<DeviceAlarm>[] = useMemo(
     () => [
       {
         key: "createdTime",
@@ -121,7 +137,7 @@ export function DeviceAlarmsTabContent({
         key: "status",
         header: "Status",
         render: (alarm) => {
-          const isCleared = alarm.status.includes("CLEARED");
+          const isCleared = String(alarm.status ?? "").includes("CLEARED");
           return (
             <Badge
               variant="outline"
@@ -144,7 +160,7 @@ export function DeviceAlarmsTabContent({
       return data?.data || [];
     }
 
-    return (data?.data || []).filter((alarm) => {
+    return (data?.data || []).filter((alarm: DeviceAlarm) => {
       const originatorName = String(alarm.originatorName || "").toLowerCase();
       const type = String(alarm.type || "").toLowerCase();
       const severity = String(alarm.severity || "").toLowerCase();
