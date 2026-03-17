@@ -97,6 +97,18 @@ const createEmptyArgumentForm = (): AddArgumentForm => ({
   defaultValue: "",
 });
 
+const createClientId = (): string => {
+  const cryptoObject = globalThis.crypto as
+    | { randomUUID?: () => string }
+    | undefined;
+
+  if (cryptoObject && typeof cryptoObject.randomUUID === "function") {
+    return cryptoObject.randomUUID();
+  }
+
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export function DeviceCalculatedFieldsTabContent({
   deviceId,
 }: DeviceCalculatedFieldsTabContentProps) {
@@ -274,7 +286,7 @@ export function DeviceCalculatedFieldsTabContent({
       arguments: [
         ...current.arguments,
         {
-          id: crypto.randomUUID(),
+          id: createClientId(),
           ...argumentForm,
         },
       ],

@@ -46,6 +46,18 @@ interface RestoreResult {
   error: string | null;
 }
 
+const createClientId = (): string => {
+  const cryptoObject = globalThis.crypto as
+    | { randomUUID?: () => string }
+    | undefined;
+
+  if (cryptoObject && typeof cryptoObject.randomUUID === "function") {
+    return cryptoObject.randomUUID();
+  }
+
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export function RestoreVersionModal({
   open,
   onOpenChange,
@@ -132,7 +144,7 @@ export function RestoreVersionModal({
         }
 
         return {
-          id: crypto.randomUUID(),
+          id: createClientId(),
           entityType: config.value,
           options,
         };
@@ -165,7 +177,7 @@ export function RestoreVersionModal({
 
     setEntries([
       ...entries,
-      { id: crypto.randomUUID(), entityType: config.value, options },
+      { id: createClientId(), entityType: config.value, options },
     ]);
   };
 
