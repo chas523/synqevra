@@ -40,15 +40,15 @@ const LoginForm = () => {
       setTimeout(() => {
         if (authStatus === "new_pending") {
           toast.success(
-            "Konto zostało pomyślnie zgłoszone! Poczekaj na weryfikację przez administratora.",
+            "Account has been successfully registered! Please wait for verification by the administrator.",
           );
         } else if (authStatus === "existing_activation") {
           toast.info(
-            "Już otrzymałeś email aktywacyjny. Sprawdź swoją skrzynkę.",
+            "You have already received an activation email. Please check your inbox.",
           );
         } else if (authStatus === "existing_pending") {
           toast.info(
-            "Twoje zgłoszenie nadal oczekuje na weryfikację przez administratora.",
+            "Your request is still pending verification by the administrator.",
           );
         }
       }, 0);

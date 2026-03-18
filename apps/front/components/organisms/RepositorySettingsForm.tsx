@@ -13,23 +13,30 @@ import {
   SelectValue,
 } from "@/components/ui/admin_select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, EyeOff, HelpCircle } from "lucide-react";
+import { Eye, EyeOff, HelpCircle, Link2Off, CheckCircle2 } from "lucide-react";
 import { FileDropzone } from "@/components/molecules/FileDropzone";
 import { RepoSettings } from "@/types/versionControlTypes";
+import { Badge } from "@/components/ui/badge";
 
 interface RepositorySettingsFormProps {
   onCheckAccess: (payload: RepoSettings) => Promise<void>;
   onSave: (payload: RepoSettings) => Promise<void>;
+  onUnlink?: () => Promise<void>;
   isChecking: boolean;
   isSaving: boolean;
+  isConfigured?: boolean;
+  isDeleting?: boolean;
   initialValues?: RepoSettings | null;
 }
 
 export function RepositorySettingsForm({
   onCheckAccess,
   onSave,
+  onUnlink,
   isChecking,
   isSaving,
+  isConfigured,
+  isDeleting,
   initialValues,
 }: RepositorySettingsFormProps) {
   const [repositoryUri, setRepositoryUri] = useState(
@@ -95,12 +102,36 @@ export function RepositorySettingsForm({
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
+    <Card
+      className={`w-full max-w-3xl mx-auto transition-all duration-300 ${isConfigured ? "border-green-500/30 shadow-md shadow-green-500/5 dark:border-green-400/20" : ""}`}
+    >
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-bold dark:text-white">
-          Repository settings
-        </CardTitle>
-        <HelpCircle className="h-5 w-5 text-muted-foreground" />
+        <div className="flex items-center gap-3">
+          <CardTitle className="text-xl font-bold dark:text-white">
+            Repository settings
+          </CardTitle>
+          {isConfigured && (
+            <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/20 flex items-center gap-1 px-2 py-1">
+              <CheckCircle2 className="h-3 w-3" />
+              Connected
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isConfigured && onUnlink && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onUnlink}
+              disabled={isDeleting}
+              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-8"
+            >
+              <Link2Off className="h-4 w-4 mr-2" />
+              {isDeleting ? "Unlinking..." : "Unlink"}
+            </Button>
+          )}
+          <HelpCircle className="h-5 w-5 text-muted-foreground" />
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Repository URL */}

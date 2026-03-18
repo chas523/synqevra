@@ -219,24 +219,13 @@ function RepositoryTab() {
         key={formRevision}
         onCheckAccess={handleCheckAccess}
         onSave={handleSave}
+        onUnlink={handleUnlink}
+        isConfigured={isConfigured}
         isChecking={isChecking}
         isSaving={isSaving}
+        isDeleting={isDeleting}
         initialValues={settings}
       />
-
-      {isConfigured && (
-        <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={handleUnlink}
-            disabled={isDeleting}
-            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-          >
-            <Link2Off className="h-4 w-4 mr-2" />
-            {isDeleting ? "Unlinking..." : "Unlink repository"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

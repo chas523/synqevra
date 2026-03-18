@@ -145,6 +145,7 @@ import { FetchDomainByIdQueryHandler } from './application/queries/fetch-domain-
 import { UpdateDomainCommandHandler } from './application/commands/update-domain/update-domain.handler';
 import { FetchOAuth2ConfigTemplateQueryHandler } from './application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.handler';
 import { SaveOAuth2ClientCommandHandler } from './application/commands/save-oauth2-client/save-oauth2-client.handler';
+import { FetchOAuth2ClientByIdHandler } from './application/queries/fetch-oauth2-client-by-id/fetch-oauth2-client-by-id.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -285,6 +286,7 @@ const queryHandlers = [
   FetchOAuth2ClientInfosQueryHandler,
   FetchDomainByIdQueryHandler,
   FetchOAuth2ConfigTemplateQueryHandler,
+  FetchOAuth2ClientByIdHandler,
 ];
 
 @Module({
