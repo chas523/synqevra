@@ -156,6 +156,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
             },
           ],
         },
+        { href: "/rulechains", icon: Layers, label: "Rulechains" },
         { href: "/settings/notifications", icon: Settings, label: "Settings" },
         {
           label: "Security",

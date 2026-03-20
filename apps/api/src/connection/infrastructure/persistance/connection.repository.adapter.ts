@@ -38,6 +38,7 @@ export class ConnectionRepositoryAdapter extends ConnectionRepository {
   async getConnectionByUserId(userId: number): Promise<ConnectionModel | null> {
     const entity = await this.repository.findOne({
       where: { user: { id: userId } },
+      relations: { thingsboard: true, medplum: true },
     });
 
     return entity ? ConnectionMapper.toDomain(entity) : null;
