@@ -231,6 +231,15 @@ import { FetchDomainByIdQuery } from 'src/thingsboard/application/queries/fetch-
 import { UpdateDomainCommand } from 'src/thingsboard/application/commands/update-domain/update-domain.command';
 import { FetchOAuth2ConfigTemplateQuery } from 'src/thingsboard/application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.query';
 import { SaveOAuth2ClientCommand } from 'src/thingsboard/application/commands/save-oauth2-client/save-oauth2-client.command';
+import { FetchOAuth2ClientByIdQuery } from 'src/thingsboard/application/queries/fetch-oauth2-client-by-id/fetch-oauth2-client-by-id.query';
+import { FetchRuleChainsQuery } from 'src/thingsboard/application/queries/fetch-rule-chains/fetch-rule-chains.query';
+import { CreateRuleChainFullCommand } from 'src/thingsboard/application/commands/create-rule-chain-full/create-rule-chain-full.command';
+import { DeleteRuleChainCommand } from 'src/thingsboard/application/commands/delete-rule-chain/delete-rule-chain.command';
+import { SetRootRuleChainCommand } from 'src/thingsboard/application/commands/set-root-rule-chain/set-root-rule-chain.command';
+import { SaveRuleChainMetadataCommand } from 'src/thingsboard/application/commands/save-rule-chain-metadata/save-rule-chain-metadata.command';
+import { FetchRuleChainByIdQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.query';
+import { FetchRuleChainMetadataQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.query';
+
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -6152,6 +6161,156 @@ export class ThingsboardController {
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/oauth2/client/:clientId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get OAuth2 client by id' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getOAuth2ClientById(
+    @TbAccessToken() accessToken: string,
+    @Param('clientId') clientId: string,
+  ) {
+    const query = new FetchOAuth2ClientByIdQuery(accessToken, clientId);
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/ruleChains')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get list of rule chains' })
+  async getRuleChains(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('type') type?: string,
+  ) {
+    const query = new FetchRuleChainsQuery(
+      accessToken,
+      Number(page),
+      Number(pageSize),
+      type,
+      sortProperty,
+      sortOrder,
+    );
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/ruleChain/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get rule chain by id' })
+  async getRuleChain(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const query = new FetchRuleChainByIdQuery(accessToken, id);
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/ruleChain/:id/metadata')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get rule chain metadata by id' })
+  async getRuleChainMetadata(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const query = new FetchRuleChainMetadataQuery(accessToken, id);
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/ruleChain')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create rule chain' })
+  async createRuleChainFull(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    const command = new CreateRuleChainFullCommand(accessToken, payload);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/ruleChain/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete rule chain' })
+  async deleteRuleChain(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const command = new DeleteRuleChainCommand(accessToken, id);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: () => ({ success: true }),
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/ruleChain/:id/root')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Set rule chain as root' })
+  async setRootRuleChain(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const command = new SetRootRuleChainCommand(accessToken, id);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
+    });
+  }
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/ruleChain/metadata')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save rule chain metadata (nodes + connections)' })
+  async saveRuleChainMetadata(
+    @TbAccessToken() accessToken: string,
+    @Body() body: { ruleChainId: { entityType: string; id: string }; nodes: any[]; connections: any[]; firstNodeIndex?: number; version?: number },
+  ) {
+    const { ruleChainId, ...metadata } = body;
+    const command = new SaveRuleChainMetadataCommand(accessToken, ruleChainId, metadata);
+    const result = await this.commandBus.execute(command);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => { throw error; },
     });
   }
 }

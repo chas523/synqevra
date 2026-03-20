@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { EntityDetailPanel } from "@/components/templates/EntityDetailPanel";
 import {
   OAuth2ClientForm,
@@ -26,6 +27,30 @@ export function OAuth2ClientDetailPanel({
 }: OAuth2ClientDetailPanelProps) {
   const { templates } = useOAuth2ConfigTemplates();
   const [isSaving, setIsSaving] = useState(false);
+  const [fullClient, setFullClient] = useState<OAuth2ClientPayload | null>(
+    null,
+  );
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    if (client?.id?.id) {
+      const fetchFullDetails = async () => {
+        setIsLoadingDetails(true);
+        try {
+          const details = await OAuth2Service.getOAuth2ClientById(client.id.id);
+          setFullClient(details);
+        } catch (error) {
+          toast.error("Failed to fetch client details");
+          console.error(error);
+        } finally {
+          setIsLoadingDetails(false);
+        }
+      };
+      fetchFullDetails();
+    } else {
+      setFullClient(null);
+    }
+  }, [client?.id?.id]);
 
   const handleSave = async (payload: OAuth2ClientPayload) => {
     setIsSaving(true);
@@ -48,15 +73,20 @@ export function OAuth2ClientDetailPanel({
       label: "Details",
       content: client ? (
         <div className="h-full">
-          {/* We pass a unique key per client id to remount form properly */}
-          <OAuth2ClientForm
-            key={`form-${client.id.id}`}
-            initialData={client as any}
-            isSaving={isSaving}
-            onSave={handleSave}
-            onCancel={onClose}
-            templates={templates}
-          />
+          {isLoadingDetails ? (
+            <div className="flex items-center justify-center h-48">
+              <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+            </div>
+          ) : fullClient ? (
+            <OAuth2ClientForm
+              key={`form-${fullClient.id?.id || client.id.id}`}
+              initialData={fullClient}
+              isSaving={isSaving}
+              onSave={handleSave}
+              onCancel={onClose}
+              templates={templates}
+            />
+          ) : null}
         </div>
       ) : null,
     },

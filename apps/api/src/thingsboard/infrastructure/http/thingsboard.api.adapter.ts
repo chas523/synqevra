@@ -1564,6 +1564,146 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchRuleChains(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    type?: string,
+  ): Promise<any> {
+    try {
+      const searchParams = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (type) {
+        searchParams.append('type', type);
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/ruleChains?${searchParams.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch rule chains',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async setRootRuleChain(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}/root`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, {}, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to set rule chain as root',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteRuleChain(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete rule chain',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async createRuleChainFull(
+    accessToken: string,
+    payload: any,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to create rule chain',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getRuleChain(
+    ruleChainId: string,
+    accessToken: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get rule chain',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getRuleChainMetadata(
+    ruleChainId: string,
+    accessToken: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}/metadata`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get rule chain metadata',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async updateRuleChainMetadata(
     ruleChainId: EntityId,
     metadata: any,

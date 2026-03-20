@@ -67,6 +67,10 @@ import { SaveAutoCommitSettingsCommandHandler } from './application/commands/sav
 import { DeleteAutoCommitSettingsCommandHandler } from './application/commands/delete-auto-commit-settings/delete-auto-commit-settings.command-handler';
 import { CreateVersionCommandHandler } from './application/commands/create-version/create-version.command-handler';
 import { RestoreVersionHandler } from './application/commands/restore-version/restore-version.handler';
+import { CreateRuleChainFullCommandHandler } from './application/commands/create-rule-chain-full/create-rule-chain-full.command-handler';
+import { DeleteRuleChainCommandHandler } from './application/commands/delete-rule-chain/delete-rule-chain.command-handler';
+import { SetRootRuleChainCommandHandler } from './application/commands/set-root-rule-chain/set-root-rule-chain.command-handler';
+import { SaveRuleChainMetadataCommandHandler } from './application/commands/save-rule-chain-metadata/save-rule-chain-metadata.command-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -145,6 +149,10 @@ import { FetchDomainByIdQueryHandler } from './application/queries/fetch-domain-
 import { UpdateDomainCommandHandler } from './application/commands/update-domain/update-domain.handler';
 import { FetchOAuth2ConfigTemplateQueryHandler } from './application/queries/fetch-oauth2-config-template/fetch-oauth2-config-template.handler';
 import { SaveOAuth2ClientCommandHandler } from './application/commands/save-oauth2-client/save-oauth2-client.handler';
+import { FetchOAuth2ClientByIdHandler } from './application/queries/fetch-oauth2-client-by-id/fetch-oauth2-client-by-id.handler';
+import { FetchRuleChainsQueryHandler } from './application/queries/fetch-rule-chains/fetch-rule-chains.query-handler';
+import { FetchRuleChainByIdHandler } from './application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.handler';
+import { FetchRuleChainMetadataHandler } from './application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -209,6 +217,10 @@ const commandHandlers = [
   CreateDomainCommandHandler,
   UpdateDomainCommandHandler,
   SaveOAuth2ClientCommandHandler,
+  CreateRuleChainFullCommandHandler,
+  DeleteRuleChainCommandHandler,
+  SetRootRuleChainCommandHandler,
+  SaveRuleChainMetadataCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -285,6 +297,10 @@ const queryHandlers = [
   FetchOAuth2ClientInfosQueryHandler,
   FetchDomainByIdQueryHandler,
   FetchOAuth2ConfigTemplateQueryHandler,
+  FetchOAuth2ClientByIdHandler,
+  FetchRuleChainsQueryHandler,
+  FetchRuleChainByIdHandler,
+  FetchRuleChainMetadataHandler,
 ];
 
 @Module({
