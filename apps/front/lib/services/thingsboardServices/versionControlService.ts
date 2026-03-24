@@ -110,4 +110,14 @@ export class VersionControlService {
     );
     return data;
   }
+
+  public static async getVersionEntityInfo(
+    versionId: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<any> {
+    const url = `thingsboard/entities/vc/info/${versionId}/${entityType}/${entityId}`;
+    const { data } = await proxyApi.get(url);
+    return data;
+  }
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { RuleNodeLibrary } from "./RuleNodeLibrary";
 import { RuleChainCanvas, type CanvasApi } from "./RuleChainCanvas";
 import type { RuleNodeDefinition } from "@/types/ruleChainTypes";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, History, Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -12,6 +13,14 @@ import {
   useRuleChainDetails,
 } from "@/hooks/thingsboard/rule-chains/useRuleChains";
 import { toast } from "sonner";
+import { useRepoSettingsInfo } from "@/hooks/thingsboard/version-control/useVersionControl";
+import { VersionsTable } from "@/components/organisms/VersionsTable";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface RuleChainEditorProps {
   ruleChainId: string;
@@ -24,9 +33,45 @@ export function RuleChainEditor({
 }: RuleChainEditorProps) {
   // Ref holding the API exposed by the canvas
   const canvasApiRef = useRef<CanvasApi | null>(null);
+  const [debugAll, setDebugAll] = useState(false);
+  const [remainingMinutes, setRemainingMinutes] = useState<number | null>(null);
+  const [isVcModalOpen, setIsVcModalOpen] = useState(false);
+  const [branch, setBranch] = useState("main");
+  const { settingsInfo, isLoading: isLoadingVc } = useRepoSettingsInfo();
   const { saveMetadata, isSavingMetadata } = useSaveRuleChainMetadata();
-  const { metadata, isLoading: isMetadataLoading } =
+  const { ruleChain, metadata, isLoading: isMetadataLoading, mutate } =
     useRuleChainDetails(ruleChainId);
+
+  const isDebugEnabled = (node: any) => {
+    const s = node.debugSettings;
+    if (!s) return false;
+    // Backend sets allEnabled: false and sets allEnabledUntil to +15min (unix timestamp ms)
+    return s.allEnabled === true || (s.allEnabledUntil && s.allEnabledUntil > Date.now());
+  };
+
+  useEffect(() => {
+    if (metadata?.nodes && Array.isArray(metadata.nodes) && metadata.nodes.length > 0) {
+      const allEnabled = metadata.nodes.every(isDebugEnabled);
+      setDebugAll(allEnabled);
+
+      // Calculate remaining minutes from the node with the max expiration time
+      const maxExp = Math.max(...metadata.nodes.map((n: any) => n.debugSettings?.allEnabledUntil || 0));
+      if (maxExp > Date.now()) {
+        setRemainingMinutes(Math.ceil((maxExp - Date.now()) / 60000));
+      } else {
+        setRemainingMinutes(null);
+      }
+    }
+  }, [metadata]);
+
+  // Update timer every minute
+  useEffect(() => {
+    if (!remainingMinutes) return;
+    const interval = setInterval(() => {
+      setRemainingMinutes((prev) => (prev && prev > 1 ? prev - 1 : null));
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [remainingMinutes]);
 
   const handleNodeClick = useCallback((def: RuleNodeDefinition) => {
     canvasApiRef.current?.addNode(def);
@@ -35,13 +80,41 @@ export function RuleChainEditor({
   const handleSave = async () => {
     if (!canvasApiRef.current) return;
     try {
-      const metadata = canvasApiRef.current.getRuleChainMetadata();
+      const canvasMetadata = canvasApiRef.current.getRuleChainMetadata();
+
+      const canvasAllEnabled = canvasMetadata.nodes.length > 0 && canvasMetadata.nodes.every(isDebugEnabled);
+      let nodesToSave = canvasMetadata.nodes;
+
+      // Only override if the checkbox state differs from the current canvas state,
+      // or if debugAll is true (to constantly refresh the 15-minute expiration timer).
+      if (debugAll !== canvasAllEnabled || debugAll) {
+        nodesToSave = canvasMetadata.nodes.map(node => ({
+          ...node,
+          debugSettings: {
+            failuresEnabled: false,
+            allEnabled: debugAll,
+            allEnabledUntil: 0
+          }
+        }));
+      }
+
       await saveMetadata(
         ruleChainId,
-        metadata.nodes,
-        metadata.connections,
-        metadata.firstNodeIndex,
+        nodesToSave,
+        canvasMetadata.connections,
+        canvasMetadata.firstNodeIndex,
       );
+
+      // Update UI immediately if debug mode was just enabled
+      if (debugAll) {
+        setRemainingMinutes(15);
+      } else {
+        setRemainingMinutes(null);
+      }
+
+      // Re-fetch from server to get accurate timestamps
+      await mutate();
+
       toast.success("Rule chain saved successfully");
     } catch (error) {
       toast.error("Failed to save rule chain", {
@@ -76,11 +149,19 @@ export function RuleChainEditor({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <label className="flex items-center gap-2 mr-2 cursor-pointer text-sm dark:text-slate-300 select-none">
+            <Checkbox
+              checked={debugAll}
+              onCheckedChange={(checked) => setDebugAll(checked === true)}
+            />
+            Debug All {remainingMinutes ? `(${remainingMinutes} min)` : ""}
+          </label>
           <Button
             variant="ghost"
             size="sm"
             className="dark:text-white dark:hover:bg-slate-800 gap-1.5"
             title="Version history"
+            onClick={() => setIsVcModalOpen(true)}
           >
             <History className="h-4 w-4" />
           </Button>
@@ -96,6 +177,23 @@ export function RuleChainEditor({
           </Button>
         </div>
       </header>
+
+      {/* ── Version Control Modal ─────────────────────────────────────── */}
+      <Dialog open={isVcModalOpen} onOpenChange={setIsVcModalOpen}>
+        <DialogContent className="sm:max-w-full w-auto p-0 bg-transparent border-none shadow-none outline-none [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Version Control</DialogTitle>
+
+          </DialogHeader>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="RULE_CHAIN"
+            entityId={ruleChainId}
+            isReadOnly={settingsInfo?.readOnly === true}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* ── Body: sidebar + canvas ───────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
@@ -114,6 +212,7 @@ export function RuleChainEditor({
           <RuleChainCanvas
             canvasApiRef={canvasApiRef}
             initialMetadata={metadata}
+            tenantId={ruleChain?.tenantId?.id}
           />
         </div>
       </div>

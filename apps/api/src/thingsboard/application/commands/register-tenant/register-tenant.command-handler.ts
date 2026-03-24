@@ -22,6 +22,7 @@ import {
   ThingsboardConnectionExistsError,
   UserActivationError,
   InvalidActivationLinkError,
+  RuleChainUpdateError,
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { AxiosError } from 'axios';
 import { ThingsboardModel } from '../../../domain/models/thingsboard.model';
@@ -52,7 +53,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_SYSADMIN_EMAIL(): string {
     return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
@@ -162,9 +163,14 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
         activationResponse.token,
       );
 
+      // MODIFIED - no longer update is as default, we're updating root rule chain to propagate messages to our rule chain
       // Step 7: Set rule chain as default
-      this.logger.log('Step 7: Setting rule chain as default');
-      await this.setRuleChainAsDefault(activationResponse.token, ruleChainId);
+      // this.logger.log('Step 7: Setting rule chain as default');
+      // await this.setRuleChainAsDefault(activationResponse.token, ruleChainId);
+
+      // Step 7: Update root rule chain to propagate messages to our rule chain
+      this.logger.log('Step 7: Updating root rule chain to propagate messages to our rule chain');
+      await this.updateRootRuleChain(activationResponse.token, ruleChainId);
 
       // Step 8: Save tokens to database
       this.logger.log('Step 8: Saving tokens to database');
@@ -280,6 +286,71 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     }
   }
 
+  private async updateRootRuleChain(
+    accessToken: string,
+    ruleChainId: EntityId,
+  ): Promise<void> {
+    try {
+      const rootRuleChainId =
+        await this.thingsboardApi.getRootRuleChain(accessToken);
+      const rootRuleChainMetadata = await this.thingsboardApi.getRuleChainMetadata(
+        rootRuleChainId.id,
+        accessToken,
+      );
+
+      // Create the new node pointing to our rule chain
+      const newNode = {
+        type: 'org.thingsboard.rule.engine.flow.TbRuleChainInputNode',
+        name: 'post observation',
+        debugSettings: null,
+        singletonMode: false,
+        configurationVersion: 1,
+        configuration: {
+          forwardMsgToDefaultRuleChain: false,
+          ruleChainId: ruleChainId.id,
+        },
+        additionalInfo: {
+          description: '',
+          layoutX: 1070,
+          layoutY: 157,
+        },
+      };
+
+      const nodes = [...rootRuleChainMetadata.nodes, newNode];
+      const newNodeIndex = nodes.length - 1;
+
+      // Add connections from "Save Timeseries" (index 0) to our new node
+      const connections = [
+        ...rootRuleChainMetadata.connections,
+        {
+          fromIndex: 0,
+          toIndex: newNodeIndex,
+          type: 'Success',
+        },
+        {
+          fromIndex: 0,
+          toIndex: newNodeIndex,
+          type: 'Failure',
+        },
+      ];
+
+      const updatedMetadata = {
+        ...rootRuleChainMetadata,
+        nodes,
+        connections,
+      };
+
+      await this.thingsboardApi.updateRuleChainMetadata(
+        rootRuleChainId,
+        updatedMetadata,
+        accessToken,
+      );
+    } catch (error) {
+      this.logger.error('Failed to update root rule chain:', error);
+      throw new RuleChainUpdateError();
+    }
+  }
+
   private async rollbackChanges(
     tenantId: EntityId | null,
     userId: string | null,
@@ -307,6 +378,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
       error instanceof ThingsboardConnectionExistsError ||
       error instanceof RuleChainCreationError ||
       error instanceof RuleChainConfigurationError ||
+      error instanceof RuleChainUpdateError ||
       error instanceof DeviceProfileUpdateError ||
       error instanceof UserActivationError ||
       error instanceof InvalidActivationLinkError

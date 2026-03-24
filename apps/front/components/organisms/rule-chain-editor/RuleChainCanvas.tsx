@@ -58,6 +58,7 @@ const newId = () => `rule_${nodeSeq++}`;
 interface CanvasInnerProps {
   canvasApiRef: React.MutableRefObject<CanvasApi | null>;
   initialMetadata?: any;
+  tenantId?: string;
 }
 
 export interface CanvasApi {
@@ -70,7 +71,11 @@ export interface CanvasApi {
   loadRuleChainMetadata: (metadata: any) => void;
 }
 
-function CanvasInner({ canvasApiRef, initialMetadata }: CanvasInnerProps) {
+function CanvasInner({
+  canvasApiRef,
+  initialMetadata,
+  tenantId,
+}: CanvasInnerProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(INITIAL_NODES);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { screenToFlowPosition, fitView } = useReactFlow();
@@ -419,6 +424,7 @@ function CanvasInner({ canvasApiRef, initialMetadata }: CanvasInnerProps) {
         isOpen={panelOpen}
         onClose={() => setPanelOpen(false)}
         onSave={handleConfigSave}
+        tenantId={tenantId}
       />
     </div>
   );
@@ -428,17 +434,20 @@ function CanvasInner({ canvasApiRef, initialMetadata }: CanvasInnerProps) {
 interface RuleChainCanvasProps {
   canvasApiRef: React.MutableRefObject<CanvasApi | null>;
   initialMetadata?: any;
+  tenantId?: string;
 }
 
 export function RuleChainCanvas({
   canvasApiRef,
   initialMetadata,
+  tenantId,
 }: RuleChainCanvasProps) {
   return (
     <ReactFlowProvider>
       <CanvasInner
         canvasApiRef={canvasApiRef}
         initialMetadata={initialMetadata}
+        tenantId={tenantId}
       />
     </ReactFlowProvider>
   );

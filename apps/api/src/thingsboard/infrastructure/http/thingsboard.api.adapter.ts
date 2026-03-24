@@ -1537,6 +1537,30 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
   }
 
   // Rule Chain operations
+  async getRootRuleChain(accessToken: string): Promise<EntityId> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChains?pageSize=10&page=0&textSearch=Root`;
+      const response = await firstValueFrom(
+        this.httpService.get<any>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      const rootRuleChain = response.data.data.find((rc: any) => rc.root === true);
+      if (!rootRuleChain) {
+        throw new Error('Root rule chain not found');
+      }
+
+      return rootRuleChain.id;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch root rule chain',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async createRuleChain(
     name: string,
     type: string,
@@ -2459,6 +2483,39 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
     }
   }
+
+  async fetchEntityEventsByQuery(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+    eventType: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      const end = endTime || Date.now();
+      const start = startTime || end - 30 * 24 * 60 * 60 * 1000;
+      const url = `${this.THINGSBOARD_API_URL}/events/${entityType}/${entityId}?tenantId=${tenantId}&startTime=${start}&endTime=${end}&pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+
+      const response = await firstValueFrom(
+        this.httpService.post(
+          url,
+          { eventType },
+          { headers: { Authorization: `Bearer ${accessToken}` } },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch entity events by query: ${error}`);
+      return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
+    }
+  }
+
 
   async fetchEntityAuditLogs(
     accessToken: string,
@@ -4115,6 +4172,29 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to get version creation status from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async getVersionEntityInfo(
+    accessToken: string,
+    versionId: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/info/${versionId}/${entityType}/${entityId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get version entity info from ThingsBoard API',
         error,
         this.logger,
       );

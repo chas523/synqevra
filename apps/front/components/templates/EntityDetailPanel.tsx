@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { DetailPanelHeader } from "@/components/molecules/DetailPanelHeader";
@@ -179,7 +178,7 @@ export function EntityDetailPanel({
           )}
 
           {/* Tab Contents */}
-          <ScrollArea className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-auto">
             {tabs.map((tab) => (
               <TabsContent
                 key={tab.id}
@@ -189,7 +188,7 @@ export function EntityDetailPanel({
                 {tab.content}
               </TabsContent>
             ))}
-          </ScrollArea>
+          </div>
         </Tabs>
       </SheetContent>
     </Sheet>

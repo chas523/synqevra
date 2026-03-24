@@ -19,7 +19,9 @@ import {
 } from "@/components/ui/tooltip";
 import Select from "@/components/ui/select";
 import { CreateVersionModal } from "@/components/organisms/CreateVersionModal";
+import { CreateSingleEntityVersionModal } from "@/components/organisms/CreateSingleEntityVersionModal";
 import { RestoreVersionModal } from "@/components/organisms/RestoreVersionModal";
+import { RestoreSingleEntityVersionModal } from "@/components/organisms/RestoreSingleEntityVersionModal";
 
 const PAGE_SIZE = 10;
 
@@ -30,6 +32,7 @@ interface VersionsTableProps {
   entityType?: string;
   entityId?: string;
   isReadOnly?: boolean;
+  hideCard?: boolean;
 }
 
 export function VersionsTable({
@@ -39,6 +42,7 @@ export function VersionsTable({
   entityType,
   entityId,
   isReadOnly = false,
+  hideCard = false,
 }: VersionsTableProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortProperty, setSortProperty] = useState("timestamp");
@@ -167,6 +171,7 @@ export function VersionsTable({
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
         onRefresh={() => mutate()}
+        hideCard={hideCard}
         rowActions={(entry) => (
           <Button
             variant="ghost"
@@ -197,7 +202,7 @@ export function VersionsTable({
                       disabled={isReadOnly}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
-                      Create entities version
+                      {entityType && entityId ? "Create version" : "Create entities version"}
                     </Button>
                   </div>
                 </TooltipTrigger>
@@ -242,26 +247,48 @@ export function VersionsTable({
         emptyMessage="No versions found."
       />
 
-      <CreateVersionModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        branches={branches}
-        onSuccess={() => {
-          mutate();
-          if (entityType && entityId) {
-            entityVersions.mutate();
-          }
-        }}
-      />
+      {entityType && entityId ? (
+        <CreateSingleEntityVersionModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          branches={branches}
+          entityType={entityType}
+          entityId={entityId}
+          onSuccess={() => {
+            mutate();
+          }}
+        />
+      ) : (
+        <CreateVersionModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          branches={branches}
+          onSuccess={() => {
+            mutate();
+          }}
+        />
+      )}
 
       {versionToRestore && (
-        <RestoreVersionModal
-          open={isRestoreModalOpen}
-          onOpenChange={setIsRestoreModalOpen}
-          versionId={versionToRestore.id}
-          versionName={versionToRestore.name}
-          onSuccess={() => mutate()}
-        />
+        entityType && entityId ? (
+          <RestoreSingleEntityVersionModal
+            open={isRestoreModalOpen}
+            onOpenChange={setIsRestoreModalOpen}
+            versionId={versionToRestore.id}
+            versionName={versionToRestore.name}
+            entityType={entityType}
+            entityId={entityId}
+            onSuccess={() => mutate()}
+          />
+        ) : (
+          <RestoreVersionModal
+            open={isRestoreModalOpen}
+            onOpenChange={setIsRestoreModalOpen}
+            versionId={versionToRestore.id}
+            versionName={versionToRestore.name}
+            onSuccess={() => mutate()}
+          />
+        )
       )}
     </div>
   );

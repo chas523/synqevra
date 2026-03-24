@@ -153,6 +153,7 @@ import { FetchOAuth2ClientByIdHandler } from './application/queries/fetch-oauth2
 import { FetchRuleChainsQueryHandler } from './application/queries/fetch-rule-chains/fetch-rule-chains.query-handler';
 import { FetchRuleChainByIdHandler } from './application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.handler';
 import { FetchRuleChainMetadataHandler } from './application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.handler';
+import { FetchEntityEventsQueryHandler } from './application/queries/fetch-entity-events/fetch-entity-events.query-handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -226,6 +227,7 @@ const commandHandlers = [
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
 
 const queryHandlers = [
+  FetchEntityEventsQueryHandler,
   FetchDevicesQueryHandler,
   FetchAssetsQueryHandler,
   FetchEntityViewsQueryHandler,

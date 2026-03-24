@@ -10,6 +10,7 @@ import { OriginatorFieldsForm } from "./config-forms/OriginatorFieldsForm";
 import { OriginatorAttributesForm } from "./config-forms/OriginatorAttributesForm";
 import { ScriptForm } from "./config-forms/ScriptForm";
 import { RestApiCallForm } from "./config-forms/RestApiCallForm";
+import { RuleNodeEvents } from "./RuleNodeEvents";
 import type {
   TenantDetailsConfig,
   OriginatorFieldsConfig,
@@ -105,6 +106,7 @@ interface NodeConfigPanelProps {
     description: string,
     config: any,
   ) => void;
+  tenantId?: string;
 }
 
 export function NodeConfigPanel({
@@ -112,6 +114,7 @@ export function NodeConfigPanel({
   isOpen,
   onClose,
   onSave,
+  tenantId,
 }: NodeConfigPanelProps) {
   const nodeData = node?.data as unknown as RuleNodeData | undefined;
   const nodeType = nodeData?.nodeType ?? "";
@@ -223,9 +226,14 @@ export function NodeConfigPanel({
       id: "events",
       label: "Events",
       content: (
-        <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-500 text-sm">
-          Events will be shown here after the rule chain is saved and running.
-        </div>
+        // Only fetch events if the node actually exists in the DB (usually a valid UUID)
+        node.id.length > 20 ? (
+          <RuleNodeEvents nodeId={node.id} tenantId={tenantId} />
+        ) : (
+          <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-500 text-sm">
+            Please run or save the rule chain to view events.
+          </div>
+        )
       ),
     },
   ];
