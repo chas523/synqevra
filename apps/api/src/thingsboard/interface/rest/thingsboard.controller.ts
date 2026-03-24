@@ -9,6 +9,7 @@ import {
   Param,
   Put,
   Delete, // Added Delete
+  HttpCode,
   Res,
   BadRequestException,
   UnauthorizedException,
@@ -239,7 +240,7 @@ import { SetRootRuleChainCommand } from 'src/thingsboard/application/commands/se
 import { SaveRuleChainMetadataCommand } from 'src/thingsboard/application/commands/save-rule-chain-metadata/save-rule-chain-metadata.command';
 import { FetchRuleChainByIdQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.query';
 import { FetchRuleChainMetadataQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.query';
-
+import { FetchEntityEventsQuery } from 'src/thingsboard/application/queries/fetch-entity-events/fetch-entity-events.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -6312,5 +6313,68 @@ export class ThingsboardController {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => { throw error; },
     });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/events/:entityType/:id')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get entity events by query' })
+  async getEntityEventsByQuery(
+    @TbAccessToken() accessToken: string,
+    @Param('entityType') entityType: string,
+    @Param('id') id: string,
+    @Query('tenantId') tenantId: string,
+    @Body('eventType') eventType: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const query = new FetchEntityEventsQuery(
+      accessToken,
+      entityType,
+      id,
+      tenantId,
+      eventType,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      startTime ? Number(startTime) : undefined,
+      endTime ? Number(endTime) : undefined,
+    );
+    const result = await this.queryBus.execute(query);
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/info/:versionId/:entityType/:entityId')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get version entity info',
+    description: 'Retrieve information about an entity in a specific version',
+  })
+  async getVersionEntityInfo(
+    @TbAccessToken() accessToken: string,
+    @Param('versionId') versionId: string,
+    @Param('entityType') entityType: string,
+    @Param('entityId') entityId: string,
+  ) {
+    return await this.thingsboardApi.getVersionEntityInfo(
+      accessToken,
+      versionId,
+      entityType,
+      entityId,
+    );
   }
 }

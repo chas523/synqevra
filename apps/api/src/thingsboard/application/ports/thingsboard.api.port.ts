@@ -138,6 +138,7 @@ export abstract class ThingsboardApiPort {
   ): Promise<ThingsboardLoginResponse & { tenantId: string }>;
 
   // Rule Chain operations
+  abstract getRootRuleChain(accessToken: string): Promise<EntityId>;
   abstract createRuleChain(
     name: string,
     type: string,
@@ -607,6 +608,20 @@ export abstract class ThingsboardApiPort {
     endTime?: number,
   ): Promise<EntityEventsResponse>;
 
+  abstract fetchEntityEventsByQuery(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+    eventType: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityEventsResponse>;
+
   abstract fetchEntityAuditLogs(
     accessToken: string,
     entityType: string,
@@ -903,6 +918,13 @@ export abstract class ThingsboardApiPort {
   abstract getRestoreVersionStatus(
     accessToken: string,
     requestId: string,
+  ): Promise<any>;
+
+  abstract getVersionEntityInfo(
+    accessToken: string,
+    versionId: string,
+    entityType: string,
+    entityId: string,
   ): Promise<any>;
 
   abstract getEntitiesByType(

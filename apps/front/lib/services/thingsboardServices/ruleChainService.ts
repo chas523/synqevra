@@ -111,4 +111,33 @@ export class RuleChainService {
     );
     return data;
   }
+
+  public static async fetchEvents(
+    entityType: string,
+    id: string,
+    tenantId: string,
+    eventType: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      tenantId,
+      page: String(page),
+      pageSize: String(pageSize),
+      sortProperty,
+      sortOrder,
+    });
+    if (startTime) params.append("startTime", String(startTime));
+    if (endTime) params.append("endTime", String(endTime));
+
+    const { data } = await proxyApi.post<any>(
+      `/thingsboard/events/${entityType}/${id}?${params.toString()}`,
+      { eventType }
+    );
+    return data;
+  }
 }
