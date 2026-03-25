@@ -112,6 +112,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
       label: "User",
       items: [
         { href: "/", icon: Home, label: "Landing Page" },
+        { href: "/dashboards", icon: LayoutDashboard, label: "Dashboards" },
         { href: "/devices", icon: Settings, label: "Devices" },
         { href: "/patients", icon: PersonStanding, label: "Patients" },
         { href: "/practitioners", icon: Stethoscope, label: "Practitioners" },
