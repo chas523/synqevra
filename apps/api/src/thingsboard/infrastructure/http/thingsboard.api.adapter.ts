@@ -4467,4 +4467,210 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async fetchTenantDashboards(
+    accessToken: string,
+    pageSize: number,
+    page: number,
+    sortProperty?: string,
+    sortOrder?: string,
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+      });
+      if (sortProperty) params.append('sortProperty', sortProperty);
+      if (sortOrder) params.append('sortOrder', sortOrder);
+
+      const url = `${this.THINGSBOARD_API_URL}/tenant/dashboards?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch tenant dashboards',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDashboardById(
+    accessToken: string,
+    id: string,
+    includeResources?: boolean,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/dashboard/${id}${includeResources ? '?includeResources=true' : ''}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch dashboard by ID',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeDashboardCustomerPublic(
+    accessToken: string,
+    id: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/public/dashboard/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.post(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make dashboard public',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeDashboardCustomerPrivate(
+    accessToken: string,
+    id: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/public/dashboard/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make dashboard private',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveDashboard(accessToken: string, dashboard: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/dashboard`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, dashboard, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save dashboard',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchCustomerById(accessToken: string, id: string): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/${id}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch customer by ID',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async updateDashboardCustomers(
+    accessToken: string,
+    dashboardId: string,
+    customerIds: string[],
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/dashboard/${dashboardId}/customers`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, customerIds, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to update dashboard customers',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteDashboard(accessToken: string, id: string): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/dashboard/${id}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete dashboard',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDashboardAuditLogs(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder = 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/audit/logs/entity/DASHBOARD/${id}`;
+      const params: any = { page, pageSize, sortProperty, sortOrder };
+      if (startTime) params.startTime = startTime;
+      if (endTime) params.endTime = endTime;
+
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          params,
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch dashboard audit logs',
+        error,
+        this.logger,
+      );
+    }
+  }
 }

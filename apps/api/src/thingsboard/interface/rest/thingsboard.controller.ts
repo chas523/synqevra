@@ -251,7 +251,7 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/login')
@@ -538,7 +538,7 @@ export class ThingsboardController {
               ? versionValue
               : versionValue != null
                 ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                  String(versionValue)
+                String(versionValue)
                 : null,
         };
       }),
@@ -1419,23 +1419,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-              from: { id, entityType: 'ENTITY_VIEW' },
-              to: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            }
+            from: { id, entityType: 'ENTITY_VIEW' },
+            to: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          }
           : {
-              from: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              to: { id, entityType: 'ENTITY_VIEW' },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            };
+            from: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            to: { id, entityType: 'ENTITY_VIEW' },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -1967,11 +1967,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-          | 'current_entity'
-          | 'device'
-          | 'asset'
-          | 'customer'
-          | 'current_tenant';
+        | 'current_entity'
+        | 'device'
+        | 'asset'
+        | 'customer'
+        | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         timeSeriesKey?: string;
         name?: string;
@@ -2007,7 +2007,7 @@ export class ThingsboardController {
 
         const refKey =
           argument.entityType === 'current_entity' ||
-          argument.entityType === 'current_tenant'
+            argument.entityType === 'current_tenant'
             ? argument.timeSeriesKey?.trim()
             : argument.name?.trim();
 
@@ -2065,11 +2065,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                  scope:
-                    payload.attributeScope === 'SHARED_SCOPE'
-                      ? 'SHARED_SCOPE'
-                      : 'SERVER_SCOPE',
-                }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -2241,23 +2241,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-              from: { id, entityType: 'ASSET' },
-              to: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            }
+            from: { id, entityType: 'ASSET' },
+            to: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          }
           : {
-              from: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              to: { id, entityType: 'ASSET' },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            };
+            from: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            to: { id, entityType: 'ASSET' },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -2993,11 +2993,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-          | 'current_entity'
-          | 'device'
-          | 'asset'
-          | 'customer'
-          | 'current_tenant';
+        | 'current_entity'
+        | 'device'
+        | 'asset'
+        | 'customer'
+        | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         timeSeriesKey?: string;
         name?: string;
@@ -3033,7 +3033,7 @@ export class ThingsboardController {
 
         const refKey =
           argument.entityType === 'current_entity' ||
-          argument.entityType === 'current_tenant'
+            argument.entityType === 'current_tenant'
             ? argument.timeSeriesKey?.trim()
             : argument.name?.trim();
 
@@ -3091,11 +3091,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+              scope:
+                payload.attributeScope === 'SHARED_SCOPE'
+                  ? 'SHARED_SCOPE'
+                  : 'SERVER_SCOPE',
+            }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -3240,23 +3240,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-              from: { id, entityType: 'DEVICE' },
-              to: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            }
+            from: { id, entityType: 'DEVICE' },
+            to: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          }
           : {
-              from: {
-                id: body.relatedEntityId,
-                entityType: body.relatedEntityType,
-              },
-              to: { id, entityType: 'DEVICE' },
-              type: body.relationType,
-              typeGroup: 'COMMON',
-            };
+            from: {
+              id: body.relatedEntityId,
+              entityType: body.relatedEntityType,
+            },
+            to: { id, entityType: 'DEVICE' },
+            type: body.relationType,
+            typeGroup: 'COMMON',
+          };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -3913,7 +3913,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -4027,7 +4027,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => {},
+      Ok: () => { },
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -6375,6 +6375,190 @@ export class ThingsboardController {
       versionId,
       entityType,
       entityId,
+    );
+  }
+
+  // Dashboards
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/tenant/dashboards')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get tenant dashboards',
+    description: 'Fetch dashboards for current tenant',
+  })
+  async getTenantDashboards(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize: string = '10',
+    @Query('page') page: string = '0',
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+  ) {
+    return await this.thingsboardApi.fetchTenantDashboards(
+      accessToken,
+      parseInt(pageSize),
+      parseInt(page),
+      sortProperty,
+      sortOrder,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/dashboard/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get dashboard by ID',
+    description: 'Fetch dashboard details by ID',
+  })
+  async getDashboardById(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('includeResources') includeResources?: string,
+  ) {
+    return await this.thingsboardApi.fetchDashboardById(
+      accessToken,
+      id,
+      includeResources === 'true',
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/customer/public/dashboard/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make dashboard public',
+    description: 'Assign dashboard to the public customer',
+  })
+  async makeDashboardCustomerPublic(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return await this.thingsboardApi.makeDashboardCustomerPublic(
+      accessToken,
+      id,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/customer/public/dashboard/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make dashboard private',
+    description: 'Unassign dashboard from the public customer',
+  })
+  async makeDashboardCustomerPrivate(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return await this.thingsboardApi.makeDashboardCustomerPrivate(
+      accessToken,
+      id,
+    );
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customer/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get customer by ID',
+    description: 'Retrieve details for a specific customer',
+  })
+  async getCustomerById(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return await this.thingsboardApi.fetchCustomerById(accessToken, id);
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/dashboard')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Save dashboard',
+    description: 'Create or update a dashboard in ThingsBoard',
+  })
+  async saveDashboard(
+    @TbAccessToken() accessToken: string,
+    @Body() dashboard: any,
+  ) {
+    try {
+      return await this.thingsboardApi.saveDashboard(accessToken, dashboard);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to save dashboard');
+    }
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/dashboard/:id/customers')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update dashboard customers',
+    description: 'Assign or unassign customers to a dashboard',
+  })
+  async updateDashboardCustomers(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() customerIds: string[],
+  ) {
+    return await this.thingsboardApi.updateDashboardCustomers(
+      accessToken,
+      id,
+      customerIds,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/dashboard/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete dashboard',
+    description: 'Delete a specific dashboard from ThingsBoard',
+  })
+  async deleteDashboard(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return await this.thingsboardApi.deleteDashboard(accessToken, id);
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/dashboards/:id/audit-logs')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get dashboard audit logs',
+    description: 'Retrieve paginated audit logs for a specific dashboard',
+  })
+  async getDashboardAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    const start = startTime ? parseInt(startTime, 10) : undefined;
+    const end = endTime ? parseInt(endTime, 10) : undefined;
+
+    return await this.thingsboardApi.fetchDashboardAuditLogs(
+      accessToken,
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      start,
+      end,
     );
   }
 }
