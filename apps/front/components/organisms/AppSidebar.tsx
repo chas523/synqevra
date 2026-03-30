@@ -135,6 +135,27 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           ],
         },
         {
+          href: "/entities/customers",
+          icon: Building2,
+          label: "Customers",
+        },
+        {
+          label: "Profiles",
+          icon: PersonStanding,
+          items: [
+            {
+              href: "/entities/profiles/device-profiles",
+              label: "Device Profiles",
+              icon: Settings,
+            },
+            {
+              href: "/entities/profiles/asset-profiles",
+              label: "Asset Profiles",
+              icon: Box,
+            },
+          ],
+        },
+        {
           label: "Resources",
           icon: FolderOpen,
           items: [

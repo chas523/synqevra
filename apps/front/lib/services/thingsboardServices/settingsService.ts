@@ -103,6 +103,13 @@ export class SettingsService {
     return data;
   }
 
+  public static async getQueueByName(name: string): Promise<Queue> {
+    const { data } = await proxyApi.get(
+      `thingsboard/queues/name/${encodeURIComponent(name)}`,
+    );
+    return data;
+  }
+
   public static async createQueue(queue: Queue): Promise<Queue> {
     const { data } = await proxyApi.post("thingsboard/queues", queue);
     return data;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Editor from "@monaco-editor/react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,15 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useTheme } from "next-themes";
 import {
   SelectAdmin,
   SelectContent,
@@ -53,15 +57,24 @@ const TELEMETRY_TYPES: Array<{ value: TelemetryType; label: string }> = [
   { value: "json", label: "JSON" },
 ];
 
+const INTEGER_INPUT_REGEX = /^-?\d*$/;
+const DOUBLE_INPUT_REGEX = /^-?\d*([\.,]\d*)?$/;
+const INTEGER_SUBMIT_REGEX = /^-?\d+$/;
+const DOUBLE_SUBMIT_REGEX = /^-?\d+([\.,]\d+)?$/;
+
 const parseTelemetryValue = (
   type: TelemetryType,
   rawValue: string,
+  booleanValue: boolean,
 ): unknown => {
   if (type === "string") {
     return rawValue;
   }
 
   if (type === "integer") {
+    if (!INTEGER_SUBMIT_REGEX.test(rawValue.trim())) {
+      throw new Error("Value must be a valid integer");
+    }
     const parsed = Number.parseInt(rawValue, 10);
     if (!Number.isFinite(parsed)) {
       throw new Error("Value must be a valid integer");
@@ -70,7 +83,10 @@ const parseTelemetryValue = (
   }
 
   if (type === "double") {
-    const parsed = Number.parseFloat(rawValue);
+    if (!DOUBLE_SUBMIT_REGEX.test(rawValue.trim())) {
+      throw new Error("Value must be a valid number");
+    }
+    const parsed = Number.parseFloat(rawValue.replace(",", "."));
     if (!Number.isFinite(parsed)) {
       throw new Error("Value must be a valid number");
     }
@@ -78,14 +94,7 @@ const parseTelemetryValue = (
   }
 
   if (type === "boolean") {
-    const normalized = rawValue.trim().toLowerCase();
-    if (normalized === "true" || normalized === "1") {
-      return true;
-    }
-    if (normalized === "false" || normalized === "0") {
-      return false;
-    }
-    throw new Error("Value must be true/false");
+    return booleanValue;
   }
 
   try {
@@ -145,6 +154,7 @@ const mergeTelemetryResponse = (
 export function AssetLatestTelemetryTabContent({
   assetId,
 }: AssetLatestTelemetryTabContentProps) {
+  const { resolvedTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -153,6 +163,21 @@ export function AssetLatestTelemetryTabContent({
   const [telemetryKey, setTelemetryKey] = useState("");
   const [telemetryType, setTelemetryType] = useState<TelemetryType>("string");
   const [telemetryValue, setTelemetryValue] = useState("");
+  const [booleanValue, setBooleanValue] = useState(false);
+  const [jsonDialogOpen, setJsonDialogOpen] = useState(false);
+  const [jsonDraft, setJsonDraft] = useState("{}");
+
+  const handleTelemetryValueChange = (nextValue: string) => {
+    if (telemetryType === "integer" && !INTEGER_INPUT_REGEX.test(nextValue)) {
+      return;
+    }
+
+    if (telemetryType === "double" && !DOUBLE_INPUT_REGEX.test(nextValue)) {
+      return;
+    }
+
+    setTelemetryValue(nextValue);
+  };
 
   const { data: attributes, isLoading: isLoadingAttributes } = useSWR(
     assetId ? ["assetAttributes", assetId] : null,
@@ -319,6 +344,8 @@ export function AssetLatestTelemetryTabContent({
     [],
   );
 
+  const editorTheme = resolvedTheme === "dark" ? "vs-dark" : "light";
+
   const valuePlaceholder = useMemo(() => {
     switch (telemetryType) {
       case "integer":
@@ -338,6 +365,8 @@ export function AssetLatestTelemetryTabContent({
     setTelemetryKey("");
     setTelemetryType("string");
     setTelemetryValue("");
+    setBooleanValue(false);
+    setJsonDraft("{}");
   };
 
   const handleClose = () => {
@@ -365,7 +394,7 @@ export function AssetLatestTelemetryTabContent({
       return;
     }
 
-    if (!telemetryValue.trim()) {
+    if (telemetryType !== "boolean" && !telemetryValue.trim()) {
       toast.error("Telemetry value is required");
       return;
     }
@@ -373,7 +402,11 @@ export function AssetLatestTelemetryTabContent({
     let parsedValue: unknown;
 
     try {
-      parsedValue = parseTelemetryValue(telemetryType, telemetryValue);
+      parsedValue = parseTelemetryValue(
+        telemetryType,
+        telemetryValue,
+        booleanValue,
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Invalid value");
       return;
@@ -416,6 +449,11 @@ export function AssetLatestTelemetryTabContent({
         totalPages={1}
         totalElements={filteredRows.length}
         onPageChange={() => {}}
+        onRefresh={async () => {
+          await mutateLatestTelemetry();
+          await mutateAllTelemetryKeys();
+          await mutateAllLatestTelemetry();
+        }}
         filterComponent={filterComponent}
         emptyMessage={
           searchQuery.trim()
@@ -457,6 +495,10 @@ export function AssetLatestTelemetryTabContent({
               totalPages={1}
               totalElements={filteredAllRows.length}
               onPageChange={() => {}}
+              onRefresh={async () => {
+                await mutateAllTelemetryKeys();
+                await mutateAllLatestTelemetry();
+              }}
               filterComponent={filterComponent}
               emptyMessage={
                 searchQuery.trim()
@@ -470,12 +512,16 @@ export function AssetLatestTelemetryTabContent({
       </Accordion>
 
       <Dialog
+        modal={false}
         open={isDialogOpen}
         onOpenChange={(open) => (!isSubmitting ? setIsDialogOpen(open) : null)}
       >
         <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>Add telemetry</DialogTitle>
+            <DialogDescription>
+              Provide telemetry key, type and value to push latest telemetry.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -495,9 +541,14 @@ export function AssetLatestTelemetryTabContent({
                 <Label>Type</Label>
                 <SelectAdmin
                   value={telemetryType}
-                  onValueChange={(value) =>
-                    setTelemetryType(value as TelemetryType)
-                  }
+                  onValueChange={(value) => {
+                    const nextType = value as TelemetryType;
+                    if (nextType === telemetryType) return;
+                    setTelemetryType(nextType);
+                    setTelemetryValue("");
+                    setBooleanValue(false);
+                    setJsonDraft("{}");
+                  }}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger className="w-full">
@@ -518,13 +569,53 @@ export function AssetLatestTelemetryTabContent({
 
               <div className="space-y-1.5">
                 <Label htmlFor="telemetry-value">Value*</Label>
-                <Input
-                  id="telemetry-value"
-                  value={telemetryValue}
-                  onChange={(event) => setTelemetryValue(event.target.value)}
-                  placeholder={valuePlaceholder}
-                  disabled={isSubmitting}
-                />
+                {telemetryType === "boolean" ? (
+                  <div className="flex items-center gap-3 pt-2">
+                    <Switch
+                      checked={booleanValue}
+                      onCheckedChange={(checked) => {
+                        setBooleanValue(checked);
+                        setTelemetryValue(checked ? "true" : "false");
+                      }}
+                      disabled={isSubmitting}
+                    />
+                    <span className="text-sm text-slate-700">
+                      {booleanValue ? "true" : "false"}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="telemetry-value"
+                      value={telemetryValue}
+                      onChange={(event) =>
+                        handleTelemetryValueChange(event.target.value)
+                      }
+                      inputMode={
+                        telemetryType === "integer"
+                          ? "numeric"
+                          : telemetryType === "double"
+                            ? "decimal"
+                            : undefined
+                      }
+                      placeholder={valuePlaceholder}
+                      disabled={isSubmitting || telemetryType === "json"}
+                    />
+                    {telemetryType === "json" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setJsonDraft(telemetryValue.trim() || "{}");
+                          setJsonDialogOpen(true);
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        Edit JSON
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -544,6 +635,62 @@ export function AssetLatestTelemetryTabContent({
               disabled={isSubmitting}
             >
               {isSubmitting ? "Adding..." : "Add"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        modal={false}
+        open={jsonDialogOpen}
+        onOpenChange={(open) => setJsonDialogOpen(open)}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit JSON value</DialogTitle>
+            <DialogDescription>
+              Enter a valid JSON object or value for telemetry payload.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="overflow-hidden rounded-md border">
+              <Editor
+                height="320px"
+                defaultLanguage="json"
+                value={jsonDraft}
+                onChange={(value) => setJsonDraft(value ?? "")}
+                theme={editorTheme}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  wordWrap: "on",
+                }}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setJsonDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                try {
+                  JSON.parse(jsonDraft);
+                  setTelemetryValue(jsonDraft);
+                  setJsonDialogOpen(false);
+                } catch {
+                  toast.error("JSON must be valid");
+                }
+              }}
+            >
+              Apply
             </Button>
           </DialogFooter>
         </DialogContent>

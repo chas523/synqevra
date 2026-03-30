@@ -157,10 +157,6 @@ export function AssetAuditLogsTabContent({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <TimeRangeFilter value={timeRange} onChange={handleTimeRangeChange} />
-      </div>
-
       <DataTable
         title="Audit logs"
         data={filteredAuditLogs}
@@ -188,6 +184,9 @@ export function AssetAuditLogsTabContent({
               />
             </div>
           </div>
+        }
+        customAction={
+          <TimeRangeFilter value={timeRange} onChange={handleTimeRangeChange} />
         }
         emptyMessage={
           isSearching

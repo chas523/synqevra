@@ -84,7 +84,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
   };
 
   const handleLogout = async () => {
-    await logout(user!.role);
+    await logout(user?.role ?? "");
     dispatch(clearUser());
   };
 
