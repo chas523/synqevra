@@ -98,7 +98,7 @@ export function Lwm2mObjectListField({
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [isOpen]);
+  }, [isOpen, selected.length, options.length, searchValue]);
 
   const handleContainerClick = () => {
     if (disabled) {
@@ -111,6 +111,7 @@ export function Lwm2mObjectListField({
   const handleSelect = (option: Lwm2mObjectOption) => {
     onAdd(option);
     onSearchChange("");
+    setIsOpen(false);
     inputRef.current?.focus();
   };
 
@@ -137,6 +138,7 @@ export function Lwm2mObjectListField({
                   onClick={(event) => {
                     event.stopPropagation();
                     onRemove(item.keyId);
+                    setIsOpen(false);
                   }}
                   aria-label={`Remove ${item.name}`}
                 >

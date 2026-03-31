@@ -32,7 +32,10 @@ const PortalSelect = ({
         onOpenChange={onOpenChange}
       >
         <SelectTrigger className="w-full">
-          <SelectValue placeholder={placeholder} />
+          <SelectValue
+            placeholder={placeholder}
+            className="w-full justify-start text-left"
+          />
         </SelectTrigger>
         <SelectContent>
           {options.length === 0 ? (
