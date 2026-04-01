@@ -11,16 +11,19 @@ import FormData from 'form-data';
 import { firstValueFrom } from 'rxjs';
 import {
   Asset,
+  AssetProfilesResponse,
   AssetProfileInfo,
   AssetProfileInfosResponse,
   AssetsResponse,
   CreateAssetRequest,
+  CustomerDetails,
   CustomerInfo,
   CustomersResponse,
   CreateCalculatedFieldPayload,
   CreateEntityViewRequest,
   DeviceCalculatedField,
   DeviceCalculatedFieldsResponse,
+  DeviceProfilesResponse,
   EntityId,
   EntityView,
   EntityViewTypeInfo,
@@ -561,6 +564,95 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchTimeseriesKeysByDeviceType(
+    accessToken: string,
+    deviceType: string,
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        attributes: 'false',
+        timeseries: 'true',
+      });
+
+      const queryPayload = {
+        pageLink: {
+          page: 0,
+          pageSize: 100,
+        },
+        entityFilter: {
+          type: 'deviceType',
+          deviceTypes: [deviceType],
+        },
+      };
+
+      const url = `${this.THINGSBOARD_API_URL}/entitiesQuery/find/keys?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ timeseries?: string[] }>(url, queryPayload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data?.timeseries)
+        ? response.data.timeseries
+        : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch timeseries keys by device type (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchDeviceProfileDeviceAttributeKeys(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        deviceProfileId,
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/devices/keys/attributes?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch device profile device attribute keys (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchDeviceProfileDeviceTimeseriesKeys(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        deviceProfileId,
+      });
+
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/devices/keys/timeseries?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch device profile device timeseries keys (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
   async fetchDeviceCalculatedFields(
     accessToken: string,
     id: string,
@@ -580,6 +672,56 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch calculated fields from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceProfileCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/DEVICE_PROFILE/${id}/calculatedFields?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get<DeviceCalculatedFieldsResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch device profile calculated fields from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAssetProfileCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ASSET_PROFILE/${id}/calculatedFields?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const response = await firstValueFrom(
+        this.httpService.get<DeviceCalculatedFieldsResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset profile calculated fields from ThingsBoard API',
         error,
         this.logger,
       );
@@ -886,6 +1028,34 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async getAssetProfile(
+    assetProfileId: string,
+    accessToken: string,
+    inlineImages?: boolean,
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams();
+      if (inlineImages !== undefined) {
+        params.append('inlineImages', String(inlineImages));
+      }
+
+      const query = params.toString();
+      const url = `${this.THINGSBOARD_API_URL}/assetProfile/${assetProfileId}${query ? `?${query}` : ''}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get asset profile',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchAssetProfileInfos(
     accessToken: string,
     page: number,
@@ -919,6 +1089,190 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         error,
         this.logger,
       );
+    }
+  }
+
+  async fetchAssetProfiles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
+    textSearch?: string,
+  ): Promise<AssetProfilesResponse> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: String(pageSize),
+        page: String(page),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/assetProfiles?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<AssetProfilesResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch asset profiles from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async saveAssetProfile(accessToken: string, payload: any): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/assetProfile`;
+      const response = await firstValueFrom(
+        this.httpService.post(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to save asset profile',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeAssetProfileDefault(
+    accessToken: string,
+    assetProfileId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/assetProfile/${assetProfileId}/default`;
+      await firstValueFrom(
+        this.httpService.post(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make asset profile default',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteAssetProfile(
+    accessToken: string,
+    assetProfileId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/assetProfile/${assetProfileId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete asset profile',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchAttributeKeysByAssetTypeAndScope(
+    accessToken: string,
+    assetType: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<string[]> {
+    try {
+      const includeServer = scope === 'SERVER_SCOPE';
+      const includeClient = scope === 'CLIENT_SCOPE';
+      const includeShared = scope === 'SHARED_SCOPE';
+
+      const params = new URLSearchParams({
+        attributes: 'true',
+        timeseries: 'false',
+        server: String(includeServer),
+        client: String(includeClient),
+        shared: String(includeShared),
+      });
+
+      const queryPayload = {
+        pageLink: {
+          page: 0,
+          pageSize: 100,
+        },
+        entityFilter: {
+          type: 'assetType',
+          assetTypes: [assetType],
+        },
+      };
+
+      const url = `${this.THINGSBOARD_API_URL}/entitiesQuery/find/keys?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ attributes?: string[] }>(url, queryPayload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data?.attributes)
+        ? response.data.attributes
+        : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch attribute keys by asset type and scope (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchTimeseriesKeysByAssetType(
+    accessToken: string,
+    assetType: string,
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        attributes: 'false',
+        timeseries: 'true',
+      });
+
+      const queryPayload = {
+        pageLink: {
+          page: 0,
+          pageSize: 100,
+        },
+        entityFilter: {
+          type: 'assetType',
+          assetTypes: [assetType],
+        },
+      };
+
+      const url = `${this.THINGSBOARD_API_URL}/entitiesQuery/find/keys?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ timeseries?: string[] }>(url, queryPayload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data?.timeseries)
+        ? response.data.timeseries
+        : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch timeseries keys by asset type (may not be available): ${error}`,
+      );
+      return [];
     }
   }
 
@@ -1196,6 +1550,109 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch customers from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchCustomer(
+    accessToken: string,
+    customerId: string,
+  ): Promise<CustomerDetails> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/${customerId}`;
+      const response = await firstValueFrom(
+        this.httpService.get<CustomerDetails>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch customer details from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteCustomer(accessToken: string, customerId: string): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/customer/${customerId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete customer in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchCustomerTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/CUSTOMER/${id}/keys/timeseries`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch customer telemetry keys from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchCustomerLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse> {
+    try {
+      const encodedKeys = encodeURIComponent(keys.join(','));
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/CUSTOMER/${id}/values/timeseries?keys=${encodedKeys}&useStrictDataTypes=false`;
+      const response = await firstValueFrom(
+        this.httpService.get<LatestTelemetryResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch latest customer telemetry from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async addCustomerLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/CUSTOMER/${id}/timeseries/LATEST_TELEMETRY`;
+      await firstValueFrom(
+        this.httpService.post(url, telemetry, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to add latest customer telemetry in ThingsBoard API',
         error,
         this.logger,
       );
@@ -1546,7 +2003,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
 
-      const rootRuleChain = response.data.data.find((rc: any) => rc.root === true);
+      const rootRuleChain = response.data.data.find(
+        (rc: any) => rc.root === true,
+      );
       if (!rootRuleChain) {
         throw new Error('Root rule chain not found');
       }
@@ -1588,42 +2047,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async fetchRuleChains(
-    accessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty = 'createdTime',
-    sortOrder: 'ASC' | 'DESC' = 'DESC',
-    type?: string,
-  ): Promise<any> {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-        sortProperty,
-        sortOrder,
-      });
-
-      if (type) {
-        searchParams.append('type', type);
-      }
-
-      const url = `${this.THINGSBOARD_API_URL}/ruleChains?${searchParams.toString()}`;
-      const response = await firstValueFrom(
-        this.httpService.get(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      ThingsboardApiException.createException(
-        'Failed to fetch rule chains',
-        error,
-        this.logger,
-      );
-    }
-  }
-
   async setRootRuleChain(
     accessToken: string,
     ruleChainId: string,
@@ -1631,9 +2054,13 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}/root`;
       const response = await firstValueFrom(
-        this.httpService.post(url, {}, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
+        this.httpService.post(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
       );
       return response.data;
     } catch (error) {
@@ -1665,10 +2092,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async createRuleChainFull(
-    accessToken: string,
-    payload: any,
-  ): Promise<any> {
+  async createRuleChainFull(accessToken: string, payload: any): Promise<any> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain`;
       const response = await firstValueFrom(
@@ -1686,10 +2110,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async getRuleChain(
-    ruleChainId: string,
-    accessToken: string,
-  ): Promise<any> {
+  async getRuleChain(ruleChainId: string, accessToken: string): Promise<any> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}`;
       const response = await firstValueFrom(
@@ -1777,9 +2198,16 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
   async getDeviceProfile(
     deviceProfileId: string,
     accessToken: string,
+    inlineImages?: boolean,
   ): Promise<any> {
     try {
-      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId}`;
+      const params = new URLSearchParams();
+      if (inlineImages !== undefined) {
+        params.append('inlineImages', String(inlineImages));
+      }
+
+      const query = params.toString();
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId}${query ? `?${query}` : ''}`;
       const response = await firstValueFrom(
         this.httpService.get(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -1789,6 +2217,50 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to get device profile',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async makeDeviceProfileDefault(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId}/default`;
+      await firstValueFrom(
+        this.httpService.post(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to make device profile default',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async deleteDeviceProfile(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfile/${deviceProfileId}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete device profile',
         error,
         this.logger,
       );
@@ -2412,6 +2884,109 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchAttributeKeysByDeviceTypeAndScope(
+    accessToken: string,
+    deviceType: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        attributes: 'true',
+        timeseries: 'false',
+        scope,
+      });
+
+      const queryPayload = {
+        pageLink: {
+          page: 0,
+          pageSize: 100,
+        },
+        entityFilter: {
+          type: 'deviceType',
+          deviceTypes: [deviceType],
+        },
+      };
+
+      const url = `${this.THINGSBOARD_API_URL}/entitiesQuery/find/keys?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ attribute?: string[] }>(url, queryPayload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return Array.isArray(response.data?.attribute)
+        ? response.data.attribute
+        : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch attribute keys by device type and scope (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
+  async fetchEntityKeysBySingleEntity(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    options: {
+      attributes: boolean;
+      timeseries: boolean;
+      scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE';
+    },
+  ): Promise<string[]> {
+    try {
+      const params = new URLSearchParams({
+        attributes: options.attributes ? 'true' : 'false',
+        timeseries: options.timeseries ? 'true' : 'false',
+      });
+
+      if (options.scope) {
+        params.append('scope', options.scope);
+      }
+
+      const queryPayload = {
+        pageLink: {
+          page: 0,
+          pageSize: 100,
+        },
+        entityFilter: {
+          type: 'singleEntity',
+          singleEntity: {
+            entityType,
+            id: entityId,
+          },
+        },
+      };
+
+      const url = `${this.THINGSBOARD_API_URL}/entitiesQuery/find/keys?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ timeseries?: string[]; attribute?: string[] }>(
+          url,
+          queryPayload,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+
+      if (options.timeseries) {
+        return Array.isArray(response.data?.timeseries)
+          ? response.data.timeseries
+          : [];
+      }
+
+      return Array.isArray(response.data?.attribute)
+        ? response.data.attribute
+        : [];
+    } catch (error) {
+      this.logger.warn(
+        `Failed to fetch keys by single entity (may not be available): ${error}`,
+      );
+      return [];
+    }
+  }
+
   async fetchEntityAlarms(
     sysAdminAccessToken: string,
     entityType: string,
@@ -2515,7 +3090,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
     }
   }
-
 
   async fetchEntityAuditLogs(
     accessToken: string,
@@ -2869,6 +3443,85 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async fetchRuleChains(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    type?: 'CORE' | 'EDGE',
+  ): Promise<any> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (type) {
+        params.append('type', type);
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/ruleChains?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch rule chains',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchQueueByName(
+    accessToken: string,
+    queueName: string,
+  ): Promise<QueueDto> {
+    try {
+      const encodedName = encodeURIComponent(queueName);
+      const url = `${this.THINGSBOARD_API_URL}/queues/name/${encodedName}?serviceType=TB_RULE_ENGINE`;
+      const response = await firstValueFrom(
+        this.httpService.get<QueueDto>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch queue by name',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchRuleChainById(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch rule chain by id',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async createQueue(
     sysAdminAccessToken: string,
     queue: QueueDto,
@@ -2937,6 +3590,43 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch resources',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchLwm2mObjectsPage(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<any[]> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: String(pageSize),
+        page: String(page),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/resource/lwm2m/page?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<any[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch LWM2M objects page',
         error,
         this.logger,
       );
@@ -3037,6 +3727,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     sortOrder: 'ASC' | 'DESC' = 'DESC',
     imageSubType: string = 'IMAGE',
     includeSystemImages: boolean = false,
+    textSearch?: string,
   ): Promise<any> {
     try {
       const params = new URLSearchParams({
@@ -3047,6 +3738,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         imageSubType,
         includeSystemImages: includeSystemImages.toString(),
       });
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
       const url = `${this.THINGSBOARD_API_URL}/images?${params.toString()}`;
       const response = await firstValueFrom(
         this.httpService.get(url, {
@@ -3746,6 +4440,42 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch device profile infos from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchDeviceProfiles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<DeviceProfilesResponse> {
+    try {
+      const params = new URLSearchParams({
+        pageSize: pageSize.toString(),
+        page: page.toString(),
+        sortProperty,
+        sortOrder,
+      });
+
+      if (textSearch?.trim()) {
+        params.append('textSearch', textSearch.trim());
+      }
+
+      const url = `${this.THINGSBOARD_API_URL}/deviceProfiles?${params.toString()}`;
+      const response = await firstValueFrom(
+        this.httpService.get<DeviceProfilesResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch device profiles from ThingsBoard API',
         error,
         this.logger,
       );

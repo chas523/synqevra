@@ -170,7 +170,7 @@ export function EntityDetailPanel({
                   className={cn(
                     "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
                     buttonVariants[action.variant || "secondary"],
-                    action.disabled && "opacity-50 cursor-not-allowed"
+                    action.disabled && "opacity-50 cursor-not-allowed",
                   )}
                 >
                   {action.icon}

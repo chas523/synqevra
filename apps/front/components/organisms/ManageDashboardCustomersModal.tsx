@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Loader2 } from "lucide-react";
-import { CustomerMultiSelect, Customer } from "@/components/molecules/CustomerMultiSelect";
+import {
+  CustomerMultiSelect,
+  Customer,
+} from "@/components/molecules/CustomerMultiSelect";
 import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
 import { Dashboard } from "@/types/dashboardTypes";
 import { toast } from "sonner";
@@ -60,7 +63,7 @@ export function ManageDashboardCustomersModal({
               title: ac.title || "Unknown Customer",
             };
           }
-        })
+        }),
       );
       setSelectedCustomers(customers);
     } catch (error) {
@@ -77,7 +80,10 @@ export function ManageDashboardCustomersModal({
     setIsUpdating(true);
     try {
       const customerIds = selectedCustomers.map((c) => c.id.id);
-      await DashboardService.updateDashboardCustomers(dashboard.id.id, customerIds);
+      await DashboardService.updateDashboardCustomers(
+        dashboard.id.id,
+        customerIds,
+      );
       toast.success("Dashboard customers updated");
       onSuccess();
       onClose();

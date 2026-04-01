@@ -128,9 +128,11 @@ import { FetchWidgetTypeFqnsHandler } from './application/queries/fetch-widget-t
 import { SaveWidgetTypeFqnsHandler } from './application/commands/save-widget-type-fqns/save-widget-type-fqns.handler';
 import { FetchWidgetBundlesQueryHandler } from './application/queries/fetch-widget-bundles/fetch-widget-bundles.query.handler';
 import { FetchWidgetBundleByIdQueryHandler } from './application/queries/fetch-widget-bundle-by-id/fetch-widget-bundle-by-id.query-handler';
+import { FetchAssetProfilesQueryHandler } from './application/queries/fetch-asset-profiles/fetch-asset-profiles.query.handler';
 import { FetchOtaPackagesQueryHandler } from './application/queries/fetch-ota-packages/fetch-ota-packages.query.handler';
 import { DownloadOtaPackageQueryHandler } from './application/queries/download-ota-package/download-ota-package.query.handler';
 import { FetchDeviceProfileInfosQueryHandler } from './application/queries/fetch-device-profile-infos/fetch-device-profile-infos.query.handler';
+import { FetchDeviceProfilesQueryHandler } from './application/queries/fetch-device-profiles/fetch-device-profiles.query.handler';
 import { FetchRepoSettingsInfoQueryHandler } from './application/queries/fetch-repo-settings-info/fetch-repo-settings-info.query.handler';
 import { FetchRepoSettingsQueryHandler } from './application/queries/fetch-repo-settings/fetch-repo-settings.query.handler';
 import { FetchVersionsQueryHandler } from './application/queries/fetch-versions/fetch-versions.query.handler';
@@ -278,12 +280,14 @@ const queryHandlers = [
   FetchMaterialIconsQueryHandler,
   FetchWidgetBundlesQueryHandler,
   FetchWidgetBundleByIdQueryHandler,
+  FetchAssetProfilesQueryHandler,
   FetchTwoFaSettingsQueryHandler,
   FetchWidgetsBundlesHandler,
   FetchWidgetTypeFqnsHandler,
   FetchOtaPackagesQueryHandler,
   DownloadOtaPackageQueryHandler,
   FetchDeviceProfileInfosQueryHandler,
+  FetchDeviceProfilesQueryHandler,
   FetchRepoSettingsInfoQueryHandler,
   FetchRepoSettingsQueryHandler,
   FetchVersionsQueryHandler,

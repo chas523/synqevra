@@ -39,23 +39,38 @@ export function RuleChainEditor({
   const [branch, setBranch] = useState("main");
   const { settingsInfo, isLoading: isLoadingVc } = useRepoSettingsInfo();
   const { saveMetadata, isSavingMetadata } = useSaveRuleChainMetadata();
-  const { ruleChain, metadata, isLoading: isMetadataLoading, mutate } =
-    useRuleChainDetails(ruleChainId);
+  const {
+    ruleChain,
+    metadata,
+    isLoading: isMetadataLoading,
+    mutate,
+  } = useRuleChainDetails(ruleChainId);
 
   const isDebugEnabled = (node: any) => {
     const s = node.debugSettings;
     if (!s) return false;
     // Backend sets allEnabled: false and sets allEnabledUntil to +15min (unix timestamp ms)
-    return s.allEnabled === true || (s.allEnabledUntil && s.allEnabledUntil > Date.now());
+    return (
+      s.allEnabled === true ||
+      (s.allEnabledUntil && s.allEnabledUntil > Date.now())
+    );
   };
 
   useEffect(() => {
-    if (metadata?.nodes && Array.isArray(metadata.nodes) && metadata.nodes.length > 0) {
+    if (
+      metadata?.nodes &&
+      Array.isArray(metadata.nodes) &&
+      metadata.nodes.length > 0
+    ) {
       const allEnabled = metadata.nodes.every(isDebugEnabled);
       setDebugAll(allEnabled);
 
       // Calculate remaining minutes from the node with the max expiration time
-      const maxExp = Math.max(...metadata.nodes.map((n: any) => n.debugSettings?.allEnabledUntil || 0));
+      const maxExp = Math.max(
+        ...metadata.nodes.map(
+          (n: any) => n.debugSettings?.allEnabledUntil || 0,
+        ),
+      );
       if (maxExp > Date.now()) {
         setRemainingMinutes(Math.ceil((maxExp - Date.now()) / 60000));
       } else {
@@ -82,19 +97,21 @@ export function RuleChainEditor({
     try {
       const canvasMetadata = canvasApiRef.current.getRuleChainMetadata();
 
-      const canvasAllEnabled = canvasMetadata.nodes.length > 0 && canvasMetadata.nodes.every(isDebugEnabled);
+      const canvasAllEnabled =
+        canvasMetadata.nodes.length > 0 &&
+        canvasMetadata.nodes.every(isDebugEnabled);
       let nodesToSave = canvasMetadata.nodes;
 
       // Only override if the checkbox state differs from the current canvas state,
       // or if debugAll is true (to constantly refresh the 15-minute expiration timer).
       if (debugAll !== canvasAllEnabled || debugAll) {
-        nodesToSave = canvasMetadata.nodes.map(node => ({
+        nodesToSave = canvasMetadata.nodes.map((node) => ({
           ...node,
           debugSettings: {
             failuresEnabled: false,
             allEnabled: debugAll,
-            allEnabledUntil: 0
-          }
+            allEnabledUntil: 0,
+          },
         }));
       }
 
@@ -183,7 +200,6 @@ export function RuleChainEditor({
         <DialogContent className="sm:max-w-full w-auto p-0 bg-transparent border-none shadow-none outline-none [&>button]:hidden">
           <DialogHeader>
             <DialogTitle className="sr-only">Version Control</DialogTitle>
-
           </DialogHeader>
           <VersionsTable
             branch={branch}

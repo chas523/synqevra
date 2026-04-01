@@ -53,7 +53,11 @@ export function RestoreSingleEntityVersionModal({
       setResult(null);
       setIsLoadingInfo(true);
 
-      VersionControlService.getVersionEntityInfo(versionId, entityType, entityId)
+      VersionControlService.getVersionEntityInfo(
+        versionId,
+        entityType,
+        entityId,
+      )
         .then((info) => {
           setEntityInfo(info);
           setOptions({
@@ -69,7 +73,8 @@ export function RestoreSingleEntityVersionModal({
 
   const pollStatus = async (requestId: string) => {
     try {
-      const res = await VersionControlService.getRestoreVersionStatus(requestId);
+      const res =
+        await VersionControlService.getRestoreVersionStatus(requestId);
       if (res.done) {
         setResult(res);
         setIsPolling(false);
@@ -174,7 +179,9 @@ export function RestoreSingleEntityVersionModal({
                   : "Version restored successfully"}
               </p>
               {result.error && (
-                <p className="text-sm text-red-400/80 max-w-xs">{result.error}</p>
+                <p className="text-sm text-red-400/80 max-w-xs">
+                  {result.error}
+                </p>
               )}
             </div>
 

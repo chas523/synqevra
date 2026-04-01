@@ -53,7 +53,7 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   private get THINGSBOARD_SYSADMIN_EMAIL(): string {
     return this.configService.getOrThrow<string>('THINGSBOARD_SYSADMIN_EMAIL');
@@ -169,7 +169,9 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
       // await this.setRuleChainAsDefault(activationResponse.token, ruleChainId);
 
       // Step 7: Update root rule chain to propagate messages to our rule chain
-      this.logger.log('Step 7: Updating root rule chain to propagate messages to our rule chain');
+      this.logger.log(
+        'Step 7: Updating root rule chain to propagate messages to our rule chain',
+      );
       await this.updateRootRuleChain(activationResponse.token, ruleChainId);
 
       // Step 8: Save tokens to database
@@ -293,10 +295,11 @@ export class RegisterTenantCommandHandler implements ICommandHandler<
     try {
       const rootRuleChainId =
         await this.thingsboardApi.getRootRuleChain(accessToken);
-      const rootRuleChainMetadata = await this.thingsboardApi.getRuleChainMetadata(
-        rootRuleChainId.id,
-        accessToken,
-      );
+      const rootRuleChainMetadata =
+        await this.thingsboardApi.getRuleChainMetadata(
+          rootRuleChainId.id,
+          accessToken,
+        );
 
       // Create the new node pointing to our rule chain
       const newNode = {

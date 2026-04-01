@@ -142,16 +142,6 @@ export function EntityViewAuditLogsTabContent({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <TimeRangeFilter
-          value={timeRange}
-          onChange={(range) => {
-            setTimeRange(range);
-            setPage(0);
-          }}
-        />
-      </div>
-
       <DataTable
         title="Audit logs"
         data={filteredAuditLogs}
@@ -179,6 +169,15 @@ export function EntityViewAuditLogsTabContent({
               />
             </div>
           </div>
+        }
+        customAction={
+          <TimeRangeFilter
+            value={timeRange}
+            onChange={(range) => {
+              setTimeRange(range);
+              setPage(0);
+            }}
+          />
         }
         emptyMessage={
           isSearching

@@ -3,8 +3,8 @@ export class FetchRuleChainsQuery {
     public readonly accessToken: string,
     public readonly page: number,
     public readonly pageSize: number,
-    public readonly type?: string,
-    public readonly sortProperty?: string,
-    public readonly sortOrder?: 'ASC' | 'DESC',
+    public readonly type?: 'CORE' | 'EDGE',
+    public readonly sortProperty: string = 'createdTime',
+    public readonly sortOrder: 'ASC' | 'DESC' = 'DESC',
   ) {}
 }

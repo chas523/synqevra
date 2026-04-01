@@ -145,10 +145,7 @@ export abstract class ThingsboardApiPort {
     debugMode: boolean,
     accessToken: string,
   ): Promise<EntityId>;
-  abstract getRuleChain(
-    ruleChainId: string,
-    accessToken: string,
-  ): Promise<any>;
+  abstract getRuleChain(ruleChainId: string, accessToken: string): Promise<any>;
   abstract getRuleChainMetadata(
     ruleChainId: string,
     accessToken: string,
@@ -158,14 +155,6 @@ export abstract class ThingsboardApiPort {
     metadata: any,
     accessToken: string,
   ): Promise<void>;
-  abstract fetchRuleChains(
-    accessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty?: string,
-    sortOrder?: 'ASC' | 'DESC',
-    type?: string,
-  ): Promise<any>;
   abstract setRootRuleChain(
     accessToken: string,
     ruleChainId: string,
@@ -174,18 +163,24 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     ruleChainId: string,
   ): Promise<void>;
-  abstract createRuleChainFull(
-    accessToken: string,
-    payload: any,
-  ): Promise<any>;
+  abstract createRuleChainFull(accessToken: string, payload: any): Promise<any>;
   abstract getDefaultDeviceProfile(accessToken: string): Promise<EntityId>;
   abstract getDeviceProfile(
     deviceProfileId: string,
     accessToken: string,
+    inlineImages?: boolean,
   ): Promise<any>;
   abstract updateDeviceProfile(
     deviceProfile: any,
     accessToken: string,
+  ): Promise<void>;
+  abstract makeDeviceProfileDefault(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<void>;
+  abstract deleteDeviceProfile(
+    accessToken: string,
+    deviceProfileId: string,
   ): Promise<void>;
 
   // Device operations
@@ -239,6 +234,18 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     id: string,
   ): Promise<string[]>;
+  abstract fetchTimeseriesKeysByDeviceType(
+    accessToken: string,
+    deviceType: string,
+  ): Promise<string[]>;
+  abstract fetchDeviceProfileDeviceAttributeKeys(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<string[]>;
+  abstract fetchDeviceProfileDeviceTimeseriesKeys(
+    accessToken: string,
+    deviceProfileId: string,
+  ): Promise<string[]>;
   abstract fetchDeviceProfileInfosWithTextSearch(
     accessToken: string,
     page: number,
@@ -259,6 +266,24 @@ export abstract class ThingsboardApiPort {
   ): Promise<any>;
 
   abstract fetchDeviceCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse>;
+
+  abstract fetchDeviceProfileCalculatedFields(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+  ): Promise<DeviceCalculatedFieldsResponse>;
+
+  abstract fetchAssetProfileCalculatedFields(
     accessToken: string,
     id: string,
     page: number,
@@ -319,6 +344,11 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     profileName: string,
   ): Promise<AssetProfileInfo>;
+  abstract getAssetProfile(
+    assetProfileId: string,
+    accessToken: string,
+    inlineImages?: boolean,
+  ): Promise<any>;
   abstract fetchAssetProfileInfos(
     accessToken: string,
     page: number,
@@ -327,6 +357,32 @@ export abstract class ThingsboardApiPort {
     sortOrder?: 'ASC' | 'DESC',
     textSearch?: string,
   ): Promise<AssetProfileInfosResponse>;
+  abstract fetchAssetProfiles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<AssetProfilesResponse>;
+  abstract saveAssetProfile(accessToken: string, payload: any): Promise<any>;
+  abstract makeAssetProfileDefault(
+    accessToken: string,
+    assetProfileId: string,
+  ): Promise<void>;
+  abstract deleteAssetProfile(
+    accessToken: string,
+    assetProfileId: string,
+  ): Promise<void>;
+  abstract fetchAttributeKeysByAssetTypeAndScope(
+    accessToken: string,
+    assetType: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<string[]>;
+  abstract fetchTimeseriesKeysByAssetType(
+    accessToken: string,
+    assetType: string,
+  ): Promise<string[]>;
   abstract fetchCustomers(
     accessToken: string,
     page: number,
@@ -335,6 +391,28 @@ export abstract class ThingsboardApiPort {
     sortOrder?: 'ASC' | 'DESC',
     textSearch?: string,
   ): Promise<CustomersResponse>;
+  abstract fetchCustomer(
+    accessToken: string,
+    customerId: string,
+  ): Promise<CustomerDetails>;
+  abstract deleteCustomer(
+    accessToken: string,
+    customerId: string,
+  ): Promise<void>;
+  abstract fetchCustomerTelemetryKeys(
+    accessToken: string,
+    id: string,
+  ): Promise<string[]>;
+  abstract fetchCustomerLatestTelemetry(
+    accessToken: string,
+    id: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse>;
+  abstract addCustomerLatestTelemetry(
+    accessToken: string,
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void>;
 
   // Entity View operations
   abstract fetchEntityViews(
@@ -522,6 +600,25 @@ export abstract class ThingsboardApiPort {
     sortOrder: 'ASC' | 'DESC',
   ): Promise<QueuesPageResponseDto>;
 
+  abstract fetchRuleChains(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    type?: 'CORE' | 'EDGE',
+  ): Promise<any>;
+
+  abstract fetchQueueByName(
+    accessToken: string,
+    queueName: string,
+  ): Promise<QueueDto>;
+
+  abstract fetchRuleChainById(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<any>;
+
   abstract createQueue(
     sysAdminAccessToken: string,
     queue: QueueDto,
@@ -564,6 +661,15 @@ export abstract class ThingsboardApiPort {
     resourceId: string,
   ): Promise<ResourceDto>;
 
+  abstract fetchLwm2mObjectsPage(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<any[]>;
+
   // Tenant detail operations
   abstract fetchTenantAttributes(
     sysAdminAccessToken: string,
@@ -583,6 +689,23 @@ export abstract class ThingsboardApiPort {
     sysAdminAccessToken: string,
     entityType: string,
     entityId: string,
+  ): Promise<string[]>;
+
+  abstract fetchAttributeKeysByDeviceTypeAndScope(
+    accessToken: string,
+    deviceType: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+  ): Promise<string[]>;
+
+  abstract fetchEntityKeysBySingleEntity(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    options: {
+      attributes: boolean;
+      timeseries: boolean;
+      scope?: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE';
+    },
   ): Promise<string[]>;
 
   abstract fetchEntityAlarms(
@@ -779,6 +902,7 @@ export abstract class ThingsboardApiPort {
     sortOrder: 'ASC' | 'DESC',
     imageSubType: string,
     includeSystemImages: boolean,
+    textSearch?: string,
   ): Promise<ImagesPageResponseDto>;
 
   abstract saveWidgetBundle(
@@ -842,6 +966,15 @@ export abstract class ThingsboardApiPort {
     sortProperty: string,
     sortOrder: 'ASC' | 'DESC',
   ): Promise<any>;
+
+  abstract fetchDeviceProfiles(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty: string,
+    sortOrder: 'ASC' | 'DESC',
+    textSearch?: string,
+  ): Promise<DeviceProfilesResponse>;
 
   // Version Control operations
   abstract getRepoSettingsInfo(accessToken: string): Promise<any>;
@@ -1138,7 +1271,7 @@ export interface DeviceCalculatedFieldsResponse {
 
 export interface CreateCalculatedFieldPayload {
   entityId: {
-    entityType: 'DEVICE' | 'ASSET';
+    entityType: 'DEVICE' | 'ASSET' | 'DEVICE_PROFILE' | 'ASSET_PROFILE';
     id: string;
   };
   configuration: {
@@ -1213,14 +1346,80 @@ export interface AssetProfileInfosResponse {
   hasNext: boolean;
 }
 
+export interface AssetProfile {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  type: string;
+  defaultRuleChainId?: EntityId | null;
+  defaultDashboardId?: EntityId | null;
+  defaultQueueName?: string | null;
+  externalId?: string | null;
+  version: number;
+  default: boolean;
+}
+
+export interface AssetProfilesResponse {
+  data: AssetProfile[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
+export interface DeviceProfile {
+  id: EntityId;
+  createdTime: number;
+  tenantId: EntityId;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  type: string;
+  transportType: string;
+  provisionType: string;
+  defaultRuleChainId?: EntityId | null;
+  defaultDashboardId?: EntityId | null;
+  defaultQueueName?: string | null;
+  provisionDeviceKey?: string | null;
+  firmwareId?: EntityId | null;
+  softwareId?: EntityId | null;
+  defaultEdgeRuleChainId?: EntityId | null;
+  externalId?: string | null;
+  version: number;
+  default: boolean;
+}
+
+export interface DeviceProfilesResponse {
+  data: DeviceProfile[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export interface CustomerInfo {
   id: EntityId;
   createdTime: number;
   title: string;
+  email?: string | null;
+  country?: string | null;
+  city?: string | null;
+  name?: string | null;
   tenantId: EntityId;
   additionalInfo?: {
     isPublic?: boolean;
   };
+}
+
+export interface CustomerDetails extends CustomerInfo {
+  state?: string | null;
+  address?: string | null;
+  address2?: string | null;
+  zip?: string | null;
+  phone?: string | null;
+  externalId?: string | null;
+  version?: number;
 }
 
 export interface CustomersResponse {

@@ -202,7 +202,9 @@ export function VersionsTable({
                       disabled={isReadOnly}
                     >
                       <RefreshCw className="h-4 w-4 mr-2" />
-                      {entityType && entityId ? "Create version" : "Create entities version"}
+                      {entityType && entityId
+                        ? "Create version"
+                        : "Create entities version"}
                     </Button>
                   </div>
                 </TooltipTrigger>
@@ -269,8 +271,8 @@ export function VersionsTable({
         />
       )}
 
-      {versionToRestore && (
-        entityType && entityId ? (
+      {versionToRestore &&
+        (entityType && entityId ? (
           <RestoreSingleEntityVersionModal
             open={isRestoreModalOpen}
             onOpenChange={setIsRestoreModalOpen}
@@ -288,8 +290,7 @@ export function VersionsTable({
             versionName={versionToRestore.name}
             onSuccess={() => mutate()}
           />
-        )
-      )}
+        ))}
     </div>
   );
 }

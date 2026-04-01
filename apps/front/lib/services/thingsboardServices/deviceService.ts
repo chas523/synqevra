@@ -46,6 +46,33 @@ export interface DeviceCalculatedFieldsResponse {
   hasNext: boolean;
 }
 
+export interface CreateCalculatedFieldRequest {
+  title: string;
+  fieldType: "simple" | "script";
+  expression: string;
+  outputKey?: string;
+  outputType?: "TIME_SERIES" | "ATTRIBUTES";
+  attributeScope?: "SERVER_SCOPE" | "SHARED_SCOPE";
+  useLatestTimestamp?: boolean;
+  arguments: Array<{
+    argumentName: string;
+    entityType:
+      | "current_entity"
+      | "device"
+      | "asset"
+      | "customer"
+      | "current_tenant";
+    argumentType: "attribute" | "latest_telemetry";
+    refEntityId?: string;
+    timeSeriesKey?: string;
+    name?: string;
+    defaultValue?: string;
+  }>;
+  failuresEnabled?: boolean;
+  allEnabled?: boolean;
+  decimalsByDefault?: number;
+}
+
 type AttributeScope = "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE";
 
 export interface DeviceAuditLog {
@@ -72,6 +99,123 @@ export interface DeviceProfileInfo {
   type?: string;
 }
 
+export type DeviceTransportType =
+  | "DEFAULT"
+  | "MQTT"
+  | "COAP"
+  | "LWM2M"
+  | "SNMP";
+
+export type DeviceProfileProvisionType =
+  | "DISABLED"
+  | "ALLOW_CREATE_NEW_DEVICES"
+  | "CHECK_PRE_PROVISIONED_DEVICES"
+  | "X509_CERTIFICATE_CHAIN";
+
+export type DeviceProfileProvisionConfiguration =
+  | {
+      type: "DISABLED";
+      provisionDeviceSecret: null;
+    }
+  | {
+      type: "ALLOW_CREATE_NEW_DEVICES" | "CHECK_PRE_PROVISIONED_DEVICES";
+      provisionDeviceSecret: string;
+    }
+  | {
+      type: "X509_CERTIFICATE_CHAIN";
+      provisionDeviceSecret: string;
+      certificateRegExPattern: string;
+      allowCreateNewDevicesByX509Certificate: boolean;
+    };
+
+export interface RuleChain {
+  id: { id: string; entityType: string };
+  createdTime?: number;
+  tenantId?: { id: string; entityType: string };
+  name: string;
+  type: "CORE" | "EDGE" | string;
+  root?: boolean;
+  debugMode?: boolean;
+}
+
+export interface DeviceProfile {
+  id: { id: string; entityType: string };
+  createdTime: number;
+  tenantId: { id: string; entityType: string };
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  type: string;
+  transportType: string;
+  provisionType: string;
+  defaultRuleChainId?: { id: string; entityType: string } | null;
+  defaultDashboardId?: { id: string; entityType: string } | null;
+  defaultQueueName?: string | null;
+  provisionDeviceKey?: string | null;
+  firmwareId?: { id: string; entityType: string } | null;
+  softwareId?: { id: string; entityType: string } | null;
+  defaultEdgeRuleChainId?: { id: string; entityType: string } | null;
+  externalId?: string | null;
+  version: number;
+  default: boolean;
+  profileData?: {
+    configuration?: { type?: string };
+    transportConfiguration?: { type?: string };
+    provisionConfiguration?:
+      | (Partial<DeviceProfileProvisionConfiguration> & {
+          type?: DeviceProfileProvisionType | string;
+        })
+      | undefined;
+    alarms?: unknown;
+  };
+}
+
+export interface DeviceProfileExport {
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  type: string;
+  transportType: string;
+  provisionType: string;
+  defaultRuleChainId?: { id: string; entityType: string } | null;
+  defaultDashboardId?: { id: string; entityType: string } | null;
+  defaultQueueName?: string | null;
+  provisionDeviceKey?: string | null;
+  firmwareId?: { id: string; entityType: string } | null;
+  softwareId?: { id: string; entityType: string } | null;
+  defaultEdgeRuleChainId?: { id: string; entityType: string } | null;
+  default: false;
+  profileData?: {
+    configuration?: { type?: string };
+    transportConfiguration?: { type?: string };
+    provisionConfiguration?:
+      | (Partial<DeviceProfileProvisionConfiguration> & {
+          type?: DeviceProfileProvisionType | string;
+        })
+      | undefined;
+    alarms?: unknown;
+  };
+}
+
+export interface CreateDeviceProfileRequest {
+  name: string;
+  type: "DEFAULT";
+  image: string | null;
+  defaultQueueName?: string | null;
+  transportType: DeviceTransportType;
+  provisionType: DeviceProfileProvisionType;
+  provisionDeviceKey: string | null;
+  description?: string | null;
+  profileData: {
+    configuration: { type: "DEFAULT" };
+    transportConfiguration: any;
+    alarms: unknown[];
+    provisionConfiguration: DeviceProfileProvisionConfiguration;
+  };
+  defaultRuleChainId?: { id: string; entityType: string } | null;
+  defaultEdgeRuleChainId?: { id: string; entityType: string } | null;
+}
+
 export interface OtaPackageInfo {
   id: { id: string; entityType: string };
   title?: string;
@@ -84,6 +228,11 @@ export interface PagedThingsboardResponse<T> {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+}
+
+export interface ReferenceEntityOption {
+  id: string;
+  name: string;
 }
 
 export class DeviceService {
@@ -220,6 +369,73 @@ export class DeviceService {
     return Array.isArray(data) ? data : [];
   }
 
+  public static async fetchDeviceProfileAttributes(
+    id: string,
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<DeviceAttributes> {
+    const { data } = await proxyApi.get<DeviceAttributes>(
+      `/thingsboard/device-profiles/${id}/attributes?scope=${scope}`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchDeviceProfileAttributeKeys(
+    id: string,
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/device-profiles/${id}/attributes/keys?scope=${scope}`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchDeviceProfileLatestTelemetryKeys(
+    id: string,
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/device-profiles/${id}/telemetry/latest/keys`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchReferenceEntitiesByType(
+    entityType: "device" | "asset" | "customer",
+    page = 0,
+    pageSize = 50,
+  ): Promise<ReferenceEntityOption[]> {
+    const typeMap: Record<"device" | "asset" | "customer", string> = {
+      device: "DEVICE",
+      asset: "ASSET",
+      customer: "CUSTOMER",
+    };
+
+    const { data } = await proxyApi.get<PagedThingsboardResponse<any>>(
+      `/thingsboard/entities/byType/${typeMap[entityType]}?page=${page}&pageSize=${pageSize}`,
+    );
+
+    const items = Array.isArray(data?.data) ? data.data : [];
+
+    return items
+      .map((item: any) => ({
+        id: item?.id?.id,
+        name: item?.name || item?.title || "",
+      }))
+      .filter((item: ReferenceEntityOption) => !!item.id && !!item.name);
+  }
+
+  public static async fetchReferenceEntityKeys(
+    entityType: "DEVICE" | "ASSET" | "CUSTOMER",
+    entityId: string,
+    kind: "attribute" | "latest_telemetry",
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/entities/${entityType}/${entityId}/keys?kind=${kind}&scope=${scope}`,
+    );
+
+    return Array.isArray(data) ? data : [];
+  }
+
   public static async fetchDeviceCalculatedFields(
     id: string,
     page = 0,
@@ -235,34 +451,21 @@ export class DeviceService {
 
   public static async createDeviceCalculatedField(
     id: string,
-    payload: {
-      title: string;
-      fieldType: "simple" | "script";
-      expression: string;
-      outputKey?: string;
-      outputType?: "TIME_SERIES" | "ATTRIBUTES";
-      attributeScope?: "SERVER_SCOPE" | "SHARED_SCOPE";
-      useLatestTimestamp?: boolean;
-      arguments: Array<{
-        argumentName: string;
-        entityType:
-          | "current_entity"
-          | "device"
-          | "asset"
-          | "customer"
-          | "current_tenant";
-        argumentType: "attribute" | "latest_telemetry";
-        timeSeriesKey?: string;
-        name?: string;
-        defaultValue?: string;
-      }>;
-      failuresEnabled?: boolean;
-      allEnabled?: boolean;
-      decimalsByDefault?: number;
-    },
+    payload: CreateCalculatedFieldRequest,
   ): Promise<DeviceCalculatedField> {
     const { data } = await proxyApi.post<DeviceCalculatedField>(
       `/thingsboard/devices/${id}/calculated-fields`,
+      payload,
+    );
+    return data;
+  }
+
+  public static async createDeviceProfileCalculatedField(
+    id: string,
+    payload: CreateCalculatedFieldRequest,
+  ): Promise<DeviceCalculatedField> {
+    const { data } = await proxyApi.post<DeviceCalculatedField>(
+      `/thingsboard/device-profiles/${id}/calculated-fields`,
       payload,
     );
     return data;
@@ -433,6 +636,161 @@ export class DeviceService {
       PagedThingsboardResponse<DeviceProfileInfo>
     >(`/thingsboard/device-profile-infos?${params.toString()}`);
     return data;
+  }
+
+  public static async fetchDeviceProfiles(
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+    textSearch?: string,
+  ): Promise<PagedThingsboardResponse<DeviceProfile>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (textSearch?.trim()) {
+      params.append("textSearch", textSearch.trim());
+    }
+
+    const { data } = await proxyApi.get<
+      PagedThingsboardResponse<DeviceProfile>
+    >(`/thingsboard/device-profiles?${params.toString()}`);
+    return data;
+  }
+
+  public static async createDeviceProfile(
+    payload: CreateDeviceProfileRequest,
+  ): Promise<void> {
+    await proxyApi.post("/thingsboard/device-profiles", payload);
+  }
+
+  public static async updateDeviceProfile(
+    payload: DeviceProfile | Record<string, unknown>,
+  ): Promise<void> {
+    await proxyApi.post("/thingsboard/device-profiles", payload);
+  }
+
+  public static async fetchDeviceProfile(id: string): Promise<DeviceProfile> {
+    const { data } = await proxyApi.get<DeviceProfile>(
+      `/thingsboard/device-profiles/${id}`,
+    );
+    return data;
+  }
+
+  public static async fetchDeviceProfileCalculatedFields(
+    id: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+  ): Promise<DeviceCalculatedFieldsResponse> {
+    const { data } = await proxyApi.get<DeviceCalculatedFieldsResponse>(
+      `/thingsboard/device-profiles/${id}/calculated-fields?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
+    );
+    return data;
+  }
+
+  public static async getDeviceProfileAuditLogs(
+    profileId: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+    startTime?: number,
+    endTime?: number,
+  ): Promise<DeviceAuditLogsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (startTime) params.append("startTime", startTime.toString());
+    if (endTime) params.append("endTime", endTime.toString());
+
+    const { data } = await proxyApi.get<DeviceAuditLogsResponse>(
+      `/thingsboard/device-profiles/${profileId}/audit-logs?${params.toString()}`,
+    );
+    return data;
+  }
+
+  public static async getRuleChains(
+    type?: "CORE" | "EDGE",
+  ): Promise<RuleChain[]> {
+    const params = new URLSearchParams({
+      page: "0",
+      pageSize: "50",
+      sortProperty: "name",
+      sortOrder: "ASC",
+    });
+
+    if (type) {
+      params.append("type", type);
+    }
+
+    const { data } = await proxyApi.get<
+      PagedThingsboardResponse<RuleChain> | RuleChain[]
+    >(`/thingsboard/rule-chains?${params.toString()}`);
+
+    const items = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.data)
+        ? data.data
+        : [];
+
+    return items;
+  }
+
+  public static async getRuleChainById(id: string): Promise<RuleChain> {
+    const { data } = await proxyApi.get<RuleChain>(
+      `/thingsboard/rule-chains/${id}`,
+    );
+    return data;
+  }
+
+  public static async exportDeviceProfile(
+    id: string,
+    inlineImages = true,
+  ): Promise<DeviceProfile> {
+    const { data } = await proxyApi.get<DeviceProfile>(
+      `/thingsboard/device-profiles/${id}/export?inlineImages=${inlineImages}`,
+    );
+    return data;
+  }
+
+  public static toDeviceProfileExport(
+    profile: DeviceProfile,
+  ): DeviceProfileExport {
+    return {
+      name: profile.name,
+      description: profile.description ?? null,
+      image: profile.image ?? null,
+      type: profile.type,
+      transportType: profile.transportType,
+      provisionType: profile.provisionType,
+      defaultRuleChainId: profile.defaultRuleChainId ?? null,
+      defaultDashboardId: profile.defaultDashboardId ?? null,
+      defaultQueueName: profile.defaultQueueName ?? null,
+      provisionDeviceKey: profile.provisionDeviceKey ?? null,
+      firmwareId: profile.firmwareId ?? null,
+      softwareId: profile.softwareId ?? null,
+      defaultEdgeRuleChainId: profile.defaultEdgeRuleChainId ?? null,
+      default: false,
+      profileData: profile.profileData,
+    };
+  }
+
+  public static async makeDeviceProfileDefault(id: string): Promise<void> {
+    await proxyApi.post(`/thingsboard/device-profiles/${id}/default`);
+  }
+
+  public static async deleteDeviceProfile(id: string): Promise<void> {
+    await proxyApi.delete(`/thingsboard/device-profiles/${id}`);
   }
 
   public static async getOtaPackages(

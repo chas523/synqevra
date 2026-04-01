@@ -188,9 +188,12 @@ import { Role } from 'src/iam/domain/enums/role.enum';
 import {
   THINGSBOARD_API_PORT,
   Asset,
+  AssetProfilesResponse,
   AssetProfileInfo,
   AssetProfileInfosResponse,
+  CustomerDetails,
   CustomersResponse,
+  DeviceProfilesResponse,
   EntityAuditLogsResponse,
   EntityViewTypeInfo,
   EntityView,
@@ -202,7 +205,11 @@ import { CreateOtaPackageCommand } from 'src/thingsboard/application/commands/cr
 import { DeleteOtaPackageCommand } from 'src/thingsboard/application/commands/delete-ota-package/delete-ota-package.command';
 import { CreateOtaPackageRequestDto } from './dtos/request/create-ota-package.request.dto';
 import { OtaPackagesPageResponseDto } from './dtos/response/ota-package.response.dto';
+import { FetchAssetProfilesQuery } from 'src/thingsboard/application/queries/fetch-asset-profiles/fetch-asset-profiles.query';
 import { FetchDeviceProfileInfosQuery } from 'src/thingsboard/application/queries/fetch-device-profile-infos/fetch-device-profile-infos.query';
+import { FetchDeviceProfilesQuery } from 'src/thingsboard/application/queries/fetch-device-profiles/fetch-device-profiles.query';
+import { AssetProfilesResponseDto } from './dtos/response/thingsboard-asset-profiles.response.dto';
+import { DeviceProfilesResponseDto } from './dtos/response/thingsboard-device-profiles.response.dto';
 import { FetchRepoSettingsInfoQuery } from 'src/thingsboard/application/queries/fetch-repo-settings-info/fetch-repo-settings-info.query';
 import { FetchRepoSettingsQuery } from 'src/thingsboard/application/queries/fetch-repo-settings/fetch-repo-settings.query';
 import { FetchVersionsQuery } from 'src/thingsboard/application/queries/fetch-versions/fetch-versions.query';
@@ -251,7 +258,7 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -538,7 +545,7 @@ export class ThingsboardController {
               ? versionValue
               : versionValue != null
                 ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                String(versionValue)
+                  String(versionValue)
                 : null,
         };
       }),
@@ -1419,23 +1426,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ENTITY_VIEW' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ENTITY_VIEW' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ENTITY_VIEW' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ENTITY_VIEW' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -1967,12 +1974,13 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
+        refEntityId?: string;
         timeSeriesKey?: string;
         name?: string;
         defaultValue?: string;
@@ -2005,11 +2013,7 @@ export class ThingsboardController {
           return acc;
         }
 
-        const refKey =
-          argument.entityType === 'current_entity' ||
-            argument.entityType === 'current_tenant'
-            ? argument.timeSeriesKey?.trim()
-            : argument.name?.trim();
+        const refKey = argument.timeSeriesKey?.trim() || argument.name?.trim();
 
         if (!refKey) {
           return acc;
@@ -2028,12 +2032,23 @@ export class ThingsboardController {
           attribute: 'ATTRIBUTE',
         };
 
+        const mappedEntityType =
+          entityTypeMap[argument.entityType] || 'CURRENT_ENTITY';
+
         acc[argumentName] = {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: entityTypeMap[argument.entityType] || 'CURRENT_ENTITY',
+            entityType: mappedEntityType,
           },
+          ...(argument.refEntityId?.trim()
+            ? {
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
+            : {}),
           defaultValue: argument.defaultValue ?? '',
         };
 
@@ -2065,11 +2080,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -2241,23 +2256,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ASSET' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ASSET' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ASSET' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ASSET' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -2460,6 +2475,411 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset profiles',
+    description: 'Retrieve paginated list of full asset profiles',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Asset profiles retrieved successfully',
+    type: AssetProfilesResponseDto,
+  })
+  async getAssetProfiles(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('textSearch') textSearch?: string,
+  ) {
+    const query = new FetchAssetProfilesQuery({
+      accessToken,
+      page: page ? parseInt(page, 10) : 0,
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: (sortOrder as 'ASC' | 'DESC') || 'DESC',
+      textSearch,
+    });
+    const result: Result<AssetProfilesResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: AssetProfilesResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id/export')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Export asset profile',
+    description: 'Export single asset profile with optional inline images',
+  })
+  async exportAssetProfile(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('inlineImages') inlineImages = 'true',
+  ) {
+    return this.thingsboardApi.getAssetProfile(
+      id,
+      accessToken,
+      inlineImages === 'true',
+    );
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset profile details',
+    description: 'Retrieve full details for a single asset profile',
+  })
+  async getAssetProfileById(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return this.thingsboardApi.getAssetProfile(id, accessToken, false);
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id/attributes/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset profile attribute keys',
+    description:
+      'Retrieve attribute keys for a specific asset profile by scope using entitiesQuery/find/keys',
+  })
+  async getAssetProfileAttributeKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    const profile = await this.thingsboardApi.getAssetProfile(
+      id,
+      accessToken,
+      false,
+    );
+    const assetType = profile?.name?.trim();
+
+    if (!assetType) {
+      return [];
+    }
+
+    return this.thingsboardApi.fetchAttributeKeysByAssetTypeAndScope(
+      accessToken,
+      assetType,
+      scope,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id/telemetry/latest/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset profile latest telemetry keys',
+    description:
+      'Retrieve all known latest telemetry keys for an asset profile',
+  })
+  async getAssetProfileLatestTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const profile = await this.thingsboardApi.getAssetProfile(
+      id,
+      accessToken,
+      false,
+    );
+    const assetType = profile?.name?.trim();
+
+    if (!assetType) {
+      return [];
+    }
+
+    return this.thingsboardApi.fetchTimeseriesKeysByAssetType(
+      accessToken,
+      assetType,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get calculated fields for asset profile',
+    description:
+      'Retrieve paginated calculated fields for a specific asset profile',
+  })
+  async getAssetProfileCalculatedFields(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    return this.thingsboardApi.fetchAssetProfileCalculatedFields(
+      accessToken,
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/asset-profiles/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create calculated field for asset profile',
+    description:
+      'Create a calculated field using ThingsBoard calculatedField API for an asset profile',
+  })
+  async createAssetProfileCalculatedField(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    payload: {
+      title: string;
+      fieldType: 'simple' | 'script';
+      expression: string;
+      outputKey?: string;
+      outputType?: 'TIME_SERIES' | 'ATTRIBUTES';
+      attributeScope?: 'SERVER_SCOPE' | 'SHARED_SCOPE';
+      useLatestTimestamp?: boolean;
+      arguments: Array<{
+        argumentName: string;
+        entityType:
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
+        argumentType: 'attribute' | 'latest_telemetry';
+        refEntityId?: string;
+        timeSeriesKey?: string;
+        name?: string;
+        defaultValue?: string;
+      }>;
+      failuresEnabled?: boolean;
+      allEnabled?: boolean;
+      decimalsByDefault?: number;
+    },
+  ) {
+    if (!payload?.title?.trim()) {
+      throw new BadRequestException('Field title is required');
+    }
+
+    if (!Array.isArray(payload?.arguments) || payload.arguments.length === 0) {
+      throw new BadRequestException('At least one argument is required');
+    }
+
+    if (!payload?.expression?.trim()) {
+      throw new BadRequestException('Expression is required');
+    }
+
+    if (payload.fieldType === 'simple' && !payload?.outputKey?.trim()) {
+      throw new BadRequestException('Output key is required for simple type');
+    }
+
+    const mappedArguments = payload.arguments.reduce<Record<string, unknown>>(
+      (acc, argument) => {
+        const argumentName = argument.argumentName?.trim();
+        if (!argumentName) {
+          return acc;
+        }
+
+        const refKey = argument.timeSeriesKey?.trim() || argument.name?.trim();
+
+        if (!refKey) {
+          return acc;
+        }
+
+        const entityTypeMap: Record<string, string> = {
+          current_entity: 'CURRENT_ENTITY',
+          device: 'DEVICE',
+          asset: 'ASSET',
+          customer: 'CUSTOMER',
+          current_tenant: 'CURRENT_TENANT',
+        };
+
+        const typeMap: Record<string, string> = {
+          latest_telemetry: 'TS_LATEST',
+          attribute: 'ATTRIBUTE',
+        };
+
+        const mappedEntityType =
+          entityTypeMap[argument.entityType] || 'CURRENT_ENTITY';
+
+        acc[argumentName] = {
+          refEntityKey: {
+            type: typeMap[argument.argumentType] || 'TS_LATEST',
+            key: refKey,
+            entityType: mappedEntityType,
+          },
+          ...(argument.refEntityId?.trim()
+            ? {
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
+            : {}),
+          defaultValue: argument.defaultValue ?? '',
+        };
+
+        return acc;
+      },
+      {},
+    );
+
+    if (Object.keys(mappedArguments).length === 0) {
+      throw new BadRequestException('At least one valid argument is required');
+    }
+
+    const outputType =
+      payload.outputType === 'ATTRIBUTES' ? 'ATTRIBUTES' : 'TIME_SERIES';
+
+    try {
+      return await this.thingsboardApi.createCalculatedField(accessToken, {
+        entityId: { entityType: 'ASSET_PROFILE', id },
+        configuration: {
+          arguments: mappedArguments,
+          useLatestTs: payload.useLatestTimestamp ?? false,
+          type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+          expression: payload.expression.trim(),
+          output: {
+            name:
+              payload.outputKey?.trim() ||
+              payload.title?.trim() ||
+              payload.expression.trim(),
+            type: outputType,
+            ...(outputType === 'ATTRIBUTES'
+              ? {
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
+              : {}),
+            decimalsByDefault: payload.decimalsByDefault ?? 2,
+          },
+        },
+        name: payload.title.trim(),
+        type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+        debugSettings: {
+          failuresEnabled: payload.failuresEnabled ?? true,
+          allEnabled: payload.allEnabled ?? true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to create asset profile calculated field',
+      );
+    }
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/asset-profiles/:id/audit-logs')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get asset profile audit logs',
+    description: 'Retrieve paginated audit logs for a specific asset profile',
+  })
+  async getAssetProfileAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    return this.thingsboardApi.fetchEntityAuditLogs(
+      accessToken,
+      'ASSET_PROFILE',
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      startTime ? Number(startTime) : undefined,
+      endTime ? Number(endTime) : undefined,
+    );
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/asset-profiles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create or update asset profile',
+    description: 'Save asset profile using ThingsBoard assetProfile API',
+  })
+  async saveAssetProfile(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    return this.thingsboardApi.saveAssetProfile(accessToken, payload);
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/asset-profiles/:id/default')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make asset profile default',
+    description: 'Set selected asset profile as default profile',
+  })
+  async makeAssetProfileDefault(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    await this.thingsboardApi.makeAssetProfileDefault(accessToken, id);
+    return { success: true };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/asset-profiles/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete asset profile',
+    description: 'Delete selected asset profile',
+  })
+  async deleteAssetProfile(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    await this.thingsboardApi.deleteAssetProfile(accessToken, id);
+    return { success: true };
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/asset-profile-info/:name')
   @ApiBearerAuth()
   @ApiOperation({
@@ -2542,6 +2962,214 @@ export class ThingsboardController {
       );
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch customers');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customers/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get customer details',
+    description: 'Retrieve customer details from ThingsBoard',
+  })
+  async getCustomer(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ): Promise<CustomerDetails> {
+    try {
+      return await this.thingsboardApi.fetchCustomer(accessToken, id);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch customer details',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/customers/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete customer',
+    description: 'Delete a customer in ThingsBoard by id',
+  })
+  async deleteCustomer(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ): Promise<void> {
+    try {
+      await this.thingsboardApi.deleteCustomer(accessToken, id);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete customer');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customers/:id/attributes')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get customer server attributes' })
+  async getCustomerAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAttributes(
+        accessToken,
+        'CUSTOMER',
+        id,
+        'SERVER_SCOPE',
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch customer attributes',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/customers/:id/attributes')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Save customer server attributes' })
+  async postCustomerAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() attributes: Record<string, any>,
+  ) {
+    try {
+      await this.thingsboardApi.saveEntityAttributes(
+        accessToken,
+        'CUSTOMER',
+        id,
+        'SERVER_SCOPE',
+        attributes,
+      );
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to save customer attributes',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customers/:id/telemetry/latest/keys')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get customer latest telemetry keys' })
+  async getCustomerLatestTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchCustomerTelemetryKeys(
+        accessToken,
+        id,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch customer telemetry keys',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customers/:id/telemetry/latest')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get customer latest telemetry' })
+  async getCustomerLatestTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('keys') keysParam: string,
+  ) {
+    const keys = (keysParam || '')
+      .split(',')
+      .map((key) => key.trim())
+      .filter(Boolean);
+
+    if (!keys.length) {
+      throw new BadRequestException('Query parameter "keys" is required');
+    }
+
+    try {
+      return await this.thingsboardApi.fetchCustomerLatestTelemetry(
+        accessToken,
+        id,
+        keys,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch customer latest telemetry',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/customers/:id/telemetry/latest')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Add customer latest telemetry' })
+  async addCustomerLatestTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() telemetry: Record<string, unknown>,
+  ) {
+    if (!telemetry || Object.keys(telemetry).length === 0) {
+      throw new BadRequestException('Telemetry payload cannot be empty');
+    }
+
+    try {
+      await this.thingsboardApi.addCustomerLatestTelemetry(
+        accessToken,
+        id,
+        telemetry,
+      );
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to add customer latest telemetry',
+      );
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/customers/:id/alarms')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get customer alarms' })
+  async getCustomerAlarms(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAlarms(
+        accessToken,
+        'CUSTOMER',
+        id,
+        Number(page),
+        Number(pageSize),
+        statusList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        severityList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch customer alarms');
     }
   }
 
@@ -2993,12 +3621,13 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
+        refEntityId?: string;
         timeSeriesKey?: string;
         name?: string;
         defaultValue?: string;
@@ -3031,11 +3660,7 @@ export class ThingsboardController {
           return acc;
         }
 
-        const refKey =
-          argument.entityType === 'current_entity' ||
-            argument.entityType === 'current_tenant'
-            ? argument.timeSeriesKey?.trim()
-            : argument.name?.trim();
+        const refKey = argument.timeSeriesKey?.trim() || argument.name?.trim();
 
         if (!refKey) {
           return acc;
@@ -3054,12 +3679,23 @@ export class ThingsboardController {
           attribute: 'ATTRIBUTE',
         };
 
+        const mappedEntityType =
+          entityTypeMap[argument.entityType] || 'CURRENT_ENTITY';
+
         acc[argumentName] = {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: entityTypeMap[argument.entityType] || 'CURRENT_ENTITY',
+            entityType: mappedEntityType,
           },
+          ...(argument.refEntityId?.trim()
+            ? {
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
+            : {}),
           defaultValue: argument.defaultValue ?? '',
         };
 
@@ -3091,11 +3727,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-              scope:
-                payload.attributeScope === 'SHARED_SCOPE'
-                  ? 'SHARED_SCOPE'
-                  : 'SERVER_SCOPE',
-            }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -3240,23 +3876,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'DEVICE' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'DEVICE' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'DEVICE' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'DEVICE' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -3838,7 +4474,7 @@ export class ThingsboardController {
   }
 
   @ApiBearerAuth()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('queues')
   @ApiOperation({ summary: 'Fetch queues' })
@@ -3869,6 +4505,53 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains')
+  @ApiOperation({ summary: 'Fetch rule chains' })
+  async fetchRuleChains(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 50,
+    @Query('sortProperty') sortProperty = 'name',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('type') type?: 'CORE' | 'EDGE',
+  ) {
+    return this.thingsboardApi.fetchRuleChains(
+      accessToken,
+      page,
+      pageSize,
+      sortProperty,
+      sortOrder,
+      type,
+    );
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('queues/name/:queueName')
+  @ApiOperation({ summary: 'Fetch queue by name' })
+  async fetchQueueByName(
+    @TbAccessToken() accessToken: string,
+    @Param('queueName') queueName: string,
+  ) {
+    return this.thingsboardApi.fetchQueueByName(accessToken, queueName);
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:ruleChainId')
+  @ApiOperation({ summary: 'Fetch rule chain by id' })
+  async fetchRuleChainById(
+    @TbAccessToken() accessToken: string,
+    @Param('ruleChainId') ruleChainId: string,
+  ) {
+    return this.thingsboardApi.fetchRuleChainById(accessToken, ruleChainId);
   }
 
   @ApiBearerAuth()
@@ -3913,7 +4596,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -3957,6 +4640,33 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('resources/lwm2m/page')
+  @ApiOperation({ summary: 'Fetch LWM2M objects page' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'LWM2M objects list fetched successfully',
+  })
+  async fetchLwm2mObjectsPage(
+    @TbAccessToken() accessToken: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 50,
+    @Query('sortProperty') sortProperty = 'resourceKey',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('textSearch') textSearch?: string,
+  ) {
+    return await this.thingsboardApi.fetchLwm2mObjectsPage(
+      accessToken,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      textSearch,
+    );
   }
 
   @ApiBearerAuth()
@@ -4027,7 +4737,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -4839,6 +5549,7 @@ export class ThingsboardController {
   async getImages(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 10,
+    @Query('textSearch') textSearch = '',
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('imageSubType') imageSubType = 'IMAGE',
@@ -4852,6 +5563,7 @@ export class ThingsboardController {
       sortOrder,
       imageSubType,
       includeSystemImages === true || String(includeSystemImages) === 'true',
+      textSearch,
       accessToken,
     );
     const result: Result<ImagesPageResponseDto, ThingsboardApiException> =
@@ -5309,6 +6021,424 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profiles',
+    description: 'Retrieve paginated list of full device profiles',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Device profiles retrieved successfully',
+    type: DeviceProfilesResponseDto,
+  })
+  async getDeviceProfiles(
+    @TbAccessToken() accessToken: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('page') page?: string,
+    @Query('sortProperty') sortProperty?: string,
+    @Query('sortOrder') sortOrder?: string,
+    @Query('textSearch') textSearch?: string,
+  ) {
+    const query = new FetchDeviceProfilesQuery({
+      accessToken,
+      page: page ? parseInt(page, 10) : 0,
+      pageSize: pageSize ? parseInt(pageSize, 10) : 10,
+      sortProperty: sortProperty || 'createdTime',
+      sortOrder: (sortOrder as 'ASC' | 'DESC') || 'DESC',
+      textSearch,
+    });
+    const result: Result<DeviceProfilesResponse, ThingsboardApiException> =
+      await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: DeviceProfilesResponse) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile details',
+    description: 'Retrieve full details for a single device profile',
+  })
+  async getDeviceProfileById(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return this.thingsboardApi.getDeviceProfile(id, accessToken, false);
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/attributes')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile attributes',
+    description: 'Retrieve attributes for a specific device profile by scope',
+  })
+  async getDeviceProfileAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    return this.thingsboardApi.fetchEntityAttributes(
+      accessToken,
+      'DEVICE_PROFILE',
+      id,
+      scope,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/attributes/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile attribute keys',
+    description:
+      'Retrieve attribute keys for a specific device profile using ThingsBoard deviceProfile keys endpoint',
+  })
+  async getDeviceProfileAttributeKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    return this.thingsboardApi.fetchDeviceProfileDeviceAttributeKeys(
+      accessToken,
+      id,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/telemetry/latest/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile latest telemetry keys',
+    description:
+      'Retrieve telemetry keys for a specific device profile using ThingsBoard deviceProfile keys endpoint',
+  })
+  async getDeviceProfileLatestTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    return this.thingsboardApi.fetchDeviceProfileDeviceTimeseriesKeys(
+      accessToken,
+      id,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get calculated fields for device profile',
+    description:
+      'Retrieve paginated calculated fields for a specific device profile',
+  })
+  async getDeviceProfileCalculatedFields(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    return this.thingsboardApi.fetchDeviceProfileCalculatedFields(
+      accessToken,
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+    );
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/device-profiles/:id/calculated-fields')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create calculated field for device profile',
+    description:
+      'Create a calculated field using ThingsBoard calculatedField API for a device profile',
+  })
+  async createDeviceProfileCalculatedField(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body()
+    payload: {
+      title: string;
+      fieldType: 'simple' | 'script';
+      expression: string;
+      outputKey?: string;
+      outputType?: 'TIME_SERIES' | 'ATTRIBUTES';
+      attributeScope?: 'SERVER_SCOPE' | 'SHARED_SCOPE';
+      useLatestTimestamp?: boolean;
+      arguments: Array<{
+        argumentName: string;
+        entityType:
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
+        argumentType: 'attribute' | 'latest_telemetry';
+        refEntityId?: string;
+        timeSeriesKey?: string;
+        name?: string;
+        defaultValue?: string;
+      }>;
+      failuresEnabled?: boolean;
+      allEnabled?: boolean;
+      decimalsByDefault?: number;
+    },
+  ) {
+    if (!payload?.title?.trim()) {
+      throw new BadRequestException('Field title is required');
+    }
+
+    if (!Array.isArray(payload?.arguments) || payload.arguments.length === 0) {
+      throw new BadRequestException('At least one argument is required');
+    }
+
+    if (!payload?.expression?.trim()) {
+      throw new BadRequestException('Expression is required');
+    }
+
+    if (payload.fieldType === 'simple' && !payload?.outputKey?.trim()) {
+      throw new BadRequestException('Output key is required for simple type');
+    }
+
+    const mappedArguments = payload.arguments.reduce<Record<string, unknown>>(
+      (acc, argument) => {
+        const argumentName = argument.argumentName?.trim();
+        if (!argumentName) {
+          return acc;
+        }
+
+        const refKey = argument.timeSeriesKey?.trim() || argument.name?.trim();
+
+        if (!refKey) {
+          return acc;
+        }
+
+        const entityTypeMap: Record<string, string> = {
+          current_entity: 'CURRENT_ENTITY',
+          device: 'DEVICE',
+          asset: 'ASSET',
+          customer: 'CUSTOMER',
+          current_tenant: 'CURRENT_TENANT',
+        };
+
+        const typeMap: Record<string, string> = {
+          latest_telemetry: 'TS_LATEST',
+          attribute: 'ATTRIBUTE',
+        };
+
+        const mappedEntityType =
+          entityTypeMap[argument.entityType] || 'CURRENT_ENTITY';
+
+        acc[argumentName] = {
+          refEntityKey: {
+            type: typeMap[argument.argumentType] || 'TS_LATEST',
+            key: refKey,
+            entityType: mappedEntityType,
+          },
+          ...(argument.refEntityId?.trim()
+            ? {
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
+            : {}),
+          defaultValue: argument.defaultValue ?? '',
+        };
+
+        return acc;
+      },
+      {},
+    );
+
+    const outputType =
+      payload.outputType === 'ATTRIBUTES' ? 'ATTRIBUTES' : 'TIME_SERIES';
+    const outputName =
+      payload.outputKey?.trim() ||
+      payload.title?.trim() ||
+      payload.expression.trim();
+
+    if (Object.keys(mappedArguments).length === 0) {
+      throw new BadRequestException('At least one valid argument is required');
+    }
+
+    const command = new CreateDeviceCalculatedFieldCommand(accessToken, {
+      entityId: { entityType: 'DEVICE_PROFILE', id },
+      configuration: {
+        arguments: mappedArguments,
+        useLatestTs: payload.useLatestTimestamp ?? false,
+        type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+        expression: payload.expression.trim(),
+        output: {
+          name: outputName,
+          type: outputType,
+          ...(outputType === 'ATTRIBUTES'
+            ? {
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
+            : {}),
+          decimalsByDefault: payload.decimalsByDefault ?? 2,
+        },
+      },
+      name: payload.title.trim(),
+      type: payload.fieldType?.toUpperCase() || 'SIMPLE',
+      debugSettings: {
+        failuresEnabled: payload.failuresEnabled ?? true,
+        allEnabled: payload.allEnabled ?? true,
+      },
+    });
+
+    const result = await this.commandBus.execute(command);
+
+    return match(result, {
+      Ok: (response) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/audit-logs')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get device profile audit logs',
+    description: 'Retrieve paginated audit logs for a specific device profile',
+  })
+  async getDeviceProfileAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    return this.thingsboardApi.fetchEntityAuditLogs(
+      accessToken,
+      'DEVICE_PROFILE',
+      id,
+      Number(page),
+      Number(pageSize),
+      sortProperty,
+      sortOrder,
+      startTime ? Number(startTime) : undefined,
+      endTime ? Number(endTime) : undefined,
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/device-profiles')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create device profile',
+    description: 'Create a new device profile',
+  })
+  async createDeviceProfile(
+    @TbAccessToken() accessToken: string,
+    @Body() payload: any,
+  ) {
+    await this.thingsboardApi.updateDeviceProfile(payload, accessToken);
+    return { success: true };
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/device-profiles/:id/export')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Export device profile',
+    description: 'Export single device profile with optional inline images',
+  })
+  async exportDeviceProfile(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('inlineImages') inlineImages = 'true',
+  ) {
+    return this.thingsboardApi.getDeviceProfile(
+      id,
+      accessToken,
+      inlineImages === 'true',
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/device-profiles/:id/default')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Make device profile default',
+    description: 'Set selected device profile as default profile',
+  })
+  async makeDeviceProfileDefault(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    await this.thingsboardApi.makeDeviceProfileDefault(accessToken, id);
+    return { success: true };
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/device-profiles/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete device profile',
+    description: 'Delete selected device profile',
+  })
+  async deleteDeviceProfile(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    await this.thingsboardApi.deleteDeviceProfile(accessToken, id);
+    return { success: true };
   }
 
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
@@ -5908,6 +7038,62 @@ export class ThingsboardController {
 
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/:entityType/:id/keys')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get keys for single entity',
+    description:
+      'Retrieve telemetry or attribute keys for a specific entity using entitiesQuery/find/keys',
+  })
+  async getKeysBySingleEntity(
+    @TbAccessToken() accessToken: string,
+    @Param('entityType') entityTypeParam: string,
+    @Param('id') id: string,
+    @Query('kind') kindParam?: string,
+    @Query('scope') scopeParam?: string,
+  ) {
+    const entityType = entityTypeParam.toUpperCase();
+    const kind = (kindParam || 'latest_telemetry').toLowerCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+
+    const supportedEntityTypes = new Set([
+      'DEVICE',
+      'ASSET',
+      'CUSTOMER',
+      'TENANT',
+      'ENTITY_VIEW',
+    ]);
+
+    if (!supportedEntityTypes.has(entityType)) {
+      throw new BadRequestException('Unsupported entity type');
+    }
+
+    if (kind !== 'latest_telemetry' && kind !== 'attribute') {
+      throw new BadRequestException('Invalid kind value');
+    }
+
+    if (
+      scope !== 'SERVER_SCOPE' &&
+      scope !== 'CLIENT_SCOPE' &&
+      scope !== 'SHARED_SCOPE'
+    ) {
+      throw new BadRequestException('Invalid scope value');
+    }
+
+    return this.thingsboardApi.fetchEntityKeysBySingleEntity(
+      accessToken,
+      entityType,
+      id,
+      {
+        attributes: kind === 'attribute',
+        timeseries: kind === 'latest_telemetry',
+        ...(kind === 'attribute' ? { scope } : {}),
+      },
+    );
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Post('/entities/vc/entity')
   @ApiBearerAuth()
   @ApiOperation({
@@ -6196,7 +7382,7 @@ export class ThingsboardController {
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
-    @Query('type') type?: string,
+    @Query('type') type?: 'CORE' | 'EDGE',
   ) {
     const query = new FetchRuleChainsQuery(
       accessToken,
@@ -6209,7 +7395,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -6226,7 +7414,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -6243,7 +7433,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -6260,7 +7452,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -6277,7 +7471,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: () => ({ success: true }),
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -6294,7 +7490,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -6304,14 +7502,27 @@ export class ThingsboardController {
   @ApiOperation({ summary: 'Save rule chain metadata (nodes + connections)' })
   async saveRuleChainMetadata(
     @TbAccessToken() accessToken: string,
-    @Body() body: { ruleChainId: { entityType: string; id: string }; nodes: any[]; connections: any[]; firstNodeIndex?: number; version?: number },
+    @Body()
+    body: {
+      ruleChainId: { entityType: string; id: string };
+      nodes: any[];
+      connections: any[];
+      firstNodeIndex?: number;
+      version?: number;
+    },
   ) {
     const { ruleChainId, ...metadata } = body;
-    const command = new SaveRuleChainMetadataCommand(accessToken, ruleChainId, metadata);
+    const command = new SaveRuleChainMetadataCommand(
+      accessToken,
+      ruleChainId,
+      metadata,
+    );
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 

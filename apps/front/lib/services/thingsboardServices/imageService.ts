@@ -15,6 +15,7 @@ export class ImageService {
     sortOrder: "ASC" | "DESC" = "DESC",
     imageSubType: string = "IMAGE",
     includeSystemImages: boolean = false,
+    textSearch?: string,
   ): Promise<ImagesPageResponse> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -24,6 +25,9 @@ export class ImageService {
       imageSubType,
       includeSystemImages: includeSystemImages.toString(),
     });
+    if (textSearch?.trim()) {
+      params.append("textSearch", textSearch.trim());
+    }
     const { data } = await proxyApi.get(
       `thingsboard/images?${params.toString()}`,
     );

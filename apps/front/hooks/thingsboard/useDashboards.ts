@@ -1,19 +1,25 @@
-import useSWR from 'swr';
-import { DashboardService } from '@/lib/services/thingsboardServices/dashboardService';
-import { DashboardsResponse } from '@/types/dashboardTypes';
+import useSWR from "swr";
+import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
+import { DashboardsResponse } from "@/types/dashboardTypes";
 
 export function useDashboards(
   page: number = 0,
   pageSize: number = 10,
-  sortProperty: string = 'createdTime',
-  sortOrder: 'ASC' | 'DESC' = 'DESC',
+  sortProperty: string = "createdTime",
+  sortOrder: "ASC" | "DESC" = "DESC",
 ) {
   const { data, error, isLoading, mutate } = useSWR<DashboardsResponse>(
     `/api/tenant/dashboards?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
-    () => DashboardService.getTenantDashboards(pageSize, page, sortProperty, sortOrder),
+    () =>
+      DashboardService.getTenantDashboards(
+        pageSize,
+        page,
+        sortProperty,
+        sortOrder,
+      ),
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   return {

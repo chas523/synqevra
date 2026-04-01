@@ -8,6 +8,7 @@ export class FetchImagesQuery implements IQuery {
     public readonly sortOrder: 'ASC' | 'DESC' = 'DESC',
     public readonly imageSubType: string = 'IMAGE',
     public readonly includeSystemImages: boolean = false,
+    public readonly textSearch: string | undefined,
     public readonly accessToken: string,
   ) {}
 }

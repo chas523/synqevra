@@ -1,8 +1,12 @@
 import { proxyApi } from "@/lib/api/api";
 import type {
   Asset,
+  CustomerDetails,
+  AssetProfile,
+  AssetProfileExport,
   AssetProfileInfo,
   AssetProfileInfosResponse,
+  AssetProfilesResponse,
   AssetsResponse,
   CreateAssetRequest,
   CustomersResponse,
@@ -57,6 +61,43 @@ export interface AssetAuditLogsResponse {
   totalPages: number;
   totalElements: number;
   hasNext: boolean;
+}
+
+export interface CreateAssetProfileCalculatedFieldRequest {
+  title: string;
+  fieldType: "simple" | "script";
+  expression: string;
+  outputKey?: string;
+  outputType?: "TIME_SERIES" | "ATTRIBUTES";
+  attributeScope?: "SERVER_SCOPE" | "SHARED_SCOPE";
+  useLatestTimestamp?: boolean;
+  arguments: Array<{
+    argumentName: string;
+    entityType:
+      | "current_entity"
+      | "device"
+      | "asset"
+      | "customer"
+      | "current_tenant";
+    argumentType: "attribute" | "latest_telemetry";
+    refEntityId?: string;
+    timeSeriesKey?: string;
+    name?: string;
+    defaultValue?: string;
+  }>;
+  failuresEnabled?: boolean;
+  allEnabled?: boolean;
+  decimalsByDefault?: number;
+}
+
+export interface CreateAssetProfileRequest {
+  name: string;
+  image: string | null;
+  defaultRuleChainId: { entityType: string; id: string } | null;
+  defaultDashboardId: { entityType: string; id: string } | null;
+  defaultQueueName: string | null;
+  defaultEdgeRuleChainId: { entityType: string; id: string } | null;
+  description: string | null;
 }
 
 export interface AssetDetails extends Asset {
@@ -392,6 +433,148 @@ export class AssetService {
     return data;
   }
 
+  public static async fetchAssetProfiles(
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+    textSearch?: string,
+  ): Promise<AssetProfilesResponse> {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (textSearch?.trim()) {
+      params.append("textSearch", textSearch.trim());
+    }
+
+    const { data } = await proxyApi.get<AssetProfilesResponse>(
+      `/thingsboard/asset-profiles?${params.toString()}`,
+    );
+    return data;
+  }
+
+  public static async exportAssetProfile(
+    id: string,
+    inlineImages = true,
+  ): Promise<AssetProfile> {
+    const { data } = await proxyApi.get<AssetProfile>(
+      `/thingsboard/asset-profiles/${id}/export?inlineImages=${inlineImages}`,
+    );
+    return data;
+  }
+
+  public static async fetchAssetProfile(id: string): Promise<AssetProfile> {
+    const { data } = await proxyApi.get<AssetProfile>(
+      `/thingsboard/asset-profiles/${id}`,
+    );
+    return data;
+  }
+
+  public static async fetchAssetProfileAttributeKeys(
+    id: string,
+    scope: "SERVER_SCOPE" | "CLIENT_SCOPE" | "SHARED_SCOPE" = "SERVER_SCOPE",
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/asset-profiles/${id}/attributes/keys?scope=${scope}`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchAssetProfileLatestTelemetryKeys(
+    id: string,
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/asset-profiles/${id}/telemetry/latest/keys`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchAssetProfileCalculatedFields(
+    id: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+  ): Promise<AssetCalculatedFieldsResponse> {
+    const { data } = await proxyApi.get<AssetCalculatedFieldsResponse>(
+      `/thingsboard/asset-profiles/${id}/calculated-fields?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
+    );
+    return data;
+  }
+
+  public static async createAssetProfileCalculatedField(
+    id: string,
+    payload: CreateAssetProfileCalculatedFieldRequest,
+  ): Promise<AssetCalculatedField> {
+    const { data } = await proxyApi.post<AssetCalculatedField>(
+      `/thingsboard/asset-profiles/${id}/calculated-fields`,
+      payload,
+    );
+    return data;
+  }
+
+  public static async getAssetProfileAuditLogs(
+    profileId: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder: "ASC" | "DESC" = "DESC",
+    startTime?: number,
+    endTime?: number,
+  ): Promise<AssetAuditLogsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (startTime) params.append("startTime", startTime.toString());
+    if (endTime) params.append("endTime", endTime.toString());
+
+    const { data } = await proxyApi.get<AssetAuditLogsResponse>(
+      `/thingsboard/asset-profiles/${profileId}/audit-logs?${params.toString()}`,
+    );
+    return data;
+  }
+
+  public static async saveAssetProfile(
+    payload: AssetProfile | CreateAssetProfileRequest | Record<string, unknown>,
+  ): Promise<AssetProfile> {
+    const { data } = await proxyApi.post<AssetProfile>(
+      "/thingsboard/asset-profiles",
+      payload,
+    );
+    return data;
+  }
+
+  public static toAssetProfileExport(
+    profile: AssetProfile,
+  ): AssetProfileExport {
+    return {
+      name: profile.name,
+      description: profile.description ?? null,
+      image: profile.image ?? null,
+      defaultRuleChainId: profile.defaultRuleChainId ?? null,
+      defaultDashboardId: profile.defaultDashboardId ?? null,
+      defaultQueueName: profile.defaultQueueName ?? null,
+      defaultEdgeRuleChainId: profile.defaultEdgeRuleChainId ?? null,
+      default: false,
+    };
+  }
+
+  public static async makeAssetProfileDefault(id: string): Promise<void> {
+    await proxyApi.post(`/thingsboard/asset-profiles/${id}/default`);
+  }
+
+  public static async deleteAssetProfile(id: string): Promise<void> {
+    await proxyApi.delete(`/thingsboard/asset-profiles/${id}`);
+  }
+
   public static async getCustomers(
     page = 0,
     pageSize = 50,
@@ -412,6 +595,97 @@ export class AssetService {
 
     const { data } = await proxyApi.get<CustomersResponse>(
       `/thingsboard/customers?${params.toString()}`,
+    );
+    return data;
+  }
+
+  public static async fetchCustomer(
+    customerId: string,
+  ): Promise<CustomerDetails> {
+    const { data } = await proxyApi.get<CustomerDetails>(
+      `/thingsboard/customers/${customerId}`,
+    );
+    return data;
+  }
+
+  public static async deleteCustomer(customerId: string): Promise<void> {
+    await proxyApi.delete(`/thingsboard/customers/${customerId}`);
+  }
+
+  public static async fetchCustomerServerAttributes(id: string): Promise<any> {
+    const { data } = await proxyApi.get<any>(
+      `/thingsboard/customers/${id}/attributes`,
+    );
+    return data;
+  }
+
+  public static async updateCustomerServerAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ): Promise<void> {
+    await proxyApi.post(`/thingsboard/customers/${id}/attributes`, attributes);
+  }
+
+  public static async fetchCustomerLatestTelemetryKeys(
+    id: string,
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get<string[]>(
+      `/thingsboard/customers/${id}/telemetry/latest/keys`,
+    );
+    return Array.isArray(data) ? data : [];
+  }
+
+  public static async fetchCustomerLatestTelemetry(
+    id: string,
+    keys: string[],
+  ): Promise<Record<string, Array<{ ts: number; value: unknown }>>> {
+    const params = new URLSearchParams();
+    if (keys.length > 0) {
+      params.append("keys", keys.join(","));
+    }
+    const { data } = await proxyApi.get<
+      Record<string, Array<{ ts: number; value: unknown }>>
+    >(`/thingsboard/customers/${id}/telemetry/latest?${params.toString()}`);
+    return data;
+  }
+
+  public static async addCustomerLatestTelemetry(
+    id: string,
+    telemetry: Record<string, unknown>,
+  ): Promise<void> {
+    await proxyApi.post(
+      `/thingsboard/customers/${id}/telemetry/latest`,
+      telemetry,
+    );
+  }
+
+  public static async getCustomerAlarms(
+    id: string,
+    page = 0,
+    pageSize = 10,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+    });
+    if (statusList && statusList.length > 0) {
+      params.append("statusList", statusList.join(","));
+    }
+    if (severityList && severityList.length > 0) {
+      params.append("severityList", severityList.join(","));
+    }
+    if (startTime !== undefined) {
+      params.append("startTime", String(startTime));
+    }
+    if (endTime !== undefined) {
+      params.append("endTime", String(endTime));
+    }
+    const { data } = await proxyApi.get<any>(
+      `/thingsboard/customers/${id}/alarms?${params.toString()}`,
     );
     return data;
   }

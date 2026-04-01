@@ -13,8 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { HelpCircle, X, Image as ImageIcon, Link as LinkIcon, Loader2, Trash2 } from "lucide-react";
-import { CustomerMultiSelect, Customer } from "@/components/molecules/CustomerMultiSelect";
+import {
+  HelpCircle,
+  X,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Loader2,
+  Trash2,
+} from "lucide-react";
+import {
+  CustomerMultiSelect,
+  Customer,
+} from "@/components/molecules/CustomerMultiSelect";
 import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
 import { toast } from "sonner";
 import { cn, getImagePreviewUrl } from "@/lib/utils";
@@ -72,11 +82,11 @@ export function AddDashboardModal({
                     columns: 24,
                     margin: 10,
                     outerMargin: true,
-                    backgroundSize: "100%"
-                  }
-                }
-              }
-            }
+                    backgroundSize: "100%",
+                  },
+                },
+              },
+            },
           },
           entityAliases: {},
           filters: {},
@@ -95,8 +105,8 @@ export function AddDashboardModal({
             showToolbarEntitySelect: false,
             showToolbarFilters: false,
             showToolbarMobileLogo: false,
-            toolbarMobileLogoUrl: ""
-          }
+            toolbarMobileLogoUrl: "",
+          },
         },
       };
 
@@ -104,7 +114,10 @@ export function AddDashboardModal({
 
       if (selectedCustomers.length > 0) {
         const customerIds = selectedCustomers.map((c) => c.id.id);
-        await DashboardService.updateDashboardCustomers(dashboard.id.id, customerIds);
+        await DashboardService.updateDashboardCustomers(
+          dashboard.id.id,
+          customerIds,
+        );
       }
 
       toast.success("Dashboard created successfully");
@@ -129,34 +142,49 @@ export function AddDashboardModal({
 
   const handleSelectGalleryImage = (imageLink: string) => {
     // Prefix with tb-image; if not already present
-    const formattedImage = imageLink.startsWith("tb-image;") ? imageLink : `tb-image;${imageLink}`;
+    const formattedImage = imageLink.startsWith("tb-image;")
+      ? imageLink
+      : `tb-image;${imageLink}`;
     setImage(formattedImage);
     setIsGalleryOpen(false);
   };
 
   const handleSetLink = () => {
     if (tempLink) {
-      const formattedImage = tempLink.startsWith("tb-image;") ? tempLink : `tb-image;${tempLink}`;
+      const formattedImage = tempLink.startsWith("tb-image;")
+        ? tempLink
+        : `tb-image;${tempLink}`;
       setImage(formattedImage);
       setTempLink("");
       setIsLinkDialogOpen(false);
     }
   };
 
-  const fieldLabelClass = "text-sm font-medium text-muted-foreground dark:text-slate-400";
-  const fieldInputClass = "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-orange-500 dark:text-white";
+  const fieldLabelClass =
+    "text-sm font-medium text-muted-foreground dark:text-slate-400";
+  const fieldInputClass =
+    "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-orange-500 dark:text-white";
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && handleClose()}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => !open && !isSubmitting && handleClose()}
+      >
         <DialogContent className="[&>button:last-child]:hidden max-w-[480px] md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-2xl bg-white dark:bg-slate-900">
           <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-row items-center justify-between space-y-0">
-            <DialogTitle className="text-xl dark:text-white font-normal">Add dashboard</DialogTitle>
+            <DialogTitle className="text-xl dark:text-white font-normal">
+              Add dashboard
+            </DialogTitle>
             <div className="flex items-center gap-3">
               <button className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors">
                 <HelpCircle className="h-6 w-6" />
               </button>
-              <button onClick={handleClose} disabled={isSubmitting} className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors">
+              <button
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+              >
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -219,12 +247,18 @@ export function AddDashboardModal({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">Dashboard order in mobile application</Label>
+                  <Label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Dashboard order in mobile application
+                  </Label>
                   <Input
                     type="number"
                     className={cn(fieldInputClass, "h-9")}
                     value={mobileOrder}
-                    onChange={(e) => setMobileOrder(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      setMobileOrder(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                     disabled={isSubmitting}
                     placeholder="Dashboard order"
                   />
@@ -238,20 +272,33 @@ export function AddDashboardModal({
                       {image ? (
                         <>
                           {image.includes("/api/images/") ? (
-                            <img src={getImagePreviewUrl(image.replace("tb-image;", ""))} alt="Preview" className="max-w-full max-h-full object-contain" />
+                            <img
+                              src={getImagePreviewUrl(
+                                image.replace("tb-image;", ""),
+                              )}
+                              alt="Preview"
+                              className="max-w-full max-h-full object-contain"
+                            />
                           ) : (
                             <div className="flex flex-col items-center justify-center h-full w-full px-2 text-center text-slate-500 overflow-hidden">
                               <LinkIcon className="h-4 w-4 mb-1" />
-                              <span className="text-[9px] break-all line-clamp-3 leading-tight">{image.replace("tb-image;", "")}</span>
+                              <span className="text-[9px] break-all line-clamp-3 leading-tight">
+                                {image.replace("tb-image;", "")}
+                              </span>
                             </div>
                           )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer" onClick={() => setImage(null)}>
+                          <div
+                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
+                            onClick={() => setImage(null)}
+                          >
                             <Trash2 className="h-5 w-5 text-white" />
                           </div>
                         </>
                       ) : (
                         <div className="flex flex-col items-center">
-                          <span className="text-[10px] text-slate-400 mb-1 font-mono uppercase tracking-wider">No image</span>
+                          <span className="text-[10px] text-slate-400 mb-1 font-mono uppercase tracking-wider">
+                            No image
+                          </span>
                           <ImageIcon className="w-8 h-8 text-slate-200 dark:text-slate-700" />
                         </div>
                       )}
@@ -265,7 +312,9 @@ export function AddDashboardModal({
                         onClick={() => setIsGalleryOpen(true)}
                       >
                         <ImageIcon className="w-6 h-6 text-slate-400 group-hover/btn:text-orange-500 transition-colors" />
-                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Browse from gallery</span>
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                          Browse from gallery
+                        </span>
                       </Button>
                       <Button
                         variant="ghost"
@@ -274,7 +323,9 @@ export function AddDashboardModal({
                         onClick={() => setIsLinkDialogOpen(true)}
                       >
                         <LinkIcon className="w-6 h-6 text-slate-400 group-hover/btn:text-orange-500 transition-colors" />
-                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">Set link</span>
+                        <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                          Set link
+                        </span>
                       </Button>
                     </div>
                   </div>
@@ -297,7 +348,9 @@ export function AddDashboardModal({
               disabled={isSubmitting || !title.trim()}
               className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900 font-medium px-8 min-w-[100px]"
             >
-              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : null}
               Add
             </Button>
           </DialogFooter>
@@ -313,7 +366,9 @@ export function AddDashboardModal({
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
         <DialogContent className="max-w-md bg-white dark:bg-slate-900 border-none shadow-2xl p-0">
           <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <DialogTitle className="text-lg font-normal">Set image link</DialogTitle>
+            <DialogTitle className="text-lg font-normal">
+              Set image link
+            </DialogTitle>
           </DialogHeader>
           <div className="p-6">
             <div className="space-y-4">
@@ -330,7 +385,9 @@ export function AddDashboardModal({
             </div>
           </div>
           <DialogFooter className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-            <Button variant="ghost" onClick={() => setIsLinkDialogOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setIsLinkDialogOpen(false)}>
+              Cancel
+            </Button>
             <Button
               onClick={handleSetLink}
               className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900 px-6"

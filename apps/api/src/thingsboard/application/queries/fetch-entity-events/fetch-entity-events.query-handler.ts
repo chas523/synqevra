@@ -10,13 +10,10 @@ import { Result, Ok, Err } from 'oxide.ts';
 import { ThingsboardApiException } from '../../../infrastructure/http/thingsboard.http.errors';
 
 @QueryHandler(FetchEntityEventsQuery)
-export class FetchEntityEventsQueryHandler
-  implements
-    IQueryHandler<
-      FetchEntityEventsQuery,
-      Result<EntityEventsResponse, ThingsboardApiException>
-    >
-{
+export class FetchEntityEventsQueryHandler implements IQueryHandler<
+  FetchEntityEventsQuery,
+  Result<EntityEventsResponse, ThingsboardApiException>
+> {
   private readonly logger = new Logger(FetchEntityEventsQueryHandler.name);
 
   constructor(
@@ -43,7 +40,10 @@ export class FetchEntityEventsQueryHandler
       );
       return Ok(response);
     } catch (error) {
-      this.logger.error(`Error fetching entity events for ${query.entityType} ${query.entityId}:`, error);
+      this.logger.error(
+        `Error fetching entity events for ${query.entityType} ${query.entityId}:`,
+        error,
+      );
       return Err(
         new ThingsboardApiException(
           `Failed to fetch entity events: ${(error as Error).message}`,
