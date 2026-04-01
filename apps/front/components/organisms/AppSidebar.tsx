@@ -136,7 +136,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           ],
         },
         {
-          href: "/entities/customers",
+          href: "/customers",
           icon: Building2,
           label: "Customers",
         },
@@ -145,12 +145,12 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
           icon: PersonStanding,
           items: [
             {
-              href: "/entities/profiles/device-profiles",
+              href: "/profiles/device-profiles",
               label: "Device Profiles",
               icon: Settings,
             },
             {
-              href: "/entities/profiles/asset-profiles",
+              href: "/profiles/asset-profiles",
               label: "Asset Profiles",
               icon: Box,
             },

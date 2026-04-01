@@ -1,7 +1,5 @@
-"use client";
-
-import { EntitiesCustomersPage } from "@/components/pages/EntitiesCustomersPage";
+import { redirect } from "next/navigation";
 
 export default function EntitiesCustomersRoute() {
-  return <EntitiesCustomersPage />;
+  redirect("/customers");
 }

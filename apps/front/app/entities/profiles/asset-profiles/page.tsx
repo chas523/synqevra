@@ -1,5 +1,5 @@
-import { EntitiesAssetProfilesPage } from "@/components/pages/EntitiesAssetProfilesPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <EntitiesAssetProfilesPage />;
+  redirect("/profiles/asset-profiles");
 }

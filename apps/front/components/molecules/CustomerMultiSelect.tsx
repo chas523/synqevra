@@ -102,7 +102,7 @@ export function CustomerMultiSelect({
     <div className="relative w-full" ref={searchRef}>
       {/* Search Input and Badges Container */}
       <div
-        className="flex flex-wrap items-center gap-1.5 p-1.5 min-h-[40px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded cursor-text focus-within:ring-1 focus-within:ring-orange-500 transition-all duration-200"
+        className="flex flex-wrap items-center gap-1.5 p-1.5 min-h-10 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded cursor-text focus-within:ring-1 focus-within:ring-orange-500 transition-all duration-200"
         onClick={() => setShowResults(true)}
       >
         {selectedCustomers.map((customer) => (

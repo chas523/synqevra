@@ -1,5 +1,5 @@
-import { EntitiesDeviceProfilesPage } from "@/components/pages/EntitiesDeviceProfilesPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <EntitiesDeviceProfilesPage />;
+  redirect("/profiles/device-profiles");
 }
