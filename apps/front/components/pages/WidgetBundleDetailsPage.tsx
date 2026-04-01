@@ -1,5 +1,6 @@
 "use client";
 
+import type { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { WidgetService } from "@/lib/services/thingsboardServices/widgetService";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,12 @@ export const WidgetBundleDetailsPage = () => {
 
   const { createWidgetType } = useManageWidgetType();
 
-  const { data: bundle, isLoading: isBundleLoading } = useSWR(
-    bundleId ? ["widgetBundle", bundleId] : null,
-    () => WidgetService.getWidgetBundleById(bundleId),
+  const {
+    data: bundle,
+    error: bundleError,
+    isLoading: isBundleLoading,
+  } = useSWR(bundleId ? ["widgetBundle", bundleId] : null, () =>
+    WidgetService.getWidgetBundleById(bundleId),
   );
 
   const {
@@ -69,6 +73,20 @@ export const WidgetBundleDetailsPage = () => {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (bundleError) {
+    const status = (bundleError as AxiosError<{ message?: string }>).response
+      ?.status;
+    const message =
+      (bundleError as AxiosError<{ message?: string }>).response?.data
+        ?.message || "Failed to load bundle details.";
+
+    return (
+      <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+        {status === 404 ? "Bundle not found" : message}
       </div>
     );
   }
