@@ -51,7 +51,7 @@ export class ConnectionController {
     private readonly confirmPractitionerUseCase: ConfirmPractitionerUseCase,
     private readonly getConnectionStatusUseCase: GetConnectionStatusUseCase,
     private readonly connectionRepository: ConnectionRepository,
-  ) {}
+  ) { }
 
   @Public()
   @Post('/connect')
@@ -139,6 +139,7 @@ export class ConnectionController {
     const connection = await this.connectionRepository.getConnectionByUserId(
       user.id,
     );
+    console.log(connection);
     return { medplum: connection?.medplumId != null };
   }
 

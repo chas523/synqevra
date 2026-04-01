@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { DetailPanelHeader } from "@/components/molecules/DetailPanelHeader";
@@ -19,6 +18,7 @@ export interface ActionButton {
   onClick: () => void;
   variant?: "primary" | "secondary" | "danger";
   icon?: ReactNode;
+  disabled?: boolean;
 }
 
 export interface EntityDetailPanelProps {
@@ -166,9 +166,11 @@ export function EntityDetailPanel({
                   key={`action-${action.label}-${index}`}
                   type="button"
                   onClick={action.onClick}
+                  disabled={action.disabled}
                   className={cn(
                     "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
                     buttonVariants[action.variant || "secondary"],
+                    action.disabled && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   {action.icon}
@@ -179,7 +181,7 @@ export function EntityDetailPanel({
           )}
 
           {/* Tab Contents */}
-          <ScrollArea className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-auto scrollbar-hide">
             {tabs.map((tab) => (
               <TabsContent
                 key={tab.id}
@@ -189,7 +191,7 @@ export function EntityDetailPanel({
                 {tab.content}
               </TabsContent>
             ))}
-          </ScrollArea>
+          </div>
         </Tabs>
       </SheetContent>
     </Sheet>

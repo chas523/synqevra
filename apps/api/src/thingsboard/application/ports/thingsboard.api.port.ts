@@ -138,17 +138,46 @@ export abstract class ThingsboardApiPort {
   ): Promise<ThingsboardLoginResponse & { tenantId: string }>;
 
   // Rule Chain operations
+  abstract getRootRuleChain(accessToken: string): Promise<EntityId>;
   abstract createRuleChain(
     name: string,
     type: string,
     debugMode: boolean,
     accessToken: string,
   ): Promise<EntityId>;
+  abstract getRuleChain(
+    ruleChainId: string,
+    accessToken: string,
+  ): Promise<any>;
+  abstract getRuleChainMetadata(
+    ruleChainId: string,
+    accessToken: string,
+  ): Promise<any>;
   abstract updateRuleChainMetadata(
     ruleChainId: EntityId,
     metadata: any,
     accessToken: string,
   ): Promise<void>;
+  abstract fetchRuleChains(
+    accessToken: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    type?: string,
+  ): Promise<any>;
+  abstract setRootRuleChain(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<any>;
+  abstract deleteRuleChain(
+    accessToken: string,
+    ruleChainId: string,
+  ): Promise<void>;
+  abstract createRuleChainFull(
+    accessToken: string,
+    payload: any,
+  ): Promise<any>;
   abstract getDefaultDeviceProfile(accessToken: string): Promise<EntityId>;
   abstract getDeviceProfile(
     deviceProfileId: string,
@@ -716,6 +745,20 @@ export abstract class ThingsboardApiPort {
     endTime?: number,
   ): Promise<EntityEventsResponse>;
 
+  abstract fetchEntityEventsByQuery(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    tenantId: string,
+    eventType: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
+    startTime?: number,
+    endTime?: number,
+  ): Promise<EntityEventsResponse>;
+
   abstract fetchEntityAuditLogs(
     accessToken: string,
     entityType: string,
@@ -1024,8 +1067,61 @@ export abstract class ThingsboardApiPort {
     requestId: string,
   ): Promise<any>;
 
+  abstract getVersionEntityInfo(
+    accessToken: string,
+    versionId: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<any>;
+
+  // Dashboards
+  abstract fetchTenantDashboards(
+    accessToken: string,
+    pageSize: number,
+    page: number,
+    sortProperty?: string,
+    sortOrder?: string,
+  ): Promise<any>;
+  abstract fetchDashboardById(
+    accessToken: string,
+    id: string,
+    includeResources?: boolean,
+  ): Promise<any>;
+  abstract makeDashboardCustomerPublic(
+    accessToken: string,
+    id: string,
+  ): Promise<any>;
+  abstract makeDashboardCustomerPrivate(
+    accessToken: string,
+    id: string,
+  ): Promise<any>;
+
+  abstract saveDashboard(accessToken: string, dashboard: any): Promise<any>;
+
+  abstract updateDashboardCustomers(
+    accessToken: string,
+    dashboardId: string,
+    customerIds: string[],
+  ): Promise<any>;
+
+  abstract fetchCustomerById(accessToken: string, id: string): Promise<any>;
+
+  abstract deleteDashboard(accessToken: string, id: string): Promise<void>;
+
+  abstract fetchDashboardAuditLogs(
+    accessToken: string,
+    id: string,
+    page: number,
+    pageSize: number,
+    sortProperty?: string,
+    sortOrder?: string,
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any>;
+
   abstract getEntitiesByType(
     accessToken: string,
+
     entityType: string,
     page: number,
     pageSize: number,

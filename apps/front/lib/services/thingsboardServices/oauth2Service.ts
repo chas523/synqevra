@@ -116,6 +116,13 @@ export class OAuth2Service {
     return data;
   }
 
+  public static async getOAuth2ClientById(clientId: string): Promise<any> {
+    const { data } = await proxyApi.get(
+      `thingsboard/oauth2/client/${clientId}`,
+    );
+    return data;
+  }
+
   public static async checkGoogleAuthAvailable(): Promise<{
     available: boolean;
   }> {

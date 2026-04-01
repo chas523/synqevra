@@ -115,6 +115,14 @@ export class RuleChainConfigurationError extends ThingsboardDomainError {
   }
 }
 
+export class RuleChainUpdateError extends ThingsboardDomainError {
+  public readonly code = 'RULE_CHAIN.UPDATE_FAILED';
+
+  constructor() {
+    super('Failed to update rule chain');
+  }
+}
+
 // Device Profile errors
 export class DeviceProfileNotFoundError extends ThingsboardDomainError {
   public readonly code = 'DEVICE_PROFILE.NOT_FOUND';
@@ -181,6 +189,7 @@ export type RegisterTenantError =
   | UserAlreadyExistsError
   | RuleChainCreationError
   | RuleChainConfigurationError
+  | RuleChainUpdateError
   | DeviceProfileUpdateError
   | ThingsboardConnectionExistsError
   | PasswordMismatchError
