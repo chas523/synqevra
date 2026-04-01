@@ -10,7 +10,18 @@ import { DashboardDetailsTabContent } from "./DashboardDetailsTabContent";
 import { DashboardAuditLogsTabContent } from "./DashboardAuditLogsTabContent";
 import { VersionsTable } from "./VersionsTable";
 import { Dashboard } from "@/types/dashboardTypes";
-import { ExternalLink, Download, Reply, Share2, Contact, Trash2, Check, X, Loader2, Save } from "lucide-react";
+import {
+  ExternalLink,
+  Download,
+  Reply,
+  Share2,
+  Contact,
+  Trash2,
+  Check,
+  X,
+  Loader2,
+  Save,
+} from "lucide-react";
 import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
 import { toast } from "sonner";
 
@@ -42,7 +53,9 @@ export function DashboardDetailPanel({
   const [isEdit, setIsEdit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [fullDashboard, setFullDashboard] = useState<Dashboard | null>(null);
-  const [editedDashboard, setEditedDashboard] = useState<Dashboard | null>(null);
+  const [editedDashboard, setEditedDashboard] = useState<Dashboard | null>(
+    null,
+  );
   const [isLoadingFull, setIsLoadingFull] = useState(false);
 
   useEffect(() => {
@@ -94,7 +107,7 @@ export function DashboardDetailPanel({
       await DashboardService.saveDashboard(editedDashboard);
       toast.success("Dashboard saved successfully");
       if (onRefresh) onRefresh();
-      
+
       // Update local full dashboard with saved changes
       setFullDashboard(editedDashboard);
       setIsEdit(false);
@@ -107,43 +120,51 @@ export function DashboardDetailPanel({
   };
 
   const currentDashboard = fullDashboard || dashboard;
-  const isPublic = currentDashboard?.assignedCustomers?.some((c) => c.public) || false;
+  const isPublic =
+    currentDashboard?.assignedCustomers?.some((c) => c.public) || false;
 
-  const wrapAction = useCallback((fn: (d: Dashboard) => void) => {
-    return async (d: Dashboard) => {
-      await fn(d);
-      await loadFullDashboard();
-      if (onRefresh) onRefresh();
-    };
-  }, [loadFullDashboard, onRefresh]);
+  const wrapAction = useCallback(
+    (fn: (d: Dashboard) => void) => {
+      return async (d: Dashboard) => {
+        await fn(d);
+        await loadFullDashboard();
+        if (onRefresh) onRefresh();
+      };
+    },
+    [loadFullDashboard, onRefresh],
+  );
 
   const actionButtons: ActionButton[] = useMemo(() => {
     if (!dashboard) return [];
 
     if (isEdit) {
-        return [
-            {
-                label: isSaving ? "Saving..." : "Save",
-                onClick: handleSaveChanges,
-                variant: "primary",
-                icon: isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="h-4 w-4" />,
-                disabled: isSaving
-            },
-            {
-                label: "Cancel",
-                onClick: handleCancelEdit,
-                variant: "secondary",
-                icon: <X className="h-4 w-4" />,
-                disabled: isSaving
-            }
-        ];
+      return [
+        {
+          label: isSaving ? "Saving..." : "Save",
+          onClick: handleSaveChanges,
+          variant: "primary",
+          icon: isSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          ),
+          disabled: isSaving,
+        },
+        {
+          label: "Cancel",
+          onClick: handleCancelEdit,
+          variant: "secondary",
+          icon: <X className="h-4 w-4" />,
+          disabled: isSaving,
+        },
+      ];
     }
 
     const buttons: ActionButton[] = [
       {
         label: "Open dashboard",
         onClick: () => {
-             window.open(`/dashboard/${dashboard.id.id}`, '_blank');
+          window.open(`/dashboard/${dashboard.id.id}`, "_blank");
         },
         variant: "primary",
         icon: <ExternalLink className="h-4 w-4" />,
@@ -187,7 +208,21 @@ export function DashboardDetailPanel({
     });
 
     return buttons;
-  }, [dashboard, isPublic, isEdit, isSaving, editedDashboard, fullDashboard, onExport, onMakePublic, onMakePrivate, onManageCustomers, onDelete, loadFullDashboard, onRefresh]);
+  }, [
+    dashboard,
+    isPublic,
+    isEdit,
+    isSaving,
+    editedDashboard,
+    fullDashboard,
+    onExport,
+    onMakePublic,
+    onMakePrivate,
+    onManageCustomers,
+    onDelete,
+    loadFullDashboard,
+    onRefresh,
+  ]);
 
   const tabs: TabConfig[] = useMemo(() => {
     if (!dashboard) return [];
@@ -197,8 +232,8 @@ export function DashboardDetailPanel({
         id: "details",
         label: "Details",
         content: (
-          <DashboardDetailsTabContent 
-            dashboard={isEdit ? editedDashboard : (fullDashboard || dashboard)} 
+          <DashboardDetailsTabContent
+            dashboard={isEdit ? editedDashboard : fullDashboard || dashboard}
             isEdit={isEdit}
             onChange={setEditedDashboard}
             isLoading={!isEdit && isLoadingFull && !fullDashboard}
@@ -209,13 +244,13 @@ export function DashboardDetailPanel({
         id: "audit-logs",
         label: "Audit logs",
         content: <DashboardAuditLogsTabContent dashboardId={dashboard.id.id} />,
-        disabled: isEdit
+        disabled: isEdit,
       },
       {
         id: "version-control",
         label: "Version control",
         content: (
-          <VersionsTable 
+          <VersionsTable
             branch={branch}
             onBranchChange={setBranch}
             entityType="DASHBOARD"
@@ -223,10 +258,17 @@ export function DashboardDetailPanel({
             hideCard={true}
           />
         ),
-        disabled: isEdit
+        disabled: isEdit,
       },
     ];
-  }, [dashboard, branch, isEdit, editedDashboard, fullDashboard, isLoadingFull]);
+  }, [
+    dashboard,
+    branch,
+    isEdit,
+    editedDashboard,
+    fullDashboard,
+    isLoadingFull,
+  ]);
 
   if (!dashboard) return null;
 
@@ -234,7 +276,11 @@ export function DashboardDetailPanel({
     <EntityDetailPanel
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? (editedDashboard?.title || dashboard.title) : (fullDashboard?.title || dashboard.title || dashboard.name || "")}
+      title={
+        isEdit
+          ? editedDashboard?.title || dashboard.title
+          : fullDashboard?.title || dashboard.title || dashboard.name || ""
+      }
       subtitle="Dashboard details"
       tabs={tabs}
       actionButtons={actionButtons}

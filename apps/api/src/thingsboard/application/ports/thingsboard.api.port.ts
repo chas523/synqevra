@@ -145,10 +145,7 @@ export abstract class ThingsboardApiPort {
     debugMode: boolean,
     accessToken: string,
   ): Promise<EntityId>;
-  abstract getRuleChain(
-    ruleChainId: string,
-    accessToken: string,
-  ): Promise<any>;
+  abstract getRuleChain(ruleChainId: string, accessToken: string): Promise<any>;
   abstract getRuleChainMetadata(
     ruleChainId: string,
     accessToken: string,
@@ -158,14 +155,6 @@ export abstract class ThingsboardApiPort {
     metadata: any,
     accessToken: string,
   ): Promise<void>;
-  abstract fetchRuleChains(
-    accessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty?: string,
-    sortOrder?: 'ASC' | 'DESC',
-    type?: string,
-  ): Promise<any>;
   abstract setRootRuleChain(
     accessToken: string,
     ruleChainId: string,
@@ -174,10 +163,7 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     ruleChainId: string,
   ): Promise<void>;
-  abstract createRuleChainFull(
-    accessToken: string,
-    payload: any,
-  ): Promise<any>;
+  abstract createRuleChainFull(accessToken: string, payload: any): Promise<any>;
   abstract getDefaultDeviceProfile(accessToken: string): Promise<EntityId>;
   abstract getDeviceProfile(
     deviceProfileId: string,

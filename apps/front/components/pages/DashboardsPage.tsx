@@ -7,7 +7,18 @@ import { useDashboards } from "@/hooks/thingsboard/useDashboards";
 import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckSquare, Square, Download, Share2, Reply, Contact, Pencil, Trash2, Plus, Search } from "lucide-react";
+import {
+  CheckSquare,
+  Square,
+  Download,
+  Share2,
+  Reply,
+  Contact,
+  Pencil,
+  Trash2,
+  Plus,
+  Search,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DashboardPublicLinkModal } from "@/components/organisms/DashboardPublicLinkModal";
 import { ManageDashboardCustomersModal } from "@/components/organisms/ManageDashboardCustomersModal";
@@ -32,8 +43,13 @@ export default function DashboardsPage() {
   const [customersModalOpen, setCustomersModalOpen] = useState(false);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<{ id: string, name: string, publicId?: string } | null>(null);
-  const [fullSelectedDashboard, setFullSelectedDashboard] = useState<Dashboard | null>(null);
+  const [selectedDashboard, setSelectedDashboard] = useState<{
+    id: string;
+    name: string;
+    publicId?: string;
+  } | null>(null);
+  const [fullSelectedDashboard, setFullSelectedDashboard] =
+    useState<Dashboard | null>(null);
 
   const { dashboards, totalPages, totalElements, isLoading, mutate } =
     useDashboards(currentPage, PAGE_SIZE, sortProperty, sortOrder);
@@ -71,10 +87,16 @@ export default function DashboardsPage() {
     return publicCustomer?.customerId?.id;
   };
 
-  const handleExport = async (e: React.MouseEvent | null, dashboard: Dashboard) => {
+  const handleExport = async (
+    e: React.MouseEvent | null,
+    dashboard: Dashboard,
+  ) => {
     if (e) e.stopPropagation();
     try {
-      const data = await DashboardService.getDashboardById(dashboard.id.id, true);
+      const data = await DashboardService.getDashboardById(
+        dashboard.id.id,
+        true,
+      );
 
       const jsonString = JSON.stringify(data, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
@@ -87,19 +109,25 @@ export default function DashboardsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-
     } catch (error) {
       toast.error("Failed to export dashboard");
     }
   };
 
-  const handleMakePublic = async (e: React.MouseEvent | null, dashboard: Dashboard) => {
+  const handleMakePublic = async (
+    e: React.MouseEvent | null,
+    dashboard: Dashboard,
+  ) => {
     if (e) e.stopPropagation();
     try {
-      const data = await DashboardService.makeDashboardCustomerPublic(dashboard.id.id);
+      const data = await DashboardService.makeDashboardCustomerPublic(
+        dashboard.id.id,
+      );
 
       if (data && data.assignedCustomers) {
-        const publicCustomer = data.assignedCustomers.find((c: any) => c.public);
+        const publicCustomer = data.assignedCustomers.find(
+          (c: any) => c.public,
+        );
         if (publicCustomer) {
           setSelectedDashboard({
             id: dashboard.id.id,
@@ -117,7 +145,10 @@ export default function DashboardsPage() {
     }
   };
 
-  const handleMakePrivate = async (e: React.MouseEvent | null, dashboard: Dashboard) => {
+  const handleMakePrivate = async (
+    e: React.MouseEvent | null,
+    dashboard: Dashboard,
+  ) => {
     if (e) e.stopPropagation();
     try {
       await DashboardService.makeDashboardCustomerPrivate(dashboard.id.id);
@@ -134,9 +165,14 @@ export default function DashboardsPage() {
     setDetailPanelOpen(true);
   };
 
-  const handleDelete = async (e: React.MouseEvent | null, dashboard: Dashboard) => {
+  const handleDelete = async (
+    e: React.MouseEvent | null,
+    dashboard: Dashboard,
+  ) => {
     if (e) e.stopPropagation();
-    if (confirm(`Are you sure you want to delete dashboard "${dashboard.title}"?`)) {
+    if (
+      confirm(`Are you sure you want to delete dashboard "${dashboard.title}"?`)
+    ) {
       try {
         await DashboardService.deleteDashboard(dashboard.id.id);
         toast.success("Dashboard deleted successfully");
@@ -148,7 +184,10 @@ export default function DashboardsPage() {
     }
   };
 
-  const handleManageCustomers = (e: React.MouseEvent | null, dashboard: Dashboard) => {
+  const handleManageCustomers = (
+    e: React.MouseEvent | null,
+    dashboard: Dashboard,
+  ) => {
     if (e) e.stopPropagation();
     setFullSelectedDashboard(dashboard);
     setCustomersModalOpen(true);

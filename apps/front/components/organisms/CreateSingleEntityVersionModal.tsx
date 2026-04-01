@@ -70,7 +70,8 @@ export function CreateSingleEntityVersionModal({
 
   const pollStatus = async (requestId: string) => {
     try {
-      const res = await VersionControlService.getVersionCreationStatus(requestId);
+      const res =
+        await VersionControlService.getVersionCreationStatus(requestId);
       if (res.done) {
         setResult(res);
         setIsPolling(false);
@@ -140,13 +141,17 @@ export function CreateSingleEntityVersionModal({
           </DialogHeader>
           <div className="space-y-4 py-4 text-foreground dark:text-white">
             <p className="font-semibold text-lg">
-              {result.added === 0 && result.modified === 0 && result.removed === 0
+              {result.added === 0 &&
+              result.modified === 0 &&
+              result.removed === 0
                 ? "No changes detected."
                 : "Version created successfully."}
             </p>
             {result.added > 0 && <p>{result.added} entity added.</p>}
             {result.modified > 0 && <p>{result.modified} entity modified.</p>}
-            {result.error && <p className="text-red-500">Error: {result.error}</p>}
+            {result.error && (
+              <p className="text-red-500">Error: {result.error}</p>
+            )}
           </div>
           <DialogFooter className="sm:justify-center">
             <Button
@@ -163,16 +168,27 @@ export function CreateSingleEntityVersionModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !isCreating && !isPolling && onOpenChange(val)}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => !isCreating && !isPolling && onOpenChange(val)}
+    >
       <DialogContent className="max-w-md p-6 dark:bg-slate-900 border-slate-800">
         <DialogHeader>
-          <DialogTitle className="text-xl dark:text-white">Create entity version</DialogTitle>
+          <DialogTitle className="text-xl dark:text-white">
+            Create entity version
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Branch*</label>
-            <Select value={branch} onValueChange={setBranch} disabled={isCreating || isPolling}>
+            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Branch*
+            </label>
+            <Select
+              value={branch}
+              onValueChange={setBranch}
+              disabled={isCreating || isPolling}
+            >
               <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-800/50 dark:text-white">
                 <SelectValue />
               </SelectTrigger>
@@ -187,7 +203,9 @@ export function CreateSingleEntityVersionModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">Version name*</label>
+            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Version name*
+            </label>
             <Input
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
@@ -199,24 +217,46 @@ export function CreateSingleEntityVersionModal({
 
           <div className="space-y-3 pt-2">
             {entityConfig?.exportOptions.map((opt) => (
-              <label key={opt.key} className="flex items-center gap-3 cursor-pointer group">
+              <label
+                key={opt.key}
+                className="flex items-center gap-3 cursor-pointer group"
+              >
                 <div className="relative">
                   <input
                     type="checkbox"
                     checked={options[opt.key] ?? opt.defaultValue}
-                    onChange={() => setOptions((prev) => ({ ...prev, [opt.key]: !prev[opt.key] }))}
+                    onChange={() =>
+                      setOptions((prev) => ({
+                        ...prev,
+                        [opt.key]: !prev[opt.key],
+                      }))
+                    }
                     disabled={isCreating || isPolling}
                     className="sr-only peer"
                   />
-                  <div className={`w-5 h-5 border-2 border-orange-500 dark:border-orange-400 rounded flex items-center justify-center transition-colors peer-checked:bg-orange-500 dark:peer-checked:bg-orange-400 ${(isCreating || isPolling) ? "opacity-50" : ""}`}>
+                  <div
+                    className={`w-5 h-5 border-2 border-orange-500 dark:border-orange-400 rounded flex items-center justify-center transition-colors peer-checked:bg-orange-500 dark:peer-checked:bg-orange-400 ${isCreating || isPolling ? "opacity-50" : ""}`}
+                  >
                     {(options[opt.key] ?? opt.defaultValue) && (
-                      <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <svg
+                        className="w-3.5 h-3.5 text-white"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 6l3 3 5-5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     )}
                   </div>
                 </div>
-                <span className={`text-sm dark:text-slate-200 select-none ${(isCreating || isPolling) ? "opacity-50" : ""}`}>
+                <span
+                  className={`text-sm dark:text-slate-200 select-none ${isCreating || isPolling ? "opacity-50" : ""}`}
+                >
                   {opt.label}
                 </span>
               </label>
@@ -238,7 +278,9 @@ export function CreateSingleEntityVersionModal({
             disabled={isCreating || isPolling || !versionName.trim()}
             className="bg-[#2a456c] hover:bg-[#1a355c] text-white border-0"
           >
-            {(isCreating || isPolling) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {(isCreating || isPolling) && (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            )}
             {isPolling ? "Creating..." : "Create"}
           </Button>
         </DialogFooter>

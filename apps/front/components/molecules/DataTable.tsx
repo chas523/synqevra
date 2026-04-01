@@ -212,10 +212,7 @@ export function DataTable<T>({
                       />
                     </TableCell>
                     {columns.map((column) => (
-                      <TableCell
-                          key={column.key}
-                          className={column.className}
-                      >
+                      <TableCell key={column.key} className={column.className}>
                         {getCellValue(item, column)}
                       </TableCell>
                     ))}
@@ -316,9 +313,7 @@ export function DataTable<T>({
           )}
         </div>
       </CardHeader>
-      <CardContent>
-       {tableContent}
-      </CardContent>
+      <CardContent>{tableContent}</CardContent>
     </Card>
   );
 }

@@ -3,7 +3,10 @@
 import { useState, useMemo } from "react";
 import useSWR from "swr";
 import { RuleChainService } from "@/lib/services/thingsboardServices/ruleChainService";
-import { DataTable, type DataTableColumn } from "@/components/molecules/DataTable";
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/components/molecules/DataTable";
 import {
   TimeWindowPicker,
   type TimeWindowValue,
@@ -29,16 +32,19 @@ interface RuleNodeEventsProps {
   tenantId?: string;
 }
 
-const TruncatedCell = ({ value, maxWidth = "120px" }: { value: string; maxWidth?: string }) => {
+const TruncatedCell = ({
+  value,
+  maxWidth = "120px",
+}: {
+  value: string;
+  maxWidth?: string;
+}) => {
   if (!value) return <span>-</span>;
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div 
-            className="truncate cursor-default" 
-            style={{ maxWidth }}
-          >
+          <div className="truncate cursor-default" style={{ maxWidth }}>
             {value}
           </div>
         </TooltipTrigger>
@@ -75,7 +81,11 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
     if (timeWindow.mode === "last") {
       st = now - (timeWindow.lastMs ?? 86400000);
       et = now;
-    } else if (timeWindow.mode === "range" && timeWindow.startTime && timeWindow.endTime) {
+    } else if (
+      timeWindow.mode === "range" &&
+      timeWindow.startTime &&
+      timeWindow.endTime
+    ) {
       st = timeWindow.startTime.getTime();
       et = timeWindow.endTime.getTime();
     } else if (timeWindow.mode === "relative") {
@@ -102,19 +112,7 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
           refreshNonce,
         ]
       : null,
-    async ([
-      _,
-      eType,
-      id,
-      tId,
-      evtType,
-      p,
-      ps,
-      sProp,
-      sOrd,
-      start,
-      end,
-    ]) => {
+    async ([_, eType, id, tId, evtType, p, ps, sProp, sOrd, start, end]) => {
       return RuleChainService.fetchEvents(
         eType as string,
         id as string,
@@ -150,7 +148,8 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         key: "createdTime",
         header: "Event time",
         sortable: true,
-        render: (item: any) => new Date(item.createdTime).toLocaleString("pl-PL"),
+        render: (item: any) =>
+          new Date(item.createdTime).toLocaleString("pl-PL"),
       },
       {
         key: "server",
@@ -165,7 +164,8 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         {
           key: "type",
           header: "Type",
-          render: (item: any) => item.body?.type ?? item.body?.msgDirection ?? "",
+          render: (item: any) =>
+            item.body?.type ?? item.body?.msgDirection ?? "",
         },
         {
           key: "entityType",
@@ -175,17 +175,23 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         {
           key: "entityId",
           header: "Entity Id",
-          render: (item: any) => <TruncatedCell value={item.body?.entityId} maxWidth="140px" />,
+          render: (item: any) => (
+            <TruncatedCell value={item.body?.entityId} maxWidth="140px" />
+          ),
         },
         {
           key: "msgId",
           header: "Message Id",
-          render: (item: any) => <TruncatedCell value={item.body?.msgId} maxWidth="140px" />,
+          render: (item: any) => (
+            <TruncatedCell value={item.body?.msgId} maxWidth="140px" />
+          ),
         },
         {
           key: "msgType",
           header: "Message Type",
-          render: (item: any) => <TruncatedCell value={item.body?.msgType} maxWidth="150px" />,
+          render: (item: any) => (
+            <TruncatedCell value={item.body?.msgType} maxWidth="150px" />
+          ),
         },
         {
           key: "relationType",
@@ -223,7 +229,9 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         {
           key: "error",
           header: "Error",
-          render: (item: any) => <TruncatedCell value={item.body?.error} maxWidth="120px" />,
+          render: (item: any) => (
+            <TruncatedCell value={item.body?.error} maxWidth="120px" />
+          ),
         },
       ];
     }
@@ -234,7 +242,12 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         {
           key: "event",
           header: "Event",
-          render: (item: any) => <TruncatedCell value={item.body?.event ?? item.body?.type} maxWidth="150px" />,
+          render: (item: any) => (
+            <TruncatedCell
+              value={item.body?.event ?? item.body?.type}
+              maxWidth="150px"
+            />
+          ),
         },
         {
           key: "status",
@@ -245,7 +258,9 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
         {
           key: "error",
           header: "Error",
-          render: (item: any) => <TruncatedCell value={item.body?.error} maxWidth="200px" />,
+          render: (item: any) => (
+            <TruncatedCell value={item.body?.error} maxWidth="200px" />
+          ),
         },
       ];
     }
@@ -272,16 +287,19 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
       {
         key: "method",
         header: "Method",
-        render: (item: any) => <TruncatedCell value={item.body?.method} maxWidth="150px" />,
+        render: (item: any) => (
+          <TruncatedCell value={item.body?.method} maxWidth="150px" />
+        ),
       },
       {
         key: "error",
         header: "Error",
-        render: (item: any) => <TruncatedCell value={item.body?.error} maxWidth="200px" />,
+        render: (item: any) => (
+          <TruncatedCell value={item.body?.error} maxWidth="200px" />
+        ),
       },
     ];
   }, [eventType]);
-
 
   const filterComponent = (
     <div className="flex items-center gap-4">
@@ -319,7 +337,7 @@ export function RuleNodeEvents({ nodeId, tenantId }: RuleNodeEventsProps) {
           setSortProperty(property);
           setSortOrder(order);
         }}
-        onRefresh={() => setRefreshNonce(n => n + 1)}
+        onRefresh={() => setRefreshNonce((n) => n + 1)}
         filterComponent={filterComponent}
         emptyMessage="No events found."
       />

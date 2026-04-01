@@ -2003,7 +2003,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         }),
       );
 
-      const rootRuleChain = response.data.data.find((rc: any) => rc.root === true);
+      const rootRuleChain = response.data.data.find(
+        (rc: any) => rc.root === true,
+      );
       if (!rootRuleChain) {
         throw new Error('Root rule chain not found');
       }
@@ -2045,42 +2047,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async fetchRuleChains(
-    accessToken: string,
-    page: number,
-    pageSize: number,
-    sortProperty = 'createdTime',
-    sortOrder: 'ASC' | 'DESC' = 'DESC',
-    type?: string,
-  ): Promise<any> {
-    try {
-      const searchParams = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-        sortProperty,
-        sortOrder,
-      });
-
-      if (type) {
-        searchParams.append('type', type);
-      }
-
-      const url = `${this.THINGSBOARD_API_URL}/ruleChains?${searchParams.toString()}`;
-      const response = await firstValueFrom(
-        this.httpService.get(url, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      ThingsboardApiException.createException(
-        'Failed to fetch rule chains',
-        error,
-        this.logger,
-      );
-    }
-  }
-
   async setRootRuleChain(
     accessToken: string,
     ruleChainId: string,
@@ -2088,9 +2054,13 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}/root`;
       const response = await firstValueFrom(
-        this.httpService.post(url, {}, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }),
+        this.httpService.post(
+          url,
+          {},
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
       );
       return response.data;
     } catch (error) {
@@ -2122,10 +2092,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async createRuleChainFull(
-    accessToken: string,
-    payload: any,
-  ): Promise<any> {
+  async createRuleChainFull(accessToken: string, payload: any): Promise<any> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain`;
       const response = await firstValueFrom(
@@ -2143,10 +2110,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async getRuleChain(
-    ruleChainId: string,
-    accessToken: string,
-  ): Promise<any> {
+  async getRuleChain(ruleChainId: string, accessToken: string): Promise<any> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/ruleChain/${ruleChainId}`;
       const response = await firstValueFrom(
@@ -3126,7 +3090,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       return { data: [], totalPages: 0, totalElements: 0, hasNext: false };
     }
   }
-
 
   async fetchEntityAuditLogs(
     accessToken: string,

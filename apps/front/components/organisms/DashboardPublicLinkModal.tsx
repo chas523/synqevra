@@ -27,9 +27,17 @@ export function DashboardPublicLinkModal({
   publicId,
   dashboardId,
 }: DashboardPublicLinkModalProps) {
-  const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-  const port = isLocalhost ? '8088' : (typeof window !== 'undefined' ? window.location.port : '');
-  const baseUrl = typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}${port ? ':' + port : ''}` : 'http://localhost:8088';
+  const isLocalhost =
+    typeof window !== "undefined" && window.location.hostname === "localhost";
+  const port = isLocalhost
+    ? "8088"
+    : typeof window !== "undefined"
+      ? window.location.port
+      : "";
+  const baseUrl =
+    typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.hostname}${port ? ":" + port : ""}`
+      : "http://localhost:8088";
 
   const publicLink = `${baseUrl}/dashboard/${dashboardId}?publicId=${publicId}`;
 
@@ -55,9 +63,14 @@ export function DashboardPublicLinkModal({
 
         <div className="p-6 space-y-4 dark:text-gray-200">
           <p className="text-sm">
-            Your dashboard <span className="font-bold">{dashboardName}</span> is now
-            public and accessible via next public{" "}
-            <a href={publicLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+            Your dashboard <span className="font-bold">{dashboardName}</span> is
+            now public and accessible via next public{" "}
+            <a
+              href={publicLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:underline"
+            >
               link
             </a>
             :
@@ -84,7 +97,8 @@ export function DashboardPublicLinkModal({
 
           <div className="bg-[#F5F5F5] dark:bg-transparent dark:border dark:border-gray-600 rounded p-4 text-sm dark:text-gray-300">
             <span className="font-bold dark:text-gray-200">Note: </span>
-            Do not forget to make related devices public in order to access their data.
+            Do not forget to make related devices public in order to access
+            their data.
           </div>
         </div>
 

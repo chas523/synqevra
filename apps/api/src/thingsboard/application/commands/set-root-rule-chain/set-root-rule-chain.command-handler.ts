@@ -1,7 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { Result, Ok, Err } from 'oxide.ts';
-import { ThingsboardApiPort, THINGSBOARD_API_PORT } from '../../ports/thingsboard.api.port';
+import {
+  ThingsboardApiPort,
+  THINGSBOARD_API_PORT,
+} from '../../ports/thingsboard.api.port';
 import { SetRootRuleChainCommand } from './set-root-rule-chain.command';
 import { ThingsboardApiException } from '../../../infrastructure/http/thingsboard.http.errors';
 
@@ -14,7 +17,9 @@ export class SetRootRuleChainCommandHandler implements ICommandHandler<SetRootRu
     private readonly thingsboardApi: ThingsboardApiPort,
   ) {}
 
-  async execute(command: SetRootRuleChainCommand): Promise<Result<any, ThingsboardApiException>> {
+  async execute(
+    command: SetRootRuleChainCommand,
+  ): Promise<Result<any, ThingsboardApiException>> {
     try {
       const response = await this.thingsboardApi.setRootRuleChain(
         command.accessToken,

@@ -258,7 +258,7 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/login')
@@ -545,7 +545,7 @@ export class ThingsboardController {
               ? versionValue
               : versionValue != null
                 ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                String(versionValue)
+                  String(versionValue)
                 : null,
         };
       }),
@@ -1426,23 +1426,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ENTITY_VIEW' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ENTITY_VIEW' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ENTITY_VIEW' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ENTITY_VIEW' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -1974,11 +1974,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -2080,11 +2080,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -2256,23 +2256,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ASSET' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ASSET' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ASSET' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ASSET' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -3621,11 +3621,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -3727,11 +3727,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-              scope:
-                payload.attributeScope === 'SHARED_SCOPE'
-                  ? 'SHARED_SCOPE'
-                  : 'SERVER_SCOPE',
-            }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -3876,23 +3876,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'DEVICE' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'DEVICE' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'DEVICE' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'DEVICE' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -4596,7 +4596,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -4737,7 +4737,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -7382,7 +7382,7 @@ export class ThingsboardController {
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
-    @Query('type') type?: string,
+    @Query('type') type?: 'CORE' | 'EDGE',
   ) {
     const query = new FetchRuleChainsQuery(
       accessToken,
@@ -7395,7 +7395,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -7412,7 +7414,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -7429,7 +7433,9 @@ export class ThingsboardController {
     const result = await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -7446,7 +7452,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -7463,7 +7471,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: () => ({ success: true }),
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 
@@ -7480,7 +7490,9 @@ export class ThingsboardController {
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -7490,14 +7502,27 @@ export class ThingsboardController {
   @ApiOperation({ summary: 'Save rule chain metadata (nodes + connections)' })
   async saveRuleChainMetadata(
     @TbAccessToken() accessToken: string,
-    @Body() body: { ruleChainId: { entityType: string; id: string }; nodes: any[]; connections: any[]; firstNodeIndex?: number; version?: number },
+    @Body()
+    body: {
+      ruleChainId: { entityType: string; id: string };
+      nodes: any[];
+      connections: any[];
+      firstNodeIndex?: number;
+      version?: number;
+    },
   ) {
     const { ruleChainId, ...metadata } = body;
-    const command = new SaveRuleChainMetadataCommand(accessToken, ruleChainId, metadata);
+    const command = new SaveRuleChainMetadataCommand(
+      accessToken,
+      ruleChainId,
+      metadata,
+    );
     const result = await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => { throw error; },
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
     });
   }
 

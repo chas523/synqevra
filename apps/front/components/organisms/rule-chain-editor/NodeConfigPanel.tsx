@@ -225,7 +225,7 @@ export function NodeConfigPanel({
     {
       id: "events",
       label: "Events",
-      content: (
+      content:
         // Only fetch events if the node actually exists in the DB (usually a valid UUID)
         node.id.length > 20 ? (
           <RuleNodeEvents nodeId={node.id} tenantId={tenantId} />
@@ -233,8 +233,7 @@ export function NodeConfigPanel({
           <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-500 text-sm">
             Please run or save the rule chain to view events.
           </div>
-        )
-      ),
+        ),
     },
   ];
 

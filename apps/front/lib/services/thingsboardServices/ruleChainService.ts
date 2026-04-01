@@ -136,7 +136,7 @@ export class RuleChainService {
 
     const { data } = await proxyApi.post<any>(
       `/thingsboard/events/${entityType}/${id}?${params.toString()}`,
-      { eventType }
+      { eventType },
     );
     return data;
   }
