@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Device } from '@medplum/fhirtypes';
+import type { MedplumClient } from '@medplum/core';
 import { UnitOfWork } from '../../../connection/infrastructure/transaction/unit-of-work';
 import { MedplumRegistrationService } from '../services/medplum-registration.service';
 import { CreateMedplumRequestDto } from '../../interface/rest/dto/create-medplum.request.dto';
@@ -107,7 +108,20 @@ export class CreateMedplumTenantUseCase {
         clientSecret,
       );
 
+    let createdCount = 0;
+    let alreadySyncedCount = 0;
+
     for (const deviceId of deviceIds) {
+      const alreadySynced = await this.isDeviceAlreadySyncedToMedplum(
+        medplumClient,
+        deviceId,
+      );
+
+      if (alreadySynced) {
+        alreadySyncedCount += 1;
+        continue;
+      }
+
       const medplumDevice: Device = {
         resourceType: 'Device',
         id: deviceId,
@@ -121,6 +135,7 @@ export class CreateMedplumTenantUseCase {
 
       try {
         await medplumClient.createResource(medplumDevice);
+        createdCount += 1;
       } catch (error) {
         this.logger.error(
           `[syncTenantDevicesToMedplum] Failed for tenantId=${tenantId}, deviceId=${deviceId}: ${error instanceof Error ? error.message : String(error)}`,
@@ -130,8 +145,28 @@ export class CreateMedplumTenantUseCase {
     }
 
     this.logger.log(
-      `[syncTenantDevicesToMedplum] Synced ${deviceIds.length} devices for tenantId=${tenantId}`,
+      `[syncTenantDevicesToMedplum] tenantId=${tenantId}, total=${deviceIds.length}, created=${createdCount}, alreadySynced=${alreadySyncedCount}`,
     );
+  }
+
+  private async isDeviceAlreadySyncedToMedplum(
+    medplumClient: MedplumClient,
+    deviceId: string,
+  ): Promise<boolean> {
+    try {
+      const existingDevice = await medplumClient.readResource(
+        'Device',
+        deviceId,
+      );
+      return Boolean(existingDevice?.id);
+    } catch (error) {
+      const status = (error as { status?: number })?.status;
+      if (status === 404) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   /** Fetches the first TENANT_ADMIN user from ThingsBoard for the given tenantId. */

@@ -45,6 +45,9 @@ const ATTRIBUTE_TYPE_OPTIONS: Array<{ value: AttributeType; label: string }> = [
   { value: "json", label: "JSON" },
 ];
 
+const INTEGER_INPUT_REGEX = /^-?\d*$/;
+const DOUBLE_INPUT_REGEX = /^-?\d*([\.,]\d*)?$/;
+
 const ATTRIBUTE_VALUE_PREVIEW_LIMIT = 80;
 
 const formatValue = (value: unknown): string => {
@@ -88,6 +91,18 @@ export function DeviceAttributesTabContent({
   const [attributeKey, setAttributeKey] = useState("");
   const [attributeType, setAttributeType] = useState<AttributeType>("string");
   const [attributeValue, setAttributeValue] = useState("");
+
+  const handleAttributeValueChange = (nextValue: string) => {
+    if (attributeType === "integer" && !INTEGER_INPUT_REGEX.test(nextValue)) {
+      return;
+    }
+
+    if (attributeType === "double" && !DOUBLE_INPUT_REGEX.test(nextValue)) {
+      return;
+    }
+
+    setAttributeValue(nextValue);
+  };
 
   const canAddAttributes = scope === "SERVER_SCOPE" || scope === "SHARED_SCOPE";
 
@@ -139,7 +154,7 @@ export function DeviceAttributesTabContent({
         }
         parsedValue = parsed;
       } else if (attributeType === "double") {
-        const parsed = Number.parseFloat(attributeValue);
+        const parsed = Number.parseFloat(attributeValue.replace(",", "."));
         if (!Number.isFinite(parsed)) {
           throw new Error("Value must be a valid number");
         }
@@ -388,9 +403,12 @@ export function DeviceAttributesTabContent({
                 <Label>Type</Label>
                 <SelectAdmin
                   value={attributeType}
-                  onValueChange={(value) =>
-                    setAttributeType(value as AttributeType)
-                  }
+                  onValueChange={(value) => {
+                    const nextType = value as AttributeType;
+                    if (nextType === attributeType) return;
+                    setAttributeType(nextType);
+                    setAttributeValue("");
+                  }}
                   disabled={isSaving}
                 >
                   <SelectTrigger className="w-full">
@@ -411,7 +429,16 @@ export function DeviceAttributesTabContent({
                 <Input
                   id="device-attribute-value"
                   value={attributeValue}
-                  onChange={(event) => setAttributeValue(event.target.value)}
+                  onChange={(event) =>
+                    handleAttributeValueChange(event.target.value)
+                  }
+                  inputMode={
+                    attributeType === "integer"
+                      ? "numeric"
+                      : attributeType === "double"
+                        ? "decimal"
+                        : undefined
+                  }
                   placeholder={
                     attributeType === "integer"
                       ? "e.g. 123"

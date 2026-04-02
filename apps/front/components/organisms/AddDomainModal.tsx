@@ -100,7 +100,7 @@ function OAuth2ClientMultiSelect({
     <div className="relative" ref={containerRef}>
       {/* Trigger / tags */}
       <div
-        className={`flex flex-wrap gap-1.5 p-2 min-h-[42px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-text transition-colors ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+        className={`flex flex-wrap gap-1.5 p-2 min-h-10.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-text transition-colors ${disabled ? "opacity-50 pointer-events-none" : ""}`}
         onClick={() => {
           setIsOpen(true);
           loadClients();
@@ -127,7 +127,7 @@ function OAuth2ClientMultiSelect({
         })}
         <input
           type="text"
-          className="flex-1 min-w-[140px] bg-transparent outline-none text-sm px-1 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="flex-1 min-w-35 bg-transparent outline-none text-sm px-1 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
           placeholder={selectedIds.length === 0 ? "Add OAuth 2.0 client" : ""}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -250,7 +250,7 @@ export function AddDomainModal({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !isSaving && onOpenChange(val)}>
-      <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-125 p-0 gap-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60">
           <DialogTitle className="text-lg font-semibold dark:text-white">
             Add domain
@@ -346,7 +346,7 @@ export function AddDomainModal({
           <Button
             onClick={handleAdd}
             disabled={isSaving || !name.trim()}
-            className="bg-[#2a456c] hover:bg-[#1a355c] text-white min-w-[72px]"
+            className="bg-[#2a456c] hover:bg-[#1a355c] text-white min-w-18"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Add"}
           </Button>

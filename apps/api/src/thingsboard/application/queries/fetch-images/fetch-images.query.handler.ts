@@ -31,6 +31,7 @@ export class FetchImagesQueryHandler implements IQueryHandler<
         query.sortOrder,
         query.imageSubType,
         query.includeSystemImages,
+        query.textSearch,
       );
 
       return Ok(response);

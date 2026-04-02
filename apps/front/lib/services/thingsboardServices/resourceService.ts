@@ -5,6 +5,25 @@ import {
   ResourcesPageResponse,
 } from "@/types/resourceTypes";
 
+export interface Lwm2mObjectResource {
+  id: number;
+  keyId: string;
+  name: string;
+  multiple: boolean;
+  mandatory: boolean;
+  instances?: Array<{
+    id: number;
+    resources?: Array<{
+      id: number;
+      name: string;
+      keyName: string;
+      observe: boolean;
+      attribute: boolean;
+      telemetry: boolean;
+    }>;
+  }>;
+}
+
 export class ResourceService {
   public static async getResources(
     page: number = 0,
@@ -54,5 +73,29 @@ export class ResourceService {
       },
     );
     return response.data;
+  }
+
+  public static async getLwm2mObjectsPage(
+    page: number = 0,
+    pageSize: number = 50,
+    textSearch?: string,
+    sortProperty: string = "resourceKey",
+    sortOrder: "ASC" | "DESC" = "ASC",
+  ): Promise<Lwm2mObjectResource[]> {
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (textSearch?.trim()) {
+      params.append("textSearch", textSearch.trim());
+    }
+
+    const { data } = await proxyApi.get<Lwm2mObjectResource[]>(
+      `thingsboard/resources/lwm2m/page?${params.toString()}`,
+    );
+    return data;
   }
 }

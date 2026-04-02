@@ -1,14 +1,14 @@
 import { proxyApi } from "@/lib/api/api";
-import { DashboardsResponse, Dashboard } from '@/types/dashboardTypes';
+import { DashboardsResponse, Dashboard } from "@/types/dashboardTypes";
 
 export class DashboardService {
   static async getTenantDashboards(
     pageSize: number = 10,
     page: number = 0,
-    sortProperty: string = 'createdTime',
-    sortOrder: string = 'DESC',
+    sortProperty: string = "createdTime",
+    sortOrder: string = "DESC",
   ): Promise<DashboardsResponse> {
-    const response = await proxyApi.get('/thingsboard/tenant/dashboards', {
+    const response = await proxyApi.get("/thingsboard/tenant/dashboards", {
       params: { pageSize, page, sortProperty, sortOrder },
     });
     return response.data;
@@ -24,7 +24,7 @@ export class DashboardService {
     includeResources: boolean = false,
   ): Promise<any> {
     const response = await proxyApi.get(`/thingsboard/dashboard/${id}`, {
-      params: { includeResources: includeResources ? 'true' : undefined },
+      params: { includeResources: includeResources ? "true" : undefined },
     });
     return response.data;
   }
@@ -52,11 +52,11 @@ export class DashboardService {
   static async getCustomers(
     pageSize: number = 50,
     page: number = 0,
-    sortProperty: string = 'title',
-    sortOrder: string = 'ASC',
+    sortProperty: string = "title",
+    sortOrder: string = "ASC",
     textSearch?: string,
   ): Promise<any> {
-    const response = await proxyApi.get('/thingsboard/customers', {
+    const response = await proxyApi.get("/thingsboard/customers", {
       params: { pageSize, page, sortProperty, sortOrder, textSearch },
     });
     return response.data;
@@ -91,16 +91,19 @@ export class DashboardService {
     startTime?: number,
     endTime?: number,
   ): Promise<any> {
-    const { data } = await proxyApi.get(`/thingsboard/dashboards/${id}/audit-logs`, {
-      params: {
-        page,
-        pageSize,
-        sortProperty,
-        sortOrder,
-        startTime,
-        endTime,
+    const { data } = await proxyApi.get(
+      `/thingsboard/dashboards/${id}/audit-logs`,
+      {
+        params: {
+          page,
+          pageSize,
+          sortProperty,
+          sortOrder,
+          startTime,
+          endTime,
+        },
       },
-    });
+    );
     return data;
   }
 }

@@ -51,7 +51,7 @@ export class ConnectionController {
     private readonly confirmPractitionerUseCase: ConfirmPractitionerUseCase,
     private readonly getConnectionStatusUseCase: GetConnectionStatusUseCase,
     private readonly connectionRepository: ConnectionRepository,
-  ) { }
+  ) {}
 
   @Public()
   @Post('/connect')

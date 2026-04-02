@@ -132,7 +132,7 @@ export function MultiSelect({
         createPortal(
           <div
             ref={dropdownRef}
-            className="fixed z-[9999] mt-1 max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md"
+            className="fixed z-9999 mt-1 max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md"
             style={{
               top: position.top,
               left: position.left,
@@ -151,7 +151,7 @@ export function MultiSelect({
                   <div
                     key={option.value}
                     className={cn(
-                      "relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                      "relative flex cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
                       isSelected ? "bg-accent/50" : "",
                     )}
                     onMouseDown={(e) => handleOptionMouseDown(e, option.value)}

@@ -1,14 +1,18 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { FetchRuleChainMetadataQuery } from './fetch-rule-chain-metadata.query';
-import { ThingsboardApiPort, THINGSBOARD_API_PORT } from '../../ports/thingsboard.api.port';
+import {
+  ThingsboardApiPort,
+  THINGSBOARD_API_PORT,
+} from '../../ports/thingsboard.api.port';
 import { Ok, Err, Result } from 'oxide.ts';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 
 @QueryHandler(FetchRuleChainMetadataQuery)
-export class FetchRuleChainMetadataHandler
-  implements IQueryHandler<FetchRuleChainMetadataQuery, Result<any, ThingsboardApiException>>
-{
+export class FetchRuleChainMetadataHandler implements IQueryHandler<
+  FetchRuleChainMetadataQuery,
+  Result<any, ThingsboardApiException>
+> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,

@@ -93,7 +93,7 @@ export class WidgetService {
     widgetBundleId: string,
   ): Promise<WidgetBundle> {
     const { data } = await proxyApi.get(
-      `thingsboard/widgetsBundle/${widgetBundleId}`,
+      `thingsboard/widgetBundle/${widgetBundleId}`,
     );
     return data;
   }
@@ -160,7 +160,7 @@ export class WidgetService {
   public static async saveWidgetBundle(
     bundle: SaveWidgetBundleRequest,
   ): Promise<WidgetBundle> {
-    const { data } = await proxyApi.post("thingsboard/widgetsBundle", bundle);
+    const { data } = await proxyApi.post("thingsboard/widgetBundle", bundle);
     return data;
   }
 

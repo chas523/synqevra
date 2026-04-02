@@ -52,10 +52,10 @@ export function CustomerMultiSelect({
 
   useEffect(() => {
     if (showResults) {
-       const timer = setTimeout(() => {
-         searchCustomers(searchTerm);
-       }, 300);
-       return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        searchCustomers(searchTerm);
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [searchTerm, showResults, searchCustomers]);
 
@@ -77,11 +77,15 @@ export function CustomerMultiSelect({
   const toggleCustomer = (customer: Customer, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const isAlreadySelected = selectedCustomers.some((c) => c.id.id === customer.id.id);
-    
+
+    const isAlreadySelected = selectedCustomers.some(
+      (c) => c.id.id === customer.id.id,
+    );
+
     if (isAlreadySelected) {
-      onCustomersChange(selectedCustomers.filter((c) => c.id.id !== customer.id.id));
+      onCustomersChange(
+        selectedCustomers.filter((c) => c.id.id !== customer.id.id),
+      );
     } else {
       onCustomersChange([...selectedCustomers, customer]);
     }
@@ -97,13 +101,13 @@ export function CustomerMultiSelect({
   return (
     <div className="relative w-full" ref={searchRef}>
       {/* Search Input and Badges Container */}
-      <div 
-        className="flex flex-wrap items-center gap-1.5 p-1.5 min-h-[40px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded cursor-text focus-within:ring-1 focus-within:ring-orange-500 transition-all duration-200"
+      <div
+        className="flex flex-wrap items-center gap-1.5 p-1.5 min-h-10 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded cursor-text focus-within:ring-1 focus-within:ring-orange-500 transition-all duration-200"
         onClick={() => setShowResults(true)}
       >
         {selectedCustomers.map((customer) => (
-          <span 
-            key={customer.id.id} 
+          <span
+            key={customer.id.id}
             className="flex items-center gap-1 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs text-slate-700 dark:text-white font-normal"
           >
             {customer.title || customer.name}
@@ -135,7 +139,9 @@ export function CustomerMultiSelect({
               </div>
             ) : searchResults.length > 0 ? (
               searchResults.map((customer) => {
-                const isSelected = selectedCustomers.some((c) => c.id.id === customer.id.id);
+                const isSelected = selectedCustomers.some(
+                  (c) => c.id.id === customer.id.id,
+                );
                 return (
                   <div
                     key={customer.id.id}
@@ -143,7 +149,9 @@ export function CustomerMultiSelect({
                     onClick={(e) => toggleCustomer(customer, e)}
                   >
                     <span>{customer.title || customer.name}</span>
-                    {isSelected && <Check className="h-3.5 w-3.5 text-orange-500" />}
+                    {isSelected && (
+                      <Check className="h-3.5 w-3.5 text-orange-500" />
+                    )}
                   </div>
                 );
               })
