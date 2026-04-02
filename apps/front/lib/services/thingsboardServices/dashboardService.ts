@@ -14,6 +14,11 @@ export class DashboardService {
     return response.data;
   }
 
+  static async getEmbedToken(): Promise<{ jwtToken: string }> {
+    const response = await proxyApi.get('/thingsboard/embed-token');
+    return response.data;
+  }
+
   static async getDashboardById(
     id: string,
     includeResources: boolean = false,

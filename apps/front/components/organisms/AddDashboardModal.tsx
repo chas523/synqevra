@@ -58,45 +58,7 @@ export function AddDashboardModal({
         mobileHide: mobileHide || null,
         mobileOrder: mobileOrder === "" ? null : Number(mobileOrder),
         configuration: {
-          description,
-          widgets: {},
-          states: {
-            default: {
-              name: title,
-              root: true,
-              layouts: {
-                main: {
-                  widgets: [],
-                  gridSettings: {
-                    backgroundColor: "#eeeeee",
-                    columns: 24,
-                    margin: 10,
-                    outerMargin: true,
-                    backgroundSize: "100%"
-                  }
-                }
-              }
-            }
-          },
-          entityAliases: {},
-          filters: {},
-          settings: {
-            stateControllerId: "entity",
-            showTitle: false,
-            showDashboardsSelect: true,
-            showEntitiesSelect: true,
-            showFilters: true,
-            showDashboardLogo: true,
-            dashboardLogoUrl: "",
-            showDashboardToolbar: true,
-            displaySecondaryToolbar: true,
-            toolbarAlwaysOpen: true,
-            showToolbarDatahouseSelect: false,
-            showToolbarEntitySelect: false,
-            showToolbarFilters: false,
-            showToolbarMobileLogo: false,
-            toolbarMobileLogoUrl: ""
-          }
+          description
         },
       };
 

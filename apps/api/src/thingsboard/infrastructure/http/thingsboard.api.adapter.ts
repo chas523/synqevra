@@ -131,7 +131,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     private readonly thingsboardRepository: ThingsboardRepositoryPort,
     @Inject(ConnectionRepository)
     private readonly connectionRepository: ConnectionRepository,
-  ) {}
+  ) { }
 
   private get THINGSBOARD_API_URL(): string {
     return (
@@ -3396,7 +3396,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       throw new ThingsboardApiException(
         error.response?.data?.message ||
-          'Failed to preview notification request',
+        'Failed to preview notification request',
         error.response?.status || 500,
       );
     }

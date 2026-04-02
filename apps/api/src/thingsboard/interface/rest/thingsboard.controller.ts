@@ -253,6 +253,20 @@ export class ThingsboardController {
     private readonly thingsboardApi: ThingsboardApiPort,
   ) { }
 
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('embed-token')
+  @ApiOperation({
+    summary: 'Get ThingsBoard JWT token for Iframe embedding',
+  })
+  getEmbedToken(@TbAccessToken() accessToken: string) {
+    if (!accessToken) {
+      throw new UnauthorizedException('No token generated. Try logging in again.');
+    }
+    return {
+      jwtToken: accessToken,
+    };
+  }
+
   @Public()
   @Post('/login')
   @ApiOperation({

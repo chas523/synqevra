@@ -1,21 +1,10 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
 import { DashboardService } from "@/lib/services/thingsboardServices/dashboardService";
-import { DashboardGrid, WidgetLayoutItem } from "@/components/organisms/dashboard/DashboardGrid";
-import { Layout } from "react-grid-layout";
-import {
-  ArrowLeft,
-  Edit2,
-  Save,
-  X,
-  Loader2,
-  LayoutDashboard,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Loader2, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 interface DashboardDetailPageProps {
   dashboardId: string;
@@ -23,100 +12,44 @@ interface DashboardDetailPageProps {
 
 export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
   const router = useRouter();
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [pendingLayout, setPendingLayout] = useState<Layout | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
-  const { data: dashboard, isLoading, mutate } = useSWR(
+  const { data: dashboard, isLoading: isLoadingDashboard } = useSWR(
     dashboardId ? ["dashboard", dashboardId] : null,
     () => DashboardService.getDashboardById(dashboardId),
   );
 
-  const defaultState = dashboard?.configuration?.states?.default;
-  const mainLayout = defaultState?.layouts?.main;
-  const gridSettings = mainLayout?.gridSettings || {};
-  const columns = gridSettings.columns || 24;
-  const margin = gridSettings.margin ?? 10;
-  const backgroundColor = gridSettings.backgroundColor || "#eeeeee";
+  const { data: tokenData, isLoading: isLoadingToken } = useSWR(
+    "embed-token",
+    () => DashboardService.getEmbedToken()
+  );
 
-  const widgetsConfig = dashboard?.configuration?.widgets || {};
-  const layoutWidgets = mainLayout?.widgets || {};
+  useEffect(() => {
+    if (iframeLoaded && tokenData?.jwtToken && iframeRef.current) {
+      // We pass the JWT token to the bridge, and the URL to redirect to right after storing it.
+      // Append hideToolbar if TB supports it, but we also clip it visually.
+      const targetUrl = `/dashboards/${dashboardId}?hideToolbar=true`;
 
-  const widgets: WidgetLayoutItem[] = useMemo(() => {
-    return Object.entries(layoutWidgets).map(([id, pos]: [string, any]) => ({
-      id,
-      sizeX: pos.sizeX,
-      sizeY: pos.sizeY,
-      row: pos.row,
-      col: pos.col,
-      widgetConfig: widgetsConfig[id] || null,
-    }));
-  }, [layoutWidgets, widgetsConfig]);
-
-  const handleLayoutChange = useCallback((layout: Layout) => {
-    setPendingLayout(layout);
-  }, []);
-
-  const handleSave = async () => {
-    if (!dashboard || !pendingLayout) return;
-    setIsSaving(true);
-
-    try {
-      const updatedWidgets: Record<string, any> = {};
-      pendingLayout.forEach((item) => {
-        const original = layoutWidgets[item.i] || {};
-        updatedWidgets[item.i] = {
-          ...original,
-          sizeX: item.w,
-          sizeY: item.h,
-          row: item.y,
-          col: item.x,
-        };
-      });
-
-      const updatedDashboard = {
-        ...dashboard,
-        configuration: {
-          ...dashboard.configuration,
-          states: {
-            ...dashboard.configuration?.states,
-            default: {
-              ...defaultState,
-              layouts: {
-                ...defaultState?.layouts,
-                main: {
-                  ...mainLayout,
-                  widgets: updatedWidgets,
-                },
-              },
-            },
-          },
+      console.log("Sending postMessage to iframe bridge...");
+      iframeRef.current.contentWindow?.postMessage(
+        {
+          jwtToken: tokenData.jwtToken,
+          redirect: targetUrl
         },
-      };
-
-      await DashboardService.saveDashboard(updatedDashboard);
-      toast.success("Dashboard layout saved");
-      mutate();
-      setIsEditMode(false);
-      setPendingLayout(null);
-    } catch {
-      toast.error("Failed to save dashboard layout");
-    } finally {
-      setIsSaving(false);
+        "http://localhost:3002"
+      );
     }
-  };
+  }, [iframeLoaded, tokenData, dashboardId]);
 
-  const handleCancelEdit = () => {
-    setIsEditMode(false);
-    setPendingLayout(null);
-  };
+  const isLoading = isLoadingDashboard || isLoadingToken;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="text-sm text-slate-500">Loading dashboard…</span>
+          <span className="text-sm text-slate-500">Loading dashboard environment...</span>
         </div>
       </div>
     );
@@ -128,9 +61,12 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
         <div className="flex flex-col items-center gap-4 text-center max-w-xs">
           <LayoutDashboard className="h-12 w-12 text-slate-300" />
           <p className="text-sm text-slate-500">Dashboard not found.</p>
-          <Button variant="outline" size="sm" onClick={() => router.push("/dashboards")}>
+          <button
+            className="border px-4 py-2 rounded-md text-sm hover:bg-slate-100"
+            onClick={() => router.push("/dashboards")}
+          >
             Go back
-          </Button>
+          </button>
         </div>
       </div>
     );
@@ -153,82 +89,32 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
             <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
               {dashboard.title || dashboard.name}
             </span>
-          </div>
-          {isEditMode && (
-            <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium">
-              Edit mode
+            <span className="text-xs ml-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
+              Live Proxy
             </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {isEditMode ? (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCancelEdit}
-                disabled={isSaving}
-                className="text-slate-500 dark:text-slate-400 gap-1.5"
-              >
-                <X className="h-4 w-4" />
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={isSaving || !pendingLayout}
-                className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Save layout
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditMode(true)}
-              className="gap-1.5 text-slate-600 dark:text-slate-300"
-            >
-              <Edit2 className="h-4 w-4" />
-              Edit
-            </Button>
-          )}
+          </div>
         </div>
       </header>
 
-      {/* Grid canvas — scroll is handled inside DashboardGrid */}
-      <main className="flex-1 min-h-0">
-        {widgets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center p-8">
-            <div className="w-16 h-16 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center">
-              <LayoutDashboard className="h-8 w-8 text-slate-400" />
-            </div>
-            <div>
-              <p className="font-medium text-slate-600 dark:text-slate-300">
-                This dashboard is empty
-              </p>
-              <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
-                Widgets added in ThingsBoard will appear here
-              </p>
-            </div>
-          </div>
-        ) : (
-          <DashboardGrid
-            widgets={widgets}
-            columns={columns}
-            margin={margin}
-            backgroundColor={backgroundColor}
-            isEditMode={isEditMode}
-            totalRows={18}
-            onLayoutChange={handleLayoutChange}
+      {/* Frame Container */}
+      <main className="flex-1 overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+        {/* We use negative margins & extra height to "clip" the top toolbar and prevent scrolling if needed */}
+        <div className="absolute inset-0 overflow-hidden">
+          <iframe
+            ref={iframeRef}
+            src="http://localhost:3002/bridge.html"
+            className="absolute top-0 left-0 w-full h-full"
+            style={{
+              border: 'none',
+              pointerEvents: 'auto'
+            }}
+            onLoad={() => setIframeLoaded(true)}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           />
-        )}
+        </div>
+
+        {/* Invisible overlay over the edges to prevent user from dragging to reveal hidden parts if necessary */}
+        <div className="absolute top-0 left-0 right-0 h-[5px] bg-slate-100 dark:bg-slate-950 z-10 pointer-events-none" />
       </main>
     </div>
   );
