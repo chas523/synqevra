@@ -56,8 +56,13 @@ function bootstrapTbProxy() {
       return next();
     }
 
-    // 2. Allow Dashboards explicitly
-    if (req.path.startsWith('/dashboards/') || req.path.startsWith('/dashboard/')) {
+    // 2. Allow Dashboards and Rule Chains explicitly
+    if (
+      req.path.startsWith('/dashboards/') ||
+      req.path.startsWith('/dashboard/') ||
+      req.path.startsWith('/ruleChains/') ||
+      req.path.startsWith('/ruleChain/')
+    ) {
       return next();
     }
 
