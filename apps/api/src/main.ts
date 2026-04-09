@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 import express, { json, urlencoded } from 'express';
-import { createProxyMiddleware, responseInterceptor } from 'http-proxy-middleware';
+import {
+  createProxyMiddleware,
+  responseInterceptor,
+} from 'http-proxy-middleware';
 
 // Initialize the secondary ThingsBoard Proxy Server for Iframe embedding
 function bootstrapTbProxy() {
@@ -57,12 +59,18 @@ function bootstrapTbProxy() {
     }
 
     // 2. Allow Dashboards explicitly
-    if (req.path.startsWith('/dashboards/') || req.path.startsWith('/dashboard/')) {
+    if (
+      req.path.startsWith('/dashboards/') ||
+      req.path.startsWith('/dashboard/')
+    ) {
       return next();
     }
 
     // 3. Allow Static Assets & Localization needed to render the pure iframe
-    const isStaticAsset = req.path.startsWith('/assets/') || req.path.startsWith('/static/') || /\.(js|css|json|ico|woff2?|svg|png|jpe?g|map)$/.test(req.path);
+    const isStaticAsset =
+      req.path.startsWith('/assets/') ||
+      req.path.startsWith('/static/') ||
+      /\.(js|css|json|ico|woff2?|svg|png|jpe?g|map)$/.test(req.path);
     if (isStaticAsset) {
       return next();
     }
@@ -83,21 +91,25 @@ function bootstrapTbProxy() {
   });
 
   // Proxy all other allowed routes directly to ThingsBoard
-  tbProxy.use('/', createProxyMiddleware({
-    target: 'http://localhost:8088',
-    changeOrigin: true,
-    ws: true, // For telemetry websockets
-    autoRewrite: true,
-    selfHandleResponse: true, // Needed for responseInterceptor
-    on: {
-      proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
-        const contentType = proxyRes.headers['content-type'];
+  tbProxy.use(
+    '/',
+    createProxyMiddleware({
+      target: 'http://localhost:8088',
+      changeOrigin: true,
+      ws: true, // For telemetry websockets
+      autoRewrite: true,
+      selfHandleResponse: true, // Needed for responseInterceptor
+      on: {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        proxyRes: responseInterceptor(
+          (responseBuffer, proxyRes, _req, _res) => {
+            const contentType = proxyRes.headers['content-type'];
 
-        // Inject CSS to hide TB Layout only into HTML responses
-        if (contentType && contentType.includes('text/html')) {
-          let html = responseBuffer.toString('utf8');
+            // Inject CSS to hide TB Layout only into HTML responses
+            if (contentType && contentType.includes('text/html')) {
+              let html = responseBuffer.toString('utf8');
 
-          const injectedCss = `
+              const injectedCss = `
             <style id="headless-styles">
                 /* Hide global side menu and headers */
                 tb-side-menu, mat-sidenav, .tb-layout-sidebar, .tb-side-menu-container, 
@@ -180,18 +192,20 @@ function bootstrapTbProxy() {
             </script>
           `;
 
-          html = html.replace('</head>', injectedCss + '</head>');
-          // fallback intercept if </head> cap is different
-          if (!html.includes(injectedCss)) {
-            html = html.replace('<body', injectedCss + '<body');
-          }
-          return html;
-        }
+              html = html.replace('</head>', injectedCss + '</head>');
+              // fallback intercept if </head> cap is different
+              if (!html.includes(injectedCss)) {
+                html = html.replace('<body', injectedCss + '<body');
+              }
+              return Promise.resolve(html);
+            }
 
-        return responseBuffer;
-      }),
-    },
-  }));
+            return Promise.resolve(responseBuffer);
+          },
+        ),
+      },
+    }),
+  );
 
   tbProxy.listen(tbProxyPort, () => {
     const logger = new Logger('TB-Proxy');

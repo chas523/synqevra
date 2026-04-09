@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Post,
   Body,
@@ -267,7 +267,9 @@ export class ThingsboardController {
   })
   getEmbedToken(@TbAccessToken() accessToken: string) {
     if (!accessToken) {
-      throw new UnauthorizedException('No token generated. Try logging in again.');
+      throw new UnauthorizedException(
+        'No token generated. Try logging in again.',
+      );
     }
     return {
       jwtToken: accessToken,
@@ -3851,7 +3853,7 @@ export class ThingsboardController {
       direction || 'FROM',
       accessToken,
     );
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, Error> = await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (response) => response,
@@ -5146,7 +5148,8 @@ export class ThingsboardController {
     @TbAccessToken() accessToken: string,
   ) {
     const command = new CreateNotificationRuleCommand(rule, accessToken);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
 
     return match(result, {
       Ok: (response) => response,
@@ -5717,7 +5720,8 @@ export class ThingsboardController {
   })
   async getTwoFaSettings(@TbAccessToken() accessToken: string) {
     const query = new FetchTwoFaSettingsQuery(accessToken);
-    const result = await this.queryBus.execute(query);
+    const result: Result<TwoFactorAuthSettingsDto, ThingsboardApiException> =
+      await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (settings: TwoFactorAuthSettingsDto) => settings,
@@ -5760,7 +5764,8 @@ export class ThingsboardController {
     @Body() settings: TwoFactorAuthSettingsRequestDto,
   ) {
     const command = new SaveTwoFaSettingsCommand(accessToken, settings);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
 
     return match(result, {
       Ok: () => ({ success: true }),
@@ -7123,7 +7128,8 @@ export class ThingsboardController {
     @Body() payload: any,
   ) {
     const command = new RestoreVersionCommand(accessToken, payload);
-    const result = await this.commandBus.execute(command);
+    const result: Result<string, ThingsboardApiException> =
+      await this.commandBus.execute(command);
 
     return match(result, {
       Ok: (requestId: string) => requestId,
@@ -7150,7 +7156,8 @@ export class ThingsboardController {
     @Param('requestId') requestId: string,
   ) {
     const query = new FetchRestoreVersionStatusQuery(accessToken, requestId);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (response: any) => response,
@@ -7186,7 +7193,8 @@ export class ThingsboardController {
       startTime: parseInt(startTime, 10),
       endTime: parseInt(endTime, 10),
     });
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
 
     return match(result, {
       Ok: (response: any) => response,
@@ -7215,7 +7223,8 @@ export class ThingsboardController {
       sortProperty,
       sortOrder,
     });
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7243,7 +7252,8 @@ export class ThingsboardController {
       sortProperty,
       sortOrder,
     });
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7268,7 +7278,8 @@ export class ThingsboardController {
       ? oauth2ClientIds.split(',').filter(Boolean)
       : [];
     const command = new CreateDomainCommand(accessToken, payload, ids);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7288,7 +7299,8 @@ export class ThingsboardController {
     @Param('domainId') domainId: string,
   ) {
     const query = new FetchDomainByIdQuery(accessToken, domainId);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7319,7 +7331,8 @@ export class ThingsboardController {
       payload,
       ids,
     );
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7336,7 +7349,8 @@ export class ThingsboardController {
   @ApiResponse({ status: HttpStatus.OK })
   async getOAuth2ConfigTemplate(@TbAccessToken() accessToken: string) {
     const query = new FetchOAuth2ConfigTemplateQuery(accessToken);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7356,7 +7370,8 @@ export class ThingsboardController {
     @Body() payload: any,
   ) {
     const command = new SaveOAuth2ClientCommand(accessToken, payload);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7376,7 +7391,8 @@ export class ThingsboardController {
     @Param('clientId') clientId: string,
   ) {
     const query = new FetchOAuth2ClientByIdQuery(accessToken, clientId);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7406,7 +7422,8 @@ export class ThingsboardController {
       sortProperty,
       sortOrder,
     );
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7425,7 +7442,8 @@ export class ThingsboardController {
     @Param('id') id: string,
   ) {
     const query = new FetchRuleChainByIdQuery(accessToken, id);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7444,7 +7462,8 @@ export class ThingsboardController {
     @Param('id') id: string,
   ) {
     const query = new FetchRuleChainMetadataQuery(accessToken, id);
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7463,7 +7482,8 @@ export class ThingsboardController {
     @Body() payload: any,
   ) {
     const command = new CreateRuleChainFullCommand(accessToken, payload);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7482,7 +7502,8 @@ export class ThingsboardController {
     @Param('id') id: string,
   ) {
     const command = new DeleteRuleChainCommand(accessToken, id);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: () => ({ success: true }),
       Err: (error: ThingsboardApiException) => {
@@ -7501,7 +7522,8 @@ export class ThingsboardController {
     @Param('id') id: string,
   ) {
     const command = new SetRootRuleChainCommand(accessToken, id);
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7531,7 +7553,8 @@ export class ThingsboardController {
       ruleChainId,
       metadata,
     );
-    const result = await this.commandBus.execute(command);
+    const result: Result<any, ThingsboardApiException> =
+      await this.commandBus.execute(command);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
@@ -7572,7 +7595,8 @@ export class ThingsboardController {
       startTime ? Number(startTime) : undefined,
       endTime ? Number(endTime) : undefined,
     );
-    const result = await this.queryBus.execute(query);
+    const result: Result<any, ThingsboardApiException> =
+      await this.queryBus.execute(query);
     return match(result, {
       Ok: (response: any) => response,
       Err: (error: ThingsboardApiException) => {
