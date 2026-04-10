@@ -944,10 +944,9 @@ export class ThingsboardController {
           entityType: 'ASSET_PROFILE',
           id: payload.assetProfileId,
         },
-        customerId: {
-          entityType: 'CUSTOMER',
-          id: payload.customerId,
-        },
+        customerId: payload.customerId
+          ? { entityType: 'CUSTOMER', id: payload.customerId }
+          : null,
         additionalInfo: {
           description: payload.description ?? '',
         },

@@ -35,6 +35,9 @@ export function AddAssetDialog({
   const [customers, setCustomers] = useState<CustomerInfo[]>([]);
   const [isBootstrapLoading, setIsBootstrapLoading] = useState(false);
 
+  const [profileSearch, setProfileSearch] = useState("");
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
   const [formData, setFormData] = useState<CreateAssetRequest>({
     name: "",
     label: "",
@@ -49,28 +52,17 @@ export function AddAssetDialog({
     const loadData = async () => {
       setIsBootstrapLoading(true);
       try {
-        const [defaultProfile, profileInfos, customerInfos] = await Promise.all(
-          [
-            AssetService.getAssetProfileInfoByName(DEFAULT_PROFILE_NAME),
-            AssetService.getAssetProfileInfos(
-              0,
-              10,
-              "name",
-              "ASC",
-              DEFAULT_PROFILE_NAME,
-            ),
-            AssetService.getCustomers(0, 50, "title", "ASC"),
-          ],
-        );
+        const [profileInfos, customerInfos] = await Promise.all([
+          AssetService.getAssetProfileInfos(0, 100, "name", "ASC"),
+          AssetService.getCustomers(0, 50, "title", "ASC"),
+        ]);
 
-        const mergedProfiles = profileInfos.data.some(
-          (profile) => profile.id?.id === defaultProfile.id?.id,
-        )
-          ? profileInfos.data
-          : [defaultProfile, ...profileInfos.data];
-
-        setProfiles(mergedProfiles);
+        setProfiles(profileInfos.data);
         setCustomers(customerInfos.data);
+
+        const defaultProfile =
+          profileInfos.data.find((p) => p.name === DEFAULT_PROFILE_NAME) ??
+          profileInfos.data[0];
 
         const publicCustomer = customerInfos.data.find(
           (customer) => customer.additionalInfo?.isPublic,
@@ -78,17 +70,17 @@ export function AddAssetDialog({
 
         setFormData((prev) => ({
           ...prev,
-          assetProfileId:
-            prev.assetProfileId ||
-            defaultProfile.id?.id ||
-            mergedProfiles[0]?.id?.id ||
-            "",
+          assetProfileId: prev.assetProfileId || defaultProfile?.id?.id || "",
           customerId:
             prev.customerId ||
             publicCustomer?.id?.id ||
             customerInfos.data[0]?.id?.id ||
             "",
         }));
+
+        if (defaultProfile) {
+          setProfileSearch(defaultProfile.name);
+        }
       } finally {
         setIsBootstrapLoading(false);
       }
@@ -97,11 +89,16 @@ export function AddAssetDialog({
     loadData();
   }, [open]);
 
+  const filteredProfiles = useMemo(() => {
+    const query = profileSearch.trim().toLowerCase();
+    if (!query) return profiles;
+    return profiles.filter((p) => p.name.toLowerCase().includes(query));
+  }, [profileSearch, profiles]);
+
   const canSubmit = useMemo(() => {
     return (
       !!formData.name.trim() &&
       !!formData.assetProfileId &&
-      !!formData.customerId &&
       !isLoading &&
       !isBootstrapLoading
     );
@@ -137,6 +134,7 @@ export function AddAssetDialog({
         customerId: "",
         description: "",
       });
+      setProfileSearch("");
       onOpenChange(false);
     } catch {
       // Error is handled by parent via toast.
@@ -172,24 +170,50 @@ export function AddAssetDialog({
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Asset profile</label>
-            <select
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={formData.assetProfileId}
-              onChange={(event) =>
-                handleInputChange("assetProfileId", event.target.value)
-              }
-              required
-              disabled={isBootstrapLoading}
-            >
-              <option value="" disabled>
-                Select asset profile
-              </option>
-              {profiles.map((profile) => (
-                <option key={profile.id?.id} value={profile.id?.id}>
-                  {profile.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={profileSearch}
+                onChange={(e) => {
+                  setProfileSearch(e.target.value);
+                  setProfileMenuOpen(true);
+                  handleInputChange("assetProfileId", "");
+                }}
+                onFocus={() => setProfileMenuOpen(true)}
+                onBlur={() => {
+                  setTimeout(() => setProfileMenuOpen(false), 150);
+                }}
+                placeholder={
+                  isBootstrapLoading
+                    ? "Loading profiles..."
+                    : "Select or type profile name"
+                }
+                disabled={isBootstrapLoading}
+              />
+              {profileMenuOpen && filteredProfiles.length > 0 && (
+                <div className="absolute z-50 mt-1 w-full max-h-44 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+                  {filteredProfiles.map((profile) => (
+                    <button
+                      key={profile.id?.id}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setProfileSearch(profile.name);
+                        handleInputChange(
+                          "assetProfileId",
+                          profile.id?.id ?? "",
+                        );
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {profile.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -200,12 +224,9 @@ export function AddAssetDialog({
               onChange={(event) =>
                 handleInputChange("customerId", event.target.value)
               }
-              required
               disabled={isBootstrapLoading}
             >
-              <option value="" disabled>
-                Select customer
-              </option>
+              <option value="">No customer</option>
               {customers.map((customer) => (
                 <option key={customer.id?.id} value={customer.id?.id}>
                   {customer.title}
