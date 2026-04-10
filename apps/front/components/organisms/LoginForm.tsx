@@ -31,7 +31,9 @@ const LoginForm = () => {
     if (role === "USER") {
       OAuth2Service.checkGoogleAuthAvailable()
         .then((res) => setIsGoogleAvailable(res.available))
-        .catch(console.error);
+        .catch(() => {
+          // Silently ignore – API may not be ready yet on initial dev start
+        });
     }
   }, [role]);
   useEffect(() => {
@@ -83,7 +85,7 @@ const LoginForm = () => {
       if (role === "ADMIN") {
         router.push("/dashboard");
       } else {
-        router.push("/devices");
+        router.push("/dashboards");
       }
     } catch (err) {
       console.error(err);

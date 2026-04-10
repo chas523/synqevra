@@ -153,7 +153,13 @@ export class AuthController {
   })
   async isGoogleAuthAvailable() {
     try {
-      const token = await this.sysAdminAuthService.getAccessToken();
+      const tokenPromise = this.sysAdminAuthService.getAccessToken();
+      const token = await Promise.race([
+        tokenPromise,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 3000),
+        ),
+      ]);
       const allClientInfos = await this.thingsboardApi.getOAuth2ClientInfos(
         token,
         {

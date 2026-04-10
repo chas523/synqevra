@@ -16,8 +16,8 @@ echo "Docker is running."
 
 
 # ─── 1. base_rule_chain.json: api → localhost ───────────────────────────────
-echo "[1/3] Patching $RULE_CHAIN ..."
-sed -i 's|http://api:3003/api/proxy/telemetry|http://localhost:3003/api/proxy/telemetry|g' "$RULE_CHAIN"
+echo "[1/3] Patching $RULE_CHAIN for Docker ..."
+sed -i 's|http://api:3003/api/proxy/telemetry|http://host.docker.internal:3003/api/proxy/telemetry|g' "$RULE_CHAIN"
 echo "Done."
 
 # ─── 2. next.config.ts: Docker/K8s DNS → localhost ──────────────────────────
