@@ -213,6 +213,7 @@ import { DeviceProfilesResponseDto } from './dtos/response/thingsboard-device-pr
 import { FetchRepoSettingsInfoQuery } from 'src/thingsboard/application/queries/fetch-repo-settings-info/fetch-repo-settings-info.query';
 import { FetchRepoSettingsQuery } from 'src/thingsboard/application/queries/fetch-repo-settings/fetch-repo-settings.query';
 import { FetchVersionsQuery } from 'src/thingsboard/application/queries/fetch-versions/fetch-versions.query';
+import { FetchVersionDiffQuery } from 'src/thingsboard/application/queries/fetch-version-diff/fetch-version-diff.query';
 import { CheckRepoAccessCommand } from 'src/thingsboard/application/commands/check-repo-access/check-repo-access.command';
 import { SaveRepoSettingsCommand } from 'src/thingsboard/application/commands/save-repo-settings/save-repo-settings.command';
 import { DeleteRepoSettingsCommand } from 'src/thingsboard/application/commands/delete-repo-settings/delete-repo-settings.command';
@@ -441,6 +442,7 @@ export class ThingsboardController {
     @Query('pageSize') pageSize = 10,
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('deviceIds') deviceIds?: string,
   ) {
     const query = new FetchDevicesQuery({
       accessToken,
@@ -448,6 +450,7 @@ export class ThingsboardController {
       pageSize: Number(pageSize),
       sortProperty,
       sortOrder,
+      deviceIds,
     });
     const result: Result<DevicesResponse, ThingsboardApiException> =
       await this.queryBus.execute(query);
@@ -894,6 +897,7 @@ export class ThingsboardController {
     @Query('sortProperty') sortProperty = 'createdTime',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('assetProfileId') assetProfileId = '',
+    @Query('assetIds') assetIds?: string,
   ) {
     const query = new FetchAssetsQuery({
       accessToken,
@@ -902,6 +906,7 @@ export class ThingsboardController {
       sortProperty,
       sortOrder,
       assetProfileId,
+      assetIds,
     });
 
     const result = await this.queryBus.execute(query);
@@ -2002,6 +2007,7 @@ export class ThingsboardController {
       failuresEnabled?: boolean;
       allEnabled?: boolean;
       decimalsByDefault?: number;
+      id?: { id: string; entityType: string };
     },
   ) {
     if (!payload?.title?.trim()) {
@@ -2053,7 +2059,6 @@ export class ThingsboardController {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: mappedEntityType,
           },
           ...(argument.refEntityId?.trim()
             ? {
@@ -2081,6 +2086,7 @@ export class ThingsboardController {
     try {
       return await this.thingsboardApi.createCalculatedField(accessToken, {
         entityId: { entityType: 'ASSET', id },
+        ...(payload.id ? { id: payload.id } : {}),
         configuration: {
           arguments: mappedArguments,
           useLatestTs: payload.useLatestTimestamp ?? false,
@@ -2699,6 +2705,7 @@ export class ThingsboardController {
       failuresEnabled?: boolean;
       allEnabled?: boolean;
       decimalsByDefault?: number;
+      id?: { id: string; entityType: string };
     },
   ) {
     if (!payload?.title?.trim()) {
@@ -2750,7 +2757,6 @@ export class ThingsboardController {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: mappedEntityType,
           },
           ...(argument.refEntityId?.trim()
             ? {
@@ -2778,6 +2784,7 @@ export class ThingsboardController {
     try {
       return await this.thingsboardApi.createCalculatedField(accessToken, {
         entityId: { entityType: 'ASSET_PROFILE', id },
+        ...(payload.id ? { id: payload.id } : {}),
         configuration: {
           arguments: mappedArguments,
           useLatestTs: payload.useLatestTimestamp ?? false,
@@ -2810,6 +2817,28 @@ export class ThingsboardController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to create asset profile calculated field',
+      );
+    }
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('/calculated-field/:id')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete calculated field',
+    description: 'Delete a calculated field by its ID',
+  })
+  async deleteCalculatedField(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    try {
+      await this.thingsboardApi.deleteCalculatedField(accessToken, id);
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to delete calculated field',
       );
     }
   }
@@ -3649,6 +3678,7 @@ export class ThingsboardController {
       failuresEnabled?: boolean;
       allEnabled?: boolean;
       decimalsByDefault?: number;
+      id?: { id: string; entityType: string };
     },
   ) {
     if (!payload?.title?.trim()) {
@@ -3700,7 +3730,6 @@ export class ThingsboardController {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: mappedEntityType,
           },
           ...(argument.refEntityId?.trim()
             ? {
@@ -3731,6 +3760,7 @@ export class ThingsboardController {
 
     const command = new CreateDeviceCalculatedFieldCommand(accessToken, {
       entityId: { entityType: 'DEVICE', id },
+      ...(payload.id ? { id: payload.id } : {}),
       configuration: {
         arguments: mappedArguments,
         useLatestTs: payload.useLatestTimestamp ?? false,
@@ -6237,6 +6267,7 @@ export class ThingsboardController {
       failuresEnabled?: boolean;
       allEnabled?: boolean;
       decimalsByDefault?: number;
+      id?: { id: string; entityType: string };
     },
   ) {
     if (!payload?.title?.trim()) {
@@ -6288,7 +6319,6 @@ export class ThingsboardController {
           refEntityKey: {
             type: typeMap[argument.argumentType] || 'TS_LATEST',
             key: refKey,
-            entityType: mappedEntityType,
           },
           ...(argument.refEntityId?.trim()
             ? {
@@ -6319,6 +6349,7 @@ export class ThingsboardController {
 
     const command = new CreateDeviceCalculatedFieldCommand(accessToken, {
       entityId: { entityType: 'DEVICE_PROFILE', id },
+      ...(payload.id ? { id: payload.id } : {}),
       configuration: {
         arguments: mappedArguments,
         useLatestTs: payload.useLatestTimestamp ?? false,
@@ -6677,6 +6708,43 @@ export class ThingsboardController {
       branch || 'main',
       entityType,
       entityId,
+    );
+    const result = await this.queryBus.execute(query);
+
+    return match(result, {
+      Ok: (response: any) => response,
+      Err: (error: ThingsboardApiException) => {
+        throw error;
+      },
+    });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/entities/vc/diff/:entityType/:entityId')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get entity version diff',
+    description: 'Retrieve difference between current and a specific version',
+  })
+  @ApiParam({ name: 'entityType', required: true, type: String })
+  @ApiParam({ name: 'entityId', required: true, type: String })
+  @ApiQuery({ name: 'versionId', required: true, type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Version difference retrieved successfully',
+  })
+  async getEntityVersionDiff(
+    @TbAccessToken() accessToken: string,
+    @Param('entityType') entityType: string,
+    @Param('entityId') entityId: string,
+    @Query('versionId') versionId: string,
+  ) {
+    const query = new FetchVersionDiffQuery(
+      accessToken,
+      entityType,
+      entityId,
+      versionId,
     );
     const result = await this.queryBus.execute(query);
 

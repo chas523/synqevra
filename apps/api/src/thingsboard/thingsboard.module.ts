@@ -156,6 +156,7 @@ import { FetchRuleChainsQueryHandler } from './application/queries/fetch-rule-ch
 import { FetchRuleChainByIdHandler } from './application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.handler';
 import { FetchRuleChainMetadataHandler } from './application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.handler';
 import { FetchEntityEventsQueryHandler } from './application/queries/fetch-entity-events/fetch-entity-events.query-handler';
+import { FetchVersionDiffQueryHandler } from './application/queries/fetch-version-diff/fetch-version-diff.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -307,6 +308,7 @@ const queryHandlers = [
   FetchRuleChainsQueryHandler,
   FetchRuleChainByIdHandler,
   FetchRuleChainMetadataHandler,
+  FetchVersionDiffQueryHandler,
 ];
 
 @Module({

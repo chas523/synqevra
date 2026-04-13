@@ -190,6 +190,7 @@ export abstract class ThingsboardApiPort {
     pageSize: number,
     sortProperty?: string,
     sortOrder?: 'ASC' | 'DESC',
+    deviceIds?: string,
   ): Promise<DevicesResponse>;
   abstract fetchDevice(accessToken: string, id: string): Promise<DeviceDetails>;
   abstract saveDevice(
@@ -297,6 +298,11 @@ export abstract class ThingsboardApiPort {
     payload: CreateCalculatedFieldPayload,
   ): Promise<DeviceCalculatedField>;
 
+  abstract deleteCalculatedField(
+    accessToken: string,
+    id: string,
+  ): Promise<void>;
+
   // Asset operations
   abstract fetchAssets(
     accessToken: string,
@@ -305,6 +311,7 @@ export abstract class ThingsboardApiPort {
     sortProperty?: string,
     sortOrder?: 'ASC' | 'DESC',
     assetProfileId?: string,
+    assetIds?: string,
   ): Promise<AssetsResponse>;
   abstract createAsset(
     accessToken: string,
@@ -791,6 +798,13 @@ export abstract class ThingsboardApiPort {
     toId: string,
     toType: string,
   ): Promise<void>;
+
+  abstract fetchVersionDiff(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    versionId: string,
+  ): Promise<any>;
 
   abstract fetchTenantProfiles(
     sysAdminAccessToken: string,

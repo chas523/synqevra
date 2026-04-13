@@ -16,12 +16,15 @@ export function ImageGalleryPage() {
   const [pageSize] = useState(10);
   const [sortProperty, setSortProperty] = useState("createdTime");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
+  const [includeSystemImages, setIncludeSystemImages] = useState(false);
 
   const { images, totalElements, totalPages, isLoading, mutate } = useImages(
     page,
     pageSize,
     sortProperty,
     sortOrder,
+    "IMAGE",
+    includeSystemImages,
   );
 
   const { isUploading, uploadImage } = useManageImage();
@@ -61,6 +64,11 @@ export function ImageGalleryPage() {
     [],
   );
 
+  const handleIncludeSystemImagesChange = useCallback((include: boolean) => {
+    setIncludeSystemImages(include);
+    setPage(0);
+  }, []);
+
   return (
     <div className="p-6">
       <ImageGalleryTable
@@ -77,6 +85,8 @@ export function ImageGalleryPage() {
         onEmbedClick={handleEmbedClick}
         onRefresh={handleRefresh}
         onAdd={() => setUploadDialogOpen(true)}
+        includeSystemImages={includeSystemImages}
+        onIncludeSystemImagesChange={handleIncludeSystemImagesChange}
       />
 
       <UploadImageDialog

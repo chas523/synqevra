@@ -113,19 +113,33 @@ export class AssetService {
     sortProperty = "createdTime",
     sortOrder: "ASC" | "DESC" = "DESC",
     assetProfileId = "",
+    assetIds?: string,
   ): Promise<AssetsResponse> {
     const params = new URLSearchParams({
       page: String(page),
       pageSize: String(pageSize),
       sortProperty,
       sortOrder,
-      assetProfileId,
     });
+
+    if (assetProfileId) {
+      params.append("assetProfileId", assetProfileId);
+    }
+
+    if (assetIds) {
+      params.append("assetIds", assetIds);
+    }
 
     const { data } = await proxyApi.get<AssetsResponse>(
       `/thingsboard/assets?${params.toString()}`,
     );
     return data;
+  }
+
+  public static async fetchAssetsByIds(ids: string[]): Promise<Asset[]> {
+    if (!ids.length) return [];
+    const response = await this.fetchAssets(0, ids.length, "createdTime", "DESC", "", ids.join(","));
+    return response.data;
   }
 
   public static async createAsset(payload: CreateAssetRequest): Promise<Asset> {
@@ -288,6 +302,10 @@ export class AssetService {
       payload,
     );
     return data;
+  }
+
+  public static async deleteCalculatedField(id: string): Promise<void> {
+    await proxyApi.delete(`/thingsboard/calculated-field/${id}`);
   }
 
   public static async getAssetAlarms(

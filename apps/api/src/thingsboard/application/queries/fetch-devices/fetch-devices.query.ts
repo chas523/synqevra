@@ -9,6 +9,7 @@ export type FetchDevicesProps = {
   pageSize?: number;
   sortProperty?: string;
   sortOrder?: 'ASC' | 'DESC';
+  deviceIds?: string;
 };
 
 export class FetchDevicesQuery extends Query<
@@ -19,6 +20,7 @@ export class FetchDevicesQuery extends Query<
   public readonly pageSize: number;
   public readonly sortProperty: string;
   public readonly sortOrder: 'ASC' | 'DESC';
+  public readonly deviceIds: string | undefined;
 
   constructor(props: FetchDevicesProps) {
     super();
@@ -27,5 +29,6 @@ export class FetchDevicesQuery extends Query<
     this.pageSize = props.pageSize ?? 10;
     this.sortProperty = props.sortProperty ?? 'createdTime';
     this.sortOrder = props.sortOrder ?? 'DESC';
+    this.deviceIds = props.deviceIds;
   }
 }

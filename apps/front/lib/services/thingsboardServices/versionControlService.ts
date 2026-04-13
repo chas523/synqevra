@@ -120,4 +120,14 @@ export class VersionControlService {
     const { data } = await proxyApi.get(url);
     return data;
   }
+
+  public static async fetchVersionDiff(
+    entityType: string,
+    entityId: string,
+    versionId: string,
+  ): Promise<any> {
+    const url = `thingsboard/entities/vc/diff/${entityType}/${entityId}?versionId=${versionId}`;
+    const { data } = await proxyApi.get(url);
+    return data;
+  }
 }

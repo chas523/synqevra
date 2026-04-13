@@ -13,6 +13,7 @@ import { EntityViewAlarmsTabContent } from "./EntityViewAlarmsTabContent";
 import { EntityViewEventsTabContent } from "./EntityViewEventsTabContent";
 import { EntityViewRelationsTabContent } from "./EntityViewRelationsTabContent";
 import { EntityViewAuditLogsTabContent } from "./EntityViewAuditLogsTabContent";
+import { VersionsTable } from "./VersionsTable";
 
 export interface EntityViewDetailPanelProps {
   entityView: EntityView | null;
@@ -27,6 +28,7 @@ export function EntityViewDetailPanel({
   onClose,
 }: EntityViewDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [branch, setBranch] = useState("main");
 
   const tabs: TabConfig[] = useMemo(() => {
     if (!entityView) return [];
@@ -75,13 +77,17 @@ export function EntityViewDetailPanel({
         id: "version-control",
         label: "Version control",
         content: (
-          <div className="p-4 text-center text-slate-500">
-            Version control coming soon
-          </div>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="ENTITY_VIEW"
+            entityId={entityViewId}
+            hideCard={true}
+          />
         ),
       },
     ];
-  }, [entityView]);
+  }, [entityView, branch]);
 
   if (!entityView) return null;
 

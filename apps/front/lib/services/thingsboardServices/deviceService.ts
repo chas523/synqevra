@@ -241,11 +241,27 @@ export class DeviceService {
     pageSize = 10,
     sortProperty = "createdTime",
     sortOrder: "ASC" | "DESC" = "DESC",
+    deviceIds?: string,
   ): Promise<DevicesResponse> {
-    const { data } = await proxyApi.get(
-      `/thingsboard/devices?page=${page}&pageSize=${pageSize}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`,
-    );
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(pageSize),
+      sortProperty,
+      sortOrder,
+    });
+
+    if (deviceIds) {
+      params.append("deviceIds", deviceIds);
+    }
+
+    const { data } = await proxyApi.get(`/thingsboard/devices?${params.toString()}`);
     return data;
+  }
+
+  public static async fetchDevicesByIds(ids: string[]): Promise<any[]> {
+    if (!ids.length) return [];
+    const response = await this.fetchDevices(0, ids.length, "createdTime", "DESC", ids.join(","));
+    return response.data;
   }
 
   public static async fetchDevice(id: string): Promise<DeviceDetails> {
@@ -469,6 +485,10 @@ export class DeviceService {
       payload,
     );
     return data;
+  }
+
+  public static async deleteCalculatedField(id: string): Promise<void> {
+    await proxyApi.delete(`/thingsboard/calculated-field/${id}`);
   }
 
   public static async deleteDevice(id: string): Promise<void> {

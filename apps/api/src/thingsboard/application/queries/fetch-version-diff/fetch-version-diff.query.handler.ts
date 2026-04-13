@@ -2,17 +2,16 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { Err, Ok, Result } from 'oxide.ts';
 import {
-  AssetsResponse,
   THINGSBOARD_API_PORT,
   ThingsboardApiPort,
 } from '../../ports/thingsboard.api.port';
+import { FetchVersionDiffQuery } from './fetch-version-diff.query';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
-import { FetchAssetsQuery } from './fetch-assets.query';
 
-@QueryHandler(FetchAssetsQuery)
-export class FetchAssetsQueryHandler implements IQueryHandler<
-  FetchAssetsQuery,
-  Result<AssetsResponse, ThingsboardApiException>
+@QueryHandler(FetchVersionDiffQuery)
+export class FetchVersionDiffQueryHandler implements IQueryHandler<
+  FetchVersionDiffQuery,
+  Result<any, ThingsboardApiException>
 > {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
@@ -20,19 +19,16 @@ export class FetchAssetsQueryHandler implements IQueryHandler<
   ) {}
 
   async execute(
-    query: FetchAssetsQuery,
-  ): Promise<Result<AssetsResponse, ThingsboardApiException>> {
+    query: FetchVersionDiffQuery,
+  ): Promise<Result<any, ThingsboardApiException>> {
+    const { accessToken, entityType, entityId, versionId } = query;
     try {
-      const response = await this.thingsboardApi.fetchAssets(
-        query.accessToken,
-        query.page,
-        query.pageSize,
-        query.sortProperty,
-        query.sortOrder,
-        query.assetProfileId,
-        query.assetIds,
+      const response = await this.thingsboardApi.fetchVersionDiff(
+        accessToken,
+        entityType,
+        entityId,
+        versionId,
       );
-
       return Ok(response);
     } catch (error) {
       return Err(error as ThingsboardApiException);
