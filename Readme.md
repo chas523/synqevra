@@ -12,8 +12,11 @@ Implementation of ThingsBoard and Medplum on docker containers.
 6. Run `pnpm dev` command to start dev server for frontend and backend  
 7. Check your ip address using `ipconfig` command (Windows).  
 8. Frontend app is running on `{YOUR_IP_ADDRESS}:3000` (ex. `10.0.1.35:3000`) or `localhost:3000` if you are using local machine.  
-9. To check thingsboard, go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine. You can find default SYS_ADMIN credentials in `fpl_thingsboard/apps/api/.env.example` file.  
-10. To accept requested users, go to `localhost:3000/dashboard/requestedUsers` and accept them.  
+9. To accept requested users, go to `localhost:3000/dashboard/requestedUsers` and accept them.  
+10. OPTIONAL! To check thingsboard, go to `{YOUR_IP_ADDRESS}:8088` (ex. `10.0.1.35:8088`) or `localhost:8088` if you are using local machine. You can find default Thingsboard SYS_ADMIN credentials in `fpl_thingsboard/apps/api/.env.example` file.  
+11. To check minio whitelabel files, go to `localhost:9001/login` and log in using username: `admin` and password: `password123`  
+12. To login as administrator, go to `localhost:3000/auth/login/admin` and log in using default email: `admin@admin.com` with password: `softteco-password`  
+
 
 ### 2. After first time setup
 1. Go to `fpl_thingsboard/backend` folder and run `docker compose up` command and wait until containers are running

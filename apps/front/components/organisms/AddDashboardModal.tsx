@@ -68,7 +68,7 @@ export function AddDashboardModal({
         mobileHide: mobileHide || null,
         mobileOrder: mobileOrder === "" ? null : Number(mobileOrder),
         configuration: {
-          description
+          description,
         },
       };
 

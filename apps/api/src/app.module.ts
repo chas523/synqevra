@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConnectionModule } from './connection/connection.module';
 import { IamModule } from './iam/iam.module';
+import { AdminInitService } from './iam/admin-init.service';
 import dbConfig from './config/db.config';
 import minioConfig from './config/minio.config';
 import { ThingsboardModule } from './thingsboard/thingsboard.module';

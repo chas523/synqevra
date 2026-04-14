@@ -640,9 +640,26 @@ export class DashboardController {
         uploadedPaths.logoDark = path;
       }
 
+      // Save a version file so all browsers can detect the logo change
+      const version = Date.now().toString();
+      const versionBuffer = Buffer.from(JSON.stringify({ version }));
+      await this.storageService.uploadFile(
+        {
+          fieldname: 'version',
+          originalname: 'version.json',
+          encoding: '7bit',
+          mimetype: 'application/json',
+          size: versionBuffer.length,
+          buffer: versionBuffer,
+        },
+        'global',
+        'version.json',
+      );
+
       return {
         success: true,
         paths: uploadedPaths,
+        version,
       };
     } catch (error) {
       throw new HttpException(

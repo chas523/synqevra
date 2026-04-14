@@ -20,9 +20,9 @@ $ruleChainPath = Join-Path $rootDir "apps\api\src\thingsboard\base_rule_chain.js
 $nextConfigPath = Join-Path $rootDir "apps\front\next.config.ts"
 
 # ─── 1. base_rule_chain.json: api → localhost ───────────────────────────────
-Write-Host "[1/3] Patching $ruleChainPath ..."
+Write-Host "[1/3] Patching $ruleChainPath for Docker ..."
 $content = Get-Content $ruleChainPath -Raw
-$content = $content -replace [regex]::Escape("http://api:3003/api/proxy/telemetry"), "http://localhost:3003/api/proxy/telemetry"
+$content = $content -replace [regex]::Escape("http://api:3003/api/proxy/telemetry"), "http://host.docker.internal:3003/api/proxy/telemetry"
 [System.IO.File]::WriteAllText($ruleChainPath, $content)
 Write-Host "      Done."
 

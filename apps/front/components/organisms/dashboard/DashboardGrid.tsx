@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useMemo, useRef, useCallback } from "react";
-import { GridLayout, useContainerWidth, Layout, noCompactor, setTopLeft, LayoutItem } from "react-grid-layout";
+import {
+  GridLayout,
+  useContainerWidth,
+  Layout,
+  noCompactor,
+  setTopLeft,
+  LayoutItem,
+} from "react-grid-layout";
 
 import "react-grid-layout/css/styles.css";
 import { WidgetTile } from "./WidgetTile";
@@ -43,7 +50,9 @@ export function DashboardGrid({
   totalRows = 18,
   onLayoutChange,
 }: DashboardGridProps) {
-  const { width, containerRef, mounted } = useContainerWidth({ initialWidth: 1280 });
+  const { width, containerRef, mounted } = useContainerWidth({
+    initialWidth: 1280,
+  });
 
   // Ref to track resize start state to fix the "dropped events" bug (GitHub #237)
   const resizeStateRef = useRef<{
@@ -79,39 +88,60 @@ export function DashboardGrid({
     return true;
   }, []);
 
-  const handleResizeStart = useCallback((_layout: Layout, _oldItem: LayoutItem | null, newItem: LayoutItem | null, _placeholder: LayoutItem | null, event: Event) => {
-    if (newItem) {
-      const e = event as any;
-      const clientX = e?.clientX ?? e?.nativeEvent?.clientX;
-      const clientY = e?.clientY ?? e?.nativeEvent?.clientY;
+  const handleResizeStart = useCallback(
+    (
+      _layout: Layout,
+      _oldItem: LayoutItem | null,
+      newItem: LayoutItem | null,
+      _placeholder: LayoutItem | null,
+      event: Event,
+    ) => {
+      if (newItem) {
+        const e = event as any;
+        const clientX = e?.clientX ?? e?.nativeEvent?.clientX;
+        const clientY = e?.clientY ?? e?.nativeEvent?.clientY;
 
-      if (typeof clientX === "number" && typeof clientY === "number") {
-        lastMousePosRef.current = { x: clientX, y: clientY };
+        if (typeof clientX === "number" && typeof clientY === "number") {
+          lastMousePosRef.current = { x: clientX, y: clientY };
+        }
+
+        const onGlobalMove = (moveEv: MouseEvent) => {
+          lastMousePosRef.current = { x: moveEv.clientX, y: moveEv.clientY };
+        };
+        window.addEventListener("mousemove", onGlobalMove);
+        (window as any)._onRglResizeMove = onGlobalMove;
+
+        // Store initial state to determine anchor point
+        resizeStateRef.current = {
+          itemId: newItem.i,
+          startX: newItem.x,
+          startY: newItem.y,
+          startW: newItem.w,
+          startH: newItem.h,
+        };
       }
-
-      const onGlobalMove = (moveEv: MouseEvent) => {
-        lastMousePosRef.current = { x: moveEv.clientX, y: moveEv.clientY };
-      };
-      window.addEventListener("mousemove", onGlobalMove);
-      (window as any)._onRglResizeMove = onGlobalMove;
-
-      // Store initial state to determine anchor point
-      resizeStateRef.current = {
-        itemId: newItem.i,
-        startX: newItem.x,
-        startY: newItem.y,
-        startW: newItem.w,
-        startH: newItem.h,
-      };
-    }
-  }, []);
+    },
+    [],
+  );
 
   const handleResize = useCallback(
-    (layout: Layout, _oldItem: LayoutItem | null, newItem: LayoutItem | null, _placeholder: LayoutItem | null, event: Event) => {
+    (
+      layout: Layout,
+      _oldItem: LayoutItem | null,
+      newItem: LayoutItem | null,
+      _placeholder: LayoutItem | null,
+      event: Event,
+    ) => {
       const meta = (event as any)?.nativeEvent || (event as any); // RGL sometimes nests it
       const handle = (event as any)?.handle || (newItem as any)?.handle || "se"; // Fallback to se if handle missing
 
-      if (!resizeStateRef.current || !newItem || newItem.i !== resizeStateRef.current.itemId || !width || !containerRef.current) {
+      if (
+        !resizeStateRef.current ||
+        !newItem ||
+        newItem.i !== resizeStateRef.current.itemId ||
+        !width ||
+        !containerRef.current
+      ) {
         onLayoutChange?.(layout);
         return;
       }
@@ -128,7 +158,7 @@ export function DashboardGrid({
       const mouseRow = Math.round((clientY - rect.top - margin) / unitH);
 
       const start = resizeStateRef.current;
-      
+
       // Determine Anchor Point based on handle
       // Anchor is the corner/side that stays FIXED during resize
       let anchorX = start.startX;
@@ -136,7 +166,7 @@ export function DashboardGrid({
 
       if (handle.includes("e")) anchorX = start.startX;
       else if (handle.includes("w")) anchorX = start.startX + start.startW;
-      
+
       if (handle.includes("s")) anchorY = start.startY;
       else if (handle.includes("n")) anchorY = start.startY + start.startH;
 
@@ -159,11 +189,19 @@ export function DashboardGrid({
       }
 
       // 🛑 BLOCK COLLISION during resize
-      const hasCollision = layout.some(item => 
-        item.i !== newItem.i && validateOverlap(item, { x: finalX, y: finalY, w: finalW, h: finalH })
+      const hasCollision = layout.some(
+        (item) =>
+          item.i !== newItem.i &&
+          validateOverlap(item, { x: finalX, y: finalY, w: finalW, h: finalH }),
       );
 
-      if (hasCollision || (finalX === newItem.x && finalY === newItem.y && finalW === newItem.w && finalH === newItem.h)) {
+      if (
+        hasCollision ||
+        (finalX === newItem.x &&
+          finalY === newItem.y &&
+          finalW === newItem.w &&
+          finalH === newItem.h)
+      ) {
         onLayoutChange?.(layout);
         return;
       }
@@ -177,15 +215,23 @@ export function DashboardGrid({
 
       onLayoutChange?.(updatedLayout);
     },
-    [onLayoutChange, width, columns, margin, validateOverlap]
+    [onLayoutChange, width, columns, margin, validateOverlap],
   );
 
   const handleDrag = useCallback(
-    (currentLayout: Layout, _oldItem: LayoutItem | null, newItem: LayoutItem | null, _placeholder: LayoutItem | null, _event: Event) => {
+    (
+      currentLayout: Layout,
+      _oldItem: LayoutItem | null,
+      newItem: LayoutItem | null,
+      _placeholder: LayoutItem | null,
+      _event: Event,
+    ) => {
       if (!newItem) return;
 
       // 🛑 BLOCK COLLISION during drag
-      const hasCollision = currentLayout.some((item) => item.i !== newItem.i && validateOverlap(item, newItem));
+      const hasCollision = currentLayout.some(
+        (item) => item.i !== newItem.i && validateOverlap(item, newItem),
+      );
 
       if (hasCollision) {
         // If colliding, don't trigger layout change
@@ -197,15 +243,18 @@ export function DashboardGrid({
     [onLayoutChange, validateOverlap],
   );
 
-  const handleResizeStop = useCallback((layout: Layout) => {
-    resizeStateRef.current = null;
-    const onGlobalMove = (window as any)._onRglResizeMove;
-    if (onGlobalMove) {
-      window.removeEventListener("mousemove", onGlobalMove);
-      delete (window as any)._onRglResizeMove;
-    }
-    onLayoutChange?.(layout);
-  }, [onLayoutChange]);
+  const handleResizeStop = useCallback(
+    (layout: Layout) => {
+      resizeStateRef.current = null;
+      const onGlobalMove = (window as any)._onRglResizeMove;
+      if (onGlobalMove) {
+        window.removeEventListener("mousemove", onGlobalMove);
+        delete (window as any)._onRglResizeMove;
+      }
+      onLayoutChange?.(layout);
+    },
+    [onLayoutChange],
+  );
 
   return (
     // Scrollable wrapper — overflow is here, NOT on the grid container
@@ -235,7 +284,16 @@ export function DashboardGrid({
             }}
             resizeConfig={{
               enabled: isEditMode,
-              handles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"] as readonly any[],
+              handles: [
+                "s",
+                "w",
+                "e",
+                "n",
+                "sw",
+                "nw",
+                "se",
+                "ne",
+              ] as readonly any[],
             }}
             compactor={{
               type: null, // No vertical compaction (don't snap to y=0)

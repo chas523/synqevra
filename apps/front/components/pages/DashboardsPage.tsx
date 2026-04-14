@@ -93,10 +93,22 @@ export default function DashboardsPage() {
   ) => {
     if (e) e.stopPropagation();
     try {
-      const data = await DashboardService.getDashboardById(
+      const raw = await DashboardService.getDashboardById(
         dashboard.id.id,
         true,
       );
+
+      // Strip server-generated fields so the export is compatible with
+      // the official ThingsBoard import format.
+      const {
+        id,
+        createdTime,
+        tenantId,
+        assignedCustomers,
+        version,
+        externalId,
+        ...data
+      } = raw;
 
       const jsonString = JSON.stringify(data, null, 2);
       const blob = new Blob([jsonString], { type: "application/json" });
@@ -240,7 +252,7 @@ export default function DashboardsPage() {
   ];
 
   return (
-    <div className="container mx-auto p-6 h-[calc(100vh-theme(spacing.16))] flex flex-col">
+    <div className="container mx-auto p-6 h-[calc(100vh-(--spacing(16)))] flex flex-col">
       <DataTable
         title="Dashboards"
         data={dashboards}

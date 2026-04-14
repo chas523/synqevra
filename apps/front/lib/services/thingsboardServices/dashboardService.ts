@@ -15,7 +15,7 @@ export class DashboardService {
   }
 
   static async getEmbedToken(): Promise<{ jwtToken: string }> {
-    const response = await proxyApi.get('/thingsboard/embed-token');
+    const response = await proxyApi.get("/thingsboard/embed-token");
     return response.data;
   }
 
