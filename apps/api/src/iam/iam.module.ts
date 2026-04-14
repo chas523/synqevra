@@ -11,6 +11,7 @@ import { Patient } from './infrastructure/persistance/patient.entity';
 import { PatientMedplum } from './infrastructure/persistance/patient-medplum.entity';
 import { AuthController } from './interface/rest/auth.controller';
 import { AuthService } from './application/auth/auth.service';
+import { AdminInitService } from './admin-init.service';
 import { JwtModule } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigModule } from '@nestjs/config';
@@ -73,7 +74,6 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
   ],
   providers: [
     AuthService,
-
     CreateUserUseCase,
     UpdateUserUseCase,
     RegisterUserUseCase,
@@ -88,7 +88,6 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     PatientLoginUseCase,
     GetPatientProfileUseCase,
     ValidateGoogleUserUseCase,
-
     { provide: UserRepository, useClass: UserRepositoryAdapter },
     { provide: AdminRepository, useClass: AdminRepositoryAdapter },
     { provide: TokenGeneratorPort, useClass: TokenGeneratorAdapter },
@@ -106,6 +105,7 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
       provide: EMAIL_PORT,
       useClass: NodemailerAdapter,
     },
+    AdminInitService,
   ],
   exports: [
     AuthService,
@@ -118,7 +118,12 @@ import { GetPatientProfileUseCase } from './application/use-cases/get-patient-pr
     PatientRepository,
     PatientMedplumRepository,
     PatientAuthGuard,
+    AdminInitService,
     ValidateGoogleUserUseCase,
   ],
 })
-export class IamModule {}
+export class IamModule {
+  constructor(adminInitService: AdminInitService) {
+    // This will trigger the onModuleInit lifecycle for AdminInitService
+  }
+}
