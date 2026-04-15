@@ -98,6 +98,61 @@ export class RuleChainService {
     await proxyApi.post("/thingsboard/ruleChain/metadata", payload);
   }
 
+  public static async importRuleChain(json: {
+    ruleChain: {
+      name: string;
+      type: string;
+      firstRuleNodeId?: any;
+      root?: boolean;
+      debugMode?: boolean;
+      configuration?: any;
+      additionalInfo?: any;
+    };
+    metadata: {
+      version?: number;
+      firstNodeIndex?: number | null;
+      nodes?: any[];
+      connections?: any[];
+      ruleChainConnections?: any;
+    };
+  }): Promise<RuleChain> {
+    const { ruleChain, metadata } = json;
+
+    const created = await RuleChainService.createRuleChain({
+      name: ruleChain.name,
+      type: ruleChain.type,
+      debugMode: ruleChain.debugMode ?? false,
+      additionalInfo: ruleChain.additionalInfo ?? null,
+    });
+
+    const sanitizedNodes = (metadata.nodes ?? []).map((node: any) => {
+      if (!node?.configuration) return node;
+
+      // Strip environment-specific references from all node types:
+      // - originatorId/originatorType  → TbMsgGeneratorNode would send telemetry
+      //   to user B's devices if kept.
+      // - ruleChainId                  → TbRuleChainInputNode would route messages
+      //   into user B's rule chain if kept. TB itself warns about this and
+      //   requires manual re-linking after import.
+      const { originatorId, originatorType, ruleChainId, ...restConfig } =
+        node.configuration;
+
+      return { ...node, configuration: restConfig };
+    });
+
+    await RuleChainService.saveRuleChainMetadata({
+      ruleChainId: { entityType: "RULE_CHAIN", id: created.id.id },
+      nodes: sanitizedNodes,
+      connections: metadata.connections ?? [],
+      firstNodeIndex:
+        metadata.firstNodeIndex != null ? metadata.firstNodeIndex : undefined,
+      // Do not forward the exported version — the freshly created chain starts
+      // at version 0 and ThingsBoard would reject any other value with a 409.
+    });
+
+    return created;
+  }
+
   public static async getRuleChain(id: string): Promise<RuleChain> {
     const { data } = await proxyApi.get<RuleChain>(
       `/thingsboard/ruleChain/${id}`,

@@ -1689,6 +1689,9 @@ export class ThingsboardController {
       await this.thingsboardApi.deleteAsset(accessToken, id);
       return { success: true };
     } catch (error) {
+      if (error instanceof ThingsboardApiException) {
+        throw new BadRequestException(error.message);
+      }
       throw new InternalServerErrorException('Failed to delete asset');
     }
   }
@@ -3829,6 +3832,9 @@ export class ThingsboardController {
       await this.thingsboardApi.deleteDevice(accessToken, id);
       return { success: true };
     } catch (error) {
+      if (error instanceof ThingsboardApiException) {
+        throw new BadRequestException(error.message);
+      }
       throw new InternalServerErrorException('Failed to delete device');
     }
   }

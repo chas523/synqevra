@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
-import { RuleChain } from "@/lib/services/thingsboardServices/ruleChainService";
+import {
+  RuleChain,
+  RuleChainService,
+} from "@/lib/services/thingsboardServices/ruleChainService";
 import {
   useRuleChains,
   useManageRuleChain,
@@ -10,7 +13,13 @@ import {
 import { AddRuleChainModal } from "@/components/organisms/AddRuleChainModal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Flag, Trash2, CheckSquare, Square } from "lucide-react";
+import { Flag, Trash2, CheckSquare, Square, Upload } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 
 const PAGE_SIZE = 10;
@@ -27,6 +36,29 @@ export default function RuleChainsPage() {
 
   const { isSaving, createRuleChain, setRootRuleChain, deleteRuleChain } =
     useManageRuleChain();
+
+  const importFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        await RuleChainService.importRuleChain(json);
+        mutate();
+        toast.success("Rule chain imported successfully");
+      } catch (error) {
+        toast.error("Failed to import rule chain – invalid JSON file");
+      } finally {
+        if (importFileInputRef.current) {
+          importFileInputRef.current.value = "";
+        }
+      }
+    },
+    [mutate],
+  );
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -173,6 +205,34 @@ export default function RuleChainsPage() {
         onSortChange={handleSortChange}
         onAdd={() => setShowAddModal(true)}
         onRefresh={handleRefresh}
+        customAction={
+          <>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => importFileInputRef.current?.click()}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Upload className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Import rule chain from JSON</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <input
+              ref={importFileInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </>
+        }
         onRowClick={handleRowClick}
         rowActions={(rc) => (
           <div className="flex items-center gap-1">

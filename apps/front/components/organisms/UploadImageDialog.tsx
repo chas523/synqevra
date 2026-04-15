@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -77,6 +78,9 @@ export function UploadImageDialog({
       <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>Upload image</DialogTitle>
+          <DialogDescription className="sr-only">
+            Select an image file to upload.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -86,30 +90,19 @@ export function UploadImageDialog({
             </Label>
             <div className="mt-2 relative">
               {preview ? (
-                <div className="flex items-start gap-4">
-                  <div className="relative">
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      className="w-16 h-16 object-contain rounded border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile(0)}
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center hover:bg-slate-500"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
-                  </div>
-                  <div className="flex-1">
-                    <FileDropzone
-                      accept="image/*"
-                      multiple={false}
-                      onFilesSelected={handleFilesSelected}
-                      selectedFiles={[]}
-                      className="h-16"
-                    />
-                  </div>
+                <div className="relative inline-block">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="w-16 h-16 object-contain rounded border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(0)}
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-slate-600 rounded-full flex items-center justify-center hover:bg-slate-500"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
                 </div>
               ) : (
                 <FileDropzone
