@@ -278,9 +278,19 @@ export default function AppSidebar() {
   }, [tenantId]);
 
   useEffect(() => {
-    const currentVersion =
-      window.localStorage.getItem(WHITELABEL_LOGO_VERSION_KEY) || "0";
-    setLogoVersion(currentVersion);
+    // Fetch version from MinIO so all browsers (not just the uploader) see the
+    // latest logo. Falls back to localStorage if the file doesn't exist yet.
+    fetch("/public-assets/global/version.json", { cache: "no-store" })
+      .then((r) => r.json())
+      .then(({ version }: { version: string }) => {
+        setLogoVersion(version);
+        window.localStorage.setItem(WHITELABEL_LOGO_VERSION_KEY, version);
+      })
+      .catch(() => {
+        const fallback =
+          window.localStorage.getItem(WHITELABEL_LOGO_VERSION_KEY) || "0";
+        setLogoVersion(fallback);
+      });
 
     const onLogoUpdated = (event: Event) => {
       const customEvent = event as CustomEvent<string>;
@@ -303,12 +313,13 @@ export default function AppSidebar() {
 
   const groups =
     role === "ADMIN" ? SIDEBAR_CONFIG.ADMIN : SIDEBAR_CONFIG.OTHERS;
-  const shouldShowPatientsNavigation = isConnectionStatusLoading || hasMedplum;
+  const shouldShowMedplumNavigation = isConnectionStatusLoading || hasMedplum;
+  const MEDPLUM_ROUTES = ["/patients", "/devices", "/practitioners"];
   const visibleGroups = groups.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
-      if (role !== "ADMIN" && item.href === "/patients") {
-        return shouldShowPatientsNavigation;
+      if (role !== "ADMIN" && item.href && MEDPLUM_ROUTES.includes(item.href)) {
+        return shouldShowMedplumNavigation;
       }
 
       return true;
@@ -386,7 +397,7 @@ export default function AppSidebar() {
         {mounted &&
           medplumEnabled &&
           role === "ADMIN" &&
-          shouldShowPatientsNavigation && (
+          shouldShowMedplumNavigation && (
             <SidebarGroup>
               <SidebarGroupLabel>Medplum</SidebarGroupLabel>
               <SidebarGroupContent>

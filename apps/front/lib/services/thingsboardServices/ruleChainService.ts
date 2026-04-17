@@ -140,17 +140,8 @@ export class RuleChainService {
     return { data: [], totalPages: 0, totalElements: 0 };
   }
 
-  // Attribute methods for UI consistency
-  public static async fetchRuleChainServerAttributes(id: string) {
-    return this.fetchRuleChainAttributes(id, 'SERVER_SCOPE');
-  }
-
   public static async fetchRuleChainSharedAttributes(id: string) {
-    return this.fetchRuleChainAttributes(id, 'SHARED_SCOPE');
-  }
-
-  public static async fetchRuleChainClientAttributes(id: string) {
-    return this.fetchRuleChainAttributes(id, 'CLIENT_SCOPE');
+    return this.fetchRuleChainAttributes(id);
   }
 
   public static async updateRuleChainServerAttributes(id: string, attributes: Record<string, any>) {
@@ -162,7 +153,7 @@ export class RuleChainService {
   }
 
   public static async deleteRuleChainAttributes(id: string, scope: string, keys: string) {
-     await proxyApi.delete(`/thingsboard/rule-chains/${id}/attributes?scope=${scope}&keys=${keys}`);
+    await proxyApi.delete(`/thingsboard/rule-chains/${id}/attributes?scope=${scope}&keys=${keys}`);
   }
 
   // Telemetry methods
@@ -245,7 +236,7 @@ export class RuleChainService {
   }
 
 
-  public static async getRuleChainAlarms(id: string, page=0, pageSize=10, statusList?: string[], severityList?: string[], startTime?: number, endTime?: number): Promise<any> {
+  public static async getRuleChainAlarms(id: string, page = 0, pageSize = 10, statusList?: string[], severityList?: string[], startTime?: number, endTime?: number): Promise<any> {
     const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString(), sortProperty: 'createdTime', sortOrder: 'DESC' });
     if (statusList?.length) params.append('statusList', statusList.join(','));
     if (severityList?.length) params.append('severityList', severityList.join(','));
@@ -264,7 +255,7 @@ export class RuleChainService {
   }
 
 
-  public static async getRuleChainAuditLogs(id: string, page=0, pageSize=10, sortProperty='createdTime', sortOrder='DESC', startTime?: number, endTime?: number): Promise<any> {
+  public static async getRuleChainAuditLogs(id: string, page = 0, pageSize = 10, sortProperty = 'createdTime', sortOrder = 'DESC', startTime?: number, endTime?: number): Promise<any> {
     const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString(), sortProperty, sortOrder });
     if (startTime) params.append('startTime', startTime.toString());
     if (endTime) params.append('endTime', endTime.toString());

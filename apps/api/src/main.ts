@@ -3,9 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import { SimpleExceptionFilter } from './utils/simple-exception.filter';
 import express, { json, urlencoded } from 'express';
-import { createProxyMiddleware, responseInterceptor } from 'http-proxy-middleware';
+import {
+  createProxyMiddleware,
+  responseInterceptor,
+} from 'http-proxy-middleware';
 
 // Initialize the secondary ThingsBoard Proxy Server for Iframe embedding
 function bootstrapTbProxy() {
@@ -34,7 +36,7 @@ function bootstrapTbProxy() {
                     }
                   } catch (e) {}
                   
-                  window.location.href = redirect || '/';
+                  window.location.replace(redirect || '/');
               }
             });
           </script>
@@ -70,7 +72,10 @@ function bootstrapTbProxy() {
     }
 
     // 3. Allow Static Assets & Localization needed to render the pure iframe
-    const isStaticAsset = req.path.startsWith('/assets/') || req.path.startsWith('/static/') || /\.(js|css|json|ico|woff2?|svg|png|jpe?g|map)$/.test(req.path);
+    const isStaticAsset =
+      req.path.startsWith('/assets/') ||
+      req.path.startsWith('/static/') ||
+      /\.(js|css|json|ico|woff2?|svg|png|jpe?g|map)$/.test(req.path);
     if (isStaticAsset) {
       return next();
     }
@@ -105,7 +110,7 @@ function bootstrapTbProxy() {
         // We delete them from the source headers to be 100% sure.
         delete proxyRes.headers['x-frame-options'];
         delete proxyRes.headers['X-Frame-Options'];
-        
+
         // Ensure browser allows this frame to be embedded in our portal
         res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:3002");
 
@@ -205,13 +210,15 @@ function bootstrapTbProxy() {
           if (!html.includes(injectedCss)) {
             html = html.replace('<body', injectedCss + '<body');
           }
-          return html;
+          return Promise.resolve(html);
         }
 
-        return responseBuffer;
-      }),
+        return Promise.resolve(responseBuffer);
+      },
+      ),
     },
-  }));
+  }),
+  );
 
   tbProxy.listen(tbProxyPort, () => {
     const logger = new Logger('TB-Proxy');

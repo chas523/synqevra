@@ -22,7 +22,7 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
 
   const { data: tokenData, isLoading: isLoadingToken } = useSWR(
     "embed-token",
-    () => DashboardService.getEmbedToken()
+    () => DashboardService.getEmbedToken(),
   );
 
   useEffect(() => {
@@ -35,9 +35,9 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
       iframeRef.current.contentWindow?.postMessage(
         {
           jwtToken: tokenData.jwtToken,
-          redirect: targetUrl
+          redirect: targetUrl,
         },
-        "http://localhost:3002"
+        "http://localhost:3002",
       );
     }
   }, [iframeLoaded, tokenData, dashboardId]);
@@ -49,7 +49,9 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
       <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="text-sm text-slate-500">Loading dashboard environment...</span>
+          <span className="text-sm text-slate-500">
+            Loading dashboard environment...
+          </span>
         </div>
       </div>
     );
@@ -105,8 +107,8 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
             src="http://localhost:3002/bridge.html"
             className="absolute top-0 left-0 w-full h-full"
             style={{
-              border: 'none',
-              pointerEvents: 'auto'
+              border: "none",
+              pointerEvents: "auto",
             }}
             onLoad={() => setIframeLoaded(true)}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"

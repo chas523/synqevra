@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
   const isAlwaysPublic = alwaysPublic.some((route) => pathname === route);
 
   if (isLoggedIn && isGuestRoute) {
-    const dashboardUrl = new URL("/devices", req.url);
+    const dashboardUrl = new URL("/dashboards", req.url);
     return NextResponse.redirect(dashboardUrl);
   }
 

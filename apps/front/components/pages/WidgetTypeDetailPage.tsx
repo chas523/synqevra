@@ -69,7 +69,7 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/resources/widgets-library")}
+            onClick={() => router.push("/resources/widgets-library/widget-types")}
             className="text-slate-500 dark:text-slate-400"
           >
             <ArrowLeft className="h-5 w-5" />

@@ -1359,7 +1359,7 @@ export interface CreateAssetRequest {
   name: string;
   label?: string | null;
   assetProfileId: EntityId;
-  customerId: EntityId;
+  customerId: EntityId | null;
   type?: string;
   additionalInfo?: {
     description?: string;
