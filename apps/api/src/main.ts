@@ -61,7 +61,10 @@ function bootstrapTbProxy() {
       req.path.startsWith('/dashboards/') ||
       req.path.startsWith('/dashboard/') ||
       req.path.startsWith('/ruleChains/') ||
-      req.path.startsWith('/ruleChain/')
+      req.path.startsWith('/ruleChain/') ||
+      req.path.startsWith('/resources/widgets-library/') ||
+      req.path.includes('/preview') ||
+      req.path.startsWith('/widget')
     ) {
       return next();
     }
@@ -73,6 +76,7 @@ function bootstrapTbProxy() {
     }
 
     // 4. Deny everything else! (e.g. /devices, /, /login, /ruleChains)
+    console.warn('[TB Proxy] Blocked by firewall:', req.path);
     res.status(403).send(`
         <!DOCTYPE html>
         <html>
@@ -96,6 +100,15 @@ function bootstrapTbProxy() {
     selfHandleResponse: true, // Needed for responseInterceptor
     on: {
       proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+        // --- 1. Aggressive fix for nested Iframe / Widget Preview ---
+        // Some responses might have multiple X-Frame-Options or different casing.
+        // We delete them from the source headers to be 100% sure.
+        delete proxyRes.headers['x-frame-options'];
+        delete proxyRes.headers['X-Frame-Options'];
+        
+        // Ensure browser allows this frame to be embedded in our portal
+        res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:3002");
+
         const contentType = proxyRes.headers['content-type'];
 
         // Inject CSS to hide TB Layout only into HTML responses
@@ -143,7 +156,9 @@ function bootstrapTbProxy() {
                     'mat-sidenav', 
                     '.tb-layout-sidebar', 
                     '.tb-side-menu-container', 
-                    '.tb-primary-toolbar'
+                    '.tb-primary-toolbar',
+                    'header.tb-nav-header',
+                    'mat-toolbar.tb-side-menu-toolbar'
                 ];
 
                 const resetMarginSelectors = [

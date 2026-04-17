@@ -3251,6 +3251,72 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     );
   }
 
+  async fetchEntityLatestTelemetry(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (keys.length > 0) {
+        params.append('keys', keys.join(','));
+      }
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/timeseries${keys.length > 0 ? '?' + params.toString() : ''}`;
+      const response = await firstValueFrom(
+        this.httpService.get<LatestTelemetryResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch latest telemetry for ${entityType}/${entityId}: ${error}`);
+      return {};
+    }
+  }
+
+  async fetchEntityTelemetryKeys(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<string[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/keys/timeseries`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      this.logger.warn(`Failed to fetch telemetry keys for ${entityType}/${entityId}: ${error}`);
+      return [];
+    }
+  }
+
+  async deleteEntityAttributes(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    keys: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/attributes/${scope}?keys=${keys}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        `Failed to delete entity attributes for ${entityType}/${entityId}`,
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchTenantProfiles(
     sysAdminAccessToken: string,
     page: number,

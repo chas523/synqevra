@@ -799,6 +799,27 @@ export abstract class ThingsboardApiPort {
     toType: string,
   ): Promise<void>;
 
+  abstract fetchEntityLatestTelemetry(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse>;
+
+  abstract fetchEntityTelemetryKeys(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<string[]>;
+
+  abstract deleteEntityAttributes(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    keys: string,
+  ): Promise<void>;
+
   abstract fetchVersionDiff(
     accessToken: string,
     entityType: string,

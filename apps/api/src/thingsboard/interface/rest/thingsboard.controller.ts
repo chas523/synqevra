@@ -17,6 +17,7 @@ import {
   NotFoundException,
   HttpStatus,
   Logger,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -244,11 +245,21 @@ import { FetchOAuth2ClientByIdQuery } from 'src/thingsboard/application/queries/
 import { FetchRuleChainsQuery } from 'src/thingsboard/application/queries/fetch-rule-chains/fetch-rule-chains.query';
 import { CreateRuleChainFullCommand } from 'src/thingsboard/application/commands/create-rule-chain-full/create-rule-chain-full.command';
 import { DeleteRuleChainCommand } from 'src/thingsboard/application/commands/delete-rule-chain/delete-rule-chain.command';
+import { FetchRuleChainMetadataQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.query';
 import { SetRootRuleChainCommand } from 'src/thingsboard/application/commands/set-root-rule-chain/set-root-rule-chain.command';
 import { SaveRuleChainMetadataCommand } from 'src/thingsboard/application/commands/save-rule-chain-metadata/save-rule-chain-metadata.command';
 import { FetchRuleChainByIdQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-by-id/fetch-rule-chain-by-id.query';
-import { FetchRuleChainMetadataQuery } from 'src/thingsboard/application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.query';
+import { SaveEntityAttributesCommand } from 'src/thingsboard/application/commands/save-entity-attributes/save-entity-attributes.command';
+import { DeleteEntityAttributesCommand } from 'src/thingsboard/application/commands/delete-entity-attributes/delete-entity-attributes.command';
+import { FetchEntityAttributesQuery } from 'src/thingsboard/application/queries/fetch-entity-attributes/fetch-entity-attributes.query';
+import { FetchEntityAlarmsQuery } from 'src/thingsboard/application/queries/fetch-entity-alarms/fetch-entity-alarms.query';
+import { FetchEntityRelationsQuery } from 'src/thingsboard/application/queries/fetch-entity-relations/fetch-entity-relations.query';
+import { FetchEntityAuditLogsQuery } from 'src/thingsboard/application/queries/fetch-entity-audit-logs/fetch-entity-audit-logs.query';
+import { FetchEntityTelemetryQuery } from 'src/thingsboard/application/queries/fetch-entity-telemetry/fetch-entity-telemetry.query';
+import { FetchEntityTelemetryKeysQuery } from 'src/thingsboard/application/queries/fetch-entity-telemetry-keys/fetch-entity-telemetry-keys.query';
 import { FetchEntityEventsQuery } from 'src/thingsboard/application/queries/fetch-entity-events/fetch-entity-events.query';
+import { CreateRelationCommand } from 'src/thingsboard/application/commands/create-relation/create-relation.command';
+import { DeleteRelationCommand } from 'src/thingsboard/application/commands/delete-relation/delete-relation.command';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -1166,7 +1177,7 @@ export class ThingsboardController {
     @Param('id') id: string,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
     if (
       scope !== 'SERVER_SCOPE' &&
       scope !== 'CLIENT_SCOPE' &&
@@ -1203,7 +1214,7 @@ export class ThingsboardController {
     @Body() attributes: Record<string, any>,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
     if (scope !== 'SERVER_SCOPE' && scope !== 'SHARED_SCOPE') {
       throw new BadRequestException(
         'Only SERVER_SCOPE and SHARED_SCOPE are allowed for updates',
@@ -2582,7 +2593,7 @@ export class ThingsboardController {
     @Param('id') id: string,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
 
     if (
       scope !== 'SERVER_SCOPE' &&
@@ -3311,7 +3322,7 @@ export class ThingsboardController {
     @Param('id') id: string,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase() as any;
 
     if (
       scope !== 'SERVER_SCOPE' &&
@@ -3417,7 +3428,7 @@ export class ThingsboardController {
     @Body() attributes: Record<string, any>,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SHARED_SCOPE').toUpperCase() as any;
 
     if (scope !== 'SERVER_SCOPE' && scope !== 'SHARED_SCOPE') {
       throw new BadRequestException(
@@ -4551,27 +4562,252 @@ export class ThingsboardController {
     });
   }
 
+
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('rule-chains')
-  @ApiOperation({ summary: 'Fetch rule chains' })
+  @ApiOperation({ summary: 'Fetch rule chains (kabob-case)' })
   async fetchRuleChains(
     @TbAccessToken() accessToken: string,
     @Query('page') page = 0,
-    @Query('pageSize') pageSize = 50,
-    @Query('sortProperty') sortProperty = 'name',
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('type') type?: 'CORE' | 'EDGE',
   ) {
-    return this.thingsboardApi.fetchRuleChains(
-      accessToken,
-      page,
-      pageSize,
-      sortProperty,
-      sortOrder,
-      type,
+    const result = await this.queryBus.execute(
+      new FetchRuleChainsQuery(
+        accessToken,
+        page,
+        pageSize,
+        type,
+        sortProperty,
+        sortOrder,
+      ),
     );
+
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id')
+  @ApiOperation({ summary: 'Fetch rule chain by id' })
+  async fetchRuleChainById(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchRuleChainByIdQuery(accessToken, id),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/attributes')
+  async getRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam?: string) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
+    const result = await this.queryBus.execute(
+      new FetchEntityAttributesQuery(accessToken, 'RULE_CHAIN', id, scope),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('rule-chains/:id/attributes')
+  async saveRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam: string, @Body() attributes: any) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
+    const result = await this.commandBus.execute(
+      new SaveEntityAttributesCommand('RULE_CHAIN', id, scope as any, attributes, accessToken),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('rule-chains/:id/attributes')
+  async deleteRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam: string, @Query('keys') keys: string) {
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
+    const result = await this.commandBus.execute(
+      new DeleteEntityAttributesCommand(accessToken, 'RULE_CHAIN', id, scope, keys),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/alarms')
+  async getRuleChainAlarms(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchEntityAlarmsQuery(
+        accessToken,
+        'RULE_CHAIN',
+        id,
+        page,
+        pageSize,
+        statusList ? statusList.split(',') : undefined,
+        severityList ? severityList.split(',') : undefined,
+        startTime,
+        endTime,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('rule-chains/:id/events')
+  async getRuleChainEvents(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() body: any,
+    @Query('tenantId') tenantId: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchEntityEventsQuery(
+        accessToken,
+        'RULE_CHAIN',
+        id,
+        tenantId || id, // Fallback to id if tenantId not provided, although TB usually wants the actual tenantId
+        body.eventType || 'LC_EVENT',
+        page,
+        pageSize,
+        sortProperty,
+        sortOrder,
+        startTime,
+        endTime,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/relations')
+  async getRuleChainRelations(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('direction') direction: 'FROM' | 'TO' = 'FROM') {
+    const result = await this.queryBus.execute(
+      new FetchEntityRelationsQuery(accessToken, 'RULE_CHAIN', id, direction),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('rule-chains/:id/relations')
+  async saveRuleChainRelation(@TbAccessToken() accessToken: string, @Param('id') id: string, @Body() body: any) {
+    const result = await this.commandBus.execute(
+      new CreateRelationCommand(
+        body.from.id,
+        body.from.entityType,
+        body.to.id,
+        body.to.entityType,
+        body.type,
+        body.additionalInfo,
+        accessToken,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Delete('rule-chains/:id/relations')
+  async deleteRuleChainRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('relatedEntityId') relatedEntityId: string,
+    @Query('relatedEntityType') relatedEntityType: string,
+    @Query('relationType') relationType: string,
+    @Query('direction') direction: 'FROM' | 'TO'
+  ) {
+    const fromId = direction === 'FROM' ? id : relatedEntityId;
+    const fromType = direction === 'FROM' ? 'RULE_CHAIN' : relatedEntityType;
+    const toId = direction === 'FROM' ? relatedEntityId : id;
+    const toType = direction === 'FROM' ? relatedEntityType : 'RULE_CHAIN';
+
+    const result = await this.commandBus.execute(
+      new DeleteRelationCommand(fromId, fromType, toId, toType, relationType, accessToken),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/audit-logs')
+  async getRuleChainAuditLogs(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchEntityAuditLogsQuery(
+        accessToken,
+        'RULE_CHAIN',
+        id,
+        page,
+        pageSize,
+        sortProperty,
+        sortOrder,
+        startTime,
+        endTime,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/telemetry/latest')
+  async getRuleChainTelemetry(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('keys') keys?: string) {
+    const result = await this.queryBus.execute(
+      new FetchEntityTelemetryQuery(accessToken, 'RULE_CHAIN', id, keys ? keys.split(',') : undefined),
+    );
+    return result.unwrap();
+  }
+
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('rule-chains/:id/telemetry/latest/keys')
+  async getRuleChainTelemetryKeys(@TbAccessToken() accessToken: string, @Param('id') id: string) {
+    const result = await this.queryBus.execute(
+      new FetchEntityTelemetryKeysQuery(accessToken, 'RULE_CHAIN', id),
+    );
+    return result.unwrap();
   }
 
   @ApiBearerAuth()
@@ -4589,9 +4825,9 @@ export class ThingsboardController {
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Get('rule-chains/:ruleChainId')
-  @ApiOperation({ summary: 'Fetch rule chain by id' })
-  async fetchRuleChainById(
+  @Get('rule-chains-deprecated/:ruleChainId')
+  @ApiOperation({ summary: 'Deprecated Fetch rule chain by id' })
+  async fetchRuleChainByIdDeprecated(
     @TbAccessToken() accessToken: string,
     @Param('ruleChainId') ruleChainId: string,
   ) {
@@ -6135,7 +6371,7 @@ export class ThingsboardController {
     @Param('id') id: string,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
 
     if (
       scope !== 'SERVER_SCOPE' &&
@@ -6167,7 +6403,7 @@ export class ThingsboardController {
     @Param('id') id: string,
     @Query('scope') scopeParam?: string,
   ) {
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
 
     if (
       scope !== 'SERVER_SCOPE' &&
@@ -7136,7 +7372,7 @@ export class ThingsboardController {
   ) {
     const entityType = entityTypeParam.toUpperCase();
     const kind = (kindParam || 'latest_telemetry').toLowerCase();
-    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase();
+    const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
 
     const supportedEntityTypes = new Set([
       'DEVICE',
@@ -7453,9 +7689,8 @@ export class ThingsboardController {
     });
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Get('/ruleChains')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get list of rule chains' })
   async getRuleChains(
@@ -7483,28 +7718,10 @@ export class ThingsboardController {
     });
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
-  @UseGuards(ThingsboardAuthGuard)
-  @Get('/ruleChain/:id')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get rule chain by id' })
-  async getRuleChain(
-    @TbAccessToken() accessToken: string,
-    @Param('id') id: string,
-  ) {
-    const query = new FetchRuleChainByIdQuery(accessToken, id);
-    const result = await this.queryBus.execute(query);
-    return match(result, {
-      Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
-  }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Get('/ruleChain/:id/metadata')
+  @Get('/rule-chains/:id/metadata')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get rule chain metadata by id' })
   async getRuleChainMetadata(
@@ -7513,36 +7730,26 @@ export class ThingsboardController {
   ) {
     const query = new FetchRuleChainMetadataQuery(accessToken, id);
     const result = await this.queryBus.execute(query);
-    return match(result, {
-      Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    return result.unwrap();
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Post('/ruleChain')
+  @Post('/rule-chains')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create rule chain' })
+  @ApiOperation({ summary: 'Create/Update rule chain' })
   async createRuleChainFull(
     @TbAccessToken() accessToken: string,
     @Body() payload: any,
   ) {
     const command = new CreateRuleChainFullCommand(accessToken, payload);
     const result = await this.commandBus.execute(command);
-    return match(result, {
-      Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    return result.unwrap();
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Delete('/ruleChain/:id')
+  @Delete('/rule-chains/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete rule chain' })
   async deleteRuleChain(
@@ -7551,17 +7758,13 @@ export class ThingsboardController {
   ) {
     const command = new DeleteRuleChainCommand(accessToken, id);
     const result = await this.commandBus.execute(command);
-    return match(result, {
-      Ok: () => ({ success: true }),
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    result.unwrap();
+    return { success: true };
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Post('/ruleChain/:id/root')
+  @Post('/rule-chains/:id/root')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Set rule chain as root' })
   async setRootRuleChain(
@@ -7570,16 +7773,11 @@ export class ThingsboardController {
   ) {
     const command = new SetRootRuleChainCommand(accessToken, id);
     const result = await this.commandBus.execute(command);
-    return match(result, {
-      Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    return result.unwrap();
   }
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
-  @Post('/ruleChain/metadata')
+  @Post('/rule-chains/metadata')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Save rule chain metadata (nodes + connections)' })
   async saveRuleChainMetadata(
@@ -7600,15 +7798,10 @@ export class ThingsboardController {
       metadata,
     );
     const result = await this.commandBus.execute(command);
-    return match(result, {
-      Ok: (response: any) => response,
-      Err: (error: ThingsboardApiException) => {
-        throw error;
-      },
-    });
+    return result.unwrap();
   }
 
-  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('/events/:entityType/:id')
   @ApiBearerAuth()
@@ -7648,6 +7841,9 @@ export class ThingsboardController {
       },
     });
   }
+
+  // Proxied Rule Chain Detail Endpoints
+
 
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)

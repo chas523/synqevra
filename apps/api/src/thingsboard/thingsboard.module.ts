@@ -71,6 +71,13 @@ import { CreateRuleChainFullCommandHandler } from './application/commands/create
 import { DeleteRuleChainCommandHandler } from './application/commands/delete-rule-chain/delete-rule-chain.command-handler';
 import { SetRootRuleChainCommandHandler } from './application/commands/set-root-rule-chain/set-root-rule-chain.command-handler';
 import { SaveRuleChainMetadataCommandHandler } from './application/commands/save-rule-chain-metadata/save-rule-chain-metadata.command-handler';
+import { DeleteEntityAttributesCommandHandler } from './application/commands/delete-entity-attributes/delete-entity-attributes.command-handler';
+import { FetchEntityAttributesQueryHandler } from './application/queries/fetch-entity-attributes/fetch-entity-attributes.query-handler';
+import { FetchEntityAlarmsQueryHandler } from './application/queries/fetch-entity-alarms/fetch-entity-alarms.query-handler';
+import { FetchEntityRelationsQueryHandler } from './application/queries/fetch-entity-relations/fetch-entity-relations.query-handler';
+import { FetchEntityAuditLogsQueryHandler } from './application/queries/fetch-entity-audit-logs/fetch-entity-audit-logs.query-handler';
+import { FetchEntityTelemetryQueryHandler } from './application/queries/fetch-entity-telemetry/fetch-entity-telemetry.query-handler';
+import { FetchEntityTelemetryKeysQueryHandler } from './application/queries/fetch-entity-telemetry-keys/fetch-entity-telemetry-keys.query-handler';
 
 // Query Handlers
 import { FetchDevicesQueryHandler } from './application/queries/fetch-devices/fetch-devices.query.handler';
@@ -225,6 +232,7 @@ const commandHandlers = [
   DeleteRuleChainCommandHandler,
   SetRootRuleChainCommandHandler,
   SaveRuleChainMetadataCommandHandler,
+  DeleteEntityAttributesCommandHandler,
 ];
 
 import { FetchResourceInfoQueryHandler } from './application/queries/fetch-resource-info/fetch-resource-info.query.handler';
@@ -309,6 +317,12 @@ const queryHandlers = [
   FetchRuleChainByIdHandler,
   FetchRuleChainMetadataHandler,
   FetchVersionDiffQueryHandler,
+  FetchEntityAttributesQueryHandler,
+  FetchEntityAlarmsQueryHandler,
+  FetchEntityRelationsQueryHandler,
+  FetchEntityAuditLogsQueryHandler,
+  FetchEntityTelemetryQueryHandler,
+  FetchEntityTelemetryKeysQueryHandler,
 ];
 
 @Module({

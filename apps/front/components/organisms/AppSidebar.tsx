@@ -347,7 +347,7 @@ export default function AppSidebar() {
     <Sidebar
       collapsible="icon"
       variant="floating"
-      className=" bg-transparent dark:bg-slate-900/30 shadow-lg shadow-slate-500/10 dark:shadow-blue-500/10"
+      className="shadow-lg shadow-slate-500/10 dark:shadow-blue-500/10"
     >
       <SidebarHeader>
         <SidebarMenu>
