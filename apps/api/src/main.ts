@@ -36,7 +36,7 @@ function bootstrapTbProxy() {
                     }
                   } catch (e) {}
                   
-                  window.location.href = redirect || '/';
+                  window.location.replace(redirect || '/');
               }
             });
           </script>
@@ -63,7 +63,10 @@ function bootstrapTbProxy() {
       req.path.startsWith('/dashboards/') ||
       req.path.startsWith('/dashboard/') ||
       req.path.startsWith('/ruleChains/') ||
-      req.path.startsWith('/ruleChain/')
+      req.path.startsWith('/ruleChain/') ||
+      req.path.startsWith('/resources/widgets-library/') ||
+      req.path.includes('/preview') ||
+      req.path.startsWith('/widget')
     ) {
       return next();
     }
@@ -78,6 +81,7 @@ function bootstrapTbProxy() {
     }
 
     // 4. Deny everything else! (e.g. /devices, /, /login, /ruleChains)
+    console.warn('[TB Proxy] Blocked by firewall:', req.path);
     res.status(403).send(`
         <!DOCTYPE html>
         <html>
@@ -93,25 +97,30 @@ function bootstrapTbProxy() {
   });
 
   // Proxy all other allowed routes directly to ThingsBoard
-  tbProxy.use(
-    '/',
-    createProxyMiddleware({
-      target: 'http://localhost:8088',
-      changeOrigin: true,
-      ws: true, // For telemetry websockets
-      autoRewrite: true,
-      selfHandleResponse: true, // Needed for responseInterceptor
-      on: {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        proxyRes: responseInterceptor(
-          (responseBuffer, proxyRes, _req, _res) => {
-            const contentType = proxyRes.headers['content-type'];
+  tbProxy.use('/', createProxyMiddleware({
+    target: 'http://localhost:8088',
+    changeOrigin: true,
+    ws: true, // For telemetry websockets
+    autoRewrite: true,
+    selfHandleResponse: true, // Needed for responseInterceptor
+    on: {
+      proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+        // --- 1. Aggressive fix for nested Iframe / Widget Preview ---
+        // Some responses might have multiple X-Frame-Options or different casing.
+        // We delete them from the source headers to be 100% sure.
+        delete proxyRes.headers['x-frame-options'];
+        delete proxyRes.headers['X-Frame-Options'];
 
-            // Inject CSS to hide TB Layout only into HTML responses
-            if (contentType && contentType.includes('text/html')) {
-              let html = responseBuffer.toString('utf8');
+        // Ensure browser allows this frame to be embedded in our portal
+        res.setHeader('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000 http://localhost:3002");
 
-              const injectedCss = `
+        const contentType = proxyRes.headers['content-type'];
+
+        // Inject CSS to hide TB Layout only into HTML responses
+        if (contentType && contentType.includes('text/html')) {
+          let html = responseBuffer.toString('utf8');
+
+          const injectedCss = `
             <style id="headless-styles">
                 /* Hide global side menu and headers */
                 tb-side-menu, mat-sidenav, .tb-layout-sidebar, .tb-side-menu-container, 
@@ -152,7 +161,9 @@ function bootstrapTbProxy() {
                     'mat-sidenav', 
                     '.tb-layout-sidebar', 
                     '.tb-side-menu-container', 
-                    '.tb-primary-toolbar'
+                    '.tb-primary-toolbar',
+                    'header.tb-nav-header',
+                    'mat-toolbar.tb-side-menu-toolbar'
                 ];
 
                 const resetMarginSelectors = [
@@ -194,19 +205,19 @@ function bootstrapTbProxy() {
             </script>
           `;
 
-              html = html.replace('</head>', injectedCss + '</head>');
-              // fallback intercept if </head> cap is different
-              if (!html.includes(injectedCss)) {
-                html = html.replace('<body', injectedCss + '<body');
-              }
-              return Promise.resolve(html);
-            }
+          html = html.replace('</head>', injectedCss + '</head>');
+          // fallback intercept if </head> cap is different
+          if (!html.includes(injectedCss)) {
+            html = html.replace('<body', injectedCss + '<body');
+          }
+          return Promise.resolve(html);
+        }
 
-            return Promise.resolve(responseBuffer);
-          },
-        ),
+        return Promise.resolve(responseBuffer);
       },
-    }),
+      ),
+    },
+  }),
   );
 
   tbProxy.listen(tbProxyPort, () => {

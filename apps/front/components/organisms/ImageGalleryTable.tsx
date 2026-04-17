@@ -9,6 +9,8 @@ import { Download, FileJson, Code, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useManageImage } from "@/hooks/thingsboard/resources/useImages";
 import { formatTenantDate } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface ImageGalleryTableProps {
   images: Image[];
@@ -24,6 +26,8 @@ interface ImageGalleryTableProps {
   onEmbedClick: (image: Image) => void;
   onRefresh: () => void;
   onAdd: () => void;
+  includeSystemImages: boolean;
+  onIncludeSystemImagesChange: (include: boolean) => void;
 }
 
 export function ImageGalleryTable({
@@ -40,6 +44,8 @@ export function ImageGalleryTable({
   onEmbedClick,
   onRefresh,
   onAdd,
+  includeSystemImages,
+  onIncludeSystemImagesChange,
 }: ImageGalleryTableProps) {
   const { downloadImage, exportImage, deleteImage } = useManageImage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -223,6 +229,21 @@ export function ImageGalleryTable({
       onRefresh={onRefresh}
       rowActions={rowActions}
       emptyMessage="No images found."
+      filterComponent={
+        <div className="flex items-center space-x-2 bg-muted/50 px-3 py-1.5 rounded-lg border">
+          <Switch
+            id="include-system-images"
+            checked={includeSystemImages}
+            onCheckedChange={onIncludeSystemImagesChange}
+          />
+          <Label
+            htmlFor="include-system-images"
+            className="text-sm font-medium cursor-pointer"
+          >
+            System images
+          </Label>
+        </div>
+      }
     />
   );
 }

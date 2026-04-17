@@ -24,6 +24,7 @@ import {
 import { DeviceService } from "@/lib/services/thingsboardServices/deviceService";
 import { AssetService } from "@/lib/services/thingsboardServices/assetService";
 import { EntityViewService } from "@/lib/services/thingsboardServices/entityViewService";
+import { RuleChainService } from "@/lib/services/thingsboardServices/ruleChainService";
 import { cn } from "@/lib/utils";
 
 type EntityType =
@@ -33,7 +34,8 @@ type EntityType =
   | "TENANT"
   | "CUSTOMER"
   | "USER"
-  | "DASHBOARD";
+  | "DASHBOARD"
+  | "RULE_CHAIN";
 
 const ENTITY_TYPE_OPTIONS: { value: EntityType; label: string }[] = [
   { value: "DEVICE", label: "Device" },
@@ -43,6 +45,7 @@ const ENTITY_TYPE_OPTIONS: { value: EntityType; label: string }[] = [
   { value: "CUSTOMER", label: "Customer" },
   { value: "USER", label: "User" },
   { value: "DASHBOARD", label: "Dashboard" },
+  { value: "RULE_CHAIN", label: "Rule Chain" },
 ];
 
 const PRESET_RELATION_TYPES = ["Contains", "Manages"];
@@ -51,6 +54,7 @@ const FETCHABLE_ENTITY_TYPES: EntityType[] = [
   "ASSET",
   "ENTITY_VIEW",
   "CUSTOMER",
+  "RULE_CHAIN",
 ];
 
 interface EntityOption {
@@ -141,6 +145,14 @@ export function AddRelationDialog({
             options = res.data.map((c) => ({
               id: c.id.id ?? "",
               label: c.title,
+            }));
+            break;
+          }
+          case "RULE_CHAIN": {
+            const res = await RuleChainService.fetchRuleChains(0, 200, "name", "ASC");
+            options = res.data.map((rc) => ({
+              id: rc.id.id ?? "",
+              label: rc.name,
             }));
             break;
           }

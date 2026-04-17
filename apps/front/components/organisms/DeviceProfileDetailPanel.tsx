@@ -12,6 +12,7 @@ import { DeviceProfileCalculatedFieldsTabContent } from "./DeviceProfileCalculat
 import { DeviceProfileAlarmRulesTabContent } from "./DeviceProfileAlarmRulesTabContent";
 import { DeviceProfileProvisioningTabContent } from "./DeviceProfileProvisioningTabContent";
 import { DeviceProfileAuditLogsTabContent } from "./DeviceProfileAuditLogsTabContent";
+import { VersionsTable } from "./VersionsTable";
 
 interface DeviceProfileDetailPanelProps {
   profile: DeviceProfile | null;
@@ -25,6 +26,7 @@ export function DeviceProfileDetailPanel({
   onClose,
 }: DeviceProfileDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [branch, setBranch] = useState("main");
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -74,13 +76,17 @@ export function DeviceProfileDetailPanel({
         id: "version-control",
         label: "Version control",
         content: (
-          <div className="p-4 text-center text-slate-500">
-            Version control coming soon
-          </div>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="DEVICE_PROFILE"
+            entityId={profileId}
+            hideCard={true}
+          />
         ),
       },
     ];
-  }, [profile]);
+  }, [profile, branch]);
 
   if (!profile) {
     return null;

@@ -22,7 +22,7 @@ export class FetchDevicesQueryHandler implements IQueryHandler<
   async execute(
     query: FetchDevicesQuery,
   ): Promise<Result<DevicesResponse, ThingsboardApiException>> {
-    const { accessToken, page, pageSize, sortProperty, sortOrder } = query;
+    const { accessToken, page, pageSize, sortProperty, sortOrder, deviceIds } = query;
     try {
       const devicesResponse: DevicesResponse =
         await this.thingsboardApi.fetchDevices(
@@ -31,6 +31,7 @@ export class FetchDevicesQueryHandler implements IQueryHandler<
           pageSize,
           sortProperty,
           sortOrder,
+          deviceIds,
         );
 
       return Ok(devicesResponse);

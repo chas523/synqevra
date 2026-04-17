@@ -9,6 +9,7 @@ import type { AssetProfile } from "@/types/thingsboardAssetTypes";
 import { AssetProfileDetailsTabContent } from "./AssetProfileDetailsTabContent";
 import { DeviceProfileCalculatedFieldsTabContent } from "./DeviceProfileCalculatedFieldsTabContent";
 import { DeviceProfileAuditLogsTabContent } from "./DeviceProfileAuditLogsTabContent";
+import { VersionsTable } from "./VersionsTable";
 
 interface AssetProfileDetailPanelProps {
   profile: AssetProfile | null;
@@ -22,6 +23,7 @@ export function AssetProfileDetailPanel({
   onClose,
 }: AssetProfileDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [branch, setBranch] = useState("main");
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -64,13 +66,17 @@ export function AssetProfileDetailPanel({
         id: "version-control",
         label: "Version control",
         content: (
-          <div className="p-4 text-center text-slate-500">
-            Version control coming soon
-          </div>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="ASSET_PROFILE"
+            entityId={profileId}
+            hideCard={true}
+          />
         ),
       },
     ];
-  }, [profile]);
+  }, [profile, branch]);
 
   if (!profile) {
     return null;
