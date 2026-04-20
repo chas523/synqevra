@@ -173,7 +173,7 @@ export class RuleChainService {
     return created;
   }
 
-  public static async getRuleChain(id: string): Promise<RuleChain> {
+  public static async getRuleChainById(id: string): Promise<RuleChain> {
     const { data } = await proxyApi.get<RuleChain>(
       `/thingsboard/rule-chains/${id}`,
     );
