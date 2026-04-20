@@ -13,6 +13,7 @@ import { AssetAlarmsTabContent } from "./AssetAlarmsTabContent";
 import { AssetEventsTabContent } from "./AssetEventsTabContent";
 import { AssetRelationsTabContent } from "./AssetRelationsTabContent";
 import { AssetAuditLogsTabContent } from "./AssetAuditLogsTabContent";
+import { VersionsTable } from "./VersionsTable";
 import type { Asset } from "@/types/thingsboardAssetTypes";
 
 export interface AssetDetailPanelProps {
@@ -28,6 +29,7 @@ export function AssetDetailPanel({
   onClose,
 }: AssetDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [branch, setBranch] = useState("main");
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -85,13 +87,17 @@ export function AssetDetailPanel({
         id: "version-control",
         label: "Version control",
         content: (
-          <div className="p-4 text-center text-slate-500">
-            Version control coming soon
-          </div>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="ASSET"
+            entityId={asset.id?.id ?? ""}
+            hideCard={true}
+          />
         ),
       },
     ];
-  }, [asset]);
+  }, [asset, branch]);
 
   if (!asset) return null;
 

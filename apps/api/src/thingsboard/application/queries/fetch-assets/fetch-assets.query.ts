@@ -10,6 +10,7 @@ export type FetchAssetsProps = {
   sortProperty?: string;
   sortOrder?: 'ASC' | 'DESC';
   assetProfileId?: string;
+  assetIds?: string;
 };
 
 export class FetchAssetsQuery extends Query<
@@ -21,6 +22,7 @@ export class FetchAssetsQuery extends Query<
   public readonly sortProperty: string;
   public readonly sortOrder: 'ASC' | 'DESC';
   public readonly assetProfileId: string;
+  public readonly assetIds: string | undefined;
 
   constructor(props: FetchAssetsProps) {
     super();
@@ -30,5 +32,6 @@ export class FetchAssetsQuery extends Query<
     this.sortProperty = props.sortProperty ?? 'createdTime';
     this.sortOrder = props.sortOrder ?? 'DESC';
     this.assetProfileId = props.assetProfileId ?? '';
+    this.assetIds = props.assetIds;
   }
 }

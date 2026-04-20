@@ -30,6 +30,7 @@ export class FetchAssetsQueryHandler implements IQueryHandler<
         query.sortProperty,
         query.sortOrder,
         query.assetProfileId,
+        query.assetIds,
       );
 
       return Ok(response);

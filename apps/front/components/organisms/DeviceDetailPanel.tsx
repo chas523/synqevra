@@ -13,6 +13,7 @@ import { DeviceAlarmsTabContent } from "./DeviceAlarmsTabContent";
 import { DeviceEventsTabContent } from "./DeviceEventsTabContent";
 import { DeviceRelationsTabContent } from "./DeviceRelationsTabContent";
 import { DeviceAuditLogsTabContent } from "./DeviceAuditLogsTabContent";
+import { VersionsTable } from "./VersionsTable";
 import type { Device } from "@/types/thingsboardDeviceTypes";
 
 export interface DeviceDetailPanelProps {
@@ -29,6 +30,7 @@ export function DeviceDetailPanel({
   onRefresh,
 }: DeviceDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [branch, setBranch] = useState("main");
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -86,13 +88,17 @@ export function DeviceDetailPanel({
         id: "version-control",
         label: "Version control",
         content: (
-          <div className="p-4 text-center text-slate-500">
-            Version control coming soon
-          </div>
+          <VersionsTable
+            branch={branch}
+            onBranchChange={setBranch}
+            entityType="DEVICE"
+            entityId={device.id?.id ?? ""}
+            hideCard={true}
+          />
         ),
       },
     ];
-  }, [device]);
+  }, [device, branch]);
 
   if (!device) return null;
 

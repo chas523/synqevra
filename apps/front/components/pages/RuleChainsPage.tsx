@@ -13,7 +13,7 @@ import {
 import { AddRuleChainModal } from "@/components/organisms/AddRuleChainModal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Flag, Trash2, CheckSquare, Square, Upload } from "lucide-react";
+import { Flag, Trash2, CheckSquare, Square, Upload, FileText } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
+import { RuleChainDetailPanel } from "@/components/organisms/RuleChainDetailPanel";
 
 const PAGE_SIZE = 10;
 
@@ -30,6 +31,9 @@ export default function RuleChainsPage() {
   const [sortProperty, setSortProperty] = useState("createdTime");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  const [selectedRuleChain, setSelectedRuleChain] = useState<RuleChain | null>(null);
+  const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
   const { ruleChains, totalPages, totalElements, isLoading, mutate } =
     useRuleChains(currentPage, PAGE_SIZE, sortProperty, sortOrder, "CORE");
@@ -241,6 +245,19 @@ export default function RuleChainsPage() {
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
+                setSelectedRuleChain(rc);
+                setIsDetailPanelOpen(true);
+              }}
+              title="View rule chain details"
+              className="text-muted-foreground hover:text-primary"
+            >
+              <FileText className="h-4 w-4 dark:text-gray-300" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
                 handleSetRoot(rc);
               }}
               title="Set as root rule chain"
@@ -280,6 +297,13 @@ export default function RuleChainsPage() {
         onClose={() => setShowAddModal(false)}
         onAdd={handleAdd}
         isSaving={isSaving}
+      />
+
+      <RuleChainDetailPanel
+        ruleChain={selectedRuleChain}
+        isOpen={isDetailPanelOpen}
+        onClose={() => setIsDetailPanelOpen(false)}
+        onRefresh={handleRefresh}
       />
     </div>
   );

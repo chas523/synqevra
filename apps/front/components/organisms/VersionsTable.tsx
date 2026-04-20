@@ -9,7 +9,7 @@ import {
 } from "@/hooks/thingsboard/version-control/useVersionControl";
 import { VersionEntry } from "@/types/versionControlTypes";
 import { Button } from "@/components/ui/button";
-import { Copy, Clock, RefreshCw, X, Link2Off, ChevronDown } from "lucide-react";
+import { Copy, Clock, RefreshCw, X, Link2Off, ChevronDown, ArrowRightLeft } from "lucide-react";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -22,6 +22,7 @@ import { CreateVersionModal } from "@/components/organisms/CreateVersionModal";
 import { CreateSingleEntityVersionModal } from "@/components/organisms/CreateSingleEntityVersionModal";
 import { RestoreVersionModal } from "@/components/organisms/RestoreVersionModal";
 import { RestoreSingleEntityVersionModal } from "@/components/organisms/RestoreSingleEntityVersionModal";
+import { CompareVersionModal } from "@/components/organisms/CompareVersionModal";
 
 const PAGE_SIZE = 10;
 
@@ -52,6 +53,13 @@ export function VersionsTable({
   // Restore modal state
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [versionToRestore, setVersionToRestore] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  // Compare modal state
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [versionToCompare, setVersionToCompare] = useState<{
     id: string;
     name: string;
   } | null>(null);
@@ -173,20 +181,38 @@ export function VersionsTable({
         onRefresh={() => mutate()}
         hideCard={hideCard}
         rowActions={(entry) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              setVersionToRestore({ id: entry.id, name: entry.name });
-              setIsRestoreModalOpen(true);
-            }}
-            title="Restore version"
-            className="text-muted-foreground"
-            disabled={isReadOnly}
-          >
-            <Clock className="h-4 w-4" />
-          </Button>
+          <>
+            {entityType && entityId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setVersionToCompare({ id: entry.id, name: entry.name });
+                  setIsCompareModalOpen(true);
+                }}
+                title="Compare current"
+                className="text-muted-foreground"
+                disabled={isReadOnly}
+              >
+                <ArrowRightLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setVersionToRestore({ id: entry.id, name: entry.name });
+                setIsRestoreModalOpen(true);
+              }}
+              title="Restore version"
+              className="text-muted-foreground"
+              disabled={isReadOnly}
+            >
+              <Clock className="h-4 w-4" />
+            </Button>
+          </>
         )}
         customAction={
           <div className="flex items-center gap-2">
@@ -291,6 +317,20 @@ export function VersionsTable({
             onSuccess={() => mutate()}
           />
         ))}
+      {entityType && entityId && (
+        <CompareVersionModal
+           open={isCompareModalOpen}
+           onOpenChange={setIsCompareModalOpen}
+           entityType={entityType}
+           entityId={entityId}
+           versionId={versionToCompare?.id || null}
+           versionName={versionToCompare?.name || ""}
+           onRestoreClick={() => {
+              setVersionToRestore(versionToCompare);
+              setIsRestoreModalOpen(true);
+           }}
+        />
+      )}
     </div>
   );
 }

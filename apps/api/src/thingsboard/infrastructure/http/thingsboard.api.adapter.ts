@@ -158,15 +158,31 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     pageSize: number,
     sortProperty = 'createdTime',
     sortOrder: 'ASC' | 'DESC' = 'DESC',
+    deviceIds?: string,
   ): Promise<DevicesResponse> {
     try {
-      const url = `${this.THINGSBOARD_API_URL}/tenant/deviceInfos?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
+      const params = new URLSearchParams({
+        pageSize: String(pageSize),
+        page: String(page),
+        sortProperty,
+        sortOrder,
+      });
+
+      const url = deviceIds 
+        ? `${this.THINGSBOARD_API_URL}/devices?deviceIds=${deviceIds}`
+        : `${this.THINGSBOARD_API_URL}/tenant/deviceInfos?${params.toString()}`;
+
       const response = await firstValueFrom(
-        this.httpService.get<DevicesResponse>(url, {
+        this.httpService.get<DevicesResponse | any[]>(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
-      return response.data;
+
+      if (deviceIds && Array.isArray(response.data)) {
+        return { data: response.data, totalElements: response.data.length, totalPages: 1, hasNext: false } as any;
+      }
+
+      return response.data as DevicesResponse;
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch devices from ThingsBoard API',
@@ -749,6 +765,26 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
+  async deleteCalculatedField(
+    accessToken: string,
+    id: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/calculatedField/${id}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to delete calculated field from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchAssets(
     accessToken: string,
     page: number,
@@ -756,6 +792,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     sortProperty = 'createdTime',
     sortOrder: 'ASC' | 'DESC' = 'DESC',
     assetProfileId = '',
+    assetIds?: string,
   ): Promise<AssetsResponse> {
     try {
       const params = new URLSearchParams({
@@ -765,16 +802,25 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         sortOrder,
       });
 
-      // Keep parity with ThingsBoard UI request shape.
-      params.append('assetProfileId', assetProfileId);
+      if (assetProfileId) {
+        params.append('assetProfileId', assetProfileId);
+      }
 
-      const url = `${this.THINGSBOARD_API_URL}/tenant/assetInfos?${params.toString()}`;
+      const url = assetIds
+        ? `${this.THINGSBOARD_API_URL}/assets?assetIds=${assetIds}`
+        : `${this.THINGSBOARD_API_URL}/tenant/assetInfos?${params.toString()}`;
+
       const response = await firstValueFrom(
-        this.httpService.get<AssetsResponse>(url, {
+        this.httpService.get<AssetsResponse | any[]>(url, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       );
-      return response.data;
+
+      if (assetIds && Array.isArray(response.data)) {
+        return { data: response.data, totalElements: response.data.length, totalPages: 1, hasNext: false } as any;
+      }
+
+      return response.data as AssetsResponse;
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to fetch assets from ThingsBoard API',
@@ -3205,6 +3251,72 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     );
   }
 
+  async fetchEntityLatestTelemetry(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    keys: string[],
+  ): Promise<LatestTelemetryResponse> {
+    try {
+      const params = new URLSearchParams();
+      if (keys.length > 0) {
+        params.append('keys', keys.join(','));
+      }
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/values/timeseries${keys.length > 0 ? '?' + params.toString() : ''}`;
+      const response = await firstValueFrom(
+        this.httpService.get<LatestTelemetryResponse>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.warn(`Failed to fetch latest telemetry for ${entityType}/${entityId}: ${error}`);
+      return {};
+    }
+  }
+
+  async fetchEntityTelemetryKeys(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+  ): Promise<string[]> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/keys/timeseries`;
+      const response = await firstValueFrom(
+        this.httpService.get<string[]>(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      this.logger.warn(`Failed to fetch telemetry keys for ${entityType}/${entityId}: ${error}`);
+      return [];
+    }
+  }
+
+  async deleteEntityAttributes(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    scope: 'SERVER_SCOPE' | 'CLIENT_SCOPE' | 'SHARED_SCOPE',
+    keys: string,
+  ): Promise<void> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/plugins/telemetry/${entityType}/${entityId}/attributes/${scope}?keys=${keys}`;
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+    } catch (error) {
+      ThingsboardApiException.createException(
+        `Failed to delete entity attributes for ${entityType}/${entityId}`,
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchTenantProfiles(
     sysAdminAccessToken: string,
     page: number,
@@ -4925,6 +5037,29 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     } catch (error) {
       ThingsboardApiException.createException(
         'Failed to get version entity info from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
+  async fetchVersionDiff(
+    accessToken: string,
+    entityType: string,
+    entityId: string,
+    versionId: string,
+  ): Promise<any> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/entities/vc/diff/${entityType}/${entityId}?versionId=${versionId}`;
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to fetch version diff from ThingsBoard API',
         error,
         this.logger,
       );
