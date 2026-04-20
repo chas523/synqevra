@@ -254,13 +254,21 @@ export class DeviceService {
       params.append("deviceIds", deviceIds);
     }
 
-    const { data } = await proxyApi.get(`/thingsboard/devices?${params.toString()}`);
+    const { data } = await proxyApi.get(
+      `/thingsboard/devices?${params.toString()}`,
+    );
     return data;
   }
 
   public static async fetchDevicesByIds(ids: string[]): Promise<any[]> {
     if (!ids.length) return [];
-    const response = await this.fetchDevices(0, ids.length, "createdTime", "DESC", ids.join(","));
+    const response = await this.fetchDevices(
+      0,
+      ids.length,
+      "createdTime",
+      "DESC",
+      ids.join(","),
+    );
     return response.data;
   }
 

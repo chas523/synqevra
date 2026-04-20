@@ -14,7 +14,6 @@ import { RuleChainAuditLogsTabContent } from "./RuleChainAuditLogsTabContent";
 import { VersionsTable } from "./VersionsTable";
 import type { RuleChain } from "@/lib/services/thingsboardServices/ruleChainService";
 
-
 export interface RuleChainDetailPanelProps {
   ruleChain: RuleChain | null;
   isOpen: boolean;
@@ -42,32 +41,47 @@ export function RuleChainDetailPanel({
       {
         id: "details",
         label: "Details",
-        content: <RuleChainDetailsTabContent ruleChainId={ruleChain.id?.id ?? ""} />,
+        content: (
+          <RuleChainDetailsTabContent ruleChainId={ruleChain.id?.id ?? ""} />
+        ),
       },
       {
         id: "attributes",
         label: "Attributes",
-        content: <RuleChainAttributesTabContent ruleChainId={ruleChain.id?.id ?? ""} />,
+        content: (
+          <RuleChainAttributesTabContent ruleChainId={ruleChain.id?.id ?? ""} />
+        ),
       },
       {
         id: "alarms",
         label: "Alarms",
-        content: <RuleChainAlarmsTabContent ruleChainId={ruleChain.id?.id ?? ""} />,
+        content: (
+          <RuleChainAlarmsTabContent ruleChainId={ruleChain.id?.id ?? ""} />
+        ),
       },
       {
         id: "events",
         label: "Events",
-        content: <RuleChainEventsTabContent ruleChainId={ruleChain.id?.id ?? ""} tenantId={ruleChain.tenantId?.id} />,
+        content: (
+          <RuleChainEventsTabContent
+            ruleChainId={ruleChain.id?.id ?? ""}
+            tenantId={ruleChain.tenantId?.id}
+          />
+        ),
       },
       {
         id: "relations",
         label: "Relations",
-        content: <RuleChainRelationsTabContent ruleChainId={ruleChain.id?.id ?? ""} />,
+        content: (
+          <RuleChainRelationsTabContent ruleChainId={ruleChain.id?.id ?? ""} />
+        ),
       },
       {
         id: "audit-logs",
         label: "Audit logs",
-        content: <RuleChainAuditLogsTabContent ruleChainId={ruleChain.id?.id ?? ""} />,
+        content: (
+          <RuleChainAuditLogsTabContent ruleChainId={ruleChain.id?.id ?? ""} />
+        ),
       },
       {
         id: "version-control",

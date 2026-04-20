@@ -64,7 +64,6 @@ export interface RuleChainAuditLog {
   entityName: string;
 }
 
-
 export class RuleChainService {
   public static async fetchRuleChains(
     page = 0,
@@ -185,13 +184,21 @@ export class RuleChainService {
   }
 
   // Stubs and profile methods
-  public static async getRuleChainProfileInfos(page = 0, pageSize = 100): Promise<any> {
-    // Usually rule chains don't have profiles in the same way devices do, 
+  public static async getRuleChainProfileInfos(
+    page = 0,
+    pageSize = 100,
+  ): Promise<any> {
+    // Usually rule chains don't have profiles in the same way devices do,
     // but the cloned UI expects this. Returning empty for now or mapping if needed.
     return { data: [], totalPages: 0, totalElements: 0 };
   }
 
-  public static async getOtaPackages(type: string, profileId: string, page = 0, pageSize = 100): Promise<any> {
+  public static async getOtaPackages(
+    type: string,
+    profileId: string,
+    page = 0,
+    pageSize = 100,
+  ): Promise<any> {
     return { data: [], totalPages: 0, totalElements: 0 };
   }
 
@@ -199,26 +206,50 @@ export class RuleChainService {
     return this.fetchRuleChainAttributes(id);
   }
 
-  public static async updateRuleChainServerAttributes(id: string, attributes: Record<string, any>) {
-    await proxyApi.post(`/thingsboard/rule-chains/${id}/attributes?scope=SERVER_SCOPE`, attributes);
+  public static async updateRuleChainServerAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ) {
+    await proxyApi.post(
+      `/thingsboard/rule-chains/${id}/attributes?scope=SERVER_SCOPE`,
+      attributes,
+    );
   }
 
-  public static async updateRuleChainSharedAttributes(id: string, attributes: Record<string, any>) {
-    await proxyApi.post(`/thingsboard/rule-chains/${id}/attributes?scope=SHARED_SCOPE`, attributes);
+  public static async updateRuleChainSharedAttributes(
+    id: string,
+    attributes: Record<string, any>,
+  ) {
+    await proxyApi.post(
+      `/thingsboard/rule-chains/${id}/attributes?scope=SHARED_SCOPE`,
+      attributes,
+    );
   }
 
-  public static async deleteRuleChainAttributes(id: string, scope: string, keys: string) {
-    await proxyApi.delete(`/thingsboard/rule-chains/${id}/attributes?scope=${scope}&keys=${keys}`);
+  public static async deleteRuleChainAttributes(
+    id: string,
+    scope: string,
+    keys: string,
+  ) {
+    await proxyApi.delete(
+      `/thingsboard/rule-chains/${id}/attributes?scope=${scope}&keys=${keys}`,
+    );
   }
 
   // Telemetry methods
-  public static async addRuleChainLatestTelemetry(id: string, telemetry: Record<string, any>) {
+  public static async addRuleChainLatestTelemetry(
+    id: string,
+    telemetry: Record<string, any>,
+  ) {
     await proxyApi.post(`/thingsboard/rule-chains/${id}/telemetry`, telemetry);
   }
 
   // Relations methods
   public static async saveRuleChainRelation(ruleChainId: string, params: any) {
-    await proxyApi.post(`/thingsboard/rule-chains/${ruleChainId}/relations`, params);
+    await proxyApi.post(
+      `/thingsboard/rule-chains/${ruleChainId}/relations`,
+      params,
+    );
   }
 
   public static async deleteRuleChainRelation(
@@ -227,21 +258,26 @@ export class RuleChainService {
       relatedEntityId: string;
       relatedEntityType: string;
       relationType: string;
-      direction: 'FROM' | 'TO';
-    }
+      direction: "FROM" | "TO";
+    },
   ) {
-    const { relatedEntityId, relatedEntityType, relationType, direction } = params;
+    const { relatedEntityId, relatedEntityType, relationType, direction } =
+      params;
     await proxyApi.delete(`/thingsboard/rule-chains/${ruleChainId}/relations`, {
-      params: { relatedEntityId, relatedEntityType, relationType, direction }
+      params: { relatedEntityId, relatedEntityType, relationType, direction },
     });
   }
 
-  public static async updateRuleChain(id: string, payload: any): Promise<RuleChain> {
-    const { data } = await proxyApi.post<RuleChain>(`/thingsboard/rule-chains`, { ...payload, id: { id, entityType: 'RULE_CHAIN' } });
+  public static async updateRuleChain(
+    id: string,
+    payload: any,
+  ): Promise<RuleChain> {
+    const { data } = await proxyApi.post<RuleChain>(
+      `/thingsboard/rule-chains`,
+      { ...payload, id: { id, entityType: "RULE_CHAIN" } },
+    );
     return data;
   }
-
-
 
   public static async getRuleChainMetadata(id: string): Promise<any> {
     const { data } = await proxyApi.get<any>(
@@ -279,54 +315,96 @@ export class RuleChainService {
     return data;
   }
 
-
   public static async fetchRuleChainAttributes(id: string): Promise<any[]> {
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/attributes?scope=SERVER_SCOPE`);
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/attributes?scope=SERVER_SCOPE`,
+    );
     return data;
   }
 
-  public static async fetchRuleChainAttributeKeys(id: string): Promise<string[]> {
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/attributes/keys?scope=SERVER_SCOPE`);
+  public static async fetchRuleChainAttributeKeys(
+    id: string,
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/attributes/keys?scope=SERVER_SCOPE`,
+    );
     return data || [];
   }
 
-
-  public static async getRuleChainAlarms(id: string, page = 0, pageSize = 10, statusList?: string[], severityList?: string[], startTime?: number, endTime?: number): Promise<any> {
-    const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString(), sortProperty: 'createdTime', sortOrder: 'DESC' });
-    if (statusList?.length) params.append('statusList', statusList.join(','));
-    if (severityList?.length) params.append('severityList', severityList.join(','));
-    if (startTime) params.append('startTime', startTime.toString());
-    if (endTime) params.append('endTime', endTime.toString());
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/alarms?${params.toString()}`);
+  public static async getRuleChainAlarms(
+    id: string,
+    page = 0,
+    pageSize = 10,
+    statusList?: string[],
+    severityList?: string[],
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      sortProperty: "createdTime",
+      sortOrder: "DESC",
+    });
+    if (statusList?.length) params.append("statusList", statusList.join(","));
+    if (severityList?.length)
+      params.append("severityList", severityList.join(","));
+    if (startTime) params.append("startTime", startTime.toString());
+    if (endTime) params.append("endTime", endTime.toString());
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/alarms?${params.toString()}`,
+    );
     return data;
   }
-
-
-
 
   public static async getRuleChainRelations(id: string): Promise<any[]> {
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/relations?fromId=${id}&fromType=RULE_CHAIN`);
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/relations?fromId=${id}&fromType=RULE_CHAIN`,
+    );
     return data;
   }
 
-
-  public static async getRuleChainAuditLogs(id: string, page = 0, pageSize = 10, sortProperty = 'createdTime', sortOrder = 'DESC', startTime?: number, endTime?: number): Promise<any> {
-    const params = new URLSearchParams({ page: page.toString(), pageSize: pageSize.toString(), sortProperty, sortOrder });
-    if (startTime) params.append('startTime', startTime.toString());
-    if (endTime) params.append('endTime', endTime.toString());
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/audit-logs?${params.toString()}`);
+  public static async getRuleChainAuditLogs(
+    id: string,
+    page = 0,
+    pageSize = 10,
+    sortProperty = "createdTime",
+    sortOrder = "DESC",
+    startTime?: number,
+    endTime?: number,
+  ): Promise<any> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+      sortProperty,
+      sortOrder,
+    });
+    if (startTime) params.append("startTime", startTime.toString());
+    if (endTime) params.append("endTime", endTime.toString());
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/audit-logs?${params.toString()}`,
+    );
     return data;
   }
 
-  public static async fetchRuleChainLatestTelemetry(id: string, keys: string[]): Promise<any> {
+  public static async fetchRuleChainLatestTelemetry(
+    id: string,
+    keys: string[],
+  ): Promise<any> {
     const params = new URLSearchParams();
-    if (keys.length > 0) params.append('keys', keys.join(','));
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/telemetry/latest?${params.toString()}`);
+    if (keys.length > 0) params.append("keys", keys.join(","));
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/telemetry/latest?${params.toString()}`,
+    );
     return data;
   }
 
-  public static async fetchRuleChainLatestTelemetryKeys(id: string): Promise<string[]> {
-    const { data } = await proxyApi.get(`/thingsboard/rule-chains/${id}/telemetry/latest/keys`);
+  public static async fetchRuleChainLatestTelemetryKeys(
+    id: string,
+  ): Promise<string[]> {
+    const { data } = await proxyApi.get(
+      `/thingsboard/rule-chains/${id}/telemetry/latest/keys`,
+    );
     return data || [];
   }
 }

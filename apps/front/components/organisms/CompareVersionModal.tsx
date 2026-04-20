@@ -45,7 +45,7 @@ export function CompareVersionModal({
           const res = await VersionControlService.fetchVersionDiff(
             entityType,
             entityId,
-            versionId
+            versionId,
           );
           if (res) {
             setCurrentVersion(res.currentVersion);
@@ -93,26 +93,26 @@ export function CompareVersionModal({
             </div>
           ) : currentVersion && otherVersion ? (
             <div className="w-full h-[60vh] flex flex-col">
-               <div className="grid grid-cols-2 px-8 py-2 text-sm font-medium text-foreground bg-muted/10 border-b">
-                 <div>Current</div>
-                 <div>{versionName}</div>
-               </div>
-               <div className="flex-1 relative">
-                 <DiffEditor
-                    language="json"
-                    original={JSON.stringify(currentVersion, null, 2)}
-                    modified={JSON.stringify(otherVersion, null, 2)}
-                    options={{
-                      readOnly: true,
-                      renderSideBySide: true,
-                      minimap: { enabled: false },
-                      scrollBeyondLastLine: false,
-                      wordWrap: "on",
-                      automaticLayout: true,
-                    }}
-                    theme="vs-light"
-                  />
-               </div>
+              <div className="grid grid-cols-2 px-8 py-2 text-sm font-medium text-foreground bg-muted/10 border-b">
+                <div>Current</div>
+                <div>{versionName}</div>
+              </div>
+              <div className="flex-1 relative">
+                <DiffEditor
+                  language="json"
+                  original={JSON.stringify(currentVersion, null, 2)}
+                  modified={JSON.stringify(otherVersion, null, 2)}
+                  options={{
+                    readOnly: true,
+                    renderSideBySide: true,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    wordWrap: "on",
+                    automaticLayout: true,
+                  }}
+                  theme="vs-light"
+                />
+              </div>
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-muted-foreground p-8 text-center">

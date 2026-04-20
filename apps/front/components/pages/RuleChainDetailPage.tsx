@@ -24,7 +24,7 @@ export default function RuleChainDetailPage({
   // Fetch TB JWT token for iframe bridge automatically
   const { data: tokenData, isLoading: isLoadingToken } = useSWR(
     useIframe ? "embed-token-rulechain" : null,
-    () => DashboardService.getEmbedToken()
+    () => DashboardService.getEmbedToken(),
   );
 
   useEffect(() => {
@@ -33,9 +33,9 @@ export default function RuleChainDetailPage({
       iframeRef.current.contentWindow?.postMessage(
         {
           jwtToken: tokenData.jwtToken,
-          redirect: targetUrl
+          redirect: targetUrl,
         },
-        "http://localhost:3002"
+        "http://localhost:3002",
       );
     }
   }, [useIframe, iframeLoaded, tokenData, ruleChainId]);
@@ -44,7 +44,9 @@ export default function RuleChainDetailPage({
     <div className="flex flex-col h-full w-full relative">
       {/* Developer Toggle Overlay */}
       <div className="absolute top-4 right-4 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-lg rounded-2xl px-4 py-2 flex items-center gap-3">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Widget Library Proxy</span>
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          Widget Library Proxy
+        </span>
         <label className="flex items-center cursor-pointer gap-2">
           <div className="relative">
             <input
@@ -59,8 +61,12 @@ export default function RuleChainDetailPage({
                 }
               }}
             />
-            <div className={`block w-10 h-6 rounded-full transition-colors ${useIframe ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
-            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useIframe ? 'translate-x-4' : ''}`}></div>
+            <div
+              className={`block w-10 h-6 rounded-full transition-colors ${useIframe ? "bg-indigo-500" : "bg-slate-300 dark:bg-slate-700"}`}
+            ></div>
+            <div
+              className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useIframe ? "translate-x-4" : ""}`}
+            ></div>
           </div>
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
             {useIframe ? "Native TB (Proxy 3002)" : "Custom NextJS Editor"}
@@ -74,7 +80,9 @@ export default function RuleChainDetailPage({
             <div className="flex items-center justify-center h-full">
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-                <span className="text-sm text-slate-500">Connecting to ThingsBoard bridge...</span>
+                <span className="text-sm text-slate-500">
+                  Connecting to ThingsBoard bridge...
+                </span>
               </div>
             </div>
           ) : (
@@ -83,7 +91,7 @@ export default function RuleChainDetailPage({
                 ref={iframeRef}
                 src="http://localhost:3002/bridge.html"
                 className="absolute top-0 left-0 w-full h-full"
-                style={{ border: 'none', pointerEvents: 'auto' }}
+                style={{ border: "none", pointerEvents: "auto" }}
                 onLoad={() => setIframeLoaded(true)}
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               />
@@ -92,7 +100,10 @@ export default function RuleChainDetailPage({
         </div>
       ) : (
         <div className="flex-1 w-full h-full">
-          <RuleChainEditor ruleChainId={ruleChainId} ruleChainName={ruleChainName} />
+          <RuleChainEditor
+            ruleChainId={ruleChainId}
+            ruleChainName={ruleChainName}
+          />
         </div>
       )}
     </div>

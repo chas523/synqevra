@@ -168,7 +168,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         sortOrder,
       });
 
-      const url = deviceIds 
+      const url = deviceIds
         ? `${this.THINGSBOARD_API_URL}/devices?deviceIds=${deviceIds}`
         : `${this.THINGSBOARD_API_URL}/tenant/deviceInfos?${params.toString()}`;
 
@@ -179,7 +179,12 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
 
       if (deviceIds && Array.isArray(response.data)) {
-        return { data: response.data, totalElements: response.data.length, totalPages: 1, hasNext: false } as any;
+        return {
+          data: response.data,
+          totalElements: response.data.length,
+          totalPages: 1,
+          hasNext: false,
+        } as any;
       }
 
       return response.data as DevicesResponse;
@@ -765,10 +770,7 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     }
   }
 
-  async deleteCalculatedField(
-    accessToken: string,
-    id: string,
-  ): Promise<void> {
+  async deleteCalculatedField(accessToken: string, id: string): Promise<void> {
     try {
       const url = `${this.THINGSBOARD_API_URL}/calculatedField/${id}`;
       await firstValueFrom(
@@ -817,7 +819,12 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
 
       if (assetIds && Array.isArray(response.data)) {
-        return { data: response.data, totalElements: response.data.length, totalPages: 1, hasNext: false } as any;
+        return {
+          data: response.data,
+          totalElements: response.data.length,
+          totalPages: 1,
+          hasNext: false,
+        } as any;
       }
 
       return response.data as AssetsResponse;
@@ -3270,7 +3277,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return response.data;
     } catch (error) {
-      this.logger.warn(`Failed to fetch latest telemetry for ${entityType}/${entityId}: ${error}`);
+      this.logger.warn(
+        `Failed to fetch latest telemetry for ${entityType}/${entityId}: ${error}`,
+      );
       return {};
     }
   }
@@ -3289,7 +3298,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-      this.logger.warn(`Failed to fetch telemetry keys for ${entityType}/${entityId}: ${error}`);
+      this.logger.warn(
+        `Failed to fetch telemetry keys for ${entityType}/${entityId}: ${error}`,
+      );
       return [];
     }
   }

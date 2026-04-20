@@ -26,7 +26,9 @@ export class FetchEntityRelationsQueryHandler implements IQueryHandler<
     const { accessToken, entityType, entityId, direction } = query;
 
     try {
-      this.logger.log(`Fetching relations for ${entityType}/${entityId} [${direction}]`);
+      this.logger.log(
+        `Fetching relations for ${entityType}/${entityId} [${direction}]`,
+      );
       const data = await this.thingsboardApi.fetchEntityRelations(
         accessToken,
         entityType,

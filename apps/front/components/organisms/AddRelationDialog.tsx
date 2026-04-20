@@ -149,7 +149,12 @@ export function AddRelationDialog({
             break;
           }
           case "RULE_CHAIN": {
-            const res = await RuleChainService.fetchRuleChains(0, 200, "name", "ASC");
+            const res = await RuleChainService.fetchRuleChains(
+              0,
+              200,
+              "name",
+              "ASC",
+            );
             options = res.data.map((rc) => ({
               id: rc.id.id ?? "",
               label: rc.name,

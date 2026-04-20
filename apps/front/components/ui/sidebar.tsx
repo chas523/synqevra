@@ -188,7 +188,7 @@ function Sidebar({
           data-mobile="true"
           className={cn(
             "!bg-white/60 dark:!bg-slate-950/60 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-800/50 text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden",
-            className
+            className,
           )}
           style={
             {

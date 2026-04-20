@@ -13,7 +13,14 @@ import {
 import { AddRuleChainModal } from "@/components/organisms/AddRuleChainModal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Flag, Trash2, CheckSquare, Square, Upload, FileText } from "lucide-react";
+import {
+  Flag,
+  Trash2,
+  CheckSquare,
+  Square,
+  Upload,
+  FileText,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -31,8 +38,10 @@ export default function RuleChainsPage() {
   const [sortProperty, setSortProperty] = useState("createdTime");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
   const [showAddModal, setShowAddModal] = useState(false);
-  
-  const [selectedRuleChain, setSelectedRuleChain] = useState<RuleChain | null>(null);
+
+  const [selectedRuleChain, setSelectedRuleChain] = useState<RuleChain | null>(
+    null,
+  );
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
 
   const { ruleChains, totalPages, totalElements, isLoading, mutate } =

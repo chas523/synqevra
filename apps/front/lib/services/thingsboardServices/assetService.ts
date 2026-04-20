@@ -138,7 +138,14 @@ export class AssetService {
 
   public static async fetchAssetsByIds(ids: string[]): Promise<Asset[]> {
     if (!ids.length) return [];
-    const response = await this.fetchAssets(0, ids.length, "createdTime", "DESC", "", ids.join(","));
+    const response = await this.fetchAssets(
+      0,
+      ids.length,
+      "createdTime",
+      "DESC",
+      "",
+      ids.join(","),
+    );
     return response.data;
   }
 

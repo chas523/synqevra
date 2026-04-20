@@ -114,9 +114,17 @@ export function RuleChainEventsTabContent({
         key: "status",
         header: "Status",
         render: (row) => (
-           <span className={row.body?.success ? "text-green-600" : row.body?.error ? "text-red-600" : ""}>
-             {row.body?.success ? "Success" : row.body?.error ? "Error" : "-"}
-           </span>
+          <span
+            className={
+              row.body?.success
+                ? "text-green-600"
+                : row.body?.error
+                  ? "text-red-600"
+                  : ""
+            }
+          >
+            {row.body?.success ? "Success" : row.body?.error ? "Error" : "-"}
+          </span>
         ),
       },
       {

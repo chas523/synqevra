@@ -32,7 +32,7 @@ export function RuleChainRelationsTabContent({
       // Note: we can filter relations by direction in a generic way or use proxy logic
       // For now, getRuleChainRelations returns info for the rule chain
       const res = await RuleChainService.getRuleChainRelations(ruleChainId);
-      
+
       // Filter by direction if needed, or if API supports it, use it.
       // ThingsBoard's /relations/info?fromId=... returns outgoing relations by default.
       // If direction is TO, we might need a different query or manual filtering.
@@ -51,7 +51,8 @@ export function RuleChainRelationsTabContent({
         header: direction === "FROM" ? "To Entity" : "From Entity",
         render: (relation) => {
           const entity = direction === "FROM" ? relation.to : relation.from;
-          const name = direction === "FROM" ? relation.toName : relation.fromName;
+          const name =
+            direction === "FROM" ? relation.toName : relation.fromName;
 
           return (
             <div className="flex flex-col">
@@ -73,7 +74,8 @@ export function RuleChainRelationsTabContent({
         key: "actions",
         header: "",
         render: (relation) => {
-          const relatedEntity = direction === "FROM" ? relation.to : relation.from;
+          const relatedEntity =
+            direction === "FROM" ? relation.to : relation.from;
           const key = `${relation.from?.id}-${relation.to?.id}-${relation.type}`;
           const isDeleting = deletingKey === key;
 
@@ -119,7 +121,9 @@ export function RuleChainRelationsTabContent({
 
     return (relations || []).filter((relation: any) => {
       const entity = direction === "FROM" ? relation.to : relation.from;
-      const entityName = String(direction === "FROM" ? relation.toName || "" : relation.fromName || "").toLowerCase();
+      const entityName = String(
+        direction === "FROM" ? relation.toName || "" : relation.fromName || "",
+      ).toLowerCase();
       const entityType = String(entity?.entityType || "").toLowerCase();
       const relationType = String(relation.type || "").toLowerCase();
 
@@ -206,12 +210,20 @@ export function RuleChainRelationsTabContent({
             type: params.relationType,
             typeGroup: "COMMON",
             additionalInfo: null,
-            from: params.direction === "FROM" 
-              ? { entityType: "RULE_CHAIN", id: ruleChainId }
-              : { entityType: params.relatedEntityType, id: params.relatedEntityId },
-            to: params.direction === "FROM"
-              ? { entityType: params.relatedEntityType, id: params.relatedEntityId }
-              : { entityType: "RULE_CHAIN", id: ruleChainId }
+            from:
+              params.direction === "FROM"
+                ? { entityType: "RULE_CHAIN", id: ruleChainId }
+                : {
+                    entityType: params.relatedEntityType,
+                    id: params.relatedEntityId,
+                  },
+            to:
+              params.direction === "FROM"
+                ? {
+                    entityType: params.relatedEntityType,
+                    id: params.relatedEntityId,
+                  }
+                : { entityType: "RULE_CHAIN", id: ruleChainId },
           };
 
           await RuleChainService.saveRuleChainRelation(ruleChainId, payload);

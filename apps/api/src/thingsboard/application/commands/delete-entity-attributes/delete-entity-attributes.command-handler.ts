@@ -13,7 +13,9 @@ export class DeleteEntityAttributesCommandHandler implements ICommandHandler<
   DeleteEntityAttributesCommand,
   Result<void, ThingsboardApiException>
 > {
-  private readonly logger = new Logger(DeleteEntityAttributesCommandHandler.name);
+  private readonly logger = new Logger(
+    DeleteEntityAttributesCommandHandler.name,
+  );
 
   constructor(
     @Inject(THINGSBOARD_API_PORT)
@@ -26,8 +28,10 @@ export class DeleteEntityAttributesCommandHandler implements ICommandHandler<
     const { accessToken, entityType, entityId, scope, keys } = command;
 
     try {
-      this.logger.log(`Deleting attributes for ${entityType}/${entityId} [${scope}]: ${keys}`);
-      
+      this.logger.log(
+        `Deleting attributes for ${entityType}/${entityId} [${scope}]: ${keys}`,
+      );
+
       // We need to implement deleteEntityAttributes in Port/Adapter if not exists
       // For now, I'll use a dynamic call to a new method we'll add to the adapter
       await (this.thingsboardApi as any).deleteEntityAttributes(
@@ -37,7 +41,7 @@ export class DeleteEntityAttributesCommandHandler implements ICommandHandler<
         scope,
         keys,
       );
-      
+
       return Ok(undefined);
     } catch (error) {
       this.logger.error('Error deleting entity attributes', error);

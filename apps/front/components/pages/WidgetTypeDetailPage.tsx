@@ -30,20 +30,20 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
   // Fetch TB JWT token for iframe bridge
   const { data: tokenData, isLoading: isLoadingToken } = useSWR(
     useIframe ? "embed-token-widget" : null,
-    () => DashboardService.getEmbedToken()
+    () => DashboardService.getEmbedToken(),
   );
 
   useEffect(() => {
     if (useIframe && iframeLoaded && tokenData?.jwtToken && iframeRef.current) {
       // The path for widget editor in TB is /resources/widgets-library/widget-types/[id]
       const targetUrl = `/resources/widgets-library/widget-types/${id}`;
-      
+
       iframeRef.current.contentWindow?.postMessage(
         {
           jwtToken: tokenData.jwtToken,
-          redirect: targetUrl
+          redirect: targetUrl,
         },
-        "http://localhost:3002"
+        "http://localhost:3002",
       );
     }
   }, [useIframe, iframeLoaded, tokenData, id]);
@@ -55,7 +55,9 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
       <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="text-sm text-slate-500">Loading widget environment...</span>
+          <span className="text-sm text-slate-500">
+            Loading widget environment...
+          </span>
         </div>
       </div>
     );
@@ -69,7 +71,9 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.push("/resources/widgets-library/widget-types")}
+            onClick={() =>
+              router.push("/resources/widgets-library/widget-types")
+            }
             className="text-slate-500 dark:text-slate-400"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -96,8 +100,12 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
                       setIframeLoaded(false);
                     }}
                   />
-                  <div className={`block w-10 h-6 rounded-full transition-colors ${useIframe ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-700'}`}></div>
-                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useIframe ? 'translate-x-4' : ''}`}></div>
+                  <div
+                    className={`block w-10 h-6 rounded-full transition-colors ${useIframe ? "bg-blue-500" : "bg-slate-300 dark:bg-slate-700"}`}
+                  ></div>
+                  <div
+                    className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useIframe ? "translate-x-4" : ""}`}
+                  ></div>
                 </div>
                 <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   {useIframe ? "Native TB" : "Custom Editor"}
@@ -115,7 +123,7 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
               ref={iframeRef}
               src="http://localhost:3002/bridge.html"
               className="absolute top-0 left-0 w-full h-full"
-              style={{ border: 'none', pointerEvents: 'auto' }}
+              style={{ border: "none", pointerEvents: "auto" }}
               onLoad={() => setIframeLoaded(true)}
             />
           </div>
@@ -131,38 +139,38 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
         </main>
       ) : (
         <div className="flex-1 overflow-hidden">
-           <WidgetEditorProvider>
-              <div className="flex flex-col h-full w-full">
-                <WidgetHeaderPanel />
-                <div className="flex-1 overflow-hidden">
-                  <Group orientation="horizontal">
-                    <Panel defaultSize={50} minSize={20}>
-                      <Group orientation="vertical">
-                        <Panel defaultSize={50} minSize={20}>
-                          <HtmlPanel />
-                        </Panel>
-                        <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
-                        <Panel defaultSize={50} minSize={20}>
-                          <JsPanel />
-                        </Panel>
-                      </Group>
-                    </Panel>
-                    <Separator className="w-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
-                    <Panel defaultSize={50} minSize={20}>
-                      <Group orientation="vertical">
-                        <Panel defaultSize={50} minSize={20}>
-                          <SettingsPanel />
-                        </Panel>
-                        <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
-                        <Panel defaultSize={50} minSize={20}>
-                          <PreviewPanel />
-                        </Panel>
-                      </Group>
-                    </Panel>
-                  </Group>
-                </div>
+          <WidgetEditorProvider>
+            <div className="flex flex-col h-full w-full">
+              <WidgetHeaderPanel />
+              <div className="flex-1 overflow-hidden">
+                <Group orientation="horizontal">
+                  <Panel defaultSize={50} minSize={20}>
+                    <Group orientation="vertical">
+                      <Panel defaultSize={50} minSize={20}>
+                        <HtmlPanel />
+                      </Panel>
+                      <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                      <Panel defaultSize={50} minSize={20}>
+                        <JsPanel />
+                      </Panel>
+                    </Group>
+                  </Panel>
+                  <Separator className="w-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                  <Panel defaultSize={50} minSize={20}>
+                    <Group orientation="vertical">
+                      <Panel defaultSize={50} minSize={20}>
+                        <SettingsPanel />
+                      </Panel>
+                      <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                      <Panel defaultSize={50} minSize={20}>
+                        <PreviewPanel />
+                      </Panel>
+                    </Group>
+                  </Panel>
+                </Group>
               </div>
-           </WidgetEditorProvider>
+            </div>
+          </WidgetEditorProvider>
         </div>
       )}
     </div>
