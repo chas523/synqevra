@@ -3815,6 +3815,79 @@ export class ThingsboardController {
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/events')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device events' })
+  async getDeviceEvents(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() body: any,
+    @Query('tenantId') tenantId: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchEntityEventsQuery(
+        accessToken,
+        'DEVICE',
+        id,
+        tenantId || id,
+        body?.eventType || 'LC_EVENT',
+        page,
+        pageSize,
+        sortProperty,
+        sortOrder,
+        startTime,
+        endTime,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/alarms')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device alarms' })
+  async getDeviceAlarms(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAlarms(
+        accessToken,
+        'DEVICE',
+        id,
+        Number(page),
+        Number(pageSize),
+        statusList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        severityList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch device alarms');
+    }
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
   @Get('/devices/:id/audit-logs')
   @ApiBearerAuth()
   @ApiOperation({

@@ -571,12 +571,12 @@ export class DeviceService {
       pageSize: pageSize.toString(),
     });
 
-    if (eventType) params.append("eventType", eventType);
     if (startTime) params.append("startTime", startTime.toString());
     if (endTime) params.append("endTime", endTime.toString());
 
-    const { data } = await proxyApi.get<any>(
+    const { data } = await proxyApi.post<any>(
       `/thingsboard/devices/${deviceId}/events?${params.toString()}`,
+      { eventType: eventType || "LC_EVENT" },
     );
     return data;
   }
