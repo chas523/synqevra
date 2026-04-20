@@ -139,7 +139,9 @@ export function AssetCalculatedFieldsTabContent({
     createEmptyArgumentForm(),
   );
   const [isCustomTimeSeriesKey, setIsCustomTimeSeriesKey] = useState(false);
-  const [editingArgumentId, setEditingArgumentId] = useState<string | null>(null);
+  const [editingArgumentId, setEditingArgumentId] = useState<string | null>(
+    null,
+  );
   const [entityNames, setEntityNames] = useState<Record<string, string>>({});
 
   const shouldFetchCurrentEntityTelemetryKeys =
@@ -196,8 +198,8 @@ export function AssetCalculatedFieldsTabContent({
         key: "expression",
         header: "Expression",
         render: (item) => (
-          <div 
-            className="truncate max-w-[300px]" 
+          <div
+            className="truncate max-w-[300px]"
             title={item.configuration?.expression || ""}
           >
             {item.configuration?.expression || "-"}
@@ -247,62 +249,88 @@ export function AssetCalculatedFieldsTabContent({
         argumentName: arg.argumentName || "",
         entityType: (arg.entityType?.toLowerCase() as EntityType) || "device",
         argumentType: (arg.argumentType as ArgumentType) || "attribute",
-        refEntityId: typeof arg.refEntityId === "object" ? arg.refEntityId.id : (arg.refEntityId || ""),
+        refEntityId:
+          typeof arg.refEntityId === "object"
+            ? arg.refEntityId.id
+            : arg.refEntityId || "",
         timeSeriesKey: arg.timeSeriesKey || "",
         name: arg.name || "",
         defaultValue: arg.defaultValue || "",
       }));
     } else if (rawArguments && typeof rawArguments === "object") {
-      mappedArguments = Object.entries(rawArguments).map(([name, entry]: [string, any]) => {
-        const entityType = entry.refEntityId?.entityType?.toLowerCase() || "device";
-        const argType = entry.refEntityKey?.type === "TS_LATEST" || entry.refEntityKey?.type === "TELEMETRY"
-                        ? "latest_telemetry" 
-                        : "attribute";
-        
-        return {
-          id: createClientId(),
-          argumentName: name,
-          entityType: (entityType === "device" || entityType === "asset" || entityType === "customer" 
-                        ? entityType 
-                        : "current_entity") as EntityType,
-          argumentType: argType as ArgumentType,
-          refEntityId: entry.refEntityId?.id || (typeof entry.refEntityId === "string" ? entry.refEntityId : ""),
-          timeSeriesKey: entry.refEntityKey?.key || entry.timeSeriesKey || "",
-          name: entry.name || "",
-          defaultValue: entry.defaultValue || "",
-        };
-      });
+      mappedArguments = Object.entries(rawArguments).map(
+        ([name, entry]: [string, any]) => {
+          const entityType =
+            entry.refEntityId?.entityType?.toLowerCase() || "device";
+          const argType =
+            entry.refEntityKey?.type === "TS_LATEST" ||
+            entry.refEntityKey?.type === "TELEMETRY"
+              ? "latest_telemetry"
+              : "attribute";
+
+          return {
+            id: createClientId(),
+            argumentName: name,
+            entityType: (entityType === "device" ||
+            entityType === "asset" ||
+            entityType === "customer"
+              ? entityType
+              : "current_entity") as EntityType,
+            argumentType: argType as ArgumentType,
+            refEntityId:
+              entry.refEntityId?.id ||
+              (typeof entry.refEntityId === "string" ? entry.refEntityId : ""),
+            timeSeriesKey: entry.refEntityKey?.key || entry.timeSeriesKey || "",
+            name: entry.name || "",
+            defaultValue: entry.defaultValue || "",
+          };
+        },
+      );
     }
 
     // Fetch names for reference entities
-    const deviceIds = mappedArguments.filter(a => a.entityType === 'device' && a.refEntityId).map(a => a.refEntityId);
-    const assetIds = mappedArguments.filter(a => a.entityType === 'asset' && a.refEntityId).map(a => a.refEntityId);
+    const deviceIds = mappedArguments
+      .filter((a) => a.entityType === "device" && a.refEntityId)
+      .map((a) => a.refEntityId);
+    const assetIds = mappedArguments
+      .filter((a) => a.entityType === "asset" && a.refEntityId)
+      .map((a) => a.refEntityId);
 
     if (deviceIds.length || assetIds.length) {
       Promise.all([
-        deviceIds.length ? DeviceService.fetchDevicesByIds(deviceIds as string[]) : Promise.resolve([]),
-        assetIds.length ? AssetService.fetchAssetsByIds(assetIds as string[]) : Promise.resolve([])
-      ]).then(([devices, assets]) => {
-        const names: Record<string, string> = {};
-        
-        // Handle both raw array and wrapped response formats
-        const deviceList = Array.isArray(devices) ? devices : ((devices as any)?.data || []);
-        const assetList = Array.isArray(assets) ? assets : ((assets as any)?.data || []);
+        deviceIds.length
+          ? DeviceService.fetchDevicesByIds(deviceIds as string[])
+          : Promise.resolve([]),
+        assetIds.length
+          ? AssetService.fetchAssetsByIds(assetIds as string[])
+          : Promise.resolve([]),
+      ])
+        .then(([devices, assets]) => {
+          const names: Record<string, string> = {};
 
-        deviceList.forEach((d: any) => {
-          const id = typeof d.id === 'object' ? d.id.id : d.id;
-          if (id) names[id] = d.name;
-        });
-        
-        assetList.forEach((a: any) => {
-          const id = typeof a.id === 'object' ? a.id.id : a.id;
-          if (id) names[id] = a.name;
-        });
+          // Handle both raw array and wrapped response formats
+          const deviceList = Array.isArray(devices)
+            ? devices
+            : (devices as any)?.data || [];
+          const assetList = Array.isArray(assets)
+            ? assets
+            : (assets as any)?.data || [];
 
-        setEntityNames(prev => ({ ...prev, ...names }));
-      }).catch(err => {
-        console.error("Failed to fetch entity names", err);
-      });
+          deviceList.forEach((d: any) => {
+            const id = typeof d.id === "object" ? d.id.id : d.id;
+            if (id) names[id] = d.name;
+          });
+
+          assetList.forEach((a: any) => {
+            const id = typeof a.id === "object" ? a.id.id : a.id;
+            if (id) names[id] = a.name;
+          });
+
+          setEntityNames((prev) => ({ ...prev, ...names }));
+        })
+        .catch((err) => {
+          console.error("Failed to fetch entity names", err);
+        });
     }
 
     setForm({
@@ -386,9 +414,7 @@ export function AssetCalculatedFieldsTabContent({
       setForm((current) => ({
         ...current,
         arguments: current.arguments.map((arg) =>
-          arg.id === editingArgumentId
-            ? { ...arg, ...argumentForm }
-            : arg
+          arg.id === editingArgumentId ? { ...arg, ...argumentForm } : arg,
         ),
       }));
     } else {
@@ -405,8 +431,15 @@ export function AssetCalculatedFieldsTabContent({
     }
 
     // Sync entity names to avoid showing ID in table
-    if (!isCurrentScope(argumentForm.entityType) && argumentForm.refEntityId && argumentForm.name) {
-      setEntityNames(prev => ({ ...prev, [argumentForm.refEntityId]: argumentForm.name }));
+    if (
+      !isCurrentScope(argumentForm.entityType) &&
+      argumentForm.refEntityId &&
+      argumentForm.name
+    ) {
+      setEntityNames((prev) => ({
+        ...prev,
+        [argumentForm.refEntityId]: argumentForm.name,
+      }));
     }
 
     setIsArgumentDialogOpen(false);
@@ -500,7 +533,9 @@ export function AssetCalculatedFieldsTabContent({
           name: argument.name,
           defaultValue: argument.defaultValue,
         })),
-        id: editingId ? { id: editingId, entityType: "CALCULATED_FIELD" } : undefined,
+        id: editingId
+          ? { id: editingId, entityType: "CALCULATED_FIELD" }
+          : undefined,
       };
 
       await AssetService.createAssetCalculatedField(assetId, payload as any);
@@ -522,7 +557,11 @@ export function AssetCalculatedFieldsTabContent({
   };
 
   const handleDeleteCalculatedField = async (item: AssetCalculatedField) => {
-    if (!window.confirm(`Are you sure you want to delete calculated field "${item.name}"?`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete calculated field "${item.name}"?`,
+      )
+    ) {
       return;
     }
 
@@ -532,7 +571,7 @@ export function AssetCalculatedFieldsTabContent({
       await mutate();
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || "Failed to delete calculated field"
+        error?.response?.data?.message || "Failed to delete calculated field",
       );
     }
   };
@@ -685,9 +724,15 @@ export function AssetCalculatedFieldsTabContent({
                     </thead>
                     <tbody>
                       {form.arguments.map((argument) => {
-                        const entityTypeLabel = ENTITY_OPTIONS.find(opt => opt.value === argument.entityType)?.label || argument.entityType;
-                        const argTypeLabel = ARGUMENT_TYPE_OPTIONS.find(opt => opt.value === argument.argumentType)?.label || argument.argumentType;
-                        
+                        const entityTypeLabel =
+                          ENTITY_OPTIONS.find(
+                            (opt) => opt.value === argument.entityType,
+                          )?.label || argument.entityType;
+                        const argTypeLabel =
+                          ARGUMENT_TYPE_OPTIONS.find(
+                            (opt) => opt.value === argument.argumentType,
+                          )?.label || argument.argumentType;
+
                         return (
                           <tr
                             key={argument.id}
@@ -696,19 +741,22 @@ export function AssetCalculatedFieldsTabContent({
                             <td className="px-3 py-2">
                               {argument.argumentName}
                             </td>
-                            <td className="px-3 py-2">
-                              {entityTypeLabel}
-                            </td>
+                            <td className="px-3 py-2">{entityTypeLabel}</td>
                             <td className="px-3 py-2">
                               {!isCurrentScope(argument.entityType) ? (
                                 <span className="text-blue-600">
-                                  {entityNames[argument.refEntityId as string] || argument.name || argument.refEntityId || "-"}
+                                  {entityNames[
+                                    argument.refEntityId as string
+                                  ] ||
+                                    argument.name ||
+                                    argument.refEntityId ||
+                                    "-"}
                                 </span>
-                              ) : "-"}
+                              ) : (
+                                "-"
+                              )}
                             </td>
-                            <td className="px-3 py-2">
-                              {argTypeLabel}
-                            </td>
+                            <td className="px-3 py-2">{argTypeLabel}</td>
                             <td className="px-3 py-2">
                               <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-700">
                                 {argument.timeSeriesKey}
@@ -736,7 +784,23 @@ export function AssetCalculatedFieldsTabContent({
                                   }
                                   disabled={isSubmitting}
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    <line x1="10" y1="11" x2="10" y2="17" />
+                                    <line x1="14" y1="11" x2="14" y2="17" />
+                                  </svg>
                                 </Button>
                               </div>
                             </td>

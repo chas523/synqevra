@@ -26,17 +26,25 @@ export class FetchEntityTelemetryQueryHandler implements IQueryHandler<
     const { accessToken, entityType, entityId, keys } = query;
 
     try {
-      this.logger.log(`Fetching latest telemetry for ${entityType}/${entityId}`);
+      this.logger.log(
+        `Fetching latest telemetry for ${entityType}/${entityId}`,
+      );
       // Using generic method if exists, or falling back to specific one for now
       // Let's check if FetchEntityTelemetry exists in Port.
       // Actually, I'll use the device one if it's generic enough in the adapter.
-      const data = await (this.thingsboardApi as any).fetchEntityLatestTelemetry?.(
-        accessToken,
-        entityType,
-        entityId,
-        keys || [],
-      ) || await (this.thingsboardApi as any).fetchDeviceLatestTelemetry(accessToken, entityId, keys || []);
-      
+      const data =
+        (await (this.thingsboardApi as any).fetchEntityLatestTelemetry?.(
+          accessToken,
+          entityType,
+          entityId,
+          keys || [],
+        )) ||
+        (await (this.thingsboardApi as any).fetchDeviceLatestTelemetry(
+          accessToken,
+          entityId,
+          keys || [],
+        ));
+
       return Ok(data);
     } catch (error) {
       this.logger.error('Error fetching entity telemetry', error);

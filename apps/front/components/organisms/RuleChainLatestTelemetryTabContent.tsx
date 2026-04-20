@@ -218,7 +218,10 @@ export function RuleChainLatestTelemetryTabContent({
       ? ["ruleChainLatestTelemetry", ruleChainId, configuredKeys.join(",")]
       : null,
     async () =>
-      RuleChainService.fetchRuleChainLatestTelemetry(ruleChainId, configuredKeys),
+      RuleChainService.fetchRuleChainLatestTelemetry(
+        ruleChainId,
+        configuredKeys,
+      ),
   );
 
   const {

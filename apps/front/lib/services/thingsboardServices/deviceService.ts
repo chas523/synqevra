@@ -254,13 +254,21 @@ export class DeviceService {
       params.append("deviceIds", deviceIds);
     }
 
-    const { data } = await proxyApi.get(`/thingsboard/devices?${params.toString()}`);
+    const { data } = await proxyApi.get(
+      `/thingsboard/devices?${params.toString()}`,
+    );
     return data;
   }
 
   public static async fetchDevicesByIds(ids: string[]): Promise<any[]> {
     if (!ids.length) return [];
-    const response = await this.fetchDevices(0, ids.length, "createdTime", "DESC", ids.join(","));
+    const response = await this.fetchDevices(
+      0,
+      ids.length,
+      "createdTime",
+      "DESC",
+      ids.join(","),
+    );
     return response.data;
   }
 
@@ -563,12 +571,12 @@ export class DeviceService {
       pageSize: pageSize.toString(),
     });
 
-    if (eventType) params.append("eventType", eventType);
     if (startTime) params.append("startTime", startTime.toString());
     if (endTime) params.append("endTime", endTime.toString());
 
-    const { data } = await proxyApi.get<any>(
+    const { data } = await proxyApi.post<any>(
       `/thingsboard/devices/${deviceId}/events?${params.toString()}`,
+      { eventType: eventType || "LC_EVENT" },
     );
     return data;
   }

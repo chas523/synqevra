@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
+  Download,
   Globe,
-  Lock,
-  UserCheck,
   KeyRound,
-  Trash2,
+  Lock,
   Loader2,
+  MoreVertical,
+  Trash2,
+  UserCheck,
 } from "lucide-react";
 import type { Device } from "@/types/thingsboardDeviceTypes";
 
@@ -38,7 +42,9 @@ interface EntitiesDevicesTableProps {
   onAssignToCustomer?: (device: Device) => void;
   onManageCredentials?: (device: Device) => void;
   onDelete?: (device: Device) => Promise<void>;
+  onExport?: (device: Device) => void;
   onAdd?: () => void;
+  customAction?: ReactNode;
 }
 
 const formatDate = (timestamp?: number) => {
@@ -70,7 +76,9 @@ export const EntitiesDevicesTable = ({
   onAssignToCustomer,
   onManageCredentials,
   onDelete,
+  onExport,
   onAdd,
+  customAction,
 }: EntitiesDevicesTableProps) => {
   const [loadingDeviceId, setLoadingDeviceId] = useState<string | null>(null);
 
@@ -162,104 +170,63 @@ export const EntitiesDevicesTable = ({
     const isPublic = Boolean(device.customerIsPublic);
 
     return (
-      <div className="flex items-center gap-0.5">
-        {/* Make public */}
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+        {isThisLoading && (
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground mr-1" />
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-blue-500"
-              disabled={isThisLoading || isPublic}
-              onClick={(e) => {
-                e.stopPropagation();
+              className="h-7 w-7 text-muted-foreground"
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onExport?.(device)}>
+              <Download className="mr-2 h-4 w-4" />
+              Export JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isPublic}
+              onClick={() => {
                 if (onMakePublic) runAction(device, onMakePublic);
               }}
             >
-              {isThisLoading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Globe className="h-3.5 w-3.5" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Make public</TooltipContent>
-        </Tooltip>
-
-        {/* Make private */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-slate-700"
-              disabled={isThisLoading || !isPublic}
-              onClick={(e) => {
-                e.stopPropagation();
+              <Globe className="mr-2 h-4 w-4" />
+              Make public
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!isPublic}
+              onClick={() => {
                 if (onMakePrivate) runAction(device, onMakePrivate);
               }}
             >
-              <Lock className="h-3.5 w-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Make private</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-green-500"
-              disabled={true}
-              onClick={(e) => {
-                e.stopPropagation();
-                onAssignToCustomer?.(device);
-              }}
-            >
-              <UserCheck className="h-3.5 w-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Assign to customer (Coming soon)</TooltipContent>
-        </Tooltip>
-
-        {/* Manage credentials */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-amber-500"
-              disabled={isThisLoading}
-              onClick={(e) => {
-                e.stopPropagation();
-                onManageCredentials?.(device);
-              }}
-            >
-              <KeyRound className="h-3.5 w-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Manage credentials</TooltipContent>
-        </Tooltip>
-
-        {/* Delete */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              disabled={isThisLoading}
-              onClick={(e) => {
-                e.stopPropagation();
+              <Lock className="mr-2 h-4 w-4" />
+              Make private
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onManageCredentials?.(device)}>
+              <KeyRound className="mr-2 h-4 w-4" />
+              Manage credentials
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              <UserCheck className="mr-2 h-4 w-4" />
+              Assign to customer
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => {
                 if (onDelete) runAction(device, onDelete);
               }}
             >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
-        </Tooltip>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete device
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     );
   };
@@ -284,6 +251,7 @@ export const EntitiesDevicesTable = ({
       rowActions={rowActions}
       onAdd={onAdd}
       addButtonLabel="Add Device"
+      customAction={customAction}
       emptyMessage="No devices found."
       loadingMessage="Loading devices..."
     />

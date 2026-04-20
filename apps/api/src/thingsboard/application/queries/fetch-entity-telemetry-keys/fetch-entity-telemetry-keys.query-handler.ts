@@ -13,7 +13,9 @@ export class FetchEntityTelemetryKeysQueryHandler implements IQueryHandler<
   FetchEntityTelemetryKeysQuery,
   Result<string[], ThingsboardApiException>
 > {
-  private readonly logger = new Logger(FetchEntityTelemetryKeysQueryHandler.name);
+  private readonly logger = new Logger(
+    FetchEntityTelemetryKeysQueryHandler.name,
+  );
 
   constructor(
     @Inject(THINGSBOARD_API_PORT)
@@ -28,12 +30,17 @@ export class FetchEntityTelemetryKeysQueryHandler implements IQueryHandler<
     try {
       this.logger.log(`Fetching telemetry keys for ${entityType}/${entityId}`);
       // Fallback to fetchDeviceTelemetryKeys if generic is not in Port
-      const data = await (this.thingsboardApi as any).fetchEntityTelemetryKeys?.(
-        accessToken,
-        entityType,
-        entityId,
-      ) || await (this.thingsboardApi as any).fetchDeviceTelemetryKeys(accessToken, entityId);
-      
+      const data =
+        (await (this.thingsboardApi as any).fetchEntityTelemetryKeys?.(
+          accessToken,
+          entityType,
+          entityId,
+        )) ||
+        (await (this.thingsboardApi as any).fetchDeviceTelemetryKeys(
+          accessToken,
+          entityId,
+        ));
+
       return Ok(data);
     } catch (error) {
       this.logger.error('Error fetching entity telemetry keys', error);

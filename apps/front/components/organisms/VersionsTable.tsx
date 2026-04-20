@@ -9,7 +9,15 @@ import {
 } from "@/hooks/thingsboard/version-control/useVersionControl";
 import { VersionEntry } from "@/types/versionControlTypes";
 import { Button } from "@/components/ui/button";
-import { Copy, Clock, RefreshCw, X, Link2Off, ChevronDown, ArrowRightLeft } from "lucide-react";
+import {
+  Copy,
+  Clock,
+  RefreshCw,
+  X,
+  Link2Off,
+  ChevronDown,
+  ArrowRightLeft,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -319,16 +327,16 @@ export function VersionsTable({
         ))}
       {entityType && entityId && (
         <CompareVersionModal
-           open={isCompareModalOpen}
-           onOpenChange={setIsCompareModalOpen}
-           entityType={entityType}
-           entityId={entityId}
-           versionId={versionToCompare?.id || null}
-           versionName={versionToCompare?.name || ""}
-           onRestoreClick={() => {
-              setVersionToRestore(versionToCompare);
-              setIsRestoreModalOpen(true);
-           }}
+          open={isCompareModalOpen}
+          onOpenChange={setIsCompareModalOpen}
+          entityType={entityType}
+          entityId={entityId}
+          versionId={versionToCompare?.id || null}
+          versionName={versionToCompare?.name || ""}
+          onRestoreClick={() => {
+            setVersionToRestore(versionToCompare);
+            setIsRestoreModalOpen(true);
+          }}
         />
       )}
     </div>

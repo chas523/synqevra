@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -146,6 +147,9 @@ export function AddAssetDialog({
       <DialogContent className="w-[min(560px,calc(100vw-2rem))] max-w-140">
         <DialogHeader>
           <DialogTitle>Add New Asset</DialogTitle>
+          <DialogDescription>
+            Fill in the details to create a new asset.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">

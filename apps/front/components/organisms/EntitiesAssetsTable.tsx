@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Globe, Loader2, Lock, Trash2 } from "lucide-react";
+import { Download, Globe, Loader2, Lock, Trash2 } from "lucide-react";
 import type { Asset } from "@/types/thingsboardAssetTypes";
 
 interface EntitiesAssetsTableProps {
@@ -29,6 +29,8 @@ interface EntitiesAssetsTableProps {
   onMakePublic?: (asset: Asset) => Promise<void>;
   onMakePrivate?: (asset: Asset) => Promise<void>;
   onDelete?: (asset: Asset) => Promise<void>;
+  onExport?: (asset: Asset) => void;
+  customAction?: ReactNode;
 }
 
 const formatDate = (timestamp?: number) => {
@@ -59,6 +61,8 @@ export const EntitiesAssetsTable = ({
   onMakePublic,
   onMakePrivate,
   onDelete,
+  onExport,
+  customAction,
 }: EntitiesAssetsTableProps) => {
   const [loadingAssetId, setLoadingAssetId] = useState<string | null>(null);
 
@@ -127,6 +131,23 @@ export const EntitiesAssetsTable = ({
 
     return (
       <div className="flex items-center gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-muted-foreground hover:text-foreground"
+              onClick={(event) => {
+                event.stopPropagation();
+                onExport?.(asset);
+              }}
+            >
+              <Download className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Export JSON</TooltipContent>
+        </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -208,6 +229,7 @@ export const EntitiesAssetsTable = ({
       onRowClick={onRowClick}
       rowActions={rowActions}
       addButtonLabel="Add Asset"
+      customAction={customAction}
       emptyMessage="No assets found."
       loadingMessage="Loading assets..."
     />

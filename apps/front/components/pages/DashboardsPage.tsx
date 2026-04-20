@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { Dashboard } from "@/types/dashboardTypes";
 import { useDashboards } from "@/hooks/thingsboard/useDashboards";
@@ -18,6 +18,7 @@ import {
   Trash2,
   Plus,
   Search,
+  Upload,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DashboardPublicLinkModal } from "@/components/organisms/DashboardPublicLinkModal";
@@ -50,6 +51,8 @@ export default function DashboardsPage() {
   } | null>(null);
   const [fullSelectedDashboard, setFullSelectedDashboard] =
     useState<Dashboard | null>(null);
+
+  const importFileInputRef = useRef<HTMLInputElement>(null);
 
   const { dashboards, totalPages, totalElements, isLoading, mutate } =
     useDashboards(currentPage, PAGE_SIZE, sortProperty, sortOrder);
@@ -86,6 +89,27 @@ export default function DashboardsPage() {
     const publicCustomer = dashboard.assignedCustomers?.find((c) => c.public);
     return publicCustomer?.customerId?.id;
   };
+
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        await DashboardService.saveDashboard(json);
+        mutate();
+        toast.success("Dashboard imported successfully");
+      } catch (error) {
+        toast.error("Failed to import dashboard – invalid JSON file");
+      } finally {
+        if (importFileInputRef.current) {
+          importFileInputRef.current.value = "";
+        }
+      }
+    },
+    [mutate],
+  );
 
   const handleExport = async (
     e: React.MouseEvent | null,
@@ -279,6 +303,24 @@ export default function DashboardsPage() {
             >
               <Search className="h-5 w-5" />
             </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Import Dashboard"
+                    onClick={() => importFileInputRef.current?.click()}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <Upload className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Import dashboard from JSON</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button
               variant="ghost"
               size="icon"
@@ -288,6 +330,13 @@ export default function DashboardsPage() {
             >
               <Plus className="h-5 w-5" />
             </Button>
+            <input
+              ref={importFileInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={handleImport}
+            />
           </div>
         }
         rowActions={(d) => (

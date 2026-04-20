@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { EntitiesAssetProfilesTable } from "@/components/organisms/EntitiesAssetProfilesTable";
 import { AddAssetProfileDialog } from "@/components/organisms/AddAssetProfileDialog";
 import { AssetProfileDetailPanel } from "@/components/organisms/AssetProfileDetailPanel";
@@ -20,7 +20,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, Upload, X } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
@@ -163,6 +169,32 @@ export const EntitiesAssetProfilesPage = () => {
     }
   }, [mutate, profileToDelete]);
 
+  const importFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        await AssetService.saveAssetProfile(json);
+        toast.success(`Asset profile "${json.name ?? file.name}" imported`);
+        mutate();
+      } catch (error: any) {
+        const message =
+          error?.response?.data?.message ??
+          "Failed to import asset profile – invalid JSON file";
+        toast.error(message);
+      } finally {
+        if (importFileInputRef.current) {
+          importFileInputRef.current.value = "";
+        }
+      }
+    },
+    [mutate],
+  );
+
   const searchAction = (
     <div className="flex items-center gap-2">
       {isSearchOpen && (
@@ -185,6 +217,32 @@ export const EntitiesAssetProfilesPage = () => {
           )}
         </div>
       )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="rounded-lg border"
+              onClick={() => importFileInputRef.current?.click()}
+              aria-label="Import asset profile"
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Import asset profile from JSON</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <input
+        ref={importFileInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleImport}
+      />
       <Button
         type="button"
         variant="ghost"

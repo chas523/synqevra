@@ -270,7 +270,7 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
-  ) { }
+  ) {}
 
   @UseGuards(ThingsboardAuthGuard)
   @Get('embed-token')
@@ -575,7 +575,7 @@ export class ThingsboardController {
               ? versionValue
               : versionValue != null
                 ? // eslint-disable-next-line @typescript-eslint/no-base-to-string
-                String(versionValue)
+                  String(versionValue)
                 : null,
         };
       }),
@@ -1457,23 +1457,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ENTITY_VIEW' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ENTITY_VIEW' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ENTITY_VIEW' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ENTITY_VIEW' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -1705,6 +1705,9 @@ export class ThingsboardController {
       await this.thingsboardApi.deleteAsset(accessToken, id);
       return { success: true };
     } catch (error) {
+      if (error instanceof ThingsboardApiException) {
+        throw new BadRequestException(error.message);
+      }
       throw new InternalServerErrorException('Failed to delete asset');
     }
   }
@@ -2005,11 +2008,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -2074,11 +2077,11 @@ export class ThingsboardController {
           },
           ...(argument.refEntityId?.trim()
             ? {
-              refEntityId: {
-                entityType: mappedEntityType,
-                id: argument.refEntityId.trim(),
-              },
-            }
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
             : {}),
           defaultValue: argument.defaultValue ?? '',
         };
@@ -2112,11 +2115,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -2288,23 +2291,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'ASSET' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'ASSET' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'ASSET' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'ASSET' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -2703,11 +2706,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -2772,11 +2775,11 @@ export class ThingsboardController {
           },
           ...(argument.refEntityId?.trim()
             ? {
-              refEntityId: {
-                entityType: mappedEntityType,
-                id: argument.refEntityId.trim(),
-              },
-            }
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
             : {}),
           defaultValue: argument.defaultValue ?? '',
         };
@@ -2810,11 +2813,11 @@ export class ThingsboardController {
             type: outputType,
             ...(outputType === 'ATTRIBUTES'
               ? {
-                scope:
-                  payload.attributeScope === 'SHARED_SCOPE'
-                    ? 'SHARED_SCOPE'
-                    : 'SERVER_SCOPE',
-              }
+                  scope:
+                    payload.attributeScope === 'SHARED_SCOPE'
+                      ? 'SHARED_SCOPE'
+                      : 'SERVER_SCOPE',
+                }
               : {}),
             decimalsByDefault: payload.decimalsByDefault ?? 2,
           },
@@ -3676,11 +3679,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -3745,11 +3748,11 @@ export class ThingsboardController {
           },
           ...(argument.refEntityId?.trim()
             ? {
-              refEntityId: {
-                entityType: mappedEntityType,
-                id: argument.refEntityId.trim(),
-              },
-            }
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
             : {}),
           defaultValue: argument.defaultValue ?? '',
         };
@@ -3783,11 +3786,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-              scope:
-                payload.attributeScope === 'SHARED_SCOPE'
-                  ? 'SHARED_SCOPE'
-                  : 'SERVER_SCOPE',
-            }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -3808,6 +3811,79 @@ export class ThingsboardController {
         throw error;
       },
     });
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/devices/:id/events')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device events' })
+  async getDeviceEvents(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() body: any,
+    @Query('tenantId') tenantId: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
+    @Query('startTime') startTime?: number,
+    @Query('endTime') endTime?: number,
+  ) {
+    const result = await this.queryBus.execute(
+      new FetchEntityEventsQuery(
+        accessToken,
+        'DEVICE',
+        id,
+        tenantId || id,
+        body?.eventType || 'LC_EVENT',
+        page,
+        pageSize,
+        sortProperty,
+        sortOrder,
+        startTime,
+        endTime,
+      ),
+    );
+    return result.unwrap();
+  }
+
+  @Roles(Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Get('/devices/:id/alarms')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get device alarms' })
+  async getDeviceAlarms(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('page') page = 0,
+    @Query('pageSize') pageSize = 10,
+    @Query('statusList') statusList?: string,
+    @Query('severityList') severityList?: string,
+    @Query('startTime') startTime?: string,
+    @Query('endTime') endTime?: string,
+  ) {
+    try {
+      return await this.thingsboardApi.fetchEntityAlarms(
+        accessToken,
+        'DEVICE',
+        id,
+        Number(page),
+        Number(pageSize),
+        statusList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        severityList
+          ?.split(',')
+          .map((it) => it.trim())
+          .filter(Boolean),
+        startTime ? Number(startTime) : undefined,
+        endTime ? Number(endTime) : undefined,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch device alarms');
+    }
   }
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -3870,6 +3946,9 @@ export class ThingsboardController {
       await this.thingsboardApi.deleteDevice(accessToken, id);
       return { success: true };
     } catch (error) {
+      if (error instanceof ThingsboardApiException) {
+        throw new BadRequestException(error.message);
+      }
       throw new InternalServerErrorException('Failed to delete device');
     }
   }
@@ -3932,23 +4011,23 @@ export class ThingsboardController {
       const relation =
         body.direction === 'FROM'
           ? {
-            from: { id, entityType: 'DEVICE' },
-            to: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          }
+              from: { id, entityType: 'DEVICE' },
+              to: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            }
           : {
-            from: {
-              id: body.relatedEntityId,
-              entityType: body.relatedEntityType,
-            },
-            to: { id, entityType: 'DEVICE' },
-            type: body.relationType,
-            typeGroup: 'COMMON',
-          };
+              from: {
+                id: body.relatedEntityId,
+                entityType: body.relatedEntityType,
+              },
+              to: { id, entityType: 'DEVICE' },
+              type: body.relationType,
+              typeGroup: 'COMMON',
+            };
       await this.thingsboardApi.saveRelation(accessToken, relation as any);
       return { success: true };
     } catch (error) {
@@ -4563,7 +4642,6 @@ export class ThingsboardController {
     });
   }
 
-
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
@@ -4610,7 +4688,11 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('rule-chains/:id/attributes')
-  async getRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam?: string) {
+  async getRuleChainAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam?: string,
+  ) {
     const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
     const result = await this.queryBus.execute(
       new FetchEntityAttributesQuery(accessToken, 'RULE_CHAIN', id, scope),
@@ -4622,10 +4704,21 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('rule-chains/:id/attributes')
-  async saveRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam: string, @Body() attributes: any) {
+  async saveRuleChainAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam: string,
+    @Body() attributes: any,
+  ) {
     const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
     const result = await this.commandBus.execute(
-      new SaveEntityAttributesCommand('RULE_CHAIN', id, scope as any, attributes, accessToken),
+      new SaveEntityAttributesCommand(
+        'RULE_CHAIN',
+        id,
+        scope,
+        attributes,
+        accessToken,
+      ),
     );
     return result.unwrap();
   }
@@ -4634,10 +4727,21 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Delete('rule-chains/:id/attributes')
-  async deleteRuleChainAttributes(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('scope') scopeParam: string, @Query('keys') keys: string) {
+  async deleteRuleChainAttributes(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('scope') scopeParam: string,
+    @Query('keys') keys: string,
+  ) {
     const scope = (scopeParam || 'SERVER_SCOPE').toUpperCase() as any;
     const result = await this.commandBus.execute(
-      new DeleteEntityAttributesCommand(accessToken, 'RULE_CHAIN', id, scope, keys),
+      new DeleteEntityAttributesCommand(
+        accessToken,
+        'RULE_CHAIN',
+        id,
+        scope,
+        keys,
+      ),
     );
     return result.unwrap();
   }
@@ -4710,7 +4814,11 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('rule-chains/:id/relations')
-  async getRuleChainRelations(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('direction') direction: 'FROM' | 'TO' = 'FROM') {
+  async getRuleChainRelations(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('direction') direction: 'FROM' | 'TO' = 'FROM',
+  ) {
     const result = await this.queryBus.execute(
       new FetchEntityRelationsQuery(accessToken, 'RULE_CHAIN', id, direction),
     );
@@ -4721,7 +4829,11 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Post('rule-chains/:id/relations')
-  async saveRuleChainRelation(@TbAccessToken() accessToken: string, @Param('id') id: string, @Body() body: any) {
+  async saveRuleChainRelation(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
     const result = await this.commandBus.execute(
       new CreateRelationCommand(
         body.from.id,
@@ -4746,7 +4858,7 @@ export class ThingsboardController {
     @Query('relatedEntityId') relatedEntityId: string,
     @Query('relatedEntityType') relatedEntityType: string,
     @Query('relationType') relationType: string,
-    @Query('direction') direction: 'FROM' | 'TO'
+    @Query('direction') direction: 'FROM' | 'TO',
   ) {
     const fromId = direction === 'FROM' ? id : relatedEntityId;
     const fromType = direction === 'FROM' ? 'RULE_CHAIN' : relatedEntityType;
@@ -4754,7 +4866,14 @@ export class ThingsboardController {
     const toType = direction === 'FROM' ? relatedEntityType : 'RULE_CHAIN';
 
     const result = await this.commandBus.execute(
-      new DeleteRelationCommand(fromId, fromType, toId, toType, relationType, accessToken),
+      new DeleteRelationCommand(
+        fromId,
+        fromType,
+        toId,
+        toType,
+        relationType,
+        accessToken,
+      ),
     );
     return result.unwrap();
   }
@@ -4793,9 +4912,18 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('rule-chains/:id/telemetry/latest')
-  async getRuleChainTelemetry(@TbAccessToken() accessToken: string, @Param('id') id: string, @Query('keys') keys?: string) {
+  async getRuleChainTelemetry(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+    @Query('keys') keys?: string,
+  ) {
     const result = await this.queryBus.execute(
-      new FetchEntityTelemetryQuery(accessToken, 'RULE_CHAIN', id, keys ? keys.split(',') : undefined),
+      new FetchEntityTelemetryQuery(
+        accessToken,
+        'RULE_CHAIN',
+        id,
+        keys ? keys.split(',') : undefined,
+      ),
     );
     return result.unwrap();
   }
@@ -4804,7 +4932,10 @@ export class ThingsboardController {
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('rule-chains/:id/telemetry/latest/keys')
-  async getRuleChainTelemetryKeys(@TbAccessToken() accessToken: string, @Param('id') id: string) {
+  async getRuleChainTelemetryKeys(
+    @TbAccessToken() accessToken: string,
+    @Param('id') id: string,
+  ) {
     const result = await this.queryBus.execute(
       new FetchEntityTelemetryKeysQuery(accessToken, 'RULE_CHAIN', id),
     );
@@ -4877,7 +5008,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -5018,7 +5149,7 @@ export class ThingsboardController {
       await this.commandBus.execute(command);
 
     return match(result, {
-      Ok: () => { },
+      Ok: () => {},
       Err: (error: ThingsboardApiException) => {
         throw error;
       },
@@ -6493,11 +6624,11 @@ export class ThingsboardController {
       arguments: Array<{
         argumentName: string;
         entityType:
-        | 'current_entity'
-        | 'device'
-        | 'asset'
-        | 'customer'
-        | 'current_tenant';
+          | 'current_entity'
+          | 'device'
+          | 'asset'
+          | 'customer'
+          | 'current_tenant';
         argumentType: 'attribute' | 'latest_telemetry';
         refEntityId?: string;
         timeSeriesKey?: string;
@@ -6562,11 +6693,11 @@ export class ThingsboardController {
           },
           ...(argument.refEntityId?.trim()
             ? {
-              refEntityId: {
-                entityType: mappedEntityType,
-                id: argument.refEntityId.trim(),
-              },
-            }
+                refEntityId: {
+                  entityType: mappedEntityType,
+                  id: argument.refEntityId.trim(),
+                },
+              }
             : {}),
           defaultValue: argument.defaultValue ?? '',
         };
@@ -6600,11 +6731,11 @@ export class ThingsboardController {
           type: outputType,
           ...(outputType === 'ATTRIBUTES'
             ? {
-              scope:
-                payload.attributeScope === 'SHARED_SCOPE'
-                  ? 'SHARED_SCOPE'
-                  : 'SERVER_SCOPE',
-            }
+                scope:
+                  payload.attributeScope === 'SHARED_SCOPE'
+                    ? 'SHARED_SCOPE'
+                    : 'SERVER_SCOPE',
+              }
             : {}),
           decimalsByDefault: payload.decimalsByDefault ?? 2,
         },
@@ -7908,7 +8039,6 @@ export class ThingsboardController {
   }
 
   // Proxied Rule Chain Detail Endpoints
-
 
   @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
   @UseGuards(ThingsboardAuthGuard)

@@ -26,7 +26,9 @@ export class FetchEntityAttributesQueryHandler implements IQueryHandler<
     const { accessToken, entityType, entityId, scope, keys } = query;
 
     try {
-      this.logger.log(`Fetching attributes for ${entityType}/${entityId} [${scope}]`);
+      this.logger.log(
+        `Fetching attributes for ${entityType}/${entityId} [${scope}]`,
+      );
       const data = await this.thingsboardApi.fetchEntityAttributes(
         accessToken,
         entityType,
