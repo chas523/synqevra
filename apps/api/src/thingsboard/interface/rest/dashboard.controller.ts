@@ -609,6 +609,7 @@ export class DashboardController {
     FileFieldsInterceptor([
       { name: 'logoWhite', maxCount: 1 },
       { name: 'logoDark', maxCount: 1 },
+      { name: 'lightColorsCss', maxCount: 1 },
     ]),
   )
   async uploadGlobalWhitelabelImages(
@@ -617,49 +618,104 @@ export class DashboardController {
     files: {
       logoWhite?: Express.Multer.File[];
       logoDark?: Express.Multer.File[];
+      lightColorsCss?: Express.Multer.File[];
     },
   ) {
     const uploadedPaths: Record<string, string> = {};
+    let logoVersion: string | null = null;
+    let cssVersion: string | null = null;
 
     try {
-      if (files?.logoWhite?.[0]) {
-        const path = await this.storageService.uploadFile(
-          files.logoWhite[0],
-          'global',
-          `logo-white.svg`,
+      // Handle logo uploads
+      const hasLogoFiles = files?.logoWhite?.[0] || files?.logoDark?.[0];
+      if (hasLogoFiles) {
+        if (files?.logoWhite?.[0]) {
+          const path = await this.storageService.uploadFile(
+            files.logoWhite[0],
+            'global',
+            `logo-white.svg`,
+          );
+          uploadedPaths.logoWhite = path;
+        }
+
+        if (files?.logoDark?.[0]) {
+          const path = await this.storageService.uploadFile(
+            files.logoDark[0],
+            'global',
+            `logo-dark.svg`,
+          );
+          uploadedPaths.logoDark = path;
+        }
+
+        // Update version.json for logos
+        logoVersion = Date.now().toString();
+        const versionBuffer = Buffer.from(
+          JSON.stringify({ version: logoVersion }),
         );
-        uploadedPaths.logoWhite = path;
+        await this.storageService.uploadFile(
+          {
+            fieldname: 'version',
+            originalname: 'version.json',
+            encoding: '7bit',
+            mimetype: 'application/json',
+            size: versionBuffer.length,
+            buffer: versionBuffer,
+          },
+          'global',
+          'version.json',
+        );
       }
 
-      if (files?.logoDark?.[0]) {
-        const path = await this.storageService.uploadFile(
-          files.logoDark[0],
-          'global',
-          `logo-dark.svg`,
-        );
-        uploadedPaths.logoDark = path;
-      }
+      // Handle CSS upload
+      if (files?.lightColorsCss?.[0]) {
+        const cssFile = files.lightColorsCss[0];
+        const hasCssExtension = cssFile.originalname
+          .toLowerCase()
+          .endsWith('.css');
+        const hasCssMimeType = cssFile.mimetype.includes('css');
 
-      // Save a version file so all browsers can detect the logo change
-      const version = Date.now().toString();
-      const versionBuffer = Buffer.from(JSON.stringify({ version }));
-      await this.storageService.uploadFile(
-        {
-          fieldname: 'version',
-          originalname: 'version.json',
-          encoding: '7bit',
-          mimetype: 'application/json',
-          size: versionBuffer.length,
-          buffer: versionBuffer,
-        },
-        'global',
-        'version.json',
-      );
+        if (!hasCssExtension && !hasCssMimeType) {
+          throw new HttpException(
+            'lightColorsCss must be a CSS file',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
+        const path = await this.storageService.uploadFile(
+          cssFile,
+          'global',
+          'light-colors.css',
+          {
+            contentType: 'text/css; charset=utf-8',
+            cacheControl: 'no-cache, no-store, must-revalidate',
+          },
+        );
+        uploadedPaths.lightColorsCss = path;
+
+        // Update css-version.json for CSS theme
+        cssVersion = Date.now().toString();
+        const cssVersionBuffer = Buffer.from(
+          JSON.stringify({ version: cssVersion }),
+        );
+        await this.storageService.uploadFile(
+          {
+            fieldname: 'css-version',
+            originalname: 'css-version.json',
+            encoding: '7bit',
+            mimetype: 'application/json',
+            size: cssVersionBuffer.length,
+            buffer: cssVersionBuffer,
+          },
+          'global',
+          'css-version.json',
+        );
+      }
 
       return {
         success: true,
         paths: uploadedPaths,
-        version,
+        version: logoVersion,
+        cssVersion: cssVersion,
       };
     } catch (error) {
       throw new HttpException(

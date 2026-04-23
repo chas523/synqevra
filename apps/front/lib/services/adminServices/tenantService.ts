@@ -555,11 +555,18 @@ export class TenantService {
 
   public static async uploadGlobalWhitelabelImages(
     formData: FormData,
-  ): Promise<{ success: boolean; paths: Record<string, string> }> {
+  ): Promise<{
+    success: boolean;
+    paths: Record<string, string>;
+    version?: string;
+    cssVersion?: string;
+  }> {
     try {
       const response = await proxyApi.post<{
         success: boolean;
         paths: Record<string, string>;
+        version?: string;
+        cssVersion?: string;
       }>(`/dashboard/settings/whitelabel`, formData);
       return response.data;
     } catch (err: unknown) {

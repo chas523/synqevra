@@ -19,6 +19,11 @@ export interface UploadedFile {
   buffer: Buffer;
 }
 
+interface UploadFileOptions {
+  cacheControl?: string;
+  contentType?: string;
+}
+
 @Injectable()
 export class StorageService implements OnModuleInit {
   private s3Client: S3Client;
@@ -103,6 +108,7 @@ export class StorageService implements OnModuleInit {
     file: UploadedFile,
     directoryPath: string,
     customFilename?: string,
+    options?: UploadFileOptions,
   ): Promise<string> {
     const defaultFilename =
       customFilename || `${uuidv4()}${path.extname(file.originalname)}`;
@@ -113,7 +119,8 @@ export class StorageService implements OnModuleInit {
         Bucket: this.bucket,
         Key: fullKey,
         Body: file.buffer,
-        ContentType: file.mimetype,
+        ContentType: options?.contentType || file.mimetype,
+        CacheControl: options?.cacheControl,
       });
 
       await this.s3Client.send(command);
