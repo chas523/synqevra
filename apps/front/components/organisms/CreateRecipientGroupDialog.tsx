@@ -118,7 +118,7 @@ export function CreateRecipientGroupDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] overflow-visible">
+      <DialogContent className="sm:max-w-150 overflow-visible">
         <DialogHeader>
           <DialogTitle>Add notification recipients group</DialogTitle>
           <DialogDescription>

@@ -11,9 +11,9 @@ type ParameterThresholdCardProps = {
   parameter: MedicalParameter;
   currentValues?: Record<string, number | string | string[]>;
   thresholdOptions: ThresholdOption[];
-  onAdd: (thresholdType: string, value: string) => void;
-  onRemove: (thresholdType: string) => void;
-  onRemoveAll: () => void;
+  onAddAction: (thresholdType: string, value: string) => void;
+  onRemoveAction: (thresholdType: string) => void;
+  onRemoveAllAction: () => void;
 };
 
 const getParameterIcon = (key: string) => {
@@ -35,9 +35,9 @@ export function ParameterThresholdCard({
   parameter,
   currentValues = {},
   thresholdOptions,
-  onAdd,
-  onRemove,
-  onRemoveAll,
+  onAddAction,
+  onRemoveAction,
+  onRemoveAllAction,
 }: ParameterThresholdCardProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedType, setSelectedType] = useState("");
@@ -45,7 +45,7 @@ export function ParameterThresholdCard({
 
   const handleAdd = () => {
     if (selectedType && inputValue) {
-      onAdd(selectedType, inputValue);
+      onAddAction(selectedType, inputValue);
       setSelectedType("");
       setInputValue("");
       setIsAdding(false);
@@ -56,12 +56,12 @@ export function ParameterThresholdCard({
 
   return (
     <div className="relative group">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-linear-to-br from-cyan-500/10 to-blue-500/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/30">
+            <div className="p-2 bg-linear-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 rounded-lg border border-cyan-200 dark:border-cyan-500/30">
               {getParameterIcon(parameter.key)}
             </div>
             <div>
@@ -78,7 +78,7 @@ export function ParameterThresholdCard({
 
           {hasValues && (
             <button
-              onClick={onRemoveAll}
+              onClick={onRemoveAllAction}
               className="cursor-pointer text-nowrap text-red-400 hover:text-red-300 text-sm px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors"
             >
               Clear All
@@ -95,7 +95,7 @@ export function ParameterThresholdCard({
                 className="relative bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-lg p-3"
               >
                 <button
-                  onClick={() => onRemove(type)}
+                  onClick={() => onRemoveAction(type)}
                   className="cursor-pointer absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs transition-colors"
                 >
                   <X className="w-3 h-3" />
@@ -150,7 +150,7 @@ export function ParameterThresholdCard({
               <button
                 onClick={handleAdd}
                 disabled={!selectedType || !inputValue}
-                className="flex-1 text-nowrap bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-700 dark:disabled:to-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:cursor-not-allowed"
+                className="flex-1 text-nowrap bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-slate-400 disabled:to-slate-400 dark:disabled:from-slate-700 dark:disabled:to-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:cursor-not-allowed"
               >
                 Add Threshold
               </button>

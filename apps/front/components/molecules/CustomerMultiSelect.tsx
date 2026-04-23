@@ -131,7 +131,7 @@ export function CustomerMultiSelect({
 
       {showResults && (
         <>
-          <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded shadow-lg max-h-60 overflow-y-auto py-1">
+          <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-background dark:bg-slate-800 border border-border dark:border-slate-800 rounded shadow-lg max-h-60 overflow-y-auto py-1">
             {isSearching && searchResults.length === 0 ? (
               <div className="px-4 py-3 text-xs text-center text-slate-500 dark:text-slate-400">
                 <Loader2 className="h-4 w-4 animate-spin mx-auto mb-1" />

@@ -1,0 +1,72 @@
+/**
+ * Light Mode Color Tokens - Sand Variant
+ * Same token contract as light-colors.css.
+ * Swap import in apps/front/app/globals.css to test white-label replacement.
+ */
+
+:root {
+  /* ===== SURFACE COLORS ===== */
+  --wl-light-background: oklch(0.992 0.006 92);
+  --wl-light-card: oklch(0.998 0.004 85);
+  --wl-light-popover: oklch(0.996 0.005 88);
+
+  /* ===== TEXT COLORS ===== */
+  --wl-light-foreground: oklch(0.25 0.03 58);
+  --wl-light-card-foreground: oklch(0.25 0.03 58);
+  --wl-light-popover-foreground: oklch(0.25 0.03 58);
+  --wl-light-muted-foreground: oklch(0.53 0.02 62);
+
+  /* ===== PRIMARY COLOR ===== */
+  --wl-light-primary: oklch(0.52 0.13 48);
+  --wl-light-primary-foreground: oklch(0.985 0.01 95);
+
+  /* ===== SECONDARY COLOR ===== */
+  --wl-light-secondary: oklch(0.94 0.02 80);
+  --wl-light-secondary-foreground: oklch(0.34 0.05 52);
+
+  /* ===== MUTED COLOR ===== */
+  --wl-light-muted: oklch(0.955 0.015 82);
+
+  /* ===== ACCENT COLOR ===== */
+  --wl-light-accent: oklch(0.9 0.05 130);
+  --wl-light-accent-foreground: oklch(0.3 0.06 120);
+
+  /* ===== DESTRUCTIVE COLOR ===== */
+  --wl-light-destructive: oklch(0.6 0.23 28);
+
+  /* ===== BORDER & INPUT ===== */
+  --wl-light-border: oklch(0.88 0.015 78);
+  --wl-light-input: oklch(0.88 0.015 78);
+
+  /* ===== FOCUS & RING ===== */
+  --wl-light-ring: oklch(0.64 0.1 54);
+
+  /* ===== CHART COLORS ===== */
+  --wl-light-chart-1: oklch(0.67 0.17 58);
+  --wl-light-chart-2: oklch(0.61 0.12 145);
+  --wl-light-chart-3: oklch(0.53 0.1 220);
+  --wl-light-chart-4: oklch(0.75 0.16 92);
+  --wl-light-chart-5: oklch(0.7 0.15 30);
+
+  /* ===== SIDEBAR COLORS ===== */
+  --wl-light-sidebar: oklch(0.975 0.01 85);
+  --wl-light-sidebar-foreground: oklch(0.3 0.04 58);
+  --wl-light-sidebar-primary: oklch(0.5 0.12 52);
+  --wl-light-sidebar-primary-foreground: oklch(0.985 0.01 95);
+  --wl-light-sidebar-accent: oklch(0.9 0.04 120);
+  --wl-light-sidebar-accent-foreground: oklch(0.3 0.05 110);
+  --wl-light-sidebar-border: oklch(0.85 0.02 80);
+  --wl-light-sidebar-ring: oklch(0.62 0.1 54);
+
+  /* ===== DASHBOARD SHELL (LIGHT) ===== */
+  --wl-light-shell-from: #faf9f5;
+  --wl-light-shell-via: #f6f1e3;
+  --wl-light-shell-to: #eef9fb;
+  --wl-light-shell-grid-rgb: 160, 140, 92;
+  --wl-light-shell-blob-1: rgba(250, 204, 21, 0.2);
+  --wl-light-shell-blob-2: rgba(125, 211, 252, 0.2);
+  --wl-light-shell-blob-3: rgba(187, 247, 208, 0.16);
+
+  /* ===== UTILITY ===== */
+  --wl-light-radius: 0.625rem;
+}

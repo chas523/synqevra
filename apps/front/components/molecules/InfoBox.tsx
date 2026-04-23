@@ -19,13 +19,13 @@ const InfoBox = ({
     blue: ["bg-blue-50", "dark:bg-blue-900/20"],
     green: ["bg-green-50", "dark:bg-green-900/20"],
     yellow: ["bg-yellow-50", "dark:bg-yellow-900/20"],
-    gray: ["bg-gray-50", "dark:bg-gray-800"],
+    gray: ["bg-muted", "dark:bg-gray-800"],
   };
 
   const textColors = {
     blue: {
-      title: "text-blue-800 dark:text-blue-200",
-      description: "text-blue-700 dark:text-blue-300",
+      title: "text-primary/90 dark:text-blue-200",
+      description: "text-primary/80 dark:text-blue-300",
     },
     green: {
       title: "text-green-800 dark:text-green-200",
@@ -36,8 +36,8 @@ const InfoBox = ({
       description: "text-yellow-700 dark:text-yellow-300",
     },
     gray: {
-      title: "text-gray-800 dark:text-gray-200",
-      description: "text-gray-700 dark:text-gray-300",
+      title: "text-foreground dark:text-gray-200",
+      description: "text-foreground/80 dark:text-gray-300",
     },
   };
 

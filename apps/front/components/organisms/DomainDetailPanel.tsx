@@ -93,7 +93,7 @@ function OAuth2ClientMultiSelect({
   return (
     <div className="relative" ref={containerRef}>
       <div
-        className={`flex flex-wrap gap-1.5 p-2 min-h-[42px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg cursor-text ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+        className={`flex flex-wrap gap-1.5 p-2 min-h-10.5 bg-muted dark:bg-slate-800/50 border border-border dark:border-slate-700 rounded-lg cursor-text ${disabled ? "opacity-50 pointer-events-none" : ""}`}
         onClick={() => {
           setIsOpen(true);
           loadClients();
@@ -105,12 +105,12 @@ function OAuth2ClientMultiSelect({
           return (
             <span
               key={id}
-              className="flex items-center gap-1 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs dark:text-white"
+              className="flex items-center gap-1 bg-secondary dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs dark:text-white"
             >
               {client?.title || id.substring(0, 8)}
               <button
                 type="button"
-                className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 ml-0.5"
+                className="text-muted-foreground hover:text-foreground dark:hover:text-slate-200 ml-0.5"
                 onClick={(e) => removeId(id, e)}
               >
                 ×
@@ -120,7 +120,7 @@ function OAuth2ClientMultiSelect({
         })}
         <input
           type="text"
-          className="flex-1 min-w-[120px] bg-transparent outline-none text-sm px-1 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          className="flex-1 min-w-30 bg-transparent outline-none text-sm px-1 dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-500"
           placeholder={selectedIds.length === 0 ? "Add OAuth 2.0 client" : ""}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -131,19 +131,19 @@ function OAuth2ClientMultiSelect({
         />
       </div>
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-52 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-52 overflow-y-auto bg-background dark:bg-slate-800 border border-border dark:border-slate-700 rounded-lg shadow-lg">
           {isLoading && (
-            <div className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground dark:text-slate-400">
               <Loader2 className="w-4 h-4 animate-spin" /> Loading…
             </div>
           )}
           {!isLoading && filtered.length === 0 && (
-            <div className="py-4 text-sm text-center text-slate-400 dark:text-slate-500">
+            <div className="py-4 text-sm text-center text-muted-foreground dark:text-slate-500">
               No clients found
             </div>
           )}
           {!isLoading && filtered.length > 0 && (
-            <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <div className="px-3 py-2 border-b border-border/50 dark:border-slate-700 text-xs font-semibold text-muted-foreground dark:text-slate-400">
               List of {filtered.length}{" "}
               {filtered.length === 1 ? "client" : "clients"}
             </div>
@@ -153,12 +153,12 @@ function OAuth2ClientMultiSelect({
             return (
               <div
                 key={client.id.id}
-                className={`px-3 py-2.5 text-sm cursor-pointer flex items-center justify-between dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 ${isSelected ? "bg-slate-50 dark:bg-slate-700/40" : ""}`}
+                className={`px-3 py-2.5 text-sm cursor-pointer flex items-center justify-between dark:text-slate-200 hover:bg-muted dark:hover:bg-slate-700/50 ${isSelected ? "bg-muted dark:bg-slate-700/40" : ""}`}
                 onClick={(e) => toggleId(client, e)}
               >
                 <span>{client.title}</span>
                 {isSelected && (
-                  <span className="text-[#2a456c] dark:text-blue-400 font-medium">
+                  <span className="text-primary dark:text-blue-400 font-medium">
                     ✓
                   </span>
                 )}
@@ -248,32 +248,32 @@ function DomainDetailsForm({
     <div className="space-y-5">
       {/* Domain name */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
           Domain name*
         </label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           disabled={isSaving}
-          className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-white"
+          className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-white"
         />
       </div>
 
       {/* Redirect URI (read-only) */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
           Redirect URI template
         </label>
         <div className="relative flex items-center">
           <Input
             readOnly
             value={redirectUri}
-            className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-slate-300 pr-10"
+            className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-slate-300 pr-10"
           />
           <button
             type="button"
             onClick={handleCopy}
-            className="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+            className="absolute right-2.5 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 transition-colors"
             title="Copy"
           >
             <Copy className="w-4 h-4" />
@@ -296,7 +296,7 @@ function DomainDetailsForm({
 
       {/* OAuth 2.0 clients */}
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
           OAuth 2.0 clients
         </label>
         <OAuth2ClientMultiSelect
@@ -325,7 +325,7 @@ function DomainDetailsForm({
         <Button
           onClick={handleSave}
           disabled={isSaving || !name.trim()}
-          className="bg-[#2a456c] hover:bg-[#1a355c] text-white gap-2 min-w-[100px]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2 min-w-25"
         >
           {isSaving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

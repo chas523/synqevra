@@ -45,7 +45,7 @@ export function PatientAvatarCarousel({
             alt={fullName}
             className="object-cover w-full h-full"
           />
-          <AvatarFallback className="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 text-2xl font-bold text-cyan-600 dark:text-cyan-400">
+          <AvatarFallback className="bg-linear-to-br from-cyan-100 to-blue-100 dark:from-cyan-500/20 dark:to-blue-500/20 text-2xl font-bold text-cyan-600 dark:text-cyan-400">
             {initials || <User className="h-10 w-10" />}
           </AvatarFallback>
         </Avatar>
@@ -56,7 +56,7 @@ export function PatientAvatarCarousel({
           <Button
             variant="secondary"
             size="icon"
-            className="absolute left-0 top-1/2 h-6 w-6 -translate-x-2 -translate-y-1/2 rounded-full shadow-md hover:scale-110 transition-transform bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            className="absolute left-0 top-1/2 h-6 w-6 -translate-x-2 -translate-y-1/2 rounded-full shadow-md hover:scale-110 transition-transform bg-background dark:bg-slate-800 border border-border dark:border-slate-700 text-muted-foreground dark:text-slate-300 hover:text-foreground dark:hover:text-white"
             onClick={handlePrevPhoto}
           >
             <ChevronLeft className="h-3 w-3" />
@@ -64,7 +64,7 @@ export function PatientAvatarCarousel({
           <Button
             variant="secondary"
             size="icon"
-            className="absolute right-0 top-1/2 h-6 w-6 -translate-y-1/2 translate-x-2 rounded-full shadow-md hover:scale-110 transition-transform bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            className="absolute right-0 top-1/2 h-6 w-6 -translate-y-1/2 translate-x-2 rounded-full shadow-md hover:scale-110 transition-transform bg-background dark:bg-slate-800 border border-border dark:border-slate-700 text-muted-foreground dark:text-slate-300 hover:text-foreground dark:hover:text-white"
             onClick={handleNextPhoto}
           >
             <ChevronRight className="h-3 w-3" />

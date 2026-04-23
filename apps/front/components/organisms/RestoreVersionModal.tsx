@@ -360,14 +360,14 @@ export function RestoreVersionModal({
       onOpenChange={(val) => !isRestoring && !isPolling && onOpenChange(val)}
     >
       <DialogContent className="max-w-[90vw] md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <DialogHeader className="px-6 py-4 border-b border-border dark:border-slate-800 bg-muted/50 dark:bg-slate-900/50">
           <DialogTitle className="text-xl dark:text-white">
             Restore entities from version '{versionName}'
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-          <fieldset className="border border-slate-200 dark:border-slate-800 rounded-lg p-5">
+          <fieldset className="border border-border dark:border-slate-800 rounded-lg p-5">
             <legend className="text-sm font-medium text-foreground dark:text-slate-300 px-2">
               Entities to restore
             </legend>
@@ -388,7 +388,7 @@ export function RestoreVersionModal({
               ))}
             </div>
 
-            <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/30 p-2 rounded border border-dashed border-slate-300 dark:border-slate-700">
+            <div className="flex justify-between items-center bg-muted dark:bg-slate-800/30 p-2 rounded border border-dashed border-border/70 dark:border-slate-700">
               <Button
                 variant="secondary"
                 size="sm"
@@ -396,7 +396,7 @@ export function RestoreVersionModal({
                 disabled={
                   availableEntityTypes.length === 0 || isRestoring || isPolling
                 }
-                className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                className="bg-secondary hover:bg-secondary/80 dark:bg-slate-700 dark:hover:bg-slate-600 text-foreground/80 dark:text-slate-200"
               >
                 Add entity type
               </Button>
@@ -405,7 +405,7 @@ export function RestoreVersionModal({
                 size="sm"
                 onClick={() => setEntries([])}
                 disabled={entries.length === 0 || isRestoring || isPolling}
-                className="bg-[#2a456c] hover:bg-[#1a355c] text-white border-0"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
               >
                 Remove all
               </Button>
@@ -426,7 +426,7 @@ export function RestoreVersionModal({
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sm:justify-end">
+        <DialogFooter className="px-6 py-4 border-t border-border dark:border-slate-800 bg-muted/50 dark:bg-slate-900/50 sm:justify-end">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
@@ -438,7 +438,7 @@ export function RestoreVersionModal({
           <Button
             onClick={handleRestore}
             disabled={isRestoring || isPolling || entries.length === 0}
-            className="bg-[#2a456c] hover:bg-[#1a355c] text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {(isRestoring || isPolling) && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -487,8 +487,8 @@ function EntityRestoreEntryCard({
   ];
 
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded shadow-sm bg-white dark:bg-slate-900 pb-4">
-      <div className="flex justify-between items-center p-3 border-b border-slate-100 dark:border-slate-800/50">
+    <div className="border border-border dark:border-slate-800 rounded shadow-sm bg-background dark:bg-slate-900 pb-4">
+      <div className="flex justify-between items-center p-3 border-b border-border/50 dark:border-slate-800/50">
         <span className="font-semibold text-sm dark:text-white">
           {entityConfig?.pluralLabel || entry.entityType}
         </span>
@@ -497,7 +497,7 @@ function EntityRestoreEntryCard({
             type="button"
             onClick={onRemove}
             disabled={disabled}
-            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-500 disabled:opacity-50"
+            className="p-1 hover:bg-muted dark:hover:bg-slate-800 rounded text-muted-foreground disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -507,7 +507,7 @@ function EntityRestoreEntryCard({
 
       <div className="p-4 flex flex-col md:flex-row gap-6">
         <div className="w-60 space-y-1.5 shrink-0">
-          <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
             Type*
           </label>
           <Select
@@ -515,7 +515,7 @@ function EntityRestoreEntryCard({
             onValueChange={onChangeType}
             disabled={disabled}
           >
-            <SelectTrigger className="h-9 bg-slate-50 dark:bg-slate-800/50 dark:text-white">
+            <SelectTrigger className="h-9 bg-muted dark:bg-slate-800/50 dark:text-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

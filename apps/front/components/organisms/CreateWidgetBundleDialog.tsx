@@ -83,7 +83,7 @@ export const CreateWidgetBundleDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-150">
           <DialogHeader>
             <DialogTitle>Add Widget Bundle</DialogTitle>
             <DialogDescription>
@@ -185,7 +185,7 @@ export const CreateWidgetBundleDialog = ({
       </Dialog>
 
       <Dialog open={showImageSelector} onOpenChange={setShowImageSelector}>
-        <DialogContent className="max-w-4xl h-[600px]">
+        <DialogContent className="max-w-4xl h-150">
           <DialogHeader>
             <DialogTitle>Select Image</DialogTitle>
           </DialogHeader>

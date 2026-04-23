@@ -280,7 +280,7 @@ export function AddEntityViewDialog({
                 disabled={isSubmitting || isLoadingTypes}
               />
               {isTypeMenuOpen && filteredTypeOptions.length > 0 && (
-                <div className="mt-1 w-full max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
+                <div className="mt-1 w-full max-h-44 overflow-y-auto rounded-md border border-border dark:border-slate-700 bg-background dark:bg-slate-900 shadow-sm">
                   {filteredTypeOptions.map((typeOption) => (
                     <button
                       key={typeOption}

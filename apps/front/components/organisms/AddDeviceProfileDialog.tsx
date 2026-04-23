@@ -2254,9 +2254,9 @@ export function AddDeviceProfileDialog({
                       metricsInputId="sparkplug-attribute-metrics"
                       checked={formState.mqttSparkplugB}
                       metrics={formState.mqttSparkplugAttributesMetricNames}
-                      onCheckedChange={setMqttSparkplugB}
-                      onAddMetric={addMqttSparkplugMetric}
-                      onRemoveMetric={removeMqttSparkplugMetric}
+                      onCheckedChangeAction={setMqttSparkplugB}
+                      onAddMetricAction={addMqttSparkplugMetric}
+                      onRemoveMetricAction={removeMqttSparkplugMetric}
                       disabled={isSaving}
                     />
 
@@ -2443,8 +2443,8 @@ export function AddDeviceProfileDialog({
                               expandedSections={expandedCoapProtoSections}
                               editorTheme={editorTheme}
                               disabled={isSaving}
-                              onToggleSection={toggleCoapProtoSection}
-                              onSchemaChange={(field, value) => {
+                              onToggleSectionAction={toggleCoapProtoSection}
+                              onSchemaChangeAction={(field, value) => {
                                 if (field === "telemetrySchema") {
                                   updateMqttField(
                                     "mqttTelemetryProtoSchema",
@@ -2648,38 +2648,40 @@ export function AddDeviceProfileDialog({
                 expandedCreateConditionIds={expandedCreateConditionIds}
                 severityOptions={SEVERITY_OPTIONS}
                 isSaving={isSaving}
-                hasAvailableCreateSeverity={hasAvailableCreateSeverity}
-                getCreateSeverityOptions={getCreateSeverityOptions}
-                onToggleAlarmExpanded={toggleAlarmExpanded}
-                onDeleteAlarmRule={deleteAlarmRule}
-                onUpdateAlarmName={(alarmId, value) =>
+                hasAvailableCreateSeverityAction={hasAvailableCreateSeverity}
+                getCreateSeverityOptionsAction={getCreateSeverityOptions}
+                onToggleAlarmExpandedAction={toggleAlarmExpanded}
+                onDeleteAlarmRuleAction={deleteAlarmRule}
+                onUpdateAlarmNameAction={(alarmId, value) =>
                   updateAlarmRule(alarmId, "name", value)
                 }
-                onToggleCreateConditionExpanded={toggleCreateConditionExpanded}
-                onDeleteCreateCondition={deleteCreateCondition}
-                onUpdateCreateConditionSeverity={(
+                onToggleCreateConditionExpandedAction={
+                  toggleCreateConditionExpanded
+                }
+                onDeleteCreateConditionAction={deleteCreateCondition}
+                onUpdateCreateConditionSeverityAction={(
                   alarmId,
                   conditionId,
                   value,
                 ) =>
                   updateCreateCondition(alarmId, conditionId, "severity", value)
                 }
-                onUpdateCreateConditionValue={(
+                onUpdateCreateConditionValueAction={(
                   alarmId,
                   conditionId,
                   field,
                   value,
                 ) => updateCreateCondition(alarmId, conditionId, field, value)}
-                onAddCreateCondition={addCreateCondition}
-                onDeleteClearCondition={deleteClearCondition}
-                onUpdateClearConditionValue={(
+                onAddCreateConditionAction={addCreateCondition}
+                onDeleteClearConditionAction={deleteClearCondition}
+                onUpdateClearConditionValueAction={(
                   alarmId,
                   conditionId,
                   field,
                   value,
                 ) => updateClearCondition(alarmId, conditionId, field, value)}
-                onAddClearCondition={addClearCondition}
-                onAddAlarmRule={addAlarmRule}
+                onAddClearConditionAction={addClearCondition}
+                onAddAlarmRuleAction={addAlarmRule}
               />
             )}
 

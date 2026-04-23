@@ -106,7 +106,7 @@ const ConfigurePractitionerPage = ({
             title="Set Your Password"
             description="Create a secure password to access your practitioner account"
           />
-          <Card className="shadow-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+          <Card className="shadow-lg bg-background dark:bg-slate-800 border-border dark:border-slate-700">
             <CardHeader className="border-b border-slate-200 dark:border-slate-700 ">
               <Heading level={2}>Complete Your Profile</Heading>
             </CardHeader>

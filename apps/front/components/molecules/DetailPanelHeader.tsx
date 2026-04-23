@@ -26,7 +26,7 @@ export function DetailPanelHeader({
   return (
     <div
       className={cn(
-        "flex items-start justify-between p-4 border-b border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/80",
+        "flex items-start justify-between p-4 border-b border-border dark:border-slate-700/50 bg-background dark:bg-slate-900/80",
         className,
       )}
     >

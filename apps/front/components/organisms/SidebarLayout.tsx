@@ -83,6 +83,13 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     setTheme(isDark ? "light" : "dark");
   };
 
+  const dashboardBackgroundStyle = isDark
+    ? undefined
+    : {
+        backgroundImage:
+          "linear-gradient(to bottom right, var(--wl-light-shell-from), var(--wl-light-shell-via), var(--wl-light-shell-to))",
+      };
+
   const handleLogout = async () => {
     await logout(user?.role ?? "");
     dispatch(clearUser());
@@ -145,15 +152,18 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
   // Dashboard routes - show sidebar with header
   return (
-    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-[#0a0f1e] dark:via-[#111827] dark:to-[#0f1419]">
+    <div
+      className="min-h-screen relative overflow-hidden bg-background dark:bg-linear-to-br dark:from-[#0a0f1e] dark:via-[#111827] dark:to-[#0f1419]"
+      style={dashboardBackgroundStyle}
+    >
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+              linear-gradient(rgba(var(--wl-light-shell-grid-rgb), 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(var(--wl-light-shell-grid-rgb), 0.1) 1px, transparent 1px)
             `,
             backgroundSize: "50px 50px",
           }}
@@ -161,14 +171,35 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       </div>
 
       {/* Animated gradient blobs */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-200/40 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
       <div
-        className="absolute bottom-20 right-10 w-80 h-80 bg-cyan-200/40 dark:bg-cyan-500/20 rounded-full blur-3xl animate-pulse pointer-events-none"
-        style={{ animationDelay: "1.5s" }}
+        className="absolute top-20 left-10 w-64 h-64 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse pointer-events-none"
+        style={
+          isDark
+            ? undefined
+            : { backgroundColor: "var(--wl-light-shell-blob-1)" }
+        }
       />
       <div
-        className="absolute top-1/2 left-1/3 w-72 h-72 bg-teal-200/30 dark:bg-teal-500/10 rounded-full blur-3xl animate-pulse pointer-events-none"
-        style={{ animationDelay: "3s" }}
+        className="absolute bottom-20 right-10 w-80 h-80 dark:bg-cyan-500/20 rounded-full blur-3xl animate-pulse pointer-events-none"
+        style={
+          isDark
+            ? { animationDelay: "1.5s" }
+            : {
+                animationDelay: "1.5s",
+                backgroundColor: "var(--wl-light-shell-blob-2)",
+              }
+        }
+      />
+      <div
+        className="absolute top-1/2 left-1/3 w-72 h-72 dark:bg-teal-500/10 rounded-full blur-3xl animate-pulse pointer-events-none"
+        style={
+          isDark
+            ? { animationDelay: "3s" }
+            : {
+                animationDelay: "3s",
+                backgroundColor: "var(--wl-light-shell-blob-3)",
+              }
+        }
       />
 
       <SidebarProvider>
@@ -212,7 +243,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               </Button>
               <Button
                 size="lg"
-                className="cursor-pointer gap-2 bg-linear-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg"
+                className="cursor-pointer gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg"
                 onClick={handleLogout}
               >
                 {isLoading ? (

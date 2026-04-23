@@ -130,7 +130,7 @@ const DeviceForm = ({
 
         <LoadingButton
           type="submit"
-          className="ml-auto cursor-pointer bg-gradient-to-r from-blue-500 to-slate-500 hover:from-blue-600 hover:to-slate-600 disabled:from-gray-600 disabled:to-gray-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 disabled:shadow-none flex items-center justify-center gap-2"
+          className="ml-auto cursor-pointer bg-linear-to-r from-blue-500 to-slate-500 hover:from-blue-600 hover:to-slate-600 disabled:from-gray-600 disabled:to-gray-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 disabled:shadow-none flex items-center justify-center gap-2"
           isLoading={isLoading}
           textBeforeClick="Create Device"
           textAfterClick="Creating..."

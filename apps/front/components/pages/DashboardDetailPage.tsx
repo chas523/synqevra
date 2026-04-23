@@ -77,7 +77,7 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
   return (
     <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden">
       {/* Top bar */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-20">
+      <header className="shrink-0 flex items-center justify-between px-4 h-14 bg-background dark:bg-slate-900 border-b border-border dark:border-slate-800 shadow-sm z-20">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboards")}
@@ -91,7 +91,7 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
             <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
               {dashboard.title || dashboard.name}
             </span>
-            <span className="text-xs ml-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
+            <span className="text-xs ml-2 bg-primary/10 dark:bg-blue-900/30 text-primary dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
               Live Proxy
             </span>
           </div>
@@ -116,7 +116,7 @@ export function DashboardDetailPage({ dashboardId }: DashboardDetailPageProps) {
         </div>
 
         {/* Invisible overlay over the edges to prevent user from dragging to reveal hidden parts if necessary */}
-        <div className="absolute top-0 left-0 right-0 h-[5px] bg-slate-100 dark:bg-slate-950 z-10 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1.25 bg-slate-100 dark:bg-slate-950 z-10 pointer-events-none" />
       </main>
     </div>
   );

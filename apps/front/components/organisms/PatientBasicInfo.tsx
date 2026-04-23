@@ -16,7 +16,7 @@ const PatientBasicInfo = ({ patient }: PatientBasicInfoProps) => {
     patient.identifier?.[0];
 
   return (
-    <div className="h-12 text-center flex-shrink-0">
+    <div className="h-12 text-center shrink-0">
       <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-0.5 leading-tight">
         {fullName}
       </h3>

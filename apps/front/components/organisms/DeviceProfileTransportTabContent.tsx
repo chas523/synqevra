@@ -1621,9 +1621,9 @@ export function DeviceProfileTransportTabContent({
               metricsInputId="profile-transport-sparkplug-metrics"
               checked={form.mqttSparkplugB}
               metrics={form.mqttSparkplugAttributesMetricNames}
-              onCheckedChange={setMqttSparkplugB}
-              onAddMetric={addMqttSparkplugMetric}
-              onRemoveMetric={removeMqttSparkplugMetric}
+              onCheckedChangeAction={setMqttSparkplugB}
+              onAddMetricAction={addMqttSparkplugMetric}
+              onRemoveMetricAction={removeMqttSparkplugMetric}
               disabled={isFormDisabled}
             />
 
@@ -1800,8 +1800,8 @@ export function DeviceProfileTransportTabContent({
                       editorTheme={editorTheme}
                       disabled={isFormDisabled}
                       toggleDisabled={isSaving}
-                      onToggleSection={toggleCoapProtoSection}
-                      onSchemaChange={(field, value) => {
+                      onToggleSectionAction={toggleCoapProtoSection}
+                      onSchemaChangeAction={(field, value) => {
                         if (field === "telemetrySchema") {
                           updateMqttField("mqttTelemetryProtoSchema", value);
                           return;

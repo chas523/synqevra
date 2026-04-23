@@ -15,7 +15,7 @@ const DeviceTableRow = ({
 }: DeviceTableRowProps) => {
   const baseStyles = [
     "cursor-pointer",
-    "hover:bg-gray-50",
+    "hover:bg-muted",
     "dark:hover:bg-gray-800",
   ];
   const allStyles = [...baseStyles, className];

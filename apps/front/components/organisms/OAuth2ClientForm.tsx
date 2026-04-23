@@ -236,13 +236,13 @@ export function OAuth2ClientForm({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden">
+    <div className="flex flex-col h-full bg-background dark:bg-slate-900 overflow-hidden">
       {/* Form Content */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
         {/* Title & Provider */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
               Title*
             </label>
             <Input
@@ -250,11 +250,11 @@ export function OAuth2ClientForm({
               onChange={(e) => setTitle(e.target.value)}
               disabled={isSaving}
               placeholder="e.g. Google Login"
-              className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-white"
+              className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
               Provider*
             </label>
             <Select
@@ -262,7 +262,7 @@ export function OAuth2ClientForm({
               onValueChange={setProvider}
               disabled={isSaving}
             >
-              <SelectTrigger className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-white">
+              <SelectTrigger className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +275,7 @@ export function OAuth2ClientForm({
         {/* Client ID & Secret */}
         <div className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
               Client ID*
             </label>
             <Input
@@ -283,11 +283,11 @@ export function OAuth2ClientForm({
               onChange={(e) => setClientId(e.target.value)}
               disabled={isSaving}
               placeholder="Enter Google Client ID"
-              className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-white"
+              className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
               Client secret*
             </label>
             <div className="relative flex items-center">
@@ -297,12 +297,12 @@ export function OAuth2ClientForm({
                 onChange={(e) => setClientSecret(e.target.value)}
                 disabled={isSaving}
                 placeholder="Enter Google Client Secret"
-                className="bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-white pr-9"
+                className="bg-muted dark:bg-slate-800/50 border-border dark:border-slate-700 dark:text-white pr-9"
               />
               <button
                 type="button"
                 onClick={() => setShowSecret(!showSecret)}
-                className="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 text-muted-foreground hover:text-foreground dark:hover:text-slate-200"
               >
                 {showSecret ? (
                   <EyeOff className="w-4 h-4" />
@@ -316,7 +316,7 @@ export function OAuth2ClientForm({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 flex justify-end gap-2 shrink-0">
+      <div className="px-6 py-4 border-t border-border dark:border-slate-800 bg-muted/50 dark:bg-slate-900/40 flex justify-end gap-2 shrink-0">
         <Button
           variant="ghost"
           onClick={onCancel}
@@ -333,7 +333,7 @@ export function OAuth2ClientForm({
             !clientId.trim() ||
             !clientSecret.trim()
           }
-          className="bg-[#2a456c] hover:bg-[#1a355c] text-white min-w-[72px]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-18"
         >
           {isSaving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

@@ -139,7 +139,7 @@ export const JavaScriptLibraryTable = ({
           { value: "MODULE", label: "Module" },
         ]}
         placeholder="All"
-        className="w-[180px]"
+        className="w-45"
       />
     </div>
   );

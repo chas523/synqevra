@@ -352,7 +352,7 @@ export const AddRuleDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] flex flex-col max-h-[90vh] overflow-visible">
+      <DialogContent className="sm:max-w-175 flex flex-col max-h-[90vh] overflow-visible">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
@@ -399,7 +399,7 @@ export const AddRuleDialog = ({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter description"
-                  className="min-h-[100px]"
+                  className="min-h-25"
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -673,7 +673,7 @@ export const AddRuleDialog = ({
                     Create New
                   </Button>
                 </div>
-                <div className="space-y-2 border rounded-lg p-3 max-h-[300px] overflow-y-auto">
+                <div className="space-y-2 border rounded-lg p-3 max-h-75 overflow-y-auto">
                   {isLoadingTargets ? (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />

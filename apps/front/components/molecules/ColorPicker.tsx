@@ -117,7 +117,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
           width={300}
           height={200}
           onClick={handleColorAreaClick}
-          className="w-full h-[200px] rounded-md cursor-crosshair border"
+          className="w-full h-50 rounded-md cursor-crosshair border"
         />
         {/* Cursor showing selected color */}
         <div

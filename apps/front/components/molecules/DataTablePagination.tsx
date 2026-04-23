@@ -61,7 +61,7 @@ export const DataTablePagination: React.FC<DataTablePaginationProps> = ({
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm text-muted-foreground min-w-[100px] text-center">
+        <span className="text-sm text-muted-foreground min-w-25 text-center">
           Page {currentPage + 1} of {Math.max(1, totalPages)}
         </span>
         <Button

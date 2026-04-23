@@ -371,7 +371,7 @@ export function DeviceProfileCalculatedFieldsTabContent({
         header: "Expression",
         render: (item) => (
           <div
-            className="truncate max-w-[300px]"
+            className="truncate max-w-75"
             title={item.configuration?.expression || ""}
           >
             {item.configuration?.expression || "-"}
@@ -824,7 +824,7 @@ export function DeviceProfileCalculatedFieldsTabContent({
         customAction={
           <Button
             type="button"
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => {
               resetForm();
               setIsDialogOpen(true);

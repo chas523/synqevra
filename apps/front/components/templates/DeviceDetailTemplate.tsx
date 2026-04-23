@@ -227,13 +227,13 @@ const DeviceDetailTemplate = ({
                   parameter={param}
                   currentValues={limits.limits[param.key]}
                   thresholdOptions={thresholdOptions}
-                  onAdd={(type, value) =>
+                  onAddAction={(type, value) =>
                     onAddParameter(param.key, type, value)
                   }
-                  onRemove={(type) =>
+                  onRemoveAction={(type) =>
                     onRemoveSpecificThreshold(param.key, type)
                   }
-                  onRemoveAll={() => onRemoveLimit(param.key)}
+                  onRemoveAllAction={() => onRemoveLimit(param.key)}
                 />
               ))}
             </div>

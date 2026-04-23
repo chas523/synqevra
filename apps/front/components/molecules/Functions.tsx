@@ -35,9 +35,9 @@ export function Functions() {
           >
             <div className={`border ${func.enabled ? "" : "bg-muted"}`}>
               {func.enabled ? (
-                <Check className="h-3 w-3 flex-shrink-0" />
+                <Check className="h-3 w-3 shrink-0" />
               ) : (
-                <X className="h-3 w-3 flex-shrink-0" />
+                <X className="h-3 w-3 shrink-0" />
               )}{" "}
             </div>
             {func.name}

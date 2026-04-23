@@ -103,7 +103,7 @@ const ActivatePage = ({ token }: ConnectionFormProps) => {
             title="Configure Your Account"
             description="Set up your company and user details to get started"
           />
-          <Card className="shadow-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+          <Card className="shadow-lg bg-background dark:bg-slate-800 border-border dark:border-slate-700">
             <CardHeader className="border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30">
               <Heading level={2}>Account Setup</Heading>
             </CardHeader>

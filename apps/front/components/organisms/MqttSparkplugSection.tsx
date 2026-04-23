@@ -13,9 +13,9 @@ type MqttSparkplugSectionProps = {
   disabled?: boolean;
   checkboxId: string;
   metricsInputId: string;
-  onCheckedChange: (checked: boolean) => void;
-  onAddMetric: (metric: string) => void;
-  onRemoveMetric: (metric: string) => void;
+  onCheckedChangeAction: (checked: boolean) => void;
+  onAddMetricAction: (metric: string) => void;
+  onRemoveMetricAction: (metric: string) => void;
 };
 
 export function MqttSparkplugSection({
@@ -24,9 +24,9 @@ export function MqttSparkplugSection({
   disabled = false,
   checkboxId,
   metricsInputId,
-  onCheckedChange,
-  onAddMetric,
-  onRemoveMetric,
+  onCheckedChangeAction,
+  onAddMetricAction,
+  onRemoveMetricAction,
 }: MqttSparkplugSectionProps) {
   const [draftMetric, setDraftMetric] = useState("");
 
@@ -36,7 +36,7 @@ export function MqttSparkplugSection({
       return;
     }
 
-    onAddMetric(metric);
+    onAddMetricAction(metric);
     setDraftMetric("");
   };
 
@@ -46,7 +46,7 @@ export function MqttSparkplugSection({
         <Checkbox
           id={checkboxId}
           checked={checked}
-          onCheckedChange={(value) => onCheckedChange(Boolean(value))}
+          onCheckedChange={(value) => onCheckedChangeAction(Boolean(value))}
           className="mt-1"
           disabled={disabled}
         />
@@ -80,7 +80,7 @@ export function MqttSparkplugSection({
                   {!isDefaultMetric && !disabled && (
                     <button
                       type="button"
-                      onClick={() => onRemoveMetric(metric)}
+                      onClick={() => onRemoveMetricAction(metric)}
                       className="rounded-full p-0.5 hover:bg-muted"
                       aria-label={`Remove ${metric}`}
                     >

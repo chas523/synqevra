@@ -150,7 +150,7 @@ export function AddOtaPackageModal({
         }
       }}
     >
-      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-137.5 overflow-y-auto max-h-[90vh]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="dark:text-white">Add package</DialogTitle>

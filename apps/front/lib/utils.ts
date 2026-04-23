@@ -71,15 +71,15 @@ export function createStandardError(
 export const getThresholdColor = (thresholdType: string): string => {
   switch (thresholdType) {
     case "minimum":
-      return "bg-blue-50 border-blue-200";
+      return "bg-chart-1/15 border-chart-1/40";
     case "maximum":
-      return "bg-red-50 border-red-200";
+      return "bg-destructive/10 border-destructive/30";
     case "equal":
-      return "bg-green-50 border-green-200";
+      return "bg-chart-2/15 border-chart-2/40";
     case "not_equal":
-      return "bg-yellow-50 border-yellow-200";
+      return "bg-chart-4/20 border-chart-4/45";
     default:
-      return "bg-gray-50 border-gray-200";
+      return "bg-muted border-border";
   }
 };
 

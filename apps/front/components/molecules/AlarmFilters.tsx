@@ -102,7 +102,7 @@ export function AlarmFilters({
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] dark:bg-slate-900 dark:border-slate-800">
+      <DialogContent className="sm:max-w-106.25 dark:bg-slate-900 dark:border-slate-800">
         <DialogHeader>
           <DialogTitle className="dark:text-slate-100">
             Filter alarms

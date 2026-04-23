@@ -171,7 +171,7 @@ export function AddAttributeModal({
                 options={VALUE_TYPE_OPTIONS}
                 value={valueType}
                 onValueChange={(val) => setValueType(val as AttributeValueType)}
-                className="w-[180px]"
+                className="w-45"
               />
 
               <Input

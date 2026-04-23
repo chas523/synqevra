@@ -19,8 +19,8 @@ type TransportProtobufSchemasSectionProps = {
   editorTheme: "light" | "vs-dark";
   disabled?: boolean;
   toggleDisabled?: boolean;
-  onToggleSection: (section: ProtoSchemaSection) => void;
-  onSchemaChange: (
+  onToggleSectionAction: (section: ProtoSchemaSection) => void;
+  onSchemaChangeAction: (
     field:
       | "telemetrySchema"
       | "attributesSchema"
@@ -76,8 +76,8 @@ export function TransportProtobufSchemasSection({
   editorTheme,
   disabled = false,
   toggleDisabled = disabled,
-  onToggleSection,
-  onSchemaChange,
+  onToggleSectionAction,
+  onSchemaChangeAction,
 }: TransportProtobufSchemasSectionProps) {
   const schemaValues = {
     telemetrySchema,
@@ -96,7 +96,7 @@ export function TransportProtobufSchemasSection({
             <div className="flex items-center justify-between bg-muted/30 px-3 py-2">
               <button
                 type="button"
-                onClick={() => onToggleSection(section.id)}
+                onClick={() => onToggleSectionAction(section.id)}
                 className="flex items-center gap-2 text-left"
                 disabled={toggleDisabled}
               >
@@ -117,7 +117,7 @@ export function TransportProtobufSchemasSection({
                   language="protobuf"
                   value={schemaValues[section.field]}
                   onChange={(value) =>
-                    onSchemaChange(section.field, value ?? "")
+                    onSchemaChangeAction(section.field, value ?? "")
                   }
                   theme={editorTheme}
                   options={{

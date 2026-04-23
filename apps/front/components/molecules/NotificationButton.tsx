@@ -77,7 +77,7 @@ const NotificationButton = () => {
       </Button>
 
       {isOpen && (
-        <div className="rounded-lg bg-white dark:bg-slate-900 absolute right-0 w-80 z-[1000] shadow-lg animate-in fade-in zoom-in-95 duration-200 border-slate-200 dark:border-slate-700">
+        <div className="rounded-lg bg-white dark:bg-slate-900 absolute right-0 w-80 z-1000 shadow-lg animate-in fade-in zoom-in-95 duration-200 border-slate-200 dark:border-slate-700">
           <div className="border-b p-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold dark:text-white">
@@ -85,7 +85,7 @@ const NotificationButton = () => {
               </CardTitle>
             </div>
           </div>
-          <CardContent className="p-0 max-h-[400px] overflow-y-auto">
+          <CardContent className="p-0 max-h-100 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-slate-500 text-sm">
                 No notifications

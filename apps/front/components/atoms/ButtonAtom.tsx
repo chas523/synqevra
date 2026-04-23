@@ -22,11 +22,12 @@ export const ButtonAtom = ({
     "inline-flex items-center justify-center font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantClasses = {
-    primary: "text-white bg-black hover:bg-gray-800 focus:ring-gray-900",
+    primary:
+      "text-primary-foreground bg-primary hover:bg-primary/90 focus:ring-ring",
     secondary:
-      "text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500",
+      "text-foreground bg-secondary hover:bg-secondary/80 focus:ring-ring dark:hover:bg-secondary/70",
     outline:
-      "text-gray-900 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-gray-500",
+      "text-foreground bg-background border border-border hover:bg-muted focus:ring-ring",
   };
 
   const sizeClasses = {

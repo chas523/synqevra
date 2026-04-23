@@ -130,7 +130,7 @@ export function RestoreSingleEntityVersionModal({
   if (result) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px] p-6 text-center dark:bg-slate-900 border-slate-800">
+        <DialogContent className="sm:max-w-100 p-6 text-center dark:bg-slate-900 border-slate-800">
           <DialogHeader>
             <DialogTitle className="dark:text-white text-xl mx-auto mb-4">
               Restoration Result
@@ -193,16 +193,16 @@ export function RestoreSingleEntityVersionModal({
                     className="p-4 rounded-xl dark:bg-slate-800/50 border dark:border-slate-700/50 backdrop-blur-sm shadow-inner group"
                   >
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs font-medium tracking-widest uppercase text-slate-500 group-hover:text-slate-400 transition-colors">
+                      <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground group-hover:text-foreground/70 transition-colors">
                         {item.entityType.replace(/_/g, " ")}
                       </span>
                     </div>
                     <div className="flex items-center justify-around">
                       <div className="text-center px-2">
-                        <div className="text-2xl font-bold text-blue-500">
+                        <div className="text-2xl font-bold text-primary">
                           {item.created}
                         </div>
-                        <div className="text-[10px] uppercase tracking-tighter text-slate-500 font-medium">
+                        <div className="text-[10px] uppercase tracking-tighter text-muted-foreground font-medium">
                           Created
                         </div>
                       </div>
@@ -211,7 +211,7 @@ export function RestoreSingleEntityVersionModal({
                         <div className="text-2xl font-bold text-orange-500">
                           {item.updated}
                         </div>
-                        <div className="text-[10px] uppercase tracking-tighter text-slate-500 font-medium">
+                        <div className="text-[10px] uppercase tracking-tighter text-muted-foreground font-medium">
                           Updated
                         </div>
                       </div>
@@ -220,7 +220,7 @@ export function RestoreSingleEntityVersionModal({
                         <div className="text-2xl font-bold text-red-500">
                           {item.deleted}
                         </div>
-                        <div className="text-[10px] uppercase tracking-tighter text-slate-500 font-medium">
+                        <div className="text-[10px] uppercase tracking-tighter text-muted-foreground font-medium">
                           Deleted
                         </div>
                       </div>
@@ -281,7 +281,7 @@ export function RestoreSingleEntityVersionModal({
 
         <div className="space-y-4 py-4">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400">
+            <div className="flex items-center gap-2 mb-2 p-2 bg-primary/10 border border-primary/20 rounded text-primary/90">
               <Info className="w-4 h-4 shrink-0" />
               <p className="text-xs">
                 Restore operation will overwrite the current entity state with
@@ -291,10 +291,10 @@ export function RestoreSingleEntityVersionModal({
 
             {isLoadingInfo ? (
               <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-6 h-6 animate-spin text-slate-500" />
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : restoreOptions.length === 0 ? (
-              <p className="text-sm text-center text-slate-500 py-4">
+              <p className="text-sm text-center text-muted-foreground py-4">
                 No restore options available for this version.
               </p>
             ) : (
@@ -359,7 +359,7 @@ export function RestoreSingleEntityVersionModal({
           <Button
             onClick={handleRestore}
             disabled={isRestoring || isPolling || isLoadingInfo}
-            className="bg-[#2a456c] hover:bg-[#1a355c] text-white border-0"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
           >
             {(isRestoring || isPolling) && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

@@ -99,8 +99,8 @@ export function ManageDashboardCustomersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] w-auto p-0 dark:bg-[#202E3C] border-slate-700 overflow-hidden outline-none">
-        <DialogHeader className="bg-[#2A456C] h-14 flex flex-row items-center justify-between px-6 py-2 relative">
+      <DialogContent className="sm:max-w-200 w-auto p-0 bg-background dark:bg-[#202E3C] border-border dark:border-slate-700 overflow-hidden outline-none">
+        <DialogHeader className="bg-primary dark:bg-[#2A456C] h-14 flex flex-row items-center justify-between px-6 py-2 relative">
           <DialogTitle className="text-[20px] text-white font-medium">
             Manage assigned customers
           </DialogTitle>
@@ -112,13 +112,13 @@ export function ManageDashboardCustomersModal({
           </button>
         </DialogHeader>
 
-        <div className="p-8 space-y-2 dark:text-gray-200 min-h-[200px]">
-          <label className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="p-8 space-y-2 dark:text-gray-200 min-h-50">
+          <label className="text-sm text-muted-foreground dark:text-gray-400">
             Assigned customers
           </label>
           {isLoading ? (
             <div className="flex justify-center items-center py-10">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
           ) : (
             <CustomerMultiSelect
@@ -129,19 +129,19 @@ export function ManageDashboardCustomersModal({
           )}
         </div>
 
-        <DialogFooter className="p-6 bg-gray-50 dark:bg-transparent border-t dark:border-slate-700 flex justify-end gap-3">
+        <DialogFooter className="p-6 bg-muted dark:bg-transparent border-t border-border dark:border-slate-700 flex justify-end gap-3">
           <Button
             onClick={onClose}
             variant="ghost"
             disabled={isUpdating}
-            className="bg-[#E9EEF5] text-[#2A6B97] hover:bg-[#D9E2ED] dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700 font-medium h-10 px-6 rounded"
+            className="bg-secondary text-primary hover:bg-secondary/80 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-700 font-medium h-10 px-6 rounded"
           >
             Cancel
           </Button>
           <Button
             onClick={handleUpdate}
             disabled={isUpdating || isLoading}
-            className="bg-[#E0E0E0] text-gray-700 dark:bg-slate-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-600 font-medium h-10 px-6 rounded shadow-none border-none"
+            className="bg-muted text-foreground/80 dark:bg-slate-700 dark:text-gray-200 hover:bg-border dark:hover:bg-slate-600 font-medium h-10 px-6 rounded shadow-none border-none"
           >
             {isUpdating ? "Updating..." : "Update"}
           </Button>

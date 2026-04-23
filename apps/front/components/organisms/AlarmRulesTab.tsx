@@ -43,37 +43,37 @@ type AlarmRulesTabProps = {
   expandedCreateConditionIds: Set<string>;
   severityOptions: Array<{ value: AlarmSeverity; label: string }>;
   isSaving: boolean;
-  hasAvailableCreateSeverity: (alarm: AlarmRule) => boolean;
-  getCreateSeverityOptions: (
+  hasAvailableCreateSeverityAction: (alarm: AlarmRule) => boolean;
+  getCreateSeverityOptionsAction: (
     alarm: AlarmRule,
     currentConditionId: string,
   ) => Array<{ value: AlarmSeverity; label: string; disabled: boolean }>;
-  onToggleAlarmExpanded: (alarmId: string) => void;
-  onDeleteAlarmRule: (alarmId: string) => void;
-  onUpdateAlarmName: (alarmId: string, value: string) => void;
-  onToggleCreateConditionExpanded: (conditionId: string) => void;
-  onDeleteCreateCondition: (alarmId: string, conditionId: string) => void;
-  onUpdateCreateConditionSeverity: (
+  onToggleAlarmExpandedAction: (alarmId: string) => void;
+  onDeleteAlarmRuleAction: (alarmId: string) => void;
+  onUpdateAlarmNameAction: (alarmId: string, value: string) => void;
+  onToggleCreateConditionExpandedAction: (conditionId: string) => void;
+  onDeleteCreateConditionAction: (alarmId: string, conditionId: string) => void;
+  onUpdateCreateConditionSeverityAction: (
     alarmId: string,
     conditionId: string,
     value: AlarmSeverity,
   ) => void;
-  onUpdateCreateConditionValue: (
+  onUpdateCreateConditionValueAction: (
     alarmId: string,
     conditionId: string,
     field: "condition" | "schedule" | "additionalInfo",
     value: string,
   ) => void;
-  onAddCreateCondition: (alarmId: string) => void;
-  onDeleteClearCondition: (alarmId: string, conditionId: string) => void;
-  onUpdateClearConditionValue: (
+  onAddCreateConditionAction: (alarmId: string) => void;
+  onDeleteClearConditionAction: (alarmId: string, conditionId: string) => void;
+  onUpdateClearConditionValueAction: (
     alarmId: string,
     conditionId: string,
     field: "condition" | "schedule" | "additionalInfo",
     value: string,
   ) => void;
-  onAddClearCondition: (alarmId: string) => void;
-  onAddAlarmRule: () => void;
+  onAddClearConditionAction: (alarmId: string) => void;
+  onAddAlarmRuleAction: () => void;
 };
 
 export function AlarmRulesTab({
@@ -82,20 +82,20 @@ export function AlarmRulesTab({
   expandedCreateConditionIds,
   severityOptions,
   isSaving,
-  hasAvailableCreateSeverity,
-  getCreateSeverityOptions,
-  onToggleAlarmExpanded,
-  onDeleteAlarmRule,
-  onUpdateAlarmName,
-  onToggleCreateConditionExpanded,
-  onDeleteCreateCondition,
-  onUpdateCreateConditionSeverity,
-  onUpdateCreateConditionValue,
-  onAddCreateCondition,
-  onDeleteClearCondition,
-  onUpdateClearConditionValue,
-  onAddClearCondition,
-  onAddAlarmRule,
+  hasAvailableCreateSeverityAction: hasAvailableCreateSeverity,
+  getCreateSeverityOptionsAction: getCreateSeverityOptions,
+  onToggleAlarmExpandedAction: onToggleAlarmExpanded,
+  onDeleteAlarmRuleAction: onDeleteAlarmRule,
+  onUpdateAlarmNameAction: onUpdateAlarmName,
+  onToggleCreateConditionExpandedAction: onToggleCreateConditionExpanded,
+  onDeleteCreateConditionAction: onDeleteCreateCondition,
+  onUpdateCreateConditionSeverityAction: onUpdateCreateConditionSeverity,
+  onUpdateCreateConditionValueAction: onUpdateCreateConditionValue,
+  onAddCreateConditionAction: onAddCreateCondition,
+  onDeleteClearConditionAction: onDeleteClearCondition,
+  onUpdateClearConditionValueAction: onUpdateClearConditionValue,
+  onAddClearConditionAction: onAddClearCondition,
+  onAddAlarmRuleAction: onAddAlarmRule,
 }: AlarmRulesTabProps) {
   return (
     <div className="space-y-4">

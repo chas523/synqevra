@@ -188,7 +188,7 @@ export function DashboardDetailsTabContent({
             onChange={(e) => updateField("description", e.target.value)}
             disabled={!isEdit}
             className={cn(
-              "min-h-[100px] font-normal resize-none transition-all duration-200",
+              "min-h-25 font-normal resize-none transition-all duration-200",
               !isEdit
                 ? readOnlyInputClass
                 : "bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white",

@@ -133,7 +133,7 @@ export function AddDashboardModal({
         open={isOpen}
         onOpenChange={(open) => !open && !isSubmitting && handleClose()}
       >
-        <DialogContent className="[&>button:last-child]:hidden max-w-[480px] md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-2xl bg-white dark:bg-slate-900">
+        <DialogContent className="[&>button:last-child]:hidden max-w-120 md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-2xl bg-background dark:bg-slate-900">
           <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-row items-center justify-between space-y-0">
             <DialogTitle className="text-xl dark:text-white font-normal">
               Add dashboard
@@ -169,7 +169,7 @@ export function AddDashboardModal({
               <div className="space-y-2">
                 <Label className={fieldLabelClass}>Description</Label>
                 <Textarea
-                  className={cn(fieldInputClass, "min-h-[100px] resize-none")}
+                  className={cn(fieldInputClass, "min-h-25 resize-none")}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={isSubmitting}
@@ -229,8 +229,8 @@ export function AddDashboardModal({
                 {/* Dashboard image shifted inside */}
                 <div className="space-y-2">
                   <Label className={fieldLabelClass}>Dashboard image</Label>
-                  <div className="flex gap-4 p-4 border border-slate-200 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900/50 shadow-sm transition-all duration-200">
-                    <div className="w-24 h-24 border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-900 flex items-center justify-center p-1 relative group overflow-hidden shadow-inner">
+                  <div className="flex gap-4 p-4 border border-border dark:border-slate-800 rounded-lg bg-background dark:bg-slate-900/50 shadow-sm transition-all duration-200">
+                    <div className="w-24 h-24 border border-border dark:border-slate-800 rounded bg-background dark:bg-slate-900 flex items-center justify-center p-1 relative group overflow-hidden shadow-inner">
                       {image ? (
                         <>
                           {image.includes("/api/images/") ? (
@@ -308,7 +308,7 @@ export function AddDashboardModal({
             <Button
               onClick={handleAdd}
               disabled={isSubmitting || !title.trim()}
-              className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900 font-medium px-8 min-w-[100px]"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900 font-medium px-8 min-w-25"
             >
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -326,7 +326,7 @@ export function AddDashboardModal({
       />
 
       <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-slate-900 border-none shadow-2xl p-0">
+        <DialogContent className="max-w-md bg-background dark:bg-slate-900 border-none shadow-2xl p-0">
           <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <DialogTitle className="text-lg font-normal">
               Set image link
