@@ -76,7 +76,7 @@ function AuditLogDetailsDialog({
 
   return (
     <Dialog open={!!log} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[540px] max-h-[85vh] flex flex-col p-0 gap-0">
+      <DialogContent className="sm:max-w-135 max-h-[85vh] flex flex-col p-0 gap-0">
         <DialogHeader className="border-b border-border bg-muted/30 px-6 py-4">
           <DialogTitle className="text-foreground">
             Audit log details
