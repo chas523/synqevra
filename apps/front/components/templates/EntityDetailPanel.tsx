@@ -36,10 +36,8 @@ export interface EntityDetailPanelProps {
 }
 
 const buttonVariants = {
-  primary:
-    "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white",
-  secondary:
-    "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700",
+  primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+  secondary: "border border-border bg-muted text-foreground hover:bg-muted/80",
   danger: "bg-red-500 hover:bg-red-600 text-white",
 };
 
@@ -133,7 +131,7 @@ export function EntityDetailPanel({
           }}
           className="flex-1 flex flex-col min-h-0"
         >
-          <div className="relative border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 px-4">
+          <div className="relative border-b border-border bg-muted/40 px-4">
             <div
               ref={tabsScrollRef}
               onWheel={handleTabsWheel}
@@ -160,7 +158,7 @@ export function EntityDetailPanel({
 
           {/* Action Buttons */}
           {actionButtons.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-4 border-b border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900/80">
+            <div className="flex flex-wrap gap-2 border-b border-border bg-background p-4">
               {actionButtons.map((action, index) => (
                 <button
                   key={`action-${action.label}-${index}`}

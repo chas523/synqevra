@@ -200,14 +200,14 @@ export function DeviceDetailsTabContent({
   if (isLoading) {
     return (
       <div className="flex justify-center p-8">
-        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!device) {
     return (
-      <div className="p-4 text-center text-slate-500">
+      <div className="p-4 text-center text-muted-foreground">
         Device details not found.
       </div>
     );
@@ -215,7 +215,7 @@ export function DeviceDetailsTabContent({
 
   if (!form) {
     return (
-      <div className="p-4 text-center text-slate-500">
+      <div className="p-4 text-center text-muted-foreground">
         Preparing device details...
       </div>
     );
@@ -228,7 +228,7 @@ export function DeviceDetailsTabContent({
           <button
             type="button"
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 hover:bg-slate-50"
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             Edit
           </button>
@@ -237,7 +237,7 @@ export function DeviceDetailsTabContent({
             <button
               type="button"
               onClick={handleCancel}
-              className="px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 hover:bg-slate-50"
+              className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
               disabled={isSaving}
             >
               Cancel
@@ -245,7 +245,7 @@ export function DeviceDetailsTabContent({
             <button
               type="button"
               onClick={handleSave}
-              className="px-3 py-1.5 text-sm font-medium rounded-md bg-cyan-600 text-white hover:bg-cyan-700 disabled:opacity-60"
+              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
               disabled={isSaving || !hasChanges}
             >
               {isSaving ? "Saving..." : "Save"}
@@ -256,16 +256,16 @@ export function DeviceDetailsTabContent({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
+          <h3 className="border-b border-border pb-2 text-sm font-semibold text-foreground">
             General Info
           </h3>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Device Name
             </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+              <div className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
                 {isEditing ? (
                   <input
                     type="text"
@@ -286,11 +286,11 @@ export function DeviceDetailsTabContent({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Device ID
             </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-600">
+              <div className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 font-mono text-sm text-muted-foreground">
                 {device.id?.id}
               </div>
               <CopyButton
@@ -302,11 +302,11 @@ export function DeviceDetailsTabContent({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Label
             </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+              <div className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
                 {isEditing ? (
                   <input
                     type="text"
@@ -327,11 +327,11 @@ export function DeviceDetailsTabContent({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Description
             </label>
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+              <div className="flex-1 rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
                 {isEditing ? (
                   <textarea
                     value={form.description}
@@ -358,15 +358,15 @@ export function DeviceDetailsTabContent({
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
+          <h3 className="border-b border-border pb-2 text-sm font-semibold text-foreground">
             Profile
           </h3>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Device Profile
             </label>
-            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+            <div className="rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
               {isEditing ? (
                 <select
                   value={form.deviceProfileId}
@@ -395,10 +395,10 @@ export function DeviceDetailsTabContent({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Assigned Firmware
             </label>
-            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+            <div className="rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
               {isEditing ? (
                 <select
                   value={form.firmwareId}
@@ -430,10 +430,10 @@ export function DeviceDetailsTabContent({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs text-slate-500 font-medium ml-1">
+            <label className="ml-1 text-xs font-medium text-muted-foreground">
               Assigned Software
             </label>
-            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm">
+            <div className="rounded-xl border border-border bg-muted/30 px-4 py-2.5 text-sm text-foreground">
               {isEditing ? (
                 <select
                   value={form.softwareId}
@@ -466,10 +466,10 @@ export function DeviceDetailsTabContent({
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="space-y-1">
-              <label className="text-xs text-slate-500 font-medium ml-1">
+              <label className="ml-1 text-xs font-medium text-muted-foreground">
                 Created At
               </label>
-              <div className="text-sm text-slate-700 ml-1">
+              <div className="ml-1 text-sm text-foreground">
                 {device.createdTime
                   ? new Date(device.createdTime).toLocaleString()
                   : "-"}
@@ -477,10 +477,10 @@ export function DeviceDetailsTabContent({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-500 font-medium ml-1">
+              <label className="ml-1 text-xs font-medium text-muted-foreground">
                 Is Gateway
               </label>
-              <div className="text-sm text-slate-700 ml-1">
+              <div className="ml-1 text-sm text-foreground">
                 {isEditing ? (
                   <label className="inline-flex items-center gap-2">
                     <input
@@ -513,10 +513,10 @@ export function DeviceDetailsTabContent({
 
           {(isEditing ? form.isGateway : device.additionalInfo?.gateway) && (
             <div className="space-y-1 pt-2">
-              <label className="text-xs text-slate-500 font-medium ml-1">
+              <label className="ml-1 text-xs font-medium text-muted-foreground">
                 Overwrite Activity Time
               </label>
-              <div className="text-sm text-slate-700 ml-1">
+              <div className="ml-1 text-sm text-foreground">
                 {isEditing ? (
                   <label className="inline-flex items-center gap-2">
                     <input

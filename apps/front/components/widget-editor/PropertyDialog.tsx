@@ -202,7 +202,7 @@ export function PropertyDialog({
                     handleChange("defaultValue", checked ? "true" : "false")
                   }
                 />
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   {formData.defaultValue === "true" ? "True" : "False"}
                 </span>
               </div>
@@ -290,7 +290,7 @@ export function PropertyDialog({
 
                 <div className="space-y-2">
                   <Label>Display condition function: f(property, model)</Label>
-                  <div className="relative border rounded-md min-h-25 bg-gray-50 dark:bg-slate-900">
+                  <div className="relative min-h-25 rounded-md border border-border bg-muted">
                     {/* Simple Monaco editor placeholder or actual editor if feasible. For now textarea */}
                     <textarea
                       className="w-full h-full min-h-25 p-2 bg-transparent outline-none text-sm font-mono"

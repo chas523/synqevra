@@ -52,10 +52,10 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="flex h-screen items-center justify-center bg-muted/40">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="text-sm text-slate-500">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">
             Loading widget environment...
           </span>
         </div>
@@ -64,9 +64,9 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-100 dark:bg-slate-950 overflow-hidden relative">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-muted/40">
       {/* Top bar */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm z-20">
+      <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-4 shadow-sm">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -74,21 +74,21 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
             onClick={() =>
               router.push("/resources/widgets-library/widget-types")
             }
-            className="text-slate-500 dark:text-slate-400"
+            className="text-muted-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+          <div className="h-5 w-px bg-border" />
           <div className="flex items-center gap-2">
-            <PanelsTopLeft className="h-4 w-4 text-slate-400" />
-            <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm">
+            <PanelsTopLeft className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-foreground">
               {widgetType?.name || "Widget Type"}
             </span>
             <div className="flex items-center gap-3 ml-4">
-              <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full font-medium">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 Widget Library Proxy
               </span>
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="h-4 w-px bg-border" />
               <label className="flex items-center cursor-pointer gap-2 scale-90 origin-left">
                 <div className="relative">
                   <input
@@ -101,13 +101,13 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
                     }}
                   />
                   <div
-                    className={`block w-10 h-6 rounded-full transition-colors ${useIframe ? "bg-blue-500" : "bg-slate-300 dark:bg-slate-700"}`}
+                    className={`block h-6 w-10 rounded-full transition-colors ${useIframe ? "bg-primary" : "bg-muted-foreground/30"}`}
                   ></div>
                   <div
-                    className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${useIframe ? "translate-x-4" : ""}`}
+                    className={`dot absolute left-1 top-1 h-4 w-4 rounded-full bg-background transition-transform ${useIframe ? "translate-x-4" : ""}`}
                   ></div>
                 </div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {useIframe ? "Native TB" : "Custom Editor"}
                 </span>
               </label>
@@ -117,7 +117,7 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
       </header>
 
       {useIframe ? (
-        <main className="flex-1 overflow-hidden relative bg-slate-200 dark:bg-slate-800">
+        <main className="relative flex-1 overflow-hidden bg-muted/60">
           <div className="absolute inset-0 overflow-hidden">
             <iframe
               ref={iframeRef}
@@ -135,7 +135,7 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
               height: calc(100% + 5px);
             }
           `}</style>
-          <div className="absolute top-0 left-0 right-0 h-[5px] bg-slate-100 dark:bg-slate-950 z-10 pointer-events-none" />
+          <div className="pointer-events-none absolute left-0 right-0 top-0 z-10 h-1.25 bg-muted/40" />
         </main>
       ) : (
         <div className="flex-1 overflow-hidden">
@@ -149,19 +149,19 @@ function WidgetTypeDetailContent({ id }: WidgetTypeDetailPageProps) {
                       <Panel defaultSize={50} minSize={20}>
                         <HtmlPanel />
                       </Panel>
-                      <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                      <Separator className="h-2 bg-border transition-colors hover:bg-muted-foreground/40" />
                       <Panel defaultSize={50} minSize={20}>
                         <JsPanel />
                       </Panel>
                     </Group>
                   </Panel>
-                  <Separator className="w-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                  <Separator className="w-2 bg-border transition-colors hover:bg-muted-foreground/40" />
                   <Panel defaultSize={50} minSize={20}>
                     <Group orientation="vertical">
                       <Panel defaultSize={50} minSize={20}>
                         <SettingsPanel />
                       </Panel>
-                      <Separator className="h-2 bg-gray-200 dark:bg-gray-800 transition-colors hover:bg-gray-300 dark:hover:bg-gray-700" />
+                      <Separator className="h-2 bg-border transition-colors hover:bg-muted-foreground/40" />
                       <Panel defaultSize={50} minSize={20}>
                         <PreviewPanel />
                       </Panel>

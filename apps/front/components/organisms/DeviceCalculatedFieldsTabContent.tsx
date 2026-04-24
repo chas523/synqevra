@@ -188,7 +188,7 @@ export function DeviceCalculatedFieldsTabContent({
       {
         key: "name",
         header: "Name",
-        className: "font-medium text-slate-900",
+        className: "font-medium text-foreground",
       },
       {
         key: "type",
@@ -706,14 +706,14 @@ export function DeviceCalculatedFieldsTabContent({
               </div>
 
               {form.arguments.length === 0 ? (
-                <div className="text-sm text-slate-500">
+                <div className="text-sm text-muted-foreground">
                   No arguments added yet.
                 </div>
               ) : (
                 <div className="rounded-md border">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-slate-50">
+                      <tr className="border-b border-border bg-muted/40">
                         <th className="px-3 py-2 text-left">Name</th>
                         <th className="px-3 py-2 text-left">Entity type</th>
                         <th className="px-3 py-2 text-left">Target entity</th>
@@ -744,7 +744,7 @@ export function DeviceCalculatedFieldsTabContent({
                             <td className="px-3 py-2">{entityTypeLabel}</td>
                             <td className="px-3 py-2">
                               {!isCurrentScope(argument.entityType) ? (
-                                <span className="text-blue-600">
+                                <span className="text-primary">
                                   {entityNames[argument.refEntityId] ||
                                     argument.name ||
                                     argument.refEntityId ||
@@ -756,7 +756,7 @@ export function DeviceCalculatedFieldsTabContent({
                             </td>
                             <td className="px-3 py-2">{argTypeLabel}</td>
                             <td className="px-3 py-2">
-                              <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-700">
+                              <span className="rounded bg-muted px-2 py-0.5 text-foreground">
                                 {argument.timeSeriesKey}
                               </span>
                             </td>
@@ -1142,7 +1142,7 @@ export function DeviceCalculatedFieldsTabContent({
                 {argumentForm.entityType === "current_entity" &&
                   argumentForm.argumentType === "latest_telemetry" &&
                   isTelemetryKeysLoading && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Loading telemetry keys...
                     </p>
                   )}

@@ -49,7 +49,7 @@ const getStatusIcon = (status?: string) => {
     case "pending":
       return <Clock className="h-4 w-4 text-yellow-500" />;
     default:
-      return <AlertCircle className="h-4 w-4 text-gray-500" />;
+      return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
   }
 };
 
@@ -62,7 +62,7 @@ const getStatusColor = (status?: string) => {
     case "pending":
       return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -70,9 +70,7 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
   const iconConfig = notification.additionalConfig?.icon;
 
   if (!iconConfig?.enabled) {
-    return (
-      <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-1 shrink-0" />
-    );
+    return <Bell className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />;
   }
 
   const { icon, color } = iconConfig;
@@ -90,7 +88,7 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
           maskRepeat: "no-repeat",
           WebkitMaskPosition: "center",
           maskPosition: "center",
-          backgroundColor: color || "#6B7280",
+          backgroundColor: color || "var(--muted-foreground)",
           width: "20px",
           height: "20px",
         }}
@@ -100,9 +98,9 @@ const NotificationIcon = ({ notification }: { notification: Notification }) => {
 
   return (
     <span
-      className="material-icons mt-1 shrink-0 select-none"
+      className="material-icons mt-1 shrink-0 select-none text-muted-foreground"
       style={{
-        color: color || "#6B7280",
+        color: color || "var(--muted-foreground)",
         fontSize: "20px",
       }}
     >
@@ -202,14 +200,14 @@ export function NotificationsListPage({
             data.data.map((notification) => (
               <div
                 key={notification.id.id}
-                className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors dark:border-gray-700"
+                className="rounded-lg border border-border p-4 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
                     <NotificationIcon notification={notification} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                        <h3 className="font-medium text-foreground">
                           {notification.subject || "Notification"}
                         </h3>
                         {notification.status && (
@@ -226,7 +224,7 @@ export function NotificationsListPage({
                       </div>
 
                       {notification.text && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
                           {notification.text}
                         </p>
                       )}
@@ -257,7 +255,7 @@ export function NotificationsListPage({
 
                       <div className="mt-2 space-y-1">
                         {notification.deliveryMethod && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Mail className="h-4 w-4" />
                             <span className="capitalize">
                               {notification.deliveryMethod}
@@ -266,14 +264,14 @@ export function NotificationsListPage({
                         )}
 
                         {notification.type && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <AlertCircle className="h-4 w-4" />
                             <span>{notification.type}</span>
                           </div>
                         )}
 
                         {notification.createdTime && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="h-4 w-4" />
                             {formatTenantDate(notification.createdTime)}
                           </div>

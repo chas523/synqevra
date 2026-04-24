@@ -98,9 +98,9 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
     return (
       <div className="space-y-4">
         <Button
-          variant="destructive"
+          size="lg"
           onClick={() => router.back()}
-          className="mb-4 flex items-center gap-2 p-2 bg-white dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-700/50 rounded-lg hover:border-cyan-500/50 text-slate-600 dark:text-slate-300 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all shadow-sm"
+          className="mb-4 cursor-pointer gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Tenants
@@ -120,8 +120,9 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
       {/* Header */}
       <div>
         <Button
+          size="lg"
           onClick={() => router.back()}
-          className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="mb-4 cursor-pointer gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Tenants
@@ -190,7 +191,7 @@ export const TenantDevicesPage = ({ tenantId }: TenantDevicesPageProps) => {
           <FilterBar
             sortValue={`${devicesOptions.sortBy}-${devicesOptions.sortOrder}`}
             onSortChange={handleSortChangeDevices}
-            sortOptions={SORT_OPTIONS.TENANTS}
+            sortOptions={SORT_OPTIONS.DEVICES}
             showStatusFilter={false}
           />
 

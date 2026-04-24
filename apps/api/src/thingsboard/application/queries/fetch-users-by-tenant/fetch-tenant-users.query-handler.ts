@@ -25,7 +25,8 @@ export class FetchTenantUsersQueryHandler implements IQueryHandler<
   async execute(
     query: FetchTenantUsersQuery,
   ): Promise<Result<GetTenantUsersResponse, TBAdminGetTenantsUsersError>> {
-    const { tenantId, page, pageSize, accessToken } = query;
+    const { tenantId, page, pageSize, sortProperty, sortOrder, accessToken } =
+      query;
     try {
       const tenantUsersResponse: GetTenantUsersResponse =
         await this.thingsboardApi.fetchTenantUsers(
@@ -33,6 +34,8 @@ export class FetchTenantUsersQueryHandler implements IQueryHandler<
           tenantId,
           page,
           pageSize,
+          sortProperty,
+          sortOrder,
         );
       return Ok(tenantUsersResponse);
     } catch (error) {

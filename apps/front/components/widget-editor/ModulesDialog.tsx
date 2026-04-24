@@ -105,14 +105,14 @@ export function ModulesDialog({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4 space-y-4">
-          <div className="grid grid-cols-[1fr_2fr_auto] gap-4 text-sm font-medium text-gray-500 mb-2 px-1">
+          <div className="mb-2 grid grid-cols-[1fr_2fr_auto] gap-4 px-1 text-sm font-medium text-muted-foreground">
             <div>Alias</div>
             <div>JS module resource</div>
             <div className="w-8"></div>
           </div>
 
           {localModules.length === 0 && (
-            <div className="text-center py-8 text-gray-400 border rounded-md border-dashed">
+            <div className="rounded-md border border-dashed py-8 text-center text-muted-foreground">
               No modules configured
             </div>
           )}
@@ -176,14 +176,14 @@ export function ModulesDialog({
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">{res.title}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-muted-foreground">
                               {res.link}
                             </span>
                           </div>
                         </Combobox.Option>
                       ))
                     ) : (
-                      <div className="p-2 text-sm text-gray-500">
+                      <div className="p-2 text-sm text-muted-foreground">
                         No JS modules found
                       </div>
                     )}
@@ -192,11 +192,14 @@ export function ModulesDialog({
               </Combobox>
 
               <div className="flex items-center gap-1 pt-2">
-                <Info size={16} className="text-gray-400 cursor-help" />
-                <Code size={16} className="text-gray-400 cursor-pointer" />
+                <Info size={16} className="cursor-help text-muted-foreground" />
+                <Code
+                  size={16}
+                  className="cursor-pointer text-muted-foreground"
+                />
                 <Trash2
                   size={16}
-                  className="text-gray-400 hover:text-red-500 cursor-pointer"
+                  className="cursor-pointer text-muted-foreground hover:text-destructive"
                   onClick={() => handleRemoveModule(index)}
                 />
               </div>

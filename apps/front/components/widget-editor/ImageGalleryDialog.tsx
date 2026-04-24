@@ -92,8 +92,8 @@ export function ImageGalleryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-225 h-[80vh] flex flex-col p-0 gap-0 bg-background dark:bg-slate-950">
-        <div className="flex items-center justify-between p-4 border-b border-border dark:border-gray-800">
+      <DialogContent className="sm:max-w-225 h-[80vh] flex flex-col p-0 gap-0 bg-background">
+        <div className="flex items-center justify-between border-b border-border p-4">
           <DialogTitle className="text-lg font-semibold">
             Image gallery
           </DialogTitle>
@@ -106,7 +106,7 @@ export function ImageGalleryDialog({
             >
               <RefreshCw size={18} />
             </Button>
-            <div className="border border-border dark:border-gray-800 rounded-md flex p-0.5">
+            <div className="flex rounded-md border border-border p-0.5">
               <Button
                 variant={viewMode === "list" ? "secondary" : "ghost"}
                 size="icon"
@@ -135,17 +135,17 @@ export function ImageGalleryDialog({
           </div>
         </div>
 
-        <div className="p-4 border-b border-border dark:border-gray-800 flex gap-4">
+        <div className="flex gap-4 border-b border-border p-4">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search images..."
-              className="pl-9 bg-muted dark:bg-slate-900 border-border dark:border-gray-800"
+              className="border-border bg-muted pl-9"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 bg-muted dark:bg-slate-900/50">
+        <div className="flex-1 overflow-y-auto bg-muted p-4">
           {loading ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               Loading...
@@ -156,9 +156,9 @@ export function ImageGalleryDialog({
                 <div
                   key={img.id?.id || index}
                   className={`
-                                        group relative aspect-square bg-background dark:bg-slate-800 rounded-md border 
+                              group relative aspect-square rounded-md border bg-background 
                                         flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-md
-                                        ${selectedImage?.id?.id === img.id?.id ? "border-primary ring-2 ring-primary/20" : "border-border dark:border-gray-700"}
+                              ${selectedImage?.id?.id === img.id?.id ? "border-primary ring-2 ring-primary/20" : "border-border"}
                                     `}
                   onClick={() => setSelectedImage(img)}
                 >
@@ -184,7 +184,7 @@ export function ImageGalleryDialog({
                     />
                     <FileImage className="fallback-icon hidden text-muted-foreground h-10 w-10" />
                   </div>
-                  <div className="w-full p-2 bg-background dark:bg-slate-800 border-t border-border/50 dark:border-gray-700 text-xs text-center truncate font-medium text-foreground/80 dark:text-gray-300">
+                  <div className="w-full truncate border-t border-border/50 bg-background p-2 text-center text-xs font-medium text-foreground/80">
                     {img.title}
                   </div>
                   <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-md pointer-events-none" />
@@ -197,12 +197,12 @@ export function ImageGalleryDialog({
                 <div
                   key={img.id?.id || index}
                   className={`
-                                        flex items-center p-2 bg-background dark:bg-slate-800 rounded-md border cursor-pointer hover:bg-muted dark:hover:bg-slate-700
-                                        ${selectedImage?.id?.id === img.id?.id ? "border-primary bg-primary/10 dark:bg-blue-900/10" : "border-border dark:border-gray-700"}
+                                        flex cursor-pointer items-center rounded-md border bg-background p-2 hover:bg-muted
+                                        ${selectedImage?.id?.id === img.id?.id ? "border-primary bg-primary/10" : "border-border"}
                                     `}
                   onClick={() => setSelectedImage(img)}
                 >
-                  <div className="h-10 w-10 shrink-0 bg-muted dark:bg-slate-900 rounded border border-border dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded border border-border bg-muted">
                     <img
                       src={getImagePreviewUrl(img.link)}
                       alt={img.title}
@@ -222,10 +222,10 @@ export function ImageGalleryDialog({
                     />
                   </div>
                   <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium text-foreground dark:text-gray-100 truncate">
+                    <div className="truncate text-sm font-medium text-foreground">
                       {img.title}
                     </div>
-                    <div className="text-xs text-muted-foreground dark:text-gray-400 truncate">
+                    <div className="truncate text-xs text-muted-foreground">
                       {img.resourceKey}
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export function ImageGalleryDialog({
           )}
         </div>
 
-        <DialogFooter className="p-4 border-t border-border dark:border-gray-800">
+        <DialogFooter className="border-t border-border p-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

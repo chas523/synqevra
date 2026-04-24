@@ -60,8 +60,8 @@ function EditableField({
   placeholder?: string;
 }) {
   return (
-    <div className="py-3 border-b border-slate-200 dark:border-slate-700/50">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+    <div className="py-3 border-b border-border">
+      <label className="mb-1.5 block text-xs text-muted-foreground">
         {label}
       </label>
       <input
@@ -69,7 +69,7 @@ function EditableField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
-        className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
+        className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
       />
     </div>
   );
@@ -88,15 +88,15 @@ function EditableTextarea({
   rows?: number;
 }) {
   return (
-    <div className="py-3 border-b border-slate-200 dark:border-slate-700/50">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+    <div className="py-3 border-b border-border">
+      <label className="mb-1.5 block text-xs text-muted-foreground">
         {label}
       </label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none"
+        className="w-full resize-none rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
       />
     </div>
   );
@@ -137,7 +137,7 @@ function AttributesTabContent({ tenantId }: { tenantId: string }) {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+      <div className="py-8 text-center text-muted-foreground">
         Loading attributes...
       </div>
     );
@@ -150,14 +150,14 @@ function AttributesTabContent({ tenantId }: { tenantId: string }) {
   return (
     <div className="space-y-4">
       {/* Header with Add button */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700/50">
-        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <span className="text-sm font-medium text-foreground">
           Attributes ({attributes.length})
         </span>
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-accent"
         >
           <Plus className="w-4 h-4" />
           Add
@@ -166,20 +166,15 @@ function AttributesTabContent({ tenantId }: { tenantId: string }) {
 
       {/* Attributes list */}
       {attributes.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+        <div className="py-8 text-center text-muted-foreground">
           No attributes
         </div>
       ) : (
         <div className="space-y-2">
           {attributes.map((attr) => (
-            <div
-              key={attr.key}
-              className="py-2 border-b border-slate-200 dark:border-slate-700/50"
-            >
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                {attr.key}
-              </span>
-              <div className="text-sm text-slate-900 dark:text-white">
+            <div key={attr.key} className="border-b border-border py-2">
+              <span className="text-xs text-muted-foreground">{attr.key}</span>
+              <div className="text-sm text-foreground">
                 {String(attr.value)}
               </div>
             </div>
@@ -254,7 +249,7 @@ function AlarmsTabContent({ tenantId }: { tenantId: string }) {
       case "WARNING":
         return "text-blue-600 bg-blue-100 dark:bg-blue-900/30";
       default:
-        return "text-slate-600 bg-slate-100 dark:bg-slate-800";
+        return "text-muted-foreground bg-muted";
     }
   };
 
@@ -267,14 +262,14 @@ function AlarmsTabContent({ tenantId }: { tenantId: string }) {
       case "ACKNOWLEDGED":
         return "text-blue-600 bg-blue-100 dark:bg-blue-900/30";
       default:
-        return "text-slate-600 bg-slate-100 dark:bg-slate-800";
+        return "text-muted-foreground bg-muted";
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-700/50">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-3">
         <AlarmFilters
           selectedStatuses={selectedStatuses}
           onStatusChange={setSelectedStatuses}
@@ -286,24 +281,22 @@ function AlarmsTabContent({ tenantId }: { tenantId: string }) {
 
       {/* Loading / Error / Empty / List */}
       {loading ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+        <div className="py-8 text-center text-muted-foreground">
           Loading alarms...
         </div>
       ) : error ? (
         <div className="text-center py-8 text-red-500">{error}</div>
       ) : alarms.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-          No alarms
-        </div>
+        <div className="py-8 text-center text-muted-foreground">No alarms</div>
       ) : (
         <div className="space-y-3">
           {alarms.map((alarm) => (
             <div
               key={alarm.id.id}
-              className="p-3 rounded-lg border border-slate-200 dark:border-slate-700"
+              className="rounded-lg border border-border p-3"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-slate-900 dark:text-white">
+                <span className="font-medium text-foreground">
                   {alarm.name}
                 </span>
                 <div className="flex items-center gap-2">
@@ -319,10 +312,10 @@ function AlarmsTabContent({ tenantId }: { tenantId: string }) {
                   </span>
                 </div>
               </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
+              <div className="text-sm text-muted-foreground">
                 <span>Type: {alarm.type}</span>
               </div>
-              <div className="text-xs text-slate-400 mt-1">
+              <div className="mt-1 text-xs text-muted-foreground">
                 {new Date(alarm.startTs).toLocaleString("en-US")}
               </div>
             </div>
@@ -368,7 +361,7 @@ function EventsTabContent({ tenantId }: { tenantId: string }) {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+      <div className="py-8 text-center text-muted-foreground">
         Loading events...
       </div>
     );
@@ -381,28 +374,26 @@ function EventsTabContent({ tenantId }: { tenantId: string }) {
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-200 dark:border-slate-700/50">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-3">
         <EventFilters selectedType={eventType} onTypeChange={setEventType} />
         <TimeRangeFilter value={timeRange} onChange={setTimeRange} />
       </div>
 
       {events.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-          No events
-        </div>
+        <div className="py-8 text-center text-muted-foreground">No events</div>
       ) : (
         <div className="space-y-3">
           {events.map((event) => (
             <div
               key={event.id.id}
-              className="p-3 rounded-lg border border-slate-200 dark:border-slate-700"
+              className="rounded-lg border border-border p-3"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-slate-900 dark:text-white">
+                <span className="font-medium text-foreground">
                   {event.type}
                 </span>
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 {new Date(event.createdTime).toLocaleString("en-US")}
               </div>
             </div>
@@ -444,13 +435,13 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
   return (
     <div className="space-y-4">
       {/* Header with Filters and Add button */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700/50">
+      <div className="flex items-center justify-between border-b border-border pb-2">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <span className="text-sm font-medium text-foreground">
             Relations ({relations.length})
           </span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Direction:</span>
+            <span className="text-xs text-muted-foreground">Direction:</span>
             <Select
               value={direction}
               onValueChange={(val) => setDirection(val as "FROM" | "TO")}
@@ -465,7 +456,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
         <button
           type="button"
           onClick={() => setIsAddDialogOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-accent"
         >
           <Plus className="w-4 h-4" />
           Add
@@ -473,13 +464,13 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+        <div className="py-8 text-center text-muted-foreground">
           Loading relations...
         </div>
       ) : error ? (
         <div className="text-center py-8 text-red-500">{error}</div>
       ) : relations.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+        <div className="py-8 text-center text-muted-foreground">
           No relations found
         </div>
       ) : (
@@ -487,35 +478,35 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
           {relations.map((relation, index) => (
             <div
               key={`${relation.from.id}-${relation.to.id}-${index}`}
-              className="p-3 rounded-lg border border-slate-200 dark:border-slate-700"
+              className="rounded-lg border border-border p-3"
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <Link2 className="w-4 h-4 text-cyan-500" />
-                    <span className="font-medium text-slate-900 dark:text-white">
+                    <Link2 className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-foreground">
                       {relation.type}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <div className="flex flex-col gap-1 min-w-37.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
+                        <span className="text-[10px] font-semibold uppercase tracking-tighter text-muted-foreground">
                           Type
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-[10px] px-1.5 py-0 h-5 font-normal text-slate-500"
+                          className="h-5 px-1.5 py-0 text-[10px] font-normal text-muted-foreground"
                         >
                           {relation.from.entityType}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
+                        <span className="text-[10px] font-semibold uppercase tracking-tighter text-muted-foreground">
                           Name
                         </span>
                         <span
-                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-37.5"
+                          className="max-w-37.5 truncate font-medium text-foreground"
                           title={relation.fromName}
                         >
                           {relation.from.id === tenant.id.id
@@ -525,26 +516,26 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                       </div>
                     </div>
 
-                    <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
 
                     <div className="flex flex-col gap-1 min-w-37.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
+                        <span className="text-[10px] font-semibold uppercase tracking-tighter text-muted-foreground">
                           Type
                         </span>
                         <Badge
                           variant="outline"
-                          className="text-[10px] px-1.5 py-0 h-5 font-normal text-slate-500"
+                          className="h-5 px-1.5 py-0 text-[10px] font-normal text-muted-foreground"
                         >
                           {relation.to.entityType}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-400 uppercase tracking-tighter font-semibold">
+                        <span className="text-[10px] font-semibold uppercase tracking-tighter text-muted-foreground">
                           Name
                         </span>
                         <span
-                          className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-37.5"
+                          className="max-w-37.5 truncate font-medium text-foreground"
                           title={relation.toName}
                         >
                           {relation.to.id === tenant.id.id
@@ -578,7 +569,7 @@ function RelationsTabContent({ tenant }: { tenant: Tenant }) {
                       toast.error("Failed to delete relation");
                     }
                   }}
-                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -658,7 +649,7 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+      <div className="py-8 text-center text-muted-foreground">
         Loading Medplum status...
       </div>
     );
@@ -670,12 +661,12 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-4">
         <div className="space-y-0.5">
-          <label className="text-sm font-medium text-slate-900 dark:text-white">
+          <label className="text-sm font-medium text-foreground">
             Medplum Integration
           </label>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-muted-foreground">
             {medplumEnabled
               ? "Medplum integration is active for this tenant."
               : "Enable Medplum integration for this tenant."}
@@ -712,7 +703,7 @@ function MedplumTabContent({ tenantId }: { tenantId: string }) {
               type="button"
               onClick={handleCancel}
               disabled={processing}
-              className="flex-1 rounded border border-slate-300 dark:border-slate-600 text-sm py-1.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              className="flex-1 rounded border border-border py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
               Cancel
             </button>
@@ -775,37 +766,37 @@ function WhitelabelTabContent({ tenantId }: { tenantId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-        <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4">
+      <div className="rounded-lg border border-border bg-muted/30 p-4">
+        <h3 className="mb-4 text-sm font-medium text-foreground">
           Whitelabel Settings
         </h3>
         <form onSubmit={handleUpload} className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="block text-sm font-medium text-foreground">
               Logo (Light Mode)
             </label>
             <input
               type="file"
               accept="image/png, image/jpeg, image/svg+xml"
               onChange={(e) => setLogoWhiteFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Recommended format: PNG, SVG. Displayed when UI is in light mode.
             </p>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+            <label className="block text-sm font-medium text-foreground">
               Logo (Dark Mode)
             </label>
             <input
               type="file"
               accept="image/png, image/jpeg, image/svg+xml"
               onChange={(e) => setLogoDarkFile(e.target.files?.[0] || null)}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Recommended format: PNG, SVG. Displayed when UI is in dark mode.
             </p>
           </div>
@@ -814,7 +805,7 @@ function WhitelabelTabContent({ tenantId }: { tenantId: string }) {
             <button
               type="submit"
               disabled={isUploading || (!logoWhiteFile && !logoDarkFile)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isUploading ? "Uploading..." : "Save Images"}
               <Upload className="w-4 h-4" />
@@ -966,11 +957,11 @@ export function TenantDetailPanel({
       content: (
         <div className="space-y-0">
           {/* Copy ID Button */}
-          <div className="pb-4 border-b border-slate-200 dark:border-slate-700/50">
+          <div className="border-b border-border pb-4">
             <button
               type="button"
               onClick={handleCopyId}
-              className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               <Copy className="w-4 h-4" />
               Copy tenant ID

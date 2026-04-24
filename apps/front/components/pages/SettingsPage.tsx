@@ -74,22 +74,22 @@ function NotificationsTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-400">
+      <div className="flex h-32 items-center justify-center text-muted-foreground">
         <p className="text-sm">Loading notification settings...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-foreground dark:text-white">
+        <h2 className="text-lg font-semibold text-foreground">
           Slack settings
         </h2>
         <button
           type="button"
-          className="text-muted-foreground hover:text-foreground dark:text-slate-400 dark:hover:text-white transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
           title="Help"
         >
           <svg
@@ -114,7 +114,7 @@ function NotificationsTab() {
           value={botToken}
           onChange={(e) => setBotToken(e.target.value)}
           placeholder="Slack API token"
-          className="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 text-sm text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-500 py-2 px-1 focus:outline-none focus:border-primary dark:focus:border-blue-400 transition-colors"
+          className="w-full border-b border-border bg-transparent px-1 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none"
         />
       </div>
 
@@ -124,7 +124,7 @@ function NotificationsTab() {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 bg-primary dark:bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-primary/90 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save"}
         </button>
@@ -207,7 +207,7 @@ function RepositoryTab() {
 
   if (isLoadingInfo || isLoadingSettings) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-400">
+      <div className="flex h-32 items-center justify-center text-muted-foreground">
         <p className="text-sm">Loading repository settings...</p>
       </div>
     );
@@ -266,22 +266,22 @@ function TrendzTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-400">
+      <div className="flex h-32 items-center justify-center text-muted-foreground">
         <p className="text-sm">Loading Trendz settings...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-foreground dark:text-white">
+        <h2 className="text-lg font-semibold text-foreground">
           Trendz settings
         </h2>
         <button
           type="button"
-          className="text-muted-foreground hover:text-foreground dark:text-slate-400 dark:hover:text-white transition-colors"
+          className="text-muted-foreground transition-colors hover:text-foreground"
           title="Help"
         >
           <svg
@@ -329,7 +329,7 @@ function TrendzTab() {
               )}
             </div>
           </div>
-          <span className="text-sm text-red-500 dark:text-red-400 font-medium select-none">
+          <span className="select-none text-sm font-medium text-red-500 dark:text-red-400">
             Enable Trendz
           </span>
         </label>
@@ -341,7 +341,7 @@ function TrendzTab() {
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
             placeholder="Trendz URL"
-            className="w-full bg-slate-50 dark:bg-slate-700/50 border-b border-slate-300 dark:border-slate-600 text-sm text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-500 py-2 px-3 focus:outline-none focus:border-primary dark:focus:border-blue-400 transition-colors"
+            className="w-full border-b border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none"
           />
         </div>
 
@@ -352,7 +352,7 @@ function TrendzTab() {
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="Trendz API key"
-            className="w-full bg-slate-50 dark:bg-slate-700/50 border-b border-slate-300 dark:border-slate-600 text-sm text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-slate-500 py-2 px-3 focus:outline-none focus:border-primary dark:focus:border-blue-400 transition-colors"
+            className="w-full border-b border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:outline-none"
           />
         </div>
       </div>
@@ -363,7 +363,7 @@ function TrendzTab() {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 bg-primary dark:bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-primary/90 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save"}
         </button>
@@ -374,10 +374,10 @@ function TrendzTab() {
 
 function PlaceholderTab({ label }: { label: string }) {
   return (
-    <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm">
-      <div className="flex items-center justify-center h-32 text-muted-foreground dark:text-slate-400">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="flex h-32 items-center justify-center text-muted-foreground">
         <p className="text-sm">
-          <span className="font-medium dark:text-white">{label}</span> - coming
+          <span className="font-medium text-foreground">{label}</span> - coming
           soon
         </p>
       </div>
@@ -417,7 +417,7 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto p-6">
       {/* Tabs */}
-      <div className="border-b border-slate-200 dark:border-slate-700/50 mb-6">
+      <div className="mb-6 border-b border-border">
         <nav className="flex gap-0 -mb-px">
           {TABS.map((tab) => {
             const isActive = currentTab === tab.id;
@@ -431,8 +431,8 @@ export default function SettingsPage() {
                                     flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                                     ${
                                       isActive
-                                        ? "border-primary dark:border-blue-400 text-primary dark:text-blue-400"
-                                        : "border-transparent text-muted-foreground dark:text-slate-400 hover:text-foreground dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600"
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                                     }
                                 `}
               >

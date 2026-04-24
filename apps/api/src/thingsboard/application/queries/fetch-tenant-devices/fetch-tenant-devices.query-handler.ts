@@ -31,6 +31,8 @@ export class FetchTenantDevicesQueryHandler implements IQueryHandler<
         query.tenantId,
         query.page,
         query.pageSize,
+        query.sortProperty,
+        query.sortOrder,
       );
       return Ok(response);
     } catch (error) {

@@ -67,14 +67,12 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
   if (!mounted)
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <Loader2 className="w-10 h-10 text-cyan-500 dark:text-cyan-400 animate-spin" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
-          <p className="text-slate-600 dark:text-slate-400 font-medium">
-            Loading...
-          </p>
+          <p className="font-medium text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -104,9 +102,9 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
     return (
       <div
         suppressHydrationWarning
-        className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors"
+        className="min-h-screen bg-background transition-colors"
       >
-        <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+        <header className="border-b border-border bg-card/80 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/">
               <Image
@@ -132,7 +130,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             <Button
               size="icon"
               variant="outline"
-              className="cursor-pointer bg-white/80 dark:bg-white/10 border-slate-200 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-700 dark:text-white"
+              className="cursor-pointer border-border bg-card/80 text-foreground hover:bg-muted"
               onClick={toggleTheme}
             >
               {isDark ? (
@@ -172,7 +170,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
       {/* Animated gradient blobs */}
       <div
-        className="absolute top-20 left-10 w-64 h-64 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse pointer-events-none"
+        className="absolute top-20 left-10 h-64 w-64 rounded-full blur-3xl animate-pulse pointer-events-none dark:bg-primary/20"
         style={
           isDark
             ? undefined
@@ -180,7 +178,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
         }
       />
       <div
-        className="absolute bottom-20 right-10 w-80 h-80 dark:bg-cyan-500/20 rounded-full blur-3xl animate-pulse pointer-events-none"
+        className="absolute bottom-20 right-10 h-80 w-80 rounded-full blur-3xl animate-pulse pointer-events-none dark:bg-primary/20"
         style={
           isDark
             ? { animationDelay: "1.5s" }
@@ -206,22 +204,22 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
         <AppSidebar />
         <SidebarInset className="bg-transparent">
           <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between relative z-20">
-            <SidebarTrigger className="-ml-1 text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-black" />
+            <SidebarTrigger className="-ml-1 text-foreground transition-colors hover:text-primary" />
             <div className="flex items-center gap-3">
               {user && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-md shadow-sm transition-all hover:bg-white/60 dark:hover:bg-white/10">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-linear-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5 shadow-sm backdrop-blur-md transition-colors hover:bg-card">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-accent/60">
                     {user.role === "ADMIN" ? (
-                      <ShieldCheck className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                      <ShieldCheck className="h-4 w-4 text-primary" />
                     ) : (
-                      <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <User className="h-4 w-4 text-primary" />
                     )}
                   </div>
                   <div className="flex-col leading-tight hidden sm:flex">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    <span className="text-sm font-semibold text-foreground">
                       {user.firstName} {user.lastName}
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-cyan-600 dark:text-cyan-500/80">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                       {user.role}
                     </span>
                   </div>
@@ -232,7 +230,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
               <Button
                 size="icon"
                 variant="outline"
-                className="cursor-pointer bg-white/80 dark:bg-white/10 border-slate-200 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/20 text-slate-700 dark:text-white"
+                className="cursor-pointer border-border bg-card/80 text-foreground hover:bg-muted"
                 onClick={toggleTheme}
               >
                 {isDark ? (

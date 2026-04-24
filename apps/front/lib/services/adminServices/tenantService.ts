@@ -200,7 +200,7 @@ export class TenantService {
       }
 
       const response = await proxyApi.get<GetTenantUsersResponse>(
-        `/dashboard/tenants/${tenantId}/users? ${params.toString()}`,
+        `/dashboard/tenants/${tenantId}/users?${params.toString()}`,
       );
 
       return this.mapTenantUsersResponse(response.data, options.limit ?? 20);
@@ -232,7 +232,7 @@ export class TenantService {
       }
 
       const response = await proxyApi.get<GetTenantDevicesResponse>(
-        `/dashboard/tenants/${tenantId}/devices? ${params.toString()}`,
+        `/dashboard/tenants/${tenantId}/devices?${params.toString()}`,
       );
 
       return this.mapTenantDevicesResponse(response.data, options.limit ?? 20);

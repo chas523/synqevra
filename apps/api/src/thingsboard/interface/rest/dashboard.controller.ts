@@ -241,6 +241,8 @@ export class DashboardController {
   async getTenantUsers(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
   ) {
@@ -249,6 +251,8 @@ export class DashboardController {
         tenantId: id,
         page: Number(page),
         pageSize: Number(pageSize),
+        sortProperty,
+        sortOrder,
       },
       accessToken,
     );
@@ -269,6 +273,8 @@ export class DashboardController {
   async getTenantDevices(
     @Query('page') page = 0,
     @Query('pageSize') pageSize = 20,
+    @Query('sortProperty') sortProperty = 'createdTime',
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Param('id') id: string,
     @TbAccessToken() accessToken: string,
   ) {
@@ -277,6 +283,8 @@ export class DashboardController {
         tenantId: id,
         page: Number(page),
         pageSize: Number(pageSize),
+        sortProperty,
+        sortOrder,
       },
       accessToken,
     );

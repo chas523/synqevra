@@ -31,7 +31,7 @@ function OAuth2Tabs() {
   }
 
   return (
-    <div className="border-b border-slate-200 dark:border-slate-800 mb-6">
+    <div className="mb-6 border-b border-border">
       <nav className="flex gap-0">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
@@ -42,8 +42,8 @@ function OAuth2Tabs() {
               prefetch={false}
               className={`relative px-5 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
                 isActive
-                  ? "border-[#2a456c] dark:border-blue-400 text-[#2a456c] dark:text-blue-400"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {tab.label}
@@ -58,15 +58,13 @@ function OAuth2Tabs() {
 // ─── OAuth2 clients chips ───────────────────────────────────────────────────
 function OAuth2ClientChips({ clients }: { clients: OAuth2ClientInfo[] }) {
   if (!clients || clients.length === 0)
-    return (
-      <span className="text-slate-400 dark:text-slate-500 text-sm">-</span>
-    );
+    return <span className="text-sm text-muted-foreground">-</span>;
   return (
     <div className="flex flex-wrap gap-1">
       {clients.map((c) => (
         <span
           key={c.id.id}
-          className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-xs font-medium"
+          className="rounded border border-border bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
         >
           {c.title}
         </span>
@@ -108,7 +106,7 @@ export default function DomainsPage() {
       header: "Created time",
       sortable: true,
       render: (item) => (
-        <span className="text-sm text-slate-900 dark:text-slate-100">
+        <span className="text-sm text-foreground">
           {formatTimestamp(item.createdTime)}
         </span>
       ),
@@ -117,7 +115,7 @@ export default function DomainsPage() {
       key: "name",
       header: "Domain name",
       render: (item) => (
-        <span className="text-sm font-medium text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">
+        <span className="cursor-pointer text-sm font-medium text-primary hover:underline">
           {item.name}
         </span>
       ),

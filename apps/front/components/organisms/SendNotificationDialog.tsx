@@ -199,7 +199,6 @@ export const SendNotificationDialog = ({
     setNotificationType("SCRATCH");
     setSelectedTemplateId("");
     setSaveAsTemplate(false);
-    setSaveAsTemplate(false);
     setNewTemplateName("");
     setScheduleLater(false);
     setScheduledTime("");
@@ -217,6 +216,14 @@ export const SendNotificationDialog = ({
   const generatePreview = async () => {
     setIsLoadingPreview(true);
     try {
+      const selectedTargetObjects = recipientGroups
+        .filter((target) => selectedRecipientIds.includes(target.id.id))
+        .map((target) => ({
+          id: target.id,
+          name: target.name,
+          configuration: target.configuration,
+        }));
+
       let previewRequest: any = {
         targets: selectedRecipientIds,
         additionalConfig: {
@@ -269,9 +276,34 @@ export const SendNotificationDialog = ({
         };
       }
 
-      const result =
-        await NotificationService.previewNotification(previewRequest);
-      setPreview(result);
+      try {
+        const result =
+          await NotificationService.previewNotification(previewRequest);
+        setPreview(result);
+      } catch (previewError: any) {
+        const previewMessage =
+          previewError?.response?.data?.message ||
+          previewError?.message ||
+          "Failed to generate preview";
+
+        if (
+          typeof previewMessage === "string" &&
+          previewMessage
+            .toLowerCase()
+            .includes("recipient type not supported") &&
+          selectedTargetObjects.length > 0
+        ) {
+          const retryRequest = {
+            ...previewRequest,
+            targets: selectedTargetObjects,
+          };
+          const retried =
+            await NotificationService.previewNotification(retryRequest);
+          setPreview(retried);
+        } else {
+          throw previewError;
+        }
+      }
     } catch (error: any) {
       console.error("Failed to generate preview:", error);
       toast.error("Failed to generate preview");
@@ -480,9 +512,9 @@ export const SendNotificationDialog = ({
           {/* Stepper */}
           <div className="flex items-center justify-center gap-2 py-2 border-b">
             <StepIndicator step={1} currentStep={currentStep} label="Setup" />
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
             <StepIndicator step={2} currentStep={currentStep} label="Compose" />
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
             <StepIndicator step={3} currentStep={currentStep} label="Review" />
           </div>
 
@@ -638,10 +670,10 @@ function StepIndicator({
                     flex items-center justify-center w-8 h-8 rounded-full
                     ${
                       isCompleted
-                        ? "bg-blue-500 text-white"
+                        ? "bg-primary text-primary-foreground"
                         : isActive
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-gray-500"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
                     }
                 `}
       >
@@ -649,7 +681,7 @@ function StepIndicator({
       </div>
       <span
         className={`text-sm ${
-          isActive ? "font-semibold text-blue-600" : "text-gray-600"
+          isActive ? "font-semibold text-primary" : "text-muted-foreground"
         }`}
       >
         {label}
@@ -688,14 +720,14 @@ function Step1Setup({
     <div className="space-y-6">
       {/* Toggle Mode */}
       <div className="flex justify-center">
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        <div className="flex rounded-lg bg-muted p-1">
           <button
             type="button"
             onClick={() => onNotificationTypeChange("SCRATCH")}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
               notificationType === "SCRATCH"
-                ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Start from scratch
@@ -705,8 +737,8 @@ function Step1Setup({
             onClick={() => onNotificationTypeChange("TEMPLATE")}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
               notificationType === "TEMPLATE"
-                ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "bg-background text-primary shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Use template
@@ -719,7 +751,7 @@ function Step1Setup({
         <div className="space-y-2">
           <Label>Template*</Label>
           {isLoadingTemplates ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading templates...
             </div>
@@ -761,12 +793,12 @@ function Step1Setup({
         </div>
 
         {isLoadingTargets ? (
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading recipient groups...
           </div>
         ) : (
-          <div className="space-y-2 border rounded-lg p-3 max-h-50 overflow-y-auto">
+          <div className="max-h-50 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
             {recipientGroupsArray.map((group: NotificationTarget) => (
               <div key={group.id.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -783,7 +815,7 @@ function Step1Setup({
               </div>
             ))}
             {recipientGroupsArray.length === 0 && (
-              <p className="text-sm text-gray-500 text-center py-2">
+              <p className="py-2 text-center text-sm text-muted-foreground">
                 No recipient groups available. Create one to get started.
               </p>
             )}
@@ -796,12 +828,12 @@ function Step1Setup({
         <div className="space-y-2">
           <Label>Delivery Methods*</Label>
           {isLoadingMethods ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading delivery methods...
             </div>
           ) : (
-            <div className="space-y-2 border rounded-lg p-3">
+            <div className="space-y-2 rounded-lg border border-border p-3">
               {availableMethods.map((method: string) => (
                 <div key={method} className="flex items-center space-x-2">
                   <Checkbox
@@ -822,7 +854,7 @@ function Step1Setup({
       )}
 
       {/* Schedule for later toggle */}
-      <div className="space-y-4 pt-2 border-t">
+      <div className="space-y-4 border-t border-border pt-2">
         <div className="flex items-center gap-2">
           <Checkbox
             id="schedule-later"
@@ -893,12 +925,24 @@ function Step3Review({
   newTemplateName,
   onNewTemplateNameChange,
 }: any) {
-  // If we have a preview from API (especially for templates), use it
-  const recipientsPreview = preview?.recipientsPreview || [];
   const totalRecipients = preview?.totalRecipientsCount || 0;
 
-  // Extract template processing info if available
-  const processedTemplate = preview?.processedTemplates?.WEB; // Assuming WEB for now or first available
+  const processedTemplates = preview?.processedTemplates || {};
+  const processedTemplate =
+    processedTemplates.WEB || Object.values(processedTemplates)[0] || null;
+  const previewIconConfig = processedTemplate?.additionalConfig?.icon;
+  const resolvedIconEnabled =
+    notificationType === "TEMPLATE"
+      ? !!previewIconConfig?.enabled
+      : iconEnabled;
+  const resolvedIconName =
+    notificationType === "TEMPLATE"
+      ? previewIconConfig?.icon || "notifications"
+      : iconName;
+  const resolvedIconColor =
+    notificationType === "TEMPLATE"
+      ? previewIconConfig?.color || "var(--muted-foreground)"
+      : iconColor;
 
   const enabledMethods = Object.entries(deliveryMethods)
     .filter(([_, enabled]) => enabled)
@@ -907,7 +951,7 @@ function Step3Review({
   return (
     <div className="space-y-6">
       {notificationType === "SCRATCH" && (
-        <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border space-y-4">
+        <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
           <div className="flex items-center gap-2">
             <Checkbox
               id="save-template"
@@ -940,43 +984,41 @@ function Step3Review({
 
       {isLoadingPreview ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
         <>
           {/* Stats summary */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="border rounded-lg p-3">
-              <div className="text-sm text-gray-500">Recipients Count</div>
+            <div className="rounded-lg border border-border p-3">
+              <div className="text-sm text-muted-foreground">
+                Recipients Count
+              </div>
               <div className="text-xl font-bold">{totalRecipients}</div>
             </div>
             {/* We can add more stats here based on preview data */}
           </div>
 
           {/* Notification Preview Card */}
-          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
             <h3 className="text-sm font-medium mb-3">Notification Preview</h3>
 
-            <div className="flex gap-4 items-start bg-white dark:bg-gray-800 p-4 rounded-md border">
+            <div className="flex items-start gap-4 rounded-md border border-border bg-background p-4">
               {/* Icon Logic: Use preview data if available, otherwise local state */}
-              {(processedTemplate?.additionalConfig?.icon?.enabled ||
-                (notificationType === "SCRATCH" && iconEnabled)) && (
+              {resolvedIconEnabled && (
                 <div className="shrink-0">
-                  {/* Handle icon rendering logic here - might need to read from processedTemplate if in template mode */}
-                  {notificationType === "TEMPLATE" ? (
-                    <Bell className="h-10 w-10 text-gray-500" /> // Simplified for template preview for now or parse mdi/material from config
-                  ) : iconName.startsWith("mdi:") ? (
+                  {resolvedIconName.startsWith("mdi:") ? (
                     <div
                       style={{
-                        WebkitMaskImage: `url(/tb-assets/mdi/${iconName.substring(4)}.svg)`,
-                        maskImage: `url(/tb-assets/mdi/${iconName.substring(4)}.svg)`,
+                        WebkitMaskImage: `url(/tb-assets/mdi/${resolvedIconName.substring(4)}.svg)`,
+                        maskImage: `url(/tb-assets/mdi/${resolvedIconName.substring(4)}.svg)`,
                         WebkitMaskSize: "contain",
                         maskSize: "contain",
                         WebkitMaskRepeat: "no-repeat",
                         maskRepeat: "no-repeat",
                         WebkitMaskPosition: "center",
                         maskPosition: "center",
-                        backgroundColor: iconColor,
+                        backgroundColor: resolvedIconColor,
                         width: "40px",
                         height: "40px",
                       }}
@@ -984,9 +1026,9 @@ function Step3Review({
                   ) : (
                     <span
                       className="material-icons text-4xl"
-                      style={{ color: iconColor }}
+                      style={{ color: resolvedIconColor }}
                     >
-                      {iconName}
+                      {resolvedIconName}
                     </span>
                   )}
                 </div>
@@ -997,7 +1039,7 @@ function Step3Review({
                 <h4 className="font-semibold text-base mb-1">
                   {processedTemplate?.subject || subject || "(No subject)"}
                 </h4>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {processedTemplate?.body || message || "(No message)"}
                 </p>
 
@@ -1028,9 +1070,9 @@ function Step3Review({
             (notificationType === "SCRATCH" &&
               actionButtonEnabled &&
               actionButtonLink)) && (
-            <div className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900">
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
               <h3 className="text-sm font-medium mb-1">Action Button Link</h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 break-all">
+              <p className="break-all text-xs text-muted-foreground">
                 {processedTemplate?.additionalConfig?.actionButtonConfig
                   ?.link || actionButtonLink}
               </p>
@@ -1042,9 +1084,9 @@ function Step3Review({
             <h3 className="text-sm font-medium">
               Recipients ({selectedRecipients.length})
             </h3>
-            <div className="border rounded-md max-h-50 overflow-y-auto">
+            <div className="max-h-50 overflow-y-auto rounded-md border border-border">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0">
+                <thead className="sticky top-0 bg-muted/50">
                   <tr>
                     <th className="text-left p-2 font-medium">Recipient</th>
                   </tr>
@@ -1069,7 +1111,7 @@ function Step3Review({
               {enabledMethods.map((method) => (
                 <span
                   key={method}
-                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                  className="rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
                 >
                   {method}
                 </span>

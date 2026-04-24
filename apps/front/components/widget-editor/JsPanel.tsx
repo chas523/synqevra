@@ -68,19 +68,17 @@ export function JsPanel() {
   const editorTheme = resolvedTheme === "dark" ? "vs-dark" : "light";
 
   return (
-    <div className="w-full h-full bg-white dark:bg-slate-950 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Javascript
-        </span>
+    <div className="flex h-full w-full flex-col bg-background">
+      <div className="flex items-center justify-between border-b border-border bg-muted px-4 py-2">
+        <span className="text-sm font-medium text-foreground">Javascript</span>
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 hover:bg-gray-200 dark:hover:bg-slate-800"
+          className="h-6 w-6 hover:bg-accent"
           onClick={() => setIsModulesDialogOpen(true)}
           title="Manage Modules"
         >
-          <Settings2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <Settings2 className="h-4 w-4 text-muted-foreground" />
         </Button>
       </div>
 

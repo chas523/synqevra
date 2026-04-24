@@ -32,7 +32,7 @@ const LandingPage = () => {
       formError={error}
       isSubmitted={isSubmitted}
       tooltipContent={tooltipContent}
-      activationTitle="Activation Information"
+      activationTitle="Activation Information: "
       activationDescription="We'll send an activation link to configure your account to the provided email. The process usually takes a few hours."
     />
   );

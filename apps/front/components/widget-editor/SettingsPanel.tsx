@@ -29,19 +29,19 @@ export function SettingsPanel() {
   };
 
   return (
-    <div className="w-full h-full bg-background dark:bg-slate-950 flex flex-col">
+    <div className="flex h-full w-full flex-col bg-background">
       <Tabs.Root
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex flex-col h-full"
       >
-        <Tabs.List className="flex border-b border-border dark:border-gray-800 bg-muted dark:bg-slate-900">
+        <Tabs.List className="flex border-b border-border bg-muted">
           <Tabs.Trigger
             value="settings-form"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "settings-form"
-                ? "text-primary border-b-2 border-primary bg-background dark:bg-slate-950 dark:text-blue-400"
-                : "text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Settings form
@@ -50,8 +50,8 @@ export function SettingsPanel() {
             value="data-key-settings-form"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "data-key-settings-form"
-                ? "text-primary border-b-2 border-primary bg-background dark:bg-slate-950 dark:text-blue-400"
-                : "text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Data key settings form
@@ -60,8 +60,8 @@ export function SettingsPanel() {
             value="widget-settings"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "widget-settings"
-                ? "text-primary border-b-2 border-primary bg-background dark:bg-slate-950 dark:text-blue-400"
-                : "text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Widget settings
@@ -73,8 +73,8 @@ export function SettingsPanel() {
               value="latest-data-key-settings-form"
               className={`px-4 py-2 text-sm font-medium outline-none ${
                 activeTab === "latest-data-key-settings-form"
-                  ? "text-primary border-b-2 border-primary bg-background dark:bg-slate-950 dark:text-blue-400"
-                  : "text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-gray-200"
+                  ? "border-b-2 border-primary bg-background text-primary"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Latest data key settings form

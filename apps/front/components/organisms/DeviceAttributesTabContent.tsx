@@ -250,14 +250,14 @@ export function DeviceAttributesTabContent({
         header: "Last update time",
         render: (row) =>
           row.lastUpdateTs ? new Date(row.lastUpdateTs).toLocaleString() : "-",
-        className: "text-slate-700 whitespace-nowrap w-56",
+        className: "w-56 whitespace-nowrap text-muted-foreground",
       },
       {
         key: "key",
         header: "Key",
         className: "w-56",
         render: (row) => (
-          <div className="truncate font-medium text-slate-900" title={row.key}>
+          <div className="truncate font-medium text-foreground" title={row.key}>
             {row.key}
           </div>
         ),
@@ -272,7 +272,7 @@ export function DeviceAttributesTabContent({
           if (!isLongValue) {
             return (
               <div
-                className="max-w-md break-all whitespace-normal font-mono text-sm text-slate-600"
+                className="max-w-md break-all whitespace-normal font-mono text-sm text-muted-foreground"
                 title={row.value}
               >
                 {row.value}
@@ -285,7 +285,7 @@ export function DeviceAttributesTabContent({
           return (
             <div className="flex max-w-sm flex-col items-start gap-2">
               <div
-                className="font-mono text-sm text-slate-600"
+                className="font-mono text-sm text-muted-foreground"
                 title={row.value}
               >
                 {previewValue}
@@ -366,7 +366,7 @@ export function DeviceAttributesTabContent({
             {canAddAttributes && (
               <Button
                 type="button"
-                className="bg-blue-600 text-white hover:bg-blue-700 whitespace-nowrap"
+                className="whitespace-nowrap bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => setDialogOpen(true)}
               >
                 Add attribute
@@ -489,8 +489,10 @@ export function DeviceAttributesTabContent({
           </DialogHeader>
 
           <div className="space-y-2 py-2">
-            <div className="text-sm font-medium text-slate-600">Full value</div>
-            <pre className="max-h-90 overflow-auto rounded border bg-slate-50 p-3 text-xs font-mono text-slate-700 whitespace-pre-wrap break-all">
+            <div className="text-sm font-medium text-muted-foreground">
+              Full value
+            </div>
+            <pre className="max-h-90 overflow-auto rounded border border-border bg-muted/30 p-3 text-xs font-mono text-foreground whitespace-pre-wrap break-all">
               {selectedDetails}
             </pre>
           </div>

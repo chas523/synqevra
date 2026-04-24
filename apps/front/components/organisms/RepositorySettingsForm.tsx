@@ -107,7 +107,7 @@ export function RepositorySettingsForm({
     >
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
-          <CardTitle className="text-xl font-bold dark:text-white">
+          <CardTitle className="text-xl font-bold text-foreground">
             Repository settings
           </CardTitle>
           {isConfigured && (
@@ -124,7 +124,7 @@ export function RepositorySettingsForm({
               size="sm"
               onClick={onUnlink}
               disabled={isDeleting}
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 h-8"
+              className="h-8 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
             >
               <Link2Off className="h-4 w-4 mr-2" />
               {isDeleting ? "Unlinking..." : "Unlink"}
@@ -136,27 +136,27 @@ export function RepositorySettingsForm({
       <CardContent className="space-y-6">
         {/* Repository URL */}
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground dark:text-slate-400">
+          <Label className="text-xs text-muted-foreground">
             Repository URL*
           </Label>
           <Input
             value={repositoryUri}
             onChange={(e) => setRepositoryUri(e.target.value)}
             placeholder="Repository URL*"
-            className="dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0 focus-visible:border-primary"
+            className="rounded-none border-0 border-b border-border bg-muted/30 text-foreground focus-visible:ring-0 focus-visible:border-primary"
           />
         </div>
 
         {/* Default branch */}
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground dark:text-slate-400">
+          <Label className="text-xs text-muted-foreground">
             Default branch name
           </Label>
           <Input
             value={defaultBranch}
             onChange={(e) => setDefaultBranch(e.target.value)}
             placeholder="Default branch name"
-            className="dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0 focus-visible:border-primary"
+            className="rounded-none border-0 border-b border-border bg-muted/30 text-foreground focus-visible:ring-0 focus-visible:border-primary"
           />
         </div>
 
@@ -170,7 +170,7 @@ export function RepositorySettingsForm({
             />
             <Label
               htmlFor="read-only"
-              className="cursor-pointer dark:text-white"
+              className="cursor-pointer text-foreground"
             >
               Read-only
             </Label>
@@ -185,7 +185,7 @@ export function RepositorySettingsForm({
             />
             <Label
               htmlFor="show-merge-commits"
-              className="cursor-pointer dark:text-white"
+              className="cursor-pointer text-foreground"
             >
               Show merge commits
             </Label>
@@ -193,14 +193,14 @@ export function RepositorySettingsForm({
         </div>
 
         {/* Authentication settings fieldset */}
-        <fieldset className="border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-4">
-          <legend className="text-sm text-muted-foreground dark:text-slate-400 px-2">
+        <fieldset className="space-y-4 rounded-md border border-border p-4">
+          <legend className="px-2 text-sm text-muted-foreground">
             Authentication settings
           </legend>
 
           {/* Auth method dropdown */}
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground dark:text-slate-400">
+            <Label className="text-xs text-muted-foreground">
               Authentication method*
             </Label>
             <Select
@@ -209,7 +209,7 @@ export function RepositorySettingsForm({
                 setAuthMethod(val as "USERNAME_PASSWORD" | "PRIVATE_KEY")
               }
             >
-              <SelectTrigger className="w-full dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0">
+              <SelectTrigger className="w-full rounded-none border-0 border-b border-border bg-muted/30 text-foreground focus-visible:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -229,7 +229,7 @@ export function RepositorySettingsForm({
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Username"
-                  className="dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0 focus-visible:border-primary"
+                  className="rounded-none border-0 border-b border-border bg-muted/30 text-foreground focus-visible:ring-0 focus-visible:border-primary"
                 />
               </div>
 
@@ -240,7 +240,7 @@ export function RepositorySettingsForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password / access token"
-                  className="dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0 focus-visible:border-primary pr-10"
+                  className="rounded-none border-0 border-b border-border bg-muted/30 pr-10 text-foreground focus-visible:ring-0 focus-visible:border-primary"
                 />
                 <button
                   type="button"
@@ -255,13 +255,13 @@ export function RepositorySettingsForm({
                 </button>
               </div>
 
-              <p className="text-xs text-muted-foreground dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 GitHub users <strong>must</strong> use access{" "}
                 <a
                   href="https://github.com/settings/tokens"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary underline hover:text-primary/80 dark:text-blue-400"
+                  className="text-primary underline hover:text-primary/80"
                 >
                   tokens
                 </a>{" "}
@@ -272,7 +272,7 @@ export function RepositorySettingsForm({
             <>
               {/* Private key file dropzone */}
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground dark:text-slate-400">
+                <Label className="text-xs text-muted-foreground">
                   Private key*
                 </Label>
                 <FileDropzone
@@ -289,7 +289,7 @@ export function RepositorySettingsForm({
                   value={privateKeyPassword}
                   onChange={(e) => setPrivateKeyPassword(e.target.value)}
                   placeholder="Passphrase"
-                  className="dark:text-white border-0 border-b rounded-none bg-slate-50 dark:bg-slate-800/50 focus-visible:ring-0 focus-visible:border-primary pr-10"
+                  className="rounded-none border-0 border-b border-border bg-muted/30 pr-10 text-foreground focus-visible:ring-0 focus-visible:border-primary"
                 />
                 <button
                   type="button"

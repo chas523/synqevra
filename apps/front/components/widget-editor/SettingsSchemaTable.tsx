@@ -127,9 +127,9 @@ export function SettingsSchemaTable({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-auto border border-border dark:border-gray-800 rounded-md">
+      <div className="flex-1 overflow-auto rounded-md border border-border">
         <table className="w-full text-sm text-left">
-          <thead className="bg-muted dark:bg-slate-900 text-muted-foreground dark:text-gray-400 font-medium border-b border-border dark:border-gray-800 sticky top-0">
+          <thead className="sticky top-0 border-b border-border bg-muted font-medium text-muted-foreground">
             <tr>
               <th className="px-4 py-2">Id</th>
               <th className="px-4 py-2">Name</th>
@@ -141,38 +141,33 @@ export function SettingsSchemaTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50 dark:divide-gray-800">
+          <tbody className="divide-y divide-border/50">
             {properties.length === 0 && (
               <tr>
                 <td
                   colSpan={4}
-                  className="px-4 py-8 text-center text-muted-foreground dark:text-gray-500"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   No properties configured
                 </td>
               </tr>
             )}
             {properties.map((prop) => (
-              <tr
-                key={prop.id}
-                className="hover:bg-muted dark:hover:bg-slate-900 text-foreground dark:text-gray-100"
-              >
+              <tr key={prop.id} className="text-foreground hover:bg-muted">
                 <td className="px-4 py-2">{prop.id}</td>
                 <td className="px-4 py-2">{prop.name}</td>
-                <td className="px-4 py-2 text-muted-foreground dark:text-gray-400">
-                  {prop.type}
-                </td>
+                <td className="px-4 py-2 text-muted-foreground">{prop.type}</td>
                 <td className="px-4 py-2 text-center flex items-center justify-center gap-2">
                   <button
                     onClick={() => openEditDialog(prop)}
-                    className="text-muted-foreground hover:text-primary dark:text-gray-500 dark:hover:text-blue-400"
+                    className="text-muted-foreground hover:text-primary"
                     title="Edit"
                   >
                     <Edit size={16} />
                   </button>
                   <button
                     onClick={() => handleDelete(prop.id)}
-                    className="text-muted-foreground hover:text-destructive dark:text-gray-500 dark:hover:text-red-400"
+                    className="text-muted-foreground hover:text-destructive"
                     title="Delete"
                   >
                     <Trash2 size={16} />
@@ -187,7 +182,7 @@ export function SettingsSchemaTable({
       <div className="pt-4">
         <Button
           onClick={openAddDialog}
-          className="bg-background dark:bg-slate-950 border border-border dark:border-gray-800 text-foreground/80 dark:text-gray-300 hover:bg-muted dark:hover:bg-slate-900"
+          className="border border-border bg-background text-foreground/80 hover:bg-muted"
         >
           Add property
         </Button>
