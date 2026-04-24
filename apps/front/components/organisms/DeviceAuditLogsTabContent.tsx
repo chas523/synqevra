@@ -203,10 +203,10 @@ export function DeviceAuditLogsTabContent({
           </DialogHeader>
 
           <div className="space-y-2 py-2">
-            <div className="text-sm font-medium text-slate-600">
+            <div className="text-sm font-medium text-muted-foreground">
               Action data
             </div>
-            <pre className="max-h-90 overflow-auto rounded border bg-slate-50 p-3 text-xs font-mono text-slate-700">
+            <pre className="max-h-90 overflow-auto rounded border border-border bg-muted/30 p-3 text-xs font-mono text-foreground">
               {selectedDetails}
             </pre>
           </div>

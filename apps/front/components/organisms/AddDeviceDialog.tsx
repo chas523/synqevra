@@ -108,8 +108,8 @@ export function AddDeviceDialog({
                     onClick={() => toggleParameter(parameter.key)}
                     className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
                       isSelected
-                        ? "bg-blue-100 text-blue-700 border border-blue-200"
-                        : "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200"
+                        ? "border border-primary/30 bg-primary/10 text-primary"
+                        : "border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
                   >
                     {parameter.label}
@@ -118,7 +118,7 @@ export function AddDeviceDialog({
               })}
             </div>
             {formData.parameters && formData.parameters.length > 0 && (
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-muted-foreground">
                 Selected: {formData.parameters.join(", ")}
               </div>
             )}
@@ -127,7 +127,7 @@ export function AddDeviceDialog({
           <div className="flex justify-end pt-4">
             <LoadingButton
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               isLoading={isLoading}
               textBeforeClick="Create Device"
               textAfterClick="Creating..."

@@ -23,24 +23,24 @@ const Input = ({
 
   const variantStyles = {
     default: [
-      "border-gray-300",
+      "border-border",
+      "bg-background",
+      "text-foreground",
+      "focus:ring-ring",
+      "focus:border-ring",
       "dark:border-gray-600",
-      "bg-white",
       "dark:bg-gray-800",
-      "text-gray-900",
       "dark:text-gray-100",
-      "focus:ring-blue-500",
-      "focus:border-blue-500",
     ],
     error: [
-      "border-red-300",
+      "border-destructive",
+      "bg-background",
+      "text-foreground",
+      "focus:ring-destructive",
+      "focus:border-destructive",
       "dark:border-red-600",
-      "bg-white",
       "dark:bg-gray-800",
-      "text-gray-900",
       "dark:text-gray-100",
-      "focus:ring-red-500",
-      "focus:border-red-500",
     ],
   };
 

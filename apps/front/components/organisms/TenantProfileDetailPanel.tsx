@@ -63,8 +63,8 @@ function EditableField({
   disabled?: boolean;
 }) {
   return (
-    <div className="py-3 border-b border-slate-200 dark:border-slate-700/50">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+    <div className="py-3 border-b border-border">
+      <label className="mb-1.5 block text-xs text-muted-foreground">
         {label}
       </label>
       <input
@@ -73,7 +73,7 @@ function EditableField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
         disabled={disabled}
-        className={`w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
       />
     </div>
   );
@@ -92,15 +92,15 @@ function EditableTextarea({
   rows?: number;
 }) {
   return (
-    <div className="py-3 border-b border-slate-200 dark:border-slate-700/50">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+    <div className="py-3 border-b border-border">
+      <label className="mb-1.5 block text-xs text-muted-foreground">
         {label}
       </label>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none"
+        className="w-full resize-none rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
       />
     </div>
   );
@@ -118,14 +118,14 @@ function EditableNumberField({
 }) {
   return (
     <div className="mb-4">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+      <label className="mb-1 block text-xs text-muted-foreground">
         {label}
       </label>
       <input
         type="number"
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-        className="w-full text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+        className="w-full rounded border border-border bg-muted/30 px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
       />
     </div>
   );
@@ -145,7 +145,7 @@ function EditableTextField({
 }) {
   return (
     <div className="mb-4">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+      <label className="mb-1 block text-xs text-muted-foreground">
         {label}
       </label>
       <input
@@ -153,7 +153,7 @@ function EditableTextField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || "Not set"}
-        className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500"
+        className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50"
       />
     </div>
   );
@@ -168,13 +168,11 @@ function ReadOnlyField({
   value: React.ReactNode;
 }) {
   return (
-    <div className="py-3 border-b border-slate-200 dark:border-slate-700/50">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+    <div className="py-3 border-b border-border">
+      <label className="mb-1.5 block text-xs text-muted-foreground">
         {label}
       </label>
-      <div className="text-sm text-slate-900 dark:text-white">
-        {value || "-"}
-      </div>
+      <div className="text-sm text-foreground">{value || "-"}</div>
     </div>
   );
 }
@@ -193,10 +191,10 @@ function ConfigField({
       : value.toString();
   return (
     <div className="mb-4">
-      <label className="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+      <label className="mb-1 block text-xs text-muted-foreground">
         {label}
       </label>
-      <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded border border-slate-200 dark:border-slate-700">
+      <div className="rounded border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
         {displayValue}
       </div>
     </div>
@@ -216,11 +214,11 @@ function ConfigSection({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg mb-4">
+    <div className="mb-4 rounded-lg border border-border">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+        className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
       >
         <span className="text-xs uppercase tracking-wider font-semibold">
           {title}
@@ -232,9 +230,7 @@ function ConfigSection({
         )}
       </button>
       {isExpanded && (
-        <div className="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-700">
-          {children}
-        </div>
+        <div className="border-t border-border px-4 pb-4 pt-2">{children}</div>
       )}
     </div>
   );

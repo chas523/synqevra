@@ -140,7 +140,7 @@ export function IconPickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[600px] flex flex-col">
+      <DialogContent className="sm:max-w-150 max-h-150 flex flex-col">
         <DialogHeader>
           <DialogTitle>Icons</DialogTitle>
         </DialogHeader>
@@ -170,12 +170,12 @@ export function IconPickerDialog({
                   onClick={() => setSelectedIcon(icon)}
                   className={`
                                         flex items-center justify-center p-3 rounded-md
-                                        hover:bg-gray-100 dark:hover:bg-gray-800
+                                        hover:bg-muted dark:hover:bg-gray-800
                                         transition-colors cursor-pointer
                                         ${
                                           selectedIcon === icon
                                             ? "bg-blue-100 dark:bg-blue-900 ring-2 ring-blue-500"
-                                            : "bg-gray-50 dark:bg-gray-900"
+                                            : "bg-muted dark:bg-gray-900"
                                         }
                                     `}
                   title={icon}

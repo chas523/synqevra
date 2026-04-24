@@ -2702,9 +2702,11 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     id: string,
     page: number,
     pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): Promise<GetTenantUsersResponse> {
     try {
-      const url = `${this.THINGSBOARD_API_URL}/tenant/${id}/users?pageSize=${pageSize}&page=${page}&sortProperty=createdTime&sortOrder=DESC`;
+      const url = `${this.THINGSBOARD_API_URL}/tenant/${id}/users?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`;
       const response = await firstValueFrom(
         this.httpService.get<GetTenantUsersResponse>(url, {
           headers: { Authorization: `Bearer ${sysadminAccessToken}` },
@@ -2725,6 +2727,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     tenantId: string,
     page: number,
     pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): Promise<GetTenantDevicesResponse> {
     try {
       const tenantAdminUserId = await this.getTenantAdminUserId(
@@ -2746,6 +2750,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
         tenantId,
         page,
         pageSize,
+        sortProperty,
+        sortOrder,
       );
     } catch (error) {
       this.logger.error(
@@ -2809,6 +2815,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     tenantId: string,
     page: number,
     pageSize: number,
+    sortProperty = 'createdTime',
+    sortOrder: 'ASC' | 'DESC' = 'DESC',
   ): Promise<GetTenantDevicesResponse> {
     const url = `${this.THINGSBOARD_API_URL}/tenant/devices`;
 
@@ -2824,8 +2832,8 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
           params: {
             pageSize,
             page,
-            sortProperty: 'createdTime',
-            sortOrder: 'DESC',
+            sortProperty,
+            sortOrder,
           },
         }),
       );

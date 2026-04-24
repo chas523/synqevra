@@ -49,19 +49,19 @@ export function HtmlPanel() {
   const editorTheme = resolvedTheme === "dark" ? "vs-dark" : "light";
 
   return (
-    <div className="w-full h-full bg-white dark:bg-slate-950 flex flex-col">
+    <div className="flex h-full w-full flex-col bg-background">
       <Tabs.Root
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex flex-col h-full"
       >
-        <Tabs.List className="flex border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-slate-900">
+        <Tabs.List className="flex border-b border-border bg-muted">
           <Tabs.Trigger
             value="resources"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "resources"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-white dark:bg-slate-950 dark:text-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Resources
@@ -70,8 +70,8 @@ export function HtmlPanel() {
             value="html"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "html"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-white dark:bg-slate-950 dark:text-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             HTML
@@ -80,8 +80,8 @@ export function HtmlPanel() {
             value="css"
             className={`px-4 py-2 text-sm font-medium outline-none ${
               activeTab === "css"
-                ? "text-blue-600 border-b-2 border-blue-600 bg-white dark:bg-slate-950 dark:text-blue-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                ? "border-b-2 border-primary bg-background text-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             CSS
@@ -189,12 +189,8 @@ function ResourcesTab() {
   const options = filteredResources.map((item) => (
     <Combobox.Option value={item.link || ""} key={item.id?.id}>
       <div className="flex flex-col">
-        <span className="font-medium text-gray-900 dark:text-gray-100">
-          {item.title}
-        </span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          {item.link}
-        </span>
+        <span className="font-medium text-foreground">{item.title}</span>
+        <span className="text-xs text-muted-foreground">{item.link}</span>
       </div>
     </Combobox.Option>
   ));
@@ -226,25 +222,25 @@ function ResourcesTab() {
                   searchTerm && (
                     <X
                       size={16}
-                      className="cursor-pointer text-gray-400"
+                      className="cursor-pointer text-muted-foreground"
                       onClick={() => setSearchTerm("")}
                     />
                   )
                 }
                 classNames={{
-                  label: "text-gray-700 dark:text-gray-300",
+                  label: "text-foreground",
                   input:
-                    "bg-white dark:bg-slate-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500",
+                    "bg-background border-border text-foreground placeholder:text-muted-foreground",
                 }}
               />
             </Combobox.Target>
 
-            <Combobox.Dropdown className="bg-white dark:bg-slate-900 border-gray-200 dark:border-gray-800">
+            <Combobox.Dropdown className="border-border bg-background">
               <Combobox.Options className="overflow-y-auto">
                 {options.length > 0 ? (
                   options
                 ) : (
-                  <Combobox.Empty className="text-gray-500 dark:text-gray-400">
+                  <Combobox.Empty className="text-muted-foreground">
                     No results found
                   </Combobox.Empty>
                 )}
@@ -258,52 +254,49 @@ function ResourcesTab() {
           onChange={(e) => setIsExtension(e.currentTarget.checked)}
           className="mb-2"
           classNames={{
-            label: "text-gray-700 dark:text-gray-300",
-            input: "dark:bg-slate-900 dark:border-gray-700",
+            label: "text-foreground",
+            input: "border-border data-[checked=true]:border-primary",
           }}
         />
         <Button
           onClick={() => handleAddResource(searchTerm, isExtension)}
           disabled={!searchTerm}
-          className="mb-px bg-blue-600 hover:bg-blue-700 text-white"
+          className="mb-px bg-primary text-primary-foreground hover:bg-primary/90"
         >
           Add
         </Button>
       </div>
 
-      <div className="border border-gray-200 dark:border-gray-800 rounded-md">
+      <div className="rounded-md border border-border">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-200 dark:border-gray-800">
+          <thead className="border-b border-border bg-muted font-medium text-muted-foreground">
             <tr>
               <th className="px-4 py-2">URL</th>
               <th className="px-4 py-2 w-24">Type</th>
               <th className="px-4 py-2 w-16"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+          <tbody className="divide-y divide-border/50">
             {existingResources.length === 0 && (
               <tr>
                 <td
                   colSpan={3}
-                  className="px-4 py-8 text-center text-gray-400 dark:text-gray-500"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   No resources added
                 </td>
               </tr>
             )}
             {existingResources.map((res: any, index: number) => (
-              <tr
-                key={index}
-                className="hover:bg-gray-50 dark:hover:bg-slate-900 text-gray-900 dark:text-gray-100"
-              >
+              <tr key={index} className="text-foreground hover:bg-muted">
                 <td className="px-4 py-2 break-all">{res.url}</td>
-                <td className="px-4 py-2 text-gray-500 dark:text-gray-400">
+                <td className="px-4 py-2 text-muted-foreground">
                   {res.isModule ? "Module" : "Extension"}
                 </td>
                 <td className="px-4 py-2 text-right">
                   <button
                     onClick={() => removeResource(index)}
-                    className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <X size={16} />
                   </button>

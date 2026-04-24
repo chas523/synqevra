@@ -87,6 +87,8 @@ const LandingTemplate = ({
             src={backgroundImage}
             alt="Healthcare background"
             fill
+            priority
+            sizes="100vw"
             className="object-cover"
           />
           {/* Dark overlay for better form readability */}

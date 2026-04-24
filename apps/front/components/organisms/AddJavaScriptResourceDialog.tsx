@@ -88,7 +88,7 @@ export const AddJavaScriptResourceDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Add JavaScript library</DialogTitle>
           <div className="flex items-center gap-2">

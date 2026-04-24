@@ -1,5 +1,5 @@
-import { Heading } from "../atoms";
 import HeaderWithText from "../molecules/HeaderWithText";
+import { DeviceFlowGraphic } from "../molecules/DeviceFlowGraphic";
 import type { DeviceFormProps } from "../organisms/DeviceForm";
 import DeviceForm from "../organisms/DeviceForm";
 import type { DeviceListProps } from "../organisms/DeviceList";
@@ -30,11 +30,7 @@ const DeviceManagementTemplate = ({
           miniText="Create IoT devices and assign them to patients. You should set accurate thresholds for upcoming observations."
         />
 
-        <img
-          src="/device-flow.svg"
-          alt="Device Flow Animation"
-          className="w-full h-auto mb-2"
-        />
+        <DeviceFlowGraphic className="mb-2" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DeviceForm {...deviceFormProps} />

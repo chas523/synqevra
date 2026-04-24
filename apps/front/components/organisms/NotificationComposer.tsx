@@ -70,7 +70,7 @@ export function NotificationComposer({
             value={message}
             onChange={(e) => onMessageChange(e.target.value)}
             placeholder="Enter message"
-            className="min-h-[100px]"
+            className="min-h-25"
           />
         </div>
 
@@ -96,7 +96,7 @@ export function NotificationComposer({
                 <button
                   type="button"
                   onClick={onIconClick}
-                  className="flex items-center justify-center w-12 h-12 rounded border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  className="flex h-12 w-12 items-center justify-center rounded border border-border transition-colors hover:bg-muted/50"
                 >
                   {iconName.startsWith("mdi:") ? (
                     <div

@@ -14,6 +14,12 @@ export const SORT_OPTIONS = {
     { value: "updatedAt-desc", label: "Recently Updated" },
     { value: "updatedAt-asc", label: "Least Updated" },
   ],
+  TENANT_USERS: [
+    { value: "createdTime-desc", label: "Newest First" },
+    { value: "createdTime-asc", label: "Oldest First" },
+    { value: "email-asc", label: "Email A-Z" },
+    { value: "email-desc", label: "Email Z-A" },
+  ],
   TENANTS: [
     { value: "createdTime-desc", label: "Newest First" },
     { value: "createdTime-asc", label: "Oldest First" },

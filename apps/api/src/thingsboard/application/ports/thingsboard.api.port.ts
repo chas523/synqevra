@@ -475,12 +475,16 @@ export abstract class ThingsboardApiPort {
     id: string,
     page: number,
     pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
   ): Promise<GetTenantUsersResponse>;
   abstract fetchTenantDevices(
     sysadminAccessToken: string,
     tenantId: string,
     page: number,
     pageSize: number,
+    sortProperty?: string,
+    sortOrder?: 'ASC' | 'DESC',
   ): Promise<GetTenantDevicesResponse>;
   abstract fetchNotifications(
     sysAdminAccessToken: string,

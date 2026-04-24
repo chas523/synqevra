@@ -32,7 +32,7 @@ export const SortSelect = ({
       <Text variant="label">{label}</Text>
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger className={className}>
-          <SelectValue />
+          <SelectValue placeholder="Select sort" />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

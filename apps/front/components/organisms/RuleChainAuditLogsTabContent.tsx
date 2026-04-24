@@ -138,7 +138,7 @@ export function RuleChainAuditLogsTabContent({
       return data?.data || [];
     }
 
-    return (data?.data || []).filter((row) => {
+    return (data?.data || []).filter((row: RuleChainAuditLog) => {
       const action = String(row.actionType || "").toLowerCase();
       const status = String(row.actionStatus || "").toLowerCase();
       const user = String(row.userName || "").toLowerCase();

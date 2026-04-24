@@ -140,29 +140,29 @@ export function TenantProfilesListPage({
                       e.key === "Enter" && handleProfileClick(profile)
                     }
                     className={cn(
-                      "p-4 border rounded-lg cursor-pointer transition-colors",
+                      "cursor-pointer rounded-lg border border-border p-4 transition-colors",
                       isSelected
-                        ? "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-300 dark:border-cyan-700"
-                        : "hover:bg-gray-50 dark:hover:bg-slate-800/50",
+                        ? "border-accent bg-accent/50"
+                        : "hover:bg-muted/50",
                     )}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
-                        <FileText className="h-5 w-5 text-gray-400 mt-1 shrink-0" />
+                        <FileText className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-gray-900 dark:text-white">
+                            <h3 className="font-medium text-foreground">
                               {profile.name}
                             </h3>
                           </div>
 
                           {profile.description && (
-                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 line-clamp-2">
+                            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                               {profile.description}
                             </p>
                           )}
 
-                          <div className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+                          <div className="mt-2 text-sm text-muted-foreground">
                             Created: {formatTenantDate(profile.createdTime)}
                           </div>
                         </div>
@@ -170,15 +170,15 @@ export function TenantProfilesListPage({
 
                       <div className="ml-4 flex items-center gap-4">
                         <div className="flex flex-col items-end">
-                          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-1">
+                          <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Default
                           </span>
                           <div
                             className={cn(
-                              "h-5 w-5 rounded border flex items-center justify-center transition-colors",
+                              "flex h-5 w-5 items-center justify-center rounded border transition-colors",
                               profile.default
-                                ? "bg-cyan-500 border-cyan-500 text-white"
-                                : "border-slate-300 dark:border-slate-600 bg-transparent",
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-border bg-transparent text-muted-foreground",
                             )}
                           >
                             {profile.default && (

@@ -153,7 +153,7 @@ export function AddRelationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] overflow-visible">
+      <DialogContent className="sm:max-w-125 overflow-visible">
         <DialogHeader>
           <DialogTitle>Add relation</DialogTitle>
           <DialogDescription>
@@ -175,7 +175,7 @@ export function AddRelationDialog({
 
           <div className="space-y-2 relative" ref={searchRef}>
             <Label>To entity (Tenants)*</Label>
-            <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-[42px] bg-background">
+            <div className="flex flex-wrap gap-2 p-2 border rounded-md min-h-10.5 bg-background">
               {selectedTenants.map((tenant) => (
                 <Badge
                   key={tenant.id.id}
@@ -194,7 +194,7 @@ export function AddRelationDialog({
                 </Badge>
               ))}
               <input
-                className="flex-1 bg-transparent outline-none min-w-[120px] text-sm"
+                className="flex-1 bg-transparent outline-none min-w-30 text-sm"
                 placeholder={
                   selectedTenants.length === 0 ? "Select tenants..." : ""
                 }
@@ -208,7 +208,7 @@ export function AddRelationDialog({
 
             {/* Dropdown Results */}
             {showResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-popover text-popover-foreground border rounded-md shadow-md max-h-[200px] overflow-auto py-1">
+              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-popover text-popover-foreground border rounded-md shadow-md max-h-50 overflow-auto py-1">
                 {searchResults.map((tenant) => (
                   <button
                     key={tenant.id.id}
@@ -243,7 +243,7 @@ export function AddRelationDialog({
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
               placeholder='{"key": "value"}'
-              className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300 font-mono"
+              className="flex min-h-20 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300 font-mono"
               rows={3}
             />
           </div>

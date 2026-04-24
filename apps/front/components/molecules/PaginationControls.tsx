@@ -21,13 +21,13 @@ const PaginationControls = ({
 
   return (
     <div
-      className={`flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10 ${className}`}
+      className={`flex items-center justify-between border-t border-border pt-4 ${className}`}
     >
       <button
         type="button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-all text-sm"
+        className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         <ChevronLeft className="w-4 h-4" />
         Previous
@@ -41,8 +41,8 @@ const PaginationControls = ({
             onClick={() => onPageChange(page)}
             className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
               currentPage === page
-                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
             }`}
           >
             {page + 1}
@@ -54,7 +54,7 @@ const PaginationControls = ({
         type="button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages - 1}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-all text-sm"
+        className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
         Next
         <ChevronRight className="w-4 h-4" />

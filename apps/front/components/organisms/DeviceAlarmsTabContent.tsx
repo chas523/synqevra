@@ -142,7 +142,9 @@ export function DeviceAlarmsTabContent({
             <Badge
               variant="outline"
               className={
-                isCleared ? "text-slate-500" : "text-amber-600 border-amber-200"
+                isCleared
+                  ? "border-border text-muted-foreground"
+                  : "border-amber-200 text-amber-600"
               }
             >
               {alarm.status}

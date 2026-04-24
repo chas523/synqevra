@@ -62,15 +62,15 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
   const handleNextPageUsers = () =>
     handleNextPage(
       usersOptions,
-      !!usersData?.pagination.hasNext,
-      usersData?.pagination.nextCursor,
+      !!usersData?.pagination?.hasNext,
+      usersData?.pagination?.nextCursor,
     );
 
   const handlePrevPageUsers = () =>
     handlePrevPage(
       usersOptions,
-      !!usersData?.pagination.hasPrev,
-      usersData?.pagination.prevCursor,
+      !!usersData?.pagination?.hasPrev,
+      usersData?.pagination?.prevCursor,
     );
 
   if (tenantLoading) {
@@ -81,8 +81,9 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
     return (
       <div className="space-y-4">
         <Button
+          size="lg"
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="cursor-pointer gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Tenants
@@ -102,8 +103,9 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
       {/* Header */}
       <div>
         <Button
+          size="lg"
           onClick={() => router.back()}
-          className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          className="mb-4 cursor-pointer gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Tenants
@@ -171,7 +173,7 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
           <FilterBar
             sortValue={`${usersOptions.sortBy}-${usersOptions.sortOrder}`}
             onSortChange={handleSortChangeUsers}
-            sortOptions={SORT_OPTIONS.ACTIVE_USERS}
+            sortOptions={SORT_OPTIONS.TENANT_USERS}
             showStatusFilter={false}
           />
 
@@ -200,10 +202,10 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
 
           {usersData && (
             <Pagination
-              hasNext={usersData.pagination.hasNext}
-              hasPrev={usersData.pagination.hasPrev}
-              currentCount={usersData.data.length}
-              total={usersData.total}
+              hasNext={usersData?.pagination?.hasNext ?? false}
+              hasPrev={usersData?.pagination?.hasPrev ?? false}
+              currentCount={usersData?.data?.length ?? 0}
+              total={usersData?.total ?? 0}
               isLoading={usersLoading}
               onNext={handleNextPageUsers}
               onPrev={handlePrevPageUsers}

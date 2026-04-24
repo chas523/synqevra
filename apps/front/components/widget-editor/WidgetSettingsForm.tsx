@@ -79,7 +79,7 @@ export function WidgetSettingsForm() {
       <div className="space-y-2">
         <Label>Image preview</Label>
         <div className="flex gap-4 h-32">
-          <div className="w-32 h-32 border border-gray-200 dark:border-gray-800 rounded-md flex items-center justify-center bg-gray-50 dark:bg-slate-900 overflow-hidden relative group">
+          <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
             {widgetType.image ? (
               <>
                 <img
@@ -101,14 +101,16 @@ export function WidgetSettingsForm() {
                 />
                 <button
                   onClick={clearImage}
-                  className="absolute top-1 right-1 p-1 bg-white/80 dark:bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white dark:hover:bg-black text-gray-500 hover:text-red-500"
+                  className="absolute right-1 top-1 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-background hover:text-destructive group-hover:opacity-100"
                 >
                   <X size={14} />
                 </button>
               </>
             ) : (
               <div className="text-center p-2">
-                <span className="text-xs text-gray-400">No image selected</span>
+                <span className="text-xs text-muted-foreground">
+                  No image selected
+                </span>
               </div>
             )}
           </div>
@@ -116,7 +118,7 @@ export function WidgetSettingsForm() {
           <div className="flex-1 grid grid-cols-2 gap-4">
             <Button
               variant="outline"
-              className="h-full flex flex-col gap-2 items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 border-dashed"
+              className="h-full flex flex-col items-center justify-center gap-2 border-dashed text-primary hover:bg-primary/10 hover:text-primary/90"
               onClick={() => setIsGalleryOpen(true)}
             >
               <ImageIcon size={24} />
@@ -164,28 +166,28 @@ export function WidgetSettingsForm() {
         </div>
       </div>
 
-      <div className="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-800">
+      <div className="space-y-2 border-t border-border/50 pt-4">
         <Label>Settings form selector</Label>
-        <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-md border border-gray-200 dark:border-gray-800 text-sm text-gray-500">
+        <div className="rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
           Default
         </div>
       </div>
 
       <div className="space-y-2">
         <Label>Data key settings form selector</Label>
-        <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-md border border-gray-200 dark:border-gray-800 text-sm text-gray-500">
+        <div className="rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
           Default
         </div>
       </div>
 
-      <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+      <div className="space-y-4 border-t border-border/50 pt-4">
         <div className="flex items-center space-x-2">
           <Switch id="basic-mode" />
           <Label htmlFor="basic-mode">Has basic mode</Label>
         </div>
         <div className="space-y-2 opacity-50 pointer-events-none">
           <Label>Basic mode form selector</Label>
-          <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-md border border-gray-200 dark:border-gray-800 text-sm text-gray-500">
+          <div className="rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
             Default
           </div>
         </div>

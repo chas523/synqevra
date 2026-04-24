@@ -133,7 +133,7 @@ export function CreateSingleEntityVersionModal({
   if (result) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px] p-6 text-center dark:bg-slate-900 border-slate-800">
+        <DialogContent className="sm:max-w-100 p-6 text-center dark:bg-slate-900 border-slate-800">
           <DialogHeader>
             <DialogTitle className="dark:text-white text-xl mx-auto mb-4">
               Version Details
@@ -181,7 +181,7 @@ export function CreateSingleEntityVersionModal({
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-sm font-medium text-muted-foreground dark:text-slate-400">
               Branch*
             </label>
             <Select
@@ -189,7 +189,7 @@ export function CreateSingleEntityVersionModal({
               onValueChange={setBranch}
               disabled={isCreating || isPolling}
             >
-              <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-800/50 dark:text-white">
+              <SelectTrigger className="w-full bg-muted dark:bg-slate-800/50 dark:text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -203,13 +203,13 @@ export function CreateSingleEntityVersionModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <label className="text-sm font-medium text-muted-foreground dark:text-slate-400">
               Version name*
             </label>
             <Input
               value={versionName}
               onChange={(e) => setVersionName(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-800/50 dark:text-white border-slate-200 dark:border-slate-800"
+              className="bg-muted dark:bg-slate-800/50 dark:text-white border-border dark:border-slate-800"
               disabled={isCreating || isPolling}
               placeholder="Enter version name"
             />
@@ -276,7 +276,7 @@ export function CreateSingleEntityVersionModal({
           <Button
             onClick={handleCreate}
             disabled={isCreating || isPolling || !versionName.trim()}
-            className="bg-[#2a456c] hover:bg-[#1a355c] text-white border-0"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
           >
             {(isCreating || isPolling) && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

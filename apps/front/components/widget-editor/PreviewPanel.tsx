@@ -8,16 +8,16 @@ export function PreviewPanel() {
   if (!widgetType) return null;
 
   return (
-    <div className="w-full h-full flex flex-col border border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 overflow-hidden">
-      <div className="p-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-slate-900 flex justify-between items-center">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+    <div className="flex h-full w-full flex-col overflow-hidden border border-border bg-background">
+      <div className="flex items-center justify-between border-b border-border bg-muted p-3">
+        <h2 className="text-sm font-semibold text-foreground/70">
           Widget Preview
         </h2>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gray-100 dark:bg-slate-900/50">
-        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-auto min-h-75">
-          <div className="aspect-4/3 w-full bg-gray-50 dark:bg-slate-900 flex items-center justify-center relative overflow-hidden group">
+      <div className="flex flex-1 flex-col items-center justify-center bg-muted/50 p-6">
+        <div className="flex h-auto min-h-75 w-full max-w-md flex-col overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+          <div className="group relative flex aspect-4/3 w-full items-center justify-center overflow-hidden bg-muted">
             {widgetType.image ? (
               <img
                 src={getImagePreviewUrl(widgetType.image)}
@@ -31,25 +31,25 @@ export function PreviewPanel() {
                 }}
               />
             ) : (
-              <ImageOff className="text-gray-300 h-16 w-16" />
+              <ImageOff className="text-muted-foreground h-16 w-16" />
             )}
             <div className="fallback-icon hidden absolute inset-0 items-center justify-center">
-              <ImageOff className="text-gray-300 h-16 w-16" />
+              <ImageOff className="text-muted-foreground h-16 w-16" />
             </div>
           </div>
 
-          <div className="p-4 border-t border-gray-100 dark:border-gray-700">
-            <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate text-center">
+          <div className="border-t border-border/50 p-4">
+            <h3 className="truncate text-center font-medium text-foreground">
               {widgetType.name || "Untitled Widget"}
             </h3>
             {widgetType.description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center line-clamp-2">
+              <p className="mt-1 line-clamp-2 text-center text-xs text-muted-foreground">
                 {widgetType.description}
               </p>
             )}
           </div>
         </div>
-        <div className="mt-4 text-xs text-gray-400 text-center max-w-xs">
+        <div className="mt-4 max-w-xs text-center text-xs text-muted-foreground">
           Using static preview image. Full dynamic rendering requires runtime
           emulation.
         </div>

@@ -80,8 +80,8 @@ export const SecuritySettingsForm = ({
           className="space-y-6 flex flex-col"
         >
           <div className="space-y-4">
-            <div className="pb-2 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <div className="border-b border-border pb-2">
+              <h3 className="text-lg font-semibold text-foreground">
                 General policy
               </h3>
             </div>
@@ -97,8 +97,8 @@ export const SecuritySettingsForm = ({
           </div>
 
           <div className="space-y-4">
-            <div className="pb-2 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <div className="border-b border-border pb-2">
+              <h3 className="text-lg font-semibold text-foreground">
                 Password policy
               </h3>
             </div>

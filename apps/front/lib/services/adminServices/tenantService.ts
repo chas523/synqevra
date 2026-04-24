@@ -200,7 +200,7 @@ export class TenantService {
       }
 
       const response = await proxyApi.get<GetTenantUsersResponse>(
-        `/dashboard/tenants/${tenantId}/users? ${params.toString()}`,
+        `/dashboard/tenants/${tenantId}/users?${params.toString()}`,
       );
 
       return this.mapTenantUsersResponse(response.data, options.limit ?? 20);
@@ -232,7 +232,7 @@ export class TenantService {
       }
 
       const response = await proxyApi.get<GetTenantDevicesResponse>(
-        `/dashboard/tenants/${tenantId}/devices? ${params.toString()}`,
+        `/dashboard/tenants/${tenantId}/devices?${params.toString()}`,
       );
 
       return this.mapTenantDevicesResponse(response.data, options.limit ?? 20);
@@ -555,11 +555,18 @@ export class TenantService {
 
   public static async uploadGlobalWhitelabelImages(
     formData: FormData,
-  ): Promise<{ success: boolean; paths: Record<string, string> }> {
+  ): Promise<{
+    success: boolean;
+    paths: Record<string, string>;
+    version?: string;
+    cssVersion?: string;
+  }> {
     try {
       const response = await proxyApi.post<{
         success: boolean;
         paths: Record<string, string>;
+        version?: string;
+        cssVersion?: string;
       }>(`/dashboard/settings/whitelabel`, formData);
       return response.data;
     } catch (err: unknown) {

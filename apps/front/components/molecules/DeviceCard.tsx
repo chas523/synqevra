@@ -31,7 +31,7 @@ const DeviceCard = ({
 
   return (
     <div
-      className={`group bg-white hover:bg-slate-50 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-white/20 rounded-2xl p-3 transition-all animate-fade-in cursor-pointer shadow-sm hover:shadow-md dark:shadow-none ${className}`}
+      className={`group cursor-pointer rounded-2xl border border-border bg-background p-3 shadow-sm transition-all hover:bg-muted/50 hover:border-border/70 hover:shadow-md animate-fade-in ${className}`}
       style={{ animationDelay: `${index * 0.05}s` }}
       onClick={() => onDeviceClick?.(device)}
     >
@@ -50,14 +50,14 @@ const DeviceCard = ({
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-slate-900 dark:text-white font-medium truncate mb-1">
+            <h3 className="mb-1 truncate font-medium text-foreground">
               {device.name}
             </h3>
             <div className="flex items-center gap-3 text-sm">
               <StatusBadge active={device.active}>
                 {device.active ? "Active" : "Inactive"}
               </StatusBadge>
-              <span className="text-slate-500 dark:text-gray-400">
+              <span className="text-muted-foreground">
                 {device.label || "-"}
               </span>
             </div>
@@ -72,13 +72,13 @@ const DeviceCard = ({
                 e.stopPropagation();
                 onToggleMenu(showMenu ? null : deviceId);
               }}
-              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:text-gray-400 dark:hover:text-white transition-all"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <MoreVertical className="w-5 h-5" />
             </button>
 
             {showMenu && (
-              <div className="absolute right-0 top-10 bg-white dark:bg-[#1a1f2e] border border-slate-200 dark:border-white/20 rounded-xl shadow-2xl overflow-hidden z-10 min-w-[180px] animate-fade-in">
+              <div className="absolute right-0 top-10 z-10 min-w-45 overflow-hidden rounded-xl border border-border bg-popover shadow-lg animate-fade-in">
                 {onDuplicate && (
                   <button
                     type="button"
@@ -86,7 +86,7 @@ const DeviceCard = ({
                       e.stopPropagation();
                       onDuplicate(device);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm text-slate-600 hover:bg-slate-100 dark:text-gray-300 dark:hover:bg-white/10 transition-colors flex items-center gap-3"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <Copy className="w-4 h-4" />
                     Duplicate device

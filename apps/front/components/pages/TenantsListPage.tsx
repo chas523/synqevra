@@ -150,32 +150,32 @@ export function TenantsListPage({
                       e.key === "Enter" && handleTenantClick(tenant)
                     }
                     className={cn(
-                      "p-4 border rounded-lg cursor-pointer transition-colors",
+                      "cursor-pointer rounded-lg border border-border p-4 transition-colors",
                       isSelected
-                        ? "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-300 dark:border-cyan-700"
-                        : "hover:bg-gray-50 dark:hover:bg-slate-800/50",
+                        ? "border-accent bg-accent/50"
+                        : "hover:bg-muted/50",
                     )}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
-                        <Building2 className="h-5 w-5 text-gray-400 mt-1 shrink-0" />
+                        <Building2 className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 dark:text-white">
+                          <h3 className="font-medium text-foreground">
                             {tenant.title}
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-slate-400">
+                          <p className="text-sm text-muted-foreground">
                             {tenant.name}
                           </p>
 
                           <div className="mt-2 space-y-1">
                             {tenant.email && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4" />
                                 {tenant.email}
                               </div>
                             )}
                             {(tenant.city || tenant.country) && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <MapPin className="h-4 w-4" />
                                 {[tenant.city, tenant.state, tenant.country]
                                   .filter(Boolean)
@@ -183,13 +183,13 @@ export function TenantsListPage({
                               </div>
                             )}
                             {tenant.phone && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4" />
                                 {tenant.phone}
                               </div>
                             )}
                             {tenant.createdTime && (
-                              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-400">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-4 w-4" />
                                 {formatTenantDate(tenant.createdTime)}
                               </div>
@@ -205,7 +205,8 @@ export function TenantsListPage({
                             e.stopPropagation();
                             handleViewUsers(tenant.id.id);
                           }}
-                          className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors whitespace-nowrap"
+                          variant="outline"
+                          className="whitespace-nowrap border-border bg-accent text-accent-foreground hover:bg-accent/80"
                           title="View users"
                         >
                           <Users className="h-4 w-4" />
@@ -217,7 +218,8 @@ export function TenantsListPage({
                             e.stopPropagation();
                             handleViewDevices(tenant.id.id);
                           }}
-                          className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-md transition-colors whitespace-nowrap"
+                          variant="outline"
+                          className="whitespace-nowrap border-border bg-muted text-muted-foreground hover:bg-muted/80"
                           title="View devices"
                         >
                           <Server className="h-4 w-4" />

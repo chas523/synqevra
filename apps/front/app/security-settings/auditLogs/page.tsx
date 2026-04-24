@@ -38,8 +38,8 @@ function StatusBadge({ status }: { status: string }) {
     <Badge
       className={`text-xs font-medium ${
         isSuccess
-          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          ? "border border-emerald-200 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+          : "border border-red-200 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
       }`}
     >
       {status.charAt(0) + status.slice(1).toLowerCase()}
@@ -76,29 +76,25 @@ function AuditLogDetailsDialog({
 
   return (
     <Dialog open={!!log} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[540px] max-h-[85vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <DialogTitle className="dark:text-white">
+      <DialogContent className="sm:max-w-135 max-h-[85vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="border-b border-border bg-muted/30 px-6 py-4">
+          <DialogTitle className="text-foreground">
             Audit log details
           </DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto p-6 space-y-3">
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-medium text-muted-foreground">
             Action data
           </p>
-          <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4 overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border border-border bg-muted/30 p-4">
             <pre
-              className="text-xs font-mono leading-relaxed whitespace-pre dark:text-slate-100"
+              className="whitespace-pre text-xs font-mono leading-relaxed text-foreground"
               dangerouslySetInnerHTML={{ __html: highlighted }}
             />
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="dark:text-white dark:border-slate-600"
-          >
+        <div className="flex justify-end border-t border-border px-6 py-4">
+          <Button variant="outline" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -180,7 +176,7 @@ export default function AuditLogsPage() {
       header: "Timestamp",
       sortable: true,
       render: (item) => (
-        <span className="text-slate-900 dark:text-slate-100 text-sm">
+        <span className="text-sm text-foreground">
           {formatTimestamp(item.createdTime)}
         </span>
       ),
@@ -189,7 +185,7 @@ export default function AuditLogsPage() {
       key: "entityType",
       header: "Entity type",
       render: (item) => (
-        <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+        <span className="text-sm font-medium text-primary">
           {item.entityId.entityType.charAt(0) +
             item.entityId.entityType.slice(1).toLowerCase()}
         </span>
@@ -199,23 +195,21 @@ export default function AuditLogsPage() {
       key: "entityName",
       header: "Entity name",
       render: (item) => (
-        <span className="dark:text-slate-200 text-sm">{item.entityName}</span>
+        <span className="text-sm text-foreground">{item.entityName}</span>
       ),
     },
     {
       key: "userName",
       header: "User",
       render: (item) => (
-        <span className="text-blue-600 dark:text-blue-400 text-sm">
-          {item.userName}
-        </span>
+        <span className="text-sm text-primary">{item.userName}</span>
       ),
     },
     {
       key: "actionType",
       header: "Type",
       render: (item) => (
-        <span className="dark:text-slate-200 text-sm">
+        <span className="text-sm text-foreground">
           {item.actionType.charAt(0) + item.actionType.slice(1).toLowerCase()}
         </span>
       ),
@@ -232,7 +226,7 @@ export default function AuditLogsPage() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          className="h-7 px-2 text-muted-foreground hover:text-foreground"
           onClick={(e) => {
             e.stopPropagation();
             setSelectedLog(item);

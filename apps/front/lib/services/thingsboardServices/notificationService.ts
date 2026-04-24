@@ -11,7 +11,17 @@ export interface DeliveryMethodsResponse {
 }
 
 export interface SendNotificationRequest {
-  targets: string[];
+  targets: Array<
+    | string
+    | {
+        id: {
+          entityType: string;
+          id: string;
+        };
+        name?: string;
+        configuration?: Record<string, any>;
+      }
+  >;
   templateId?: {
     entityType: string;
     id: string;

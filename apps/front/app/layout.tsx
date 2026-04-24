@@ -8,6 +8,7 @@ import { TelemetryProvider } from "@/lib/context/TelemetryContext";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
 import StoreProvider from "./StoreProvider";
+import WhitelabelLightColorsLoader from "@/components/organisms/WhitelabelLightColorsLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,17 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet"
         />
+        <link
+          id="whitelabel-light-colors"
+          rel="stylesheet"
+          href="/public-assets/global/light-colors.css?v=0"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <StoreProvider>
+          <WhitelabelLightColorsLoader />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

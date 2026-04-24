@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Clock, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 export type TimeWindowMode = "last" | "range" | "relative";
@@ -313,7 +324,7 @@ function formatButtonLabel(v: TimeWindowValue): string {
 
 // ─── Main component ─────────────────────────────────────────────────────────
 export function TimeWindowPicker({ value, onChange }: TimeWindowPickerProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [draftMode, setDraftMode] = useState<TimeWindowMode>(value.mode);
   const [draftLastMs, setDraftLastMs] = useState(value.lastMs ?? 86400000);
   const [draftLastLabel, setDraftLastLabel] = useState(
@@ -328,17 +339,19 @@ export function TimeWindowPicker({ value, onChange }: TimeWindowPickerProps) {
   const [draftEnd, setDraftEnd] = useState<string>(
     toDatetimeLocalString(value.endTime ?? new Date()),
   );
-  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    if (!open) return;
+
+    setDraftMode(value.mode);
+    setDraftLastMs(value.lastMs ?? 86400000);
+    setDraftLastLabel(value.lastLabel ?? "1 day");
+    setDraftRelativeKey(value.relativeKey ?? "current_day");
+    setDraftStart(
+      toDatetimeLocalString(value.startTime ?? new Date(Date.now() - 86400000)),
+    );
+    setDraftEnd(toDatetimeLocalString(value.endTime ?? new Date()));
+  }, [open, value]);
 
   const handleUpdate = () => {
     if (draftMode === "last") {
@@ -364,130 +377,102 @@ export function TimeWindowPicker({ value, onChange }: TimeWindowPickerProps) {
         endTime: new Date(draftEnd),
       });
     }
-    setIsOpen(false);
+    setOpen(false);
   };
 
   return (
-    <div className="relative inline-block" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-      >
-        <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-        {formatButtonLabel(value)}
-      </button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-8 gap-2 text-xs font-normal">
+          <Clock className="h-3.5 w-3.5" />
+          {formatButtonLabel(value)}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-106.25">
+        <DialogHeader>
+          <DialogTitle>Time window</DialogTitle>
+        </DialogHeader>
 
-      {isOpen && (
-        <div className="absolute left-0 top-full mt-2 z-50 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-4">
-          <p className="font-semibold text-sm text-slate-700 dark:text-white mb-3">
-            Time window
-          </p>
+        <Tabs
+          value={draftMode}
+          onValueChange={(v) => setDraftMode(v as TimeWindowMode)}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="last">Last</TabsTrigger>
+            <TabsTrigger value="range">Range</TabsTrigger>
+            <TabsTrigger value="relative">Relative</TabsTrigger>
+          </TabsList>
 
-          {/* Mode tabs */}
-          <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
-            {(["last", "range", "relative"] as TimeWindowMode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setDraftMode(m)}
-                className={`flex-1 py-1 text-sm font-medium rounded-md transition-colors capitalize ${
-                  draftMode === m
-                    ? "bg-white dark:bg-slate-700 text-[#2a456c] dark:text-white shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                }`}
+          <TabsContent value="last" className="space-y-4 py-4">
+            <div className="grid gap-2">
+              <Label>Preset</Label>
+              <select
+                value={draftLastMs}
+                onChange={(e) => {
+                  const opt = LAST_OPTIONS.find(
+                    (o) => o.ms === Number(e.target.value),
+                  );
+                  if (opt) {
+                    setDraftLastMs(opt.ms);
+                    setDraftLastLabel(opt.label);
+                  }
+                }}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none"
               >
-                {m.charAt(0).toUpperCase() + m.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Mode: Last */}
-          {draftMode === "last" && (
-            <select
-              value={draftLastMs}
-              onChange={(e) => {
-                const opt = LAST_OPTIONS.find(
-                  (o) => o.ms === Number(e.target.value),
-                );
-                if (opt) {
-                  setDraftLastMs(opt.ms);
-                  setDraftLastLabel(opt.label);
-                }
-              }}
-              className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2a456c]"
-            >
-              {LAST_OPTIONS.map((o) => (
-                <option key={o.ms} value={o.ms}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {/* Mode: Range */}
-          {draftMode === "range" && (
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 block">
-                  From
-                </label>
-                <input
-                  type="datetime-local"
-                  value={draftStart}
-                  onChange={(e) => setDraftStart(e.target.value)}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2a456c]"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1 block">
-                  To
-                </label>
-                <input
-                  type="datetime-local"
-                  value={draftEnd}
-                  onChange={(e) => setDraftEnd(e.target.value)}
-                  className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2a456c]"
-                />
-              </div>
+                {LAST_OPTIONS.map((o) => (
+                  <option key={o.ms} value={o.ms}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+          </TabsContent>
 
-          {/* Mode: Relative */}
-          {draftMode === "relative" && (
-            <select
-              value={draftRelativeKey}
-              onChange={(e) => setDraftRelativeKey(e.target.value)}
-              className="w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2a456c]"
-            >
-              {RELATIVE_OPTIONS.map((o) => (
-                <option key={o.key} value={o.key}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          )}
+          <TabsContent value="range" className="space-y-4 py-4">
+            <div className="grid gap-2">
+              <Label>From</Label>
+              <Input
+                type="datetime-local"
+                value={draftStart}
+                onChange={(e) => setDraftStart(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>To</Label>
+              <Input
+                type="datetime-local"
+                value={draftEnd}
+                onChange={(e) => setDraftEnd(e.target.value)}
+              />
+            </div>
+          </TabsContent>
 
-          {/* Footer */}
-          <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-              className="dark:text-slate-300"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleUpdate}
-              className="bg-[#2a456c] hover:bg-[#1a355c] text-white"
-            >
-              Update
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+          <TabsContent value="relative" className="space-y-4 py-4">
+            <div className="grid gap-2">
+              <Label>Preset</Label>
+              <select
+                value={draftRelativeKey}
+                onChange={(e) => setDraftRelativeKey(e.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none"
+              >
+                {RELATIVE_OPTIONS.map((o) => (
+                  <option key={o.key} value={o.key}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleUpdate}>Update</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

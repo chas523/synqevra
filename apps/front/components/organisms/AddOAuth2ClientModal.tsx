@@ -47,11 +47,11 @@ export function AddOAuth2ClientModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-        <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-[#2a456c] dark:bg-slate-800">
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden bg-background dark:bg-slate-900 border-border dark:border-slate-800">
+        <DialogHeader className="px-6 py-4 border-b border-border dark:border-slate-800 bg-primary dark:bg-slate-800">
           <DialogTitle className="text-white">Add OAuth 2.0 client</DialogTitle>
         </DialogHeader>
-        <div className="h-[450px] overflow-hidden flex flex-col">
+        <div className="h-112.5 overflow-hidden flex flex-col">
           {/* Key is used to reset form state when modal opens */}
           {open && (
             <OAuth2ClientForm

@@ -4,6 +4,14 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const accessToken = req.cookies.get("access_token")?.value;
 
+  // Never enforce auth redirects for static assets proxied to external services.
+  if (
+    pathname.startsWith("/public-assets/") ||
+    pathname.startsWith("/tb-assets/")
+  ) {
+    return NextResponse.next();
+  }
+
   const isLoggedIn = Boolean(accessToken);
 
   const publicForGuests = ["/auth/login", "/auth/activate"];
@@ -32,5 +40,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|api).*)"],
+  matcher: ["/((?!_next|favicon.ico|api|public-assets|tb-assets).*)"],
 };

@@ -48,8 +48,8 @@ export function DashboardPublicLinkModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-auto w-auto p-0 dark:bg-[#202E3C] border-slate-700 overflow-x-auto outline-none">
-        <DialogHeader className="bg-[#2A456C] h-12 flex flex-row items-center justify-between px-4 py-2 relative">
+      <DialogContent className="sm:max-w-auto w-auto p-0 bg-background dark:bg-[#202E3C] border-border dark:border-slate-700 overflow-x-auto outline-none">
+        <DialogHeader className="bg-primary dark:bg-[#2A456C] h-12 flex flex-row items-center justify-between px-4 py-2 relative">
           <DialogTitle className="text-base text-white font-medium">
             Dashboard is now public
           </DialogTitle>
@@ -62,14 +62,14 @@ export function DashboardPublicLinkModal({
         </DialogHeader>
 
         <div className="p-6 space-y-4 dark:text-gray-200">
-          <p className="text-sm">
+          <p className="text-sm text-foreground">
             Your dashboard <span className="font-bold">{dashboardName}</span> is
             now public and accessible via next public{" "}
             <a
               href={publicLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:underline"
+              className="text-primary hover:underline"
             >
               link
             </a>
@@ -77,9 +77,9 @@ export function DashboardPublicLinkModal({
           </p>
 
           <div className="flex items-center">
-            <div className="flex-1 bg-[#1A2634] border border-[#2A3F54] rounded-sm flex items-center h-10 overflow-hidden">
+            <div className="flex-1 bg-muted border border-border rounded-sm flex items-center h-10 overflow-hidden">
               <div className="px-3 flex-1 overflow-x-auto whitespace-nowrap scrollbar-hide">
-                <code className="text-[13px] font-mono select-all text-gray-300">
+                <code className="text-[13px] font-mono select-all text-foreground/80">
                   {publicLink}
                 </code>
               </div>
@@ -87,7 +87,7 @@ export function DashboardPublicLinkModal({
             <Button
               variant="secondary"
               size="icon"
-              className="ml-2 h-10 w-10 shrink-0 bg-[#444444] hover:bg-[#555555] text-white border-none rounded"
+              className="ml-2 h-10 w-10 shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground border-none rounded"
               onClick={handleCopy}
               title="Copy to clipboard"
             >
@@ -95,8 +95,10 @@ export function DashboardPublicLinkModal({
             </Button>
           </div>
 
-          <div className="bg-[#F5F5F5] dark:bg-transparent dark:border dark:border-gray-600 rounded p-4 text-sm dark:text-gray-300">
-            <span className="font-bold dark:text-gray-200">Note: </span>
+          <div className="bg-muted dark:bg-transparent dark:border dark:border-gray-600 rounded p-4 text-sm text-foreground/80 dark:text-gray-300">
+            <span className="font-bold text-foreground dark:text-gray-200">
+              Note:{" "}
+            </span>
             Do not forget to make related devices public in order to access
             their data.
           </div>
@@ -106,7 +108,7 @@ export function DashboardPublicLinkModal({
           <Button
             onClick={onClose}
             variant="ghost"
-            className="text-[#2A6B97] hover:text-[#184F75] hover:bg-transparent font-medium dark:text-blue-400 dark:hover:text-blue-300"
+            className="text-primary hover:text-primary/80 hover:bg-transparent font-medium dark:text-blue-400 dark:hover:text-blue-300"
           >
             OK
           </Button>

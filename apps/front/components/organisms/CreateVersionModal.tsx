@@ -241,7 +241,7 @@ export function CreateVersionModal({
   if (result) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px] p-6 text-center">
+        <DialogContent className="sm:max-w-100 p-6 text-center">
           <DialogHeader>
             <DialogTitle className="dark:text-white text-xl mx-auto mb-4">
               Version Details
@@ -282,7 +282,7 @@ export function CreateVersionModal({
       onOpenChange={(val) => !isCreating && !isPolling && onOpenChange(val)}
     >
       <DialogContent className="max-w-[90vw] md:max-w-6xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <DialogHeader className="px-6 py-4 border-b border-border dark:border-slate-800 bg-muted/50 dark:bg-slate-900/50">
           <DialogTitle className="text-xl dark:text-white">
             Create entities version
           </DialogTitle>
@@ -300,7 +300,7 @@ export function CreateVersionModal({
                 onValueChange={setBranch}
                 disabled={isCreating || isPolling}
               >
-                <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-800/50 h-10 dark:text-white">
+                <SelectTrigger className="w-full bg-muted dark:bg-slate-800/50 h-10 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -319,7 +319,7 @@ export function CreateVersionModal({
               <Input
                 value={versionName}
                 onChange={(e) => setVersionName(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800/50 h-10 border-slate-200 dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-orange-500 dark:text-white"
+                className="bg-muted dark:bg-slate-800/50 h-10 border-border dark:border-slate-800 focus-visible:ring-1 focus-visible:ring-orange-500 dark:text-white"
                 disabled={isCreating || isPolling}
               />
             </div>
@@ -334,7 +334,7 @@ export function CreateVersionModal({
               onValueChange={setDefaultSyncStrategy}
               disabled={isCreating || isPolling}
             >
-              <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-800/50 h-10 dark:text-white">
+              <SelectTrigger className="w-full bg-muted dark:bg-slate-800/50 h-10 dark:text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -349,7 +349,7 @@ export function CreateVersionModal({
           </div>
 
           {/* Entities fieldset */}
-          <fieldset className="border border-slate-200 dark:border-slate-800 rounded-lg p-5">
+          <fieldset className="border border-border dark:border-slate-800 rounded-lg p-5">
             <legend className="text-sm font-medium text-foreground dark:text-slate-300 px-2">
               Entities to export
             </legend>
@@ -375,7 +375,7 @@ export function CreateVersionModal({
               ))}
             </div>
 
-            <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/30 p-2 rounded border border-dashed border-slate-300 dark:border-slate-700">
+            <div className="flex justify-between items-center bg-muted dark:bg-slate-800/30 p-2 rounded border border-dashed border-border/70 dark:border-slate-700">
               <Button
                 variant="secondary"
                 size="sm"
@@ -383,7 +383,7 @@ export function CreateVersionModal({
                 disabled={
                   availableEntityTypes.length === 0 || isCreating || isPolling
                 }
-                className="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
+                className="bg-secondary hover:bg-secondary/80 dark:bg-slate-700 dark:hover:bg-slate-600 text-foreground/80 dark:text-slate-200"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add entity type
@@ -393,7 +393,7 @@ export function CreateVersionModal({
                 size="sm"
                 onClick={() => setEntries([])}
                 disabled={entries.length === 0 || isCreating || isPolling}
-                className="bg-[#2a456c] hover:bg-[#1a355c] text-white border-0"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground border-0"
               >
                 Remove all
               </Button>
@@ -401,7 +401,7 @@ export function CreateVersionModal({
           </fieldset>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sm:justify-end">
+        <DialogFooter className="px-6 py-4 border-t border-border dark:border-slate-800 bg-muted/50 dark:bg-slate-900/50 sm:justify-end">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}
@@ -417,7 +417,7 @@ export function CreateVersionModal({
               !versionName.trim() ||
               entries.some((e) => !e.allEntities && e.entityIds.length === 0)
             }
-            className="bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900"
+            className="bg-secondary hover:bg-secondary/80 text-foreground/80 dark:bg-slate-300 dark:hover:bg-slate-400 dark:text-slate-900"
           >
             {(isCreating || isPolling) && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -463,9 +463,9 @@ function EntityEntryCard({
   }, [entry.entityType, availableEntityTypes]);
 
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded shadow-sm bg-white dark:bg-slate-900 pb-4">
+    <div className="border border-border dark:border-slate-800 rounded shadow-sm bg-background dark:bg-slate-900 pb-4">
       {/* Header */}
-      <div className="flex justify-between items-center p-3 border-b border-slate-100 dark:border-slate-800/50">
+      <div className="flex justify-between items-center p-3 border-b border-border/50 dark:border-slate-800/50">
         <span className="font-semibold text-sm dark:text-white">
           {entityConfig?.pluralLabel || entry.entityType}
         </span>
@@ -474,7 +474,7 @@ function EntityEntryCard({
             type="button"
             onClick={onRemove}
             disabled={disabled}
-            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-500 disabled:opacity-50"
+            className="p-1 hover:bg-muted dark:hover:bg-slate-800 rounded text-muted-foreground disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -486,7 +486,7 @@ function EntityEntryCard({
         <div className="flex-1 space-y-4">
           <div className="flex gap-4">
             <div className="flex-1 space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
                 Type*
               </label>
               <Select
@@ -494,7 +494,7 @@ function EntityEntryCard({
                 onValueChange={onChangeType}
                 disabled={disabled}
               >
-                <SelectTrigger className="h-9 bg-slate-50 dark:bg-slate-800/50 dark:text-white">
+                <SelectTrigger className="h-9 bg-muted dark:bg-slate-800/50 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -507,7 +507,7 @@ function EntityEntryCard({
               </Select>
             </div>
             <div className="flex-1 space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <label className="text-xs font-medium text-muted-foreground dark:text-slate-400">
                 Sync strategy
               </label>
               <Select
@@ -515,7 +515,7 @@ function EntityEntryCard({
                 onValueChange={onChangeSyncStrategy}
                 disabled={disabled}
               >
-                <SelectTrigger className="h-9 bg-slate-50 dark:bg-slate-800/50 dark:text-white">
+                <SelectTrigger className="h-9 bg-muted dark:bg-slate-800/50 dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -552,7 +552,7 @@ function EntityEntryCard({
         </div>
 
         {/* Export options column */}
-        <div className="w-[200px] flex flex-col gap-3 pt-1">
+        <div className="w-50 flex flex-col gap-3 pt-1">
           {entityConfig?.exportOptions.map((opt) => (
             <label
               key={opt.key}
@@ -686,7 +686,7 @@ function EntityMultiSelect({
     <div className="relative">
       {/* Custom Multi-select Combo Box */}
       <div
-        className={`flex flex-wrap gap-1.5 p-1.5 min-h-[36px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded cursor-text ${disabled ? "opacity-50 pointer-events-none" : ""}`}
+        className={`flex flex-wrap gap-1.5 p-1.5 min-h-9 bg-muted dark:bg-slate-800/50 border border-border dark:border-slate-700 rounded cursor-text ${disabled ? "opacity-50 pointer-events-none" : ""}`}
         onClick={() => {
           setIsOpen(true);
           loadEntities();
@@ -698,12 +698,12 @@ function EntityMultiSelect({
           return (
             <span
               key={id}
-              className="flex items-center gap-1 bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs dark:text-white"
+              className="flex items-center gap-1 bg-secondary dark:bg-slate-700 px-2 py-0.5 rounded-full text-xs dark:text-white"
               title={id}
             >
               {entity?.title || entity?.name || id.substring(0, 8)}
               <button
-                className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 ml-1"
+                className="text-muted-foreground hover:text-foreground dark:hover:text-slate-200 ml-1"
                 onClick={(e) => removeId(id, e)}
               >
                 ×
@@ -713,7 +713,7 @@ function EntityMultiSelect({
         })}
         <input
           type="text"
-          className="flex-1 min-w-[100px] bg-transparent outline-none text-sm px-1 py-0.5 dark:text-white"
+          className="flex-1 min-w-25 bg-transparent outline-none text-sm px-1 py-0.5 dark:text-white"
           placeholder={selectedIds.length === 0 ? "Entity list" : ""}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -731,14 +731,14 @@ function EntityMultiSelect({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-md">
+          <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-y-auto bg-background dark:bg-slate-800 border border-border dark:border-slate-700 rounded shadow-md">
             {isLoading && (
-              <div className="p-3 text-sm text-center text-slate-500 border-b border-slate-200 dark:border-slate-700 dark:text-slate-400">
+              <div className="p-3 text-sm text-center text-muted-foreground border-b border-border dark:border-slate-700 dark:text-slate-400">
                 Loading...
               </div>
             )}
             {entities.length > 0 && (
-              <div className="p-2 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 flex justify-between items-center">
+              <div className="p-2 border-b border-border dark:border-slate-700 text-xs font-semibold text-muted-foreground dark:text-slate-400 flex justify-between items-center">
                 <span>
                   List of {entities.length}{" "}
                   {entities.length === 1 ? "entity" : "entities"}
@@ -746,7 +746,7 @@ function EntityMultiSelect({
               </div>
             )}
             {!isLoading && filteredEntities.length === 0 && (
-              <div className="p-2 text-sm text-slate-500 dark:text-slate-400 text-center">
+              <div className="p-2 text-sm text-muted-foreground dark:text-slate-400 text-center">
                 No entities found
               </div>
             )}
@@ -756,7 +756,7 @@ function EntityMultiSelect({
               return (
                 <div
                   key={id}
-                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between dark:text-slate-200 ${isSelected ? "bg-slate-50 dark:bg-slate-700/50" : ""}`}
+                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-muted dark:hover:bg-slate-700 flex items-center justify-between dark:text-slate-200 ${isSelected ? "bg-muted dark:bg-slate-700/50" : ""}`}
                   onClick={(e) => toggleId(id, entity, e)}
                 >
                   <span>{entity.title || entity.name}</span>

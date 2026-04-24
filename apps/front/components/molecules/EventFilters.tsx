@@ -55,7 +55,7 @@ export function EventFilters({
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle>Filter events</DialogTitle>
         </DialogHeader>

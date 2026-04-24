@@ -24,7 +24,7 @@ const ObservationDateGroup = ({
         className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-500">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-cyan-500 to-blue-500">
             <Calendar className="h-5 w-5 text-white" />
           </div>
           <div className="flex items-center gap-3">
@@ -53,7 +53,7 @@ const ObservationDateGroup = ({
       <div
         className={cn(
           "transition-all duration-300 ease-in-out overflow-hidden",
-          isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0",
+          isExpanded ? "max-h-500 opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <div className="px-4 py-4 space-y-1 border-t border-slate-200 dark:border-white/10">

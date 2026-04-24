@@ -64,12 +64,12 @@ const DeviceForm = ({
   };
 
   return (
-    <div className="h-fit bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 shadow-xl dark:shadow-2xl">
+    <div className="h-fit rounded-3xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-          <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/60 text-accent-foreground">
+          <Plus className="h-5 w-5 text-primary" />
         </div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <h2 className="text-xl font-semibold text-foreground">
           Add New Device
         </h2>
       </div>
@@ -82,8 +82,8 @@ const DeviceForm = ({
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
           required
-          labelClassName="text-slate-600 dark:text-gray-300 mb-2"
-          inputClassName="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+          labelClassName="mb-2 text-muted-foreground"
+          inputClassName="rounded-xl border border-border bg-muted/30 px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
         />
 
         <FormField
@@ -93,12 +93,12 @@ const DeviceForm = ({
           placeholder="Body temperature sensor - chest placed"
           value={formData.label || ""}
           onChange={(e) => handleInputChange("label", e.target.value)}
-          labelClassName="text-slate-600 dark:text-gray-300 mb-2"
-          inputClassName="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+          labelClassName="mb-2 text-muted-foreground"
+          inputClassName="rounded-xl border border-border bg-muted/30 px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
         />
 
-        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-white/10">
-          <div className="text-xs text-slate-500 dark:text-gray-400 mb-3 uppercase tracking-wider">
+        <div className="mt-6 border-t border-border pt-6">
+          <div className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">
             Select Measurement Types
           </div>
           <div className="flex flex-wrap gap-2">
@@ -112,8 +112,8 @@ const DeviceForm = ({
                   style={{ fontSize: "12px" }}
                   className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-blue-100 dark:bg-blue-500/30 border border-blue-300 dark:border-blue-400/50 text-blue-600 dark:text-blue-300"
-                      : "bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/10 hover:border-slate-300 dark:hover:border-white/20"
+                      ? "border border-primary/30 bg-primary/10 text-primary"
+                      : "border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   {parameter.label}
@@ -122,7 +122,7 @@ const DeviceForm = ({
             })}
           </div>
           {formData.parameters && formData.parameters.length > 0 && (
-            <div className="mt-2 text-xs text-slate-500 dark:text-gray-500">
+            <div className="mt-2 text-xs text-muted-foreground">
               Selected: {formData.parameters.join(", ")}
             </div>
           )}
@@ -130,7 +130,7 @@ const DeviceForm = ({
 
         <LoadingButton
           type="submit"
-          className="ml-auto cursor-pointer bg-gradient-to-r from-blue-500 to-slate-500 hover:from-blue-600 hover:to-slate-600 disabled:from-gray-600 disabled:to-gray-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20 disabled:shadow-none flex items-center justify-center gap-2"
+          className="ml-auto flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed"
           isLoading={isLoading}
           textBeforeClick="Create Device"
           textAfterClick="Creating..."
