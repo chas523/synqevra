@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/admin_select";
 import { ScriptEditor } from "@/components/molecules/ScriptEditor";
+import { TestScriptModal } from "@/components/molecules/TestScriptModal";
 
 interface DeviceCalculatedFieldsTabContentProps {
   deviceId: string;
@@ -123,6 +124,7 @@ export function DeviceCalculatedFieldsTabContent({
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isArgumentDialogOpen, setIsArgumentDialogOpen] = useState(false);
+  const [isTestScriptModalOpen, setIsTestScriptModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddCalculatedFieldForm>({
@@ -829,14 +831,28 @@ export function DeviceCalculatedFieldsTabContent({
                   />
                 </>
               ) : (
-                <ScriptEditor
-                  value={form.expression}
-                  onChange={(val) =>
-                    setForm((prev) => ({ ...prev, expression: val }))
-                  }
-                  disabled={isSubmitting}
-                  minHeight="250px"
-                />
+                <>
+                  <ScriptEditor
+                    value={form.expression}
+                    onChange={(val) =>
+                      setForm((prev) => ({ ...prev, expression: val }))
+                    }
+                    disabled={isSubmitting}
+                    minHeight="250px"
+                  />
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={form.arguments.length === 0 || isSubmitting}
+                      onClick={() => setIsTestScriptModalOpen(true)}
+                      title={form.arguments.length === 0 ? "Add at least one argument to test the script" : ""}
+                    >
+                      Test Script Function
+                    </Button>
+                  </div>
+                </>
               )}
             </div>
 
@@ -1209,6 +1225,21 @@ export function DeviceCalculatedFieldsTabContent({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {isTestScriptModalOpen && (
+        <TestScriptModal
+          open={isTestScriptModalOpen}
+          onClose={() => setIsTestScriptModalOpen(false)}
+          onApply={(newVal) =>
+            setForm((prev) => ({ ...prev, expression: newVal }))
+          }
+          expression={form.expression}
+          arguments={form.arguments.map((a) => ({
+            argumentName: a.argumentName,
+            defaultValue: a.defaultValue,
+          }))}
+        />
+      )}
     </div>
   );
 }

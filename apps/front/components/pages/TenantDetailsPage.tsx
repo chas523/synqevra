@@ -22,6 +22,8 @@ import {
 } from "@/components/organisms";
 import { TenantUserCard } from "@/components/organisms/TenantUserCard";
 import { formatTenantDate } from "@/lib/utils";
+import { TenantService } from "@/lib/services/adminServices/tenantService";
+import { toast } from "sonner";
 
 interface TenantDetailsPageProps {
   tenantId: string;
@@ -72,6 +74,19 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
       !!usersData?.pagination?.hasPrev,
       usersData?.pagination?.prevCursor,
     );
+
+  const handleImpersonate = async (userId: string) => {
+    try {
+      await TenantService.getImpersonationToken(userId);
+      localStorage.removeItem("isAuthenticatedAdmin");
+      localStorage.setItem("isAuthenticated", "true");
+      toast.success("Impersonation successful. Redirecting...");
+      window.location.href = "/dashboards";
+    } catch (err: unknown) {
+      toast.error("Failed to impersonate user");
+      console.error(err);
+    }
+  };
 
   if (tenantLoading) {
     return <LoadingCard count={2} />;
@@ -195,7 +210,11 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
               />
             ) : (
               usersData.data.map((user) => (
-                <TenantUserCard key={user.id.id} user={user} />
+                <TenantUserCard 
+                  key={user.id.id} 
+                  user={user} 
+                  onImpersonate={() => handleImpersonate(user.id.id)}
+                />
               ))
             )}
           </div>

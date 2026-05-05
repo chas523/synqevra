@@ -152,6 +152,27 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     );
   }
 
+  async getUserToken(
+    sysAdminAccessToken: string,
+    userId: string,
+  ): Promise<ThingsboardLoginResponse> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/user/${userId}/token`;
+      const response = await firstValueFrom(
+        this.httpService.get<ThingsboardLoginResponse>(url, {
+          headers: { Authorization: `Bearer ${sysAdminAccessToken}` },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to get impersonation token from ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
   async fetchDevices(
     accessToken: string,
     page: number,
@@ -786,6 +807,32 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
+
+  async testCalculatedFieldScript(
+    accessToken: string,
+    payload: { expression: string; arguments: Record<string, any> },
+  ): Promise<{ output: string; error: string }> {
+    try {
+      const url = `${this.THINGSBOARD_API_URL}/calculatedField/testScript`;
+      const response = await firstValueFrom(
+        this.httpService.post<{ output: string; error: string }>(
+          url,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        ),
+      );
+      return response.data;
+    } catch (error) {
+      ThingsboardApiException.createException(
+        'Failed to test calculated field script in ThingsBoard API',
+        error,
+        this.logger,
+      );
+    }
+  }
+
 
   async fetchAssets(
     accessToken: string,

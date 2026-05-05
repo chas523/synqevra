@@ -213,6 +213,23 @@ export class TenantService {
     }
   }
 
+  public static async getImpersonationToken(
+    userId: string,
+  ): Promise<{ token: string; refreshToken: string }> {
+    try {
+      const response = await proxyApi.post<{ token: string; refreshToken: string }>(
+        `/thingsboard/user/${userId}/token`,
+      );
+      return response.data;
+    } catch (err: unknown) {
+      const message = extractErrorMessage(
+        err,
+        `Failed to get impersonation token for user ${userId}`,
+      );
+      throw new Error(message);
+    }
+  }
+
   public static async getTenantDevices(
     tenantId: string,
     options: TenantsRequestOptions,

@@ -64,6 +64,13 @@ export interface RuleChainAuditLog {
   entityName: string;
 }
 
+export interface RuleChainAuditLogsResponse {
+  data: RuleChainAuditLog[];
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export class RuleChainService {
   public static async fetchRuleChains(
     page = 0,
@@ -372,7 +379,7 @@ export class RuleChainService {
     sortOrder = "DESC",
     startTime?: number,
     endTime?: number,
-  ): Promise<any> {
+  ): Promise<RuleChainAuditLogsResponse> {
     const params = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString(),

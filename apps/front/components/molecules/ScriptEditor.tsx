@@ -28,7 +28,7 @@ export function ScriptEditor({
 
   return (
     <div className="space-y-1.5 w-full">
-      <Label className="text-sm font-medium">{label}</Label>
+      {label && <Label className="text-sm font-medium">{label}</Label>}
       <div className="rounded-md border bg-card overflow-hidden transition-colors focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         <div className="bg-muted/50 px-4 py-2 border-b font-mono text-sm text-muted-foreground select-none">
           function {functionName}({args}) {"{"}

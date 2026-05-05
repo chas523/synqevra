@@ -10,6 +10,7 @@ import {
   ThingsboardRepositoryPort,
 } from '../../ports/thingsboard.repository.port';
 import { RefreshTokenCommand } from './refresh-token.command';
+import * as jwt from 'jsonwebtoken';
 import {
   RefreshTokenError,
   TokenRefreshError,
@@ -18,6 +19,7 @@ import {
 } from 'src/thingsboard/domain/errors/thingsboard.errors';
 import { ThingsboardApiException } from 'src/thingsboard/infrastructure/http/thingsboard.http.errors';
 import { ThingsboardTokensResponseDto } from 'src/thingsboard/interface/rest/dtos/response/thingsboard-tokens.response.dto';
+import { ThingsboardLoginResponse } from 'src/thingsboard/infrastructure/http/thingsboard.api.types';
 
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenCommandHandler implements ICommandHandler<
@@ -49,8 +51,40 @@ export class RefreshTokenCommandHandler implements ICommandHandler<
         return Err(new TokenRefreshError());
       }
 
-      const refreshResponse =
-        await this.thingsboardApi.refreshToken(currentRefreshToken);
+      let refreshResponse: ThingsboardLoginResponse;
+
+      try {
+        refreshResponse =
+          await this.thingsboardApi.refreshToken(currentRefreshToken);
+      } catch (error) {
+        if (
+          error instanceof ThingsboardApiException &&
+          error.message.includes('Token has expired')
+        ) {
+          const currentAccessToken = thingsboardModel.getAccessToken();
+          const decoded: any = currentAccessToken
+            ? jwt.decode(currentAccessToken)
+            : null;
+          const tbUserId = decoded?.userId;
+
+          if (tbUserId) {
+            try {
+              const sysAdminTokens =
+                await this.thingsboardApi.loginToSysadminAccount();
+              refreshResponse = await this.thingsboardApi.getUserToken(
+                sysAdminTokens.token,
+                tbUserId,
+              );
+            } catch (fallbackError) {
+              return Err(new ExpiredTokenError());
+            }
+          } else {
+            return Err(new ExpiredTokenError());
+          }
+        } else {
+          return Err(new TokenRefreshError());
+        }
+      }
 
       thingsboardModel.setAccessToken(refreshResponse.token);
       thingsboardModel.setRefreshToken(refreshResponse.refreshToken);
@@ -61,12 +95,6 @@ export class RefreshTokenCommandHandler implements ICommandHandler<
         refreshToken: refreshResponse.refreshToken,
       });
     } catch (error) {
-      if (error instanceof ThingsboardApiException) {
-        if (error.message.includes('Token has expired')) {
-          return Err(new ExpiredTokenError());
-        }
-        return Err(new TokenRefreshError());
-      }
       return Err(new TokenRefreshError());
     }
   }

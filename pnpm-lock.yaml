@@ -113,6 +113,9 @@ importers:
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
+      form-data:
+        specifier: ^4.0.5
+        version: 4.0.5
       http-proxy-middleware:
         specifier: ^3.0.5
         version: 3.0.5
@@ -138,6 +141,9 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       passport-local:
+        specifier: ^1.0.0
+        version: 1.0.0
+      passport-strategy:
         specifier: ^1.0.0
         version: 1.0.0
       pg:
@@ -189,6 +195,9 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+      '@types/form-data':
+        specifier: ^2.5.2
+        version: 2.5.2
       '@types/http-proxy-middleware':
         specifier: ^1.0.0
         version: 1.0.0
@@ -210,6 +219,9 @@ importers:
       '@types/passport-local':
         specifier: ^1.0.38
         version: 1.0.38
+      '@types/passport-strategy':
+        specifier: ^0.2.38
+        version: 0.2.38
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
@@ -3506,6 +3518,10 @@ packages:
 
   '@types/express@5.0.6':
     resolution: {integrity: sha512-sKYVuV7Sv9fbPIt/442koC7+IIwK5olP1KWeD88e/idgoJqDm3JV/YUiPwkoKK92ylff2MGxSz1CSjsXelx0YA==}
+
+  '@types/form-data@2.5.2':
+    resolution: {integrity: sha512-tfmcyHn1Pp9YHAO5r40+UuZUPAZbUEgqTel3EuEKpmF9hPkXgR4l41853raliXnb4gwyPNoQOfvgGGlHN5WSog==}
+    deprecated: This is a stub types definition. form-data provides its own type definitions, so you do not need this installed.
 
   '@types/hoist-non-react-statics@3.3.7':
     resolution: {integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==}
@@ -11490,6 +11506,10 @@ snapshots:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 5.1.0
       '@types/serve-static': 2.2.0
+
+  '@types/form-data@2.5.2':
+    dependencies:
+      form-data: 4.0.5
 
   '@types/hoist-non-react-statics@3.3.7(@types/react@19.2.7)':
     dependencies:

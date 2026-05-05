@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   RuleChainAuditLog,
+  RuleChainAuditLogsResponse,
   RuleChainService,
 } from "@/lib/services/thingsboardServices/ruleChainService";
 
@@ -35,7 +36,7 @@ export function RuleChainAuditLogsTabContent({
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedDetails, setSelectedDetails] = useState<string>("{}");
 
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR<RuleChainAuditLogsResponse>(
     ruleChainId
       ? [
           "ruleChainAuditLogs",

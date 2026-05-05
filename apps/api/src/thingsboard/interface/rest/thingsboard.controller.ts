@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Post,
   Body,
@@ -16,8 +16,8 @@
   InternalServerErrorException,
   NotFoundException,
   HttpStatus,
-  Logger,
   Req,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -41,6 +41,16 @@ import { FetchDevicesQuery } from 'src/thingsboard/application/queries/fetch-dev
 import { FetchAssetsQuery } from 'src/thingsboard/application/queries/fetch-assets/fetch-assets.query';
 import { FetchEntityViewsQuery } from 'src/thingsboard/application/queries/fetch-entity-views/fetch-entity-views.query';
 import { FetchResourcesQuery } from 'src/thingsboard/application/queries/fetch-resources/fetch-resources.query';
+import * as jwt from 'jsonwebtoken';
+import * as argon2 from 'argon2';
+import type { Response } from 'express';
+import { AuthService } from 'src/iam/application/auth/auth.service';
+import { UserRepository } from 'src/iam/domain/repositories/user.repository';
+import { ConnectionRepository } from 'src/connection/domain/repositories/connection.repository';
+import {
+  THINGSBOARD_REPOSITORY_PORT,
+  ThingsboardRepositoryPort,
+} from 'src/thingsboard/application/ports/thingsboard.repository.port';
 import { FetchResourceInfoQuery } from 'src/thingsboard/application/queries/fetch-resource-info/fetch-resource-info.query';
 import { FetchDeviceRelationsQuery } from '../../application/queries/fetch-device-relations/fetch-device-relations.query';
 import { match, Result } from 'oxide.ts';
@@ -260,6 +270,7 @@ import { FetchEntityTelemetryKeysQuery } from 'src/thingsboard/application/queri
 import { FetchEntityEventsQuery } from 'src/thingsboard/application/queries/fetch-entity-events/fetch-entity-events.query';
 import { CreateRelationCommand } from 'src/thingsboard/application/commands/create-relation/create-relation.command';
 import { DeleteRelationCommand } from 'src/thingsboard/application/commands/delete-relation/delete-relation.command';
+import { GetUserTokenQuery } from 'src/thingsboard/application/queries/get-user-token/get-user-token.query';
 
 @ApiTags('ThingsBoard')
 @Controller('thingsboard')
@@ -270,6 +281,12 @@ export class ThingsboardController {
     private readonly queryBus: QueryBus,
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApi: ThingsboardApiPort,
+    @Inject(THINGSBOARD_REPOSITORY_PORT)
+    private readonly thingsboardRepository: ThingsboardRepositoryPort,
+    private readonly authService: AuthService,
+    private readonly userRepository: UserRepository,
+    @Inject(ConnectionRepository)
+    private readonly connectionRepository: ConnectionRepository,
   ) {}
 
   @UseGuards(ThingsboardAuthGuard)
@@ -412,6 +429,64 @@ export class ThingsboardController {
         throw new InternalServerErrorException('Failed to fetch user');
       },
     });
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/user/:userId/token')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Impersonate a user',
+    description: 'Log in as a specific tenant user by ThingsBoard userId',
+  })
+  async getUserImpersonationToken(
+    @TbAccessToken() accessToken: string,
+    @Param('userId') userId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const query = new GetUserTokenQuery(userId, accessToken);
+    const result = await this.queryBus.execute(query);
+    
+    // Decode the TB token to get the user's email
+    const decoded: any = jwt.decode(result.token);
+    const email = decoded?.sub;
+
+    if (!email) {
+      throw new BadRequestException('Could not determine email from impersonation token');
+    }
+
+    // Find our internal user by email
+    const user = await this.userRepository.getUserByEmail(email);
+    if (!user || user.id === undefined) {
+      throw new NotFoundException(`User with email ${email} not found or missing ID in our database`);
+    }
+
+    // Get the role for the user
+    const connection = await this.connectionRepository.getConnectionByUserId(user.id);
+    if (!connection || !connection.role) {
+      throw new UnauthorizedException('User role not found');
+    }
+
+    // Update the user's Thingsboard token in our database so it doesn't try to use an expired one
+    const tbModel = await this.thingsboardRepository.findByUserId(user.id);
+    if (tbModel) {
+      tbModel.setAccessToken(result.token);
+      tbModel.setRefreshToken(result.refreshToken);
+      await this.thingsboardRepository.update(tbModel);
+    }
+
+    // Generate our own internal access and refresh tokens
+    const newAccessToken = await this.authService.generateAccessToken(user.id, connection.role);
+    const newRefreshToken = await this.authService.generateRefreshToken(user.id, connection.role);
+    const hashedRt = await argon2.hash(newRefreshToken);
+
+    // Save the hashed refresh token
+    await this.userRepository.updateHashedRt(user.id, hashedRt);
+
+    // Set cookies so the frontend gets logged in as this user
+    this.authService.setTokenCookies(res, newAccessToken, newRefreshToken);
+
+    return result;
   }
 
   @Roles(Role.MODERATOR, Role.PRACTITIONER)
@@ -2854,6 +2929,31 @@ export class ThingsboardController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to delete calculated field',
+      );
+    }
+  }
+
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER)
+  @UseGuards(ThingsboardAuthGuard)
+  @Post('/calculated-field/testScript')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Test calculated field script',
+    description:
+      'Test a calculated field script expression with given arguments',
+  })
+  async testCalculatedFieldScript(
+    @TbAccessToken() accessToken: string,
+    @Body() body: { expression: string; arguments: Record<string, any> },
+  ) {
+    try {
+      return await this.thingsboardApi.testCalculatedFieldScript(
+        accessToken,
+        body,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to test calculated field script',
       );
     }
   }
