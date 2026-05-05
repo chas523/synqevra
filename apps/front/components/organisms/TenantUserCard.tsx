@@ -6,9 +6,14 @@ import { formatTenantDate } from "@/lib/utils";
 interface TenantUserCardProps {
   user: TenantUser;
   onViewDetails?: () => void;
+  onImpersonate?: () => void;
 }
 
-export function TenantUserCard({ user, onViewDetails }: TenantUserCardProps) {
+export function TenantUserCard({
+  user,
+  onViewDetails,
+  onImpersonate,
+}: TenantUserCardProps) {
   const fullName =
     [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
 
@@ -50,14 +55,25 @@ export function TenantUserCard({ user, onViewDetails }: TenantUserCardProps) {
           </div>
         </div>
 
-        {onViewDetails && (
-          <Button
-            onClick={onViewDetails}
-            className="ml-2 whitespace-nowrap text-sm text-blue-600 hover:text-blue-700"
-          >
-            View details
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {onImpersonate && (
+            <Button
+              onClick={onImpersonate}
+              variant="outline"
+              className="text-sm text-blue-600 hover:text-blue-700 whitespace-nowrap ml-2"
+            >
+              Impersonate
+            </Button>
+          )}
+          {onViewDetails && (
+            <Button
+              onClick={onViewDetails}
+              className="text-sm text-blue-600 hover:text-blue-700 whitespace-nowrap ml-2"
+            >
+              View details
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

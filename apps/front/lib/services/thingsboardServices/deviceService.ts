@@ -499,6 +499,17 @@ export class DeviceService {
     await proxyApi.delete(`/thingsboard/calculated-field/${id}`);
   }
 
+  public static async testCalculatedFieldScript(payload: {
+    expression: string;
+    arguments: Record<string, { ts: number; value: unknown; type: string }>;
+  }): Promise<{ output: string; error: string }> {
+    const { data } = await proxyApi.post<{ output: string; error: string }>(
+      `/thingsboard/calculated-field/testScript`,
+      payload,
+    );
+    return data;
+  }
+
   public static async deleteDevice(id: string): Promise<void> {
     await proxyApi.delete(`/thingsboard/devices/${id}`);
   }

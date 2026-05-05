@@ -88,6 +88,10 @@ export abstract class ThingsboardApiPort {
   abstract refreshToken(
     refreshToken: string,
   ): Promise<ThingsboardLoginResponse>;
+  abstract getUserToken(
+    sysAdminAccessToken: string,
+    userId: string,
+  ): Promise<ThingsboardLoginResponse>;
 
   // Tenant operations
   abstract getDefaultTenantProfile(
@@ -302,6 +306,11 @@ export abstract class ThingsboardApiPort {
     accessToken: string,
     id: string,
   ): Promise<void>;
+
+  abstract testCalculatedFieldScript(
+    accessToken: string,
+    payload: { expression: string; arguments: Record<string, any> },
+  ): Promise<{ output: string; error: string }>;
 
   // Asset operations
   abstract fetchAssets(

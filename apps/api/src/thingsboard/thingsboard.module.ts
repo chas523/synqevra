@@ -7,6 +7,7 @@ import { ThingsboardController } from './interface/rest/thingsboard.controller';
 import { DashboardController } from './interface/rest/dashboard.controller';
 import { ConnectionModule } from 'src/connection/connection.module';
 import { MedplumModule } from 'src/medplum/medplum.module';
+import { IamModule } from 'src/iam/iam.module';
 
 // Infrastructure
 import { ThingsboardApiAdapter } from './infrastructure/http/thingsboard.api.adapter';
@@ -164,6 +165,7 @@ import { FetchRuleChainByIdHandler } from './application/queries/fetch-rule-chai
 import { FetchRuleChainMetadataHandler } from './application/queries/fetch-rule-chain-metadata/fetch-rule-chain-metadata.handler';
 import { FetchEntityEventsQueryHandler } from './application/queries/fetch-entity-events/fetch-entity-events.query-handler';
 import { FetchVersionDiffQueryHandler } from './application/queries/fetch-version-diff/fetch-version-diff.query.handler';
+import { GetUserTokenQueryHandler } from './application/queries/get-user-token/get-user-token.query.handler';
 
 // Services
 import { TelemetryService } from './application/services/telemetry.service';
@@ -323,6 +325,7 @@ const queryHandlers = [
   FetchEntityAuditLogsQueryHandler,
   FetchEntityTelemetryQueryHandler,
   FetchEntityTelemetryKeysQueryHandler,
+  GetUserTokenQueryHandler,
 ];
 
 @Module({
@@ -332,6 +335,7 @@ const queryHandlers = [
     CqrsModule,
     forwardRef(() => ConnectionModule),
     forwardRef(() => MedplumModule),
+    forwardRef(() => IamModule),
   ],
   providers: [
     ...commandHandlers,
