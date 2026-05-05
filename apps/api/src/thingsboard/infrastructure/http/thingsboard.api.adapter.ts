@@ -815,13 +815,9 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
     try {
       const url = `${this.THINGSBOARD_API_URL}/calculatedField/testScript`;
       const response = await firstValueFrom(
-        this.httpService.post<{ output: string; error: string }>(
-          url,
-          payload,
-          {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          },
-        ),
+        this.httpService.post<{ output: string; error: string }>(url, payload, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
       );
       return response.data;
     } catch (error) {
@@ -832,7 +828,6 @@ export class ThingsboardApiAdapter implements ThingsboardApiPort {
       );
     }
   }
-
 
   async fetchAssets(
     accessToken: string,

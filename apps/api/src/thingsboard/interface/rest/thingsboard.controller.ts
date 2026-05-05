@@ -446,23 +446,29 @@ export class ThingsboardController {
   ) {
     const query = new GetUserTokenQuery(userId, accessToken);
     const result = await this.queryBus.execute(query);
-    
+
     // Decode the TB token to get the user's email
     const decoded: any = jwt.decode(result.token);
     const email = decoded?.sub;
 
     if (!email) {
-      throw new BadRequestException('Could not determine email from impersonation token');
+      throw new BadRequestException(
+        'Could not determine email from impersonation token',
+      );
     }
 
     // Find our internal user by email
     const user = await this.userRepository.getUserByEmail(email);
     if (!user || user.id === undefined) {
-      throw new NotFoundException(`User with email ${email} not found or missing ID in our database`);
+      throw new NotFoundException(
+        `User with email ${email} not found or missing ID in our database`,
+      );
     }
 
     // Get the role for the user
-    const connection = await this.connectionRepository.getConnectionByUserId(user.id);
+    const connection = await this.connectionRepository.getConnectionByUserId(
+      user.id,
+    );
     if (!connection || !connection.role) {
       throw new UnauthorizedException('User role not found');
     }
@@ -476,8 +482,14 @@ export class ThingsboardController {
     }
 
     // Generate our own internal access and refresh tokens
-    const newAccessToken = await this.authService.generateAccessToken(user.id, connection.role);
-    const newRefreshToken = await this.authService.generateRefreshToken(user.id, connection.role);
+    const newAccessToken = await this.authService.generateAccessToken(
+      user.id,
+      connection.role,
+    );
+    const newRefreshToken = await this.authService.generateRefreshToken(
+      user.id,
+      connection.role,
+    );
     const hashedRt = await argon2.hash(newRefreshToken);
 
     // Save the hashed refresh token

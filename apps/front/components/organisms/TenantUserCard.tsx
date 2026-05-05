@@ -9,7 +9,11 @@ interface TenantUserCardProps {
   onImpersonate?: () => void;
 }
 
-export function TenantUserCard({ user, onViewDetails, onImpersonate }: TenantUserCardProps) {
+export function TenantUserCard({
+  user,
+  onViewDetails,
+  onImpersonate,
+}: TenantUserCardProps) {
   const fullName =
     [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
 

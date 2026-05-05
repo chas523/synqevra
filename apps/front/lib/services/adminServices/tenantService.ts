@@ -217,9 +217,10 @@ export class TenantService {
     userId: string,
   ): Promise<{ token: string; refreshToken: string }> {
     try {
-      const response = await proxyApi.post<{ token: string; refreshToken: string }>(
-        `/thingsboard/user/${userId}/token`,
-      );
+      const response = await proxyApi.post<{
+        token: string;
+        refreshToken: string;
+      }>(`/thingsboard/user/${userId}/token`);
       return response.data;
     } catch (err: unknown) {
       const message = extractErrorMessage(

@@ -39,10 +39,11 @@ const PaginationControls = ({
             type="button"
             key={page}
             onClick={() => onPageChange(page)}
-            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${currentPage === page
+            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs sm:text-sm font-medium transition-all shrink-0 ${
+              currentPage === page
                 ? "bg-primary text-primary-foreground"
                 : "border border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
+            }`}
           >
             {page + 1}
           </button>

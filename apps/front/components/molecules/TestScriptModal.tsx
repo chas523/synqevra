@@ -120,12 +120,12 @@ export function TestScriptModal({
         Custom styling for DialogContent to make it truly full screen and bypass default Shadcn styling.
         z-[100] ensures it's above the previous modal.
       */}
-      <DialogContent 
+      <DialogContent
         className="fixed inset-0 z-[100] flex !max-w-none flex-col !h-screen !w-screen p-0 m-0 border-none rounded-none bg-background gap-0 !translate-x-0 !translate-y-0 !top-0 !left-0 !duration-0"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogTitle className="sr-only">Test Script Function</DialogTitle>
-        
+
         {/* Top bar */}
         <div className="flex items-center justify-between border-b px-6 py-4 shrink-0">
           <h2 className="text-lg font-semibold">Test Script Function</h2>
@@ -137,7 +137,10 @@ export function TestScriptModal({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col lg:flex-row gap-6 p-6 min-h-0 overflow-y-auto lg:overflow-hidden" style={{ flex: "1 1 0" }}>
+        <div
+          className="flex flex-col lg:flex-row gap-6 p-6 min-h-0 overflow-y-auto lg:overflow-hidden"
+          style={{ flex: "1 1 0" }}
+        >
           {/* Left column – Script source */}
           <div className="flex flex-col gap-3 min-w-0 shrink-0 lg:shrink lg:flex-1">
             <div className="flex items-center gap-2">
@@ -154,7 +157,10 @@ export function TestScriptModal({
               <div className="bg-muted/50 px-4 py-2 border-b font-mono text-sm text-muted-foreground select-none">
                 function calculate(ctx, adf) {"{"}
               </div>
-              <div style={{ flex: "1 1 0", minHeight: "200px", height: "auto" }} className="lg:h-[calc(100%-72px)]">
+              <div
+                style={{ flex: "1 1 0", minHeight: "200px", height: "auto" }}
+                className="lg:h-[calc(100%-72px)]"
+              >
                 <Editor
                   height="100%"
                   language="javascript"
@@ -260,7 +266,6 @@ export function TestScriptModal({
           </div>
         </div>
 
-
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t px-6 py-4 shrink-0">
           <DialogPrimitive.Close asChild>
@@ -268,7 +273,7 @@ export function TestScriptModal({
               Cancel
             </Button>
           </DialogPrimitive.Close>
-          
+
           <Button
             variant="outline"
             className="border-blue-200 text-blue-700 hover:bg-blue-50"

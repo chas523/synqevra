@@ -8,9 +8,7 @@ import {
 } from '../../ports/thingsboard.api.port';
 
 @QueryHandler(GetUserTokenQuery)
-export class GetUserTokenQueryHandler
-  implements IQueryHandler<GetUserTokenQuery>
-{
+export class GetUserTokenQueryHandler implements IQueryHandler<GetUserTokenQuery> {
   constructor(
     @Inject(THINGSBOARD_API_PORT)
     private readonly thingsboardApiPort: ThingsboardApiPort,

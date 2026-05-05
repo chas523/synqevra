@@ -847,7 +847,11 @@ export function DeviceCalculatedFieldsTabContent({
                       size="sm"
                       disabled={form.arguments.length === 0 || isSubmitting}
                       onClick={() => setIsTestScriptModalOpen(true)}
-                      title={form.arguments.length === 0 ? "Add at least one argument to test the script" : ""}
+                      title={
+                        form.arguments.length === 0
+                          ? "Add at least one argument to test the script"
+                          : ""
+                      }
                     >
                       Test Script Function
                     </Button>

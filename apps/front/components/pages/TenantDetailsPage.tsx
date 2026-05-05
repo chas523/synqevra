@@ -210,9 +210,9 @@ export const TenantDetailsPage = ({ tenantId }: TenantDetailsPageProps) => {
               />
             ) : (
               usersData.data.map((user) => (
-                <TenantUserCard 
-                  key={user.id.id} 
-                  user={user} 
+                <TenantUserCard
+                  key={user.id.id}
+                  user={user}
                   onImpersonate={() => handleImpersonate(user.id.id)}
                 />
               ))
