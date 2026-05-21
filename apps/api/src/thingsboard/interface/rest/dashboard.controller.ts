@@ -351,7 +351,7 @@ export class DashboardController {
     });
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MODERATOR, Role.PRACTITIONER, Role.USER)
   @UseGuards(ThingsboardAuthGuard)
   @Get('/tenants/:id/alarms')
   async getTenantAlarms(

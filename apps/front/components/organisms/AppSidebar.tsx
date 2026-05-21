@@ -13,6 +13,7 @@ import {
   Stethoscope,
   ShieldCheck,
   BellIcon,
+  TriangleAlert,
   Cpu,
   History,
   Wrench,
@@ -112,6 +113,7 @@ const SIDEBAR_CONFIG: Record<string, NavGroup[]> = {
       label: "User",
       items: [
         { href: "/", icon: Home, label: "Landing Page" },
+        { href: "/alarms", icon: TriangleAlert, label: "Alarms" },
         { href: "/dashboards", icon: LayoutDashboard, label: "Dashboards" },
         { href: "/devices", icon: Settings, label: "Devices" },
         { href: "/patients", icon: PersonStanding, label: "Patients" },

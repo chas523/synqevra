@@ -40,4 +40,32 @@ export class AlarmRepositoryAdapter extends AlarmRepository {
   async save(alarm: Alarm): Promise<Alarm> {
     return this.repository.save(alarm);
   }
+
+  async findById(id: string): Promise<Alarm | null> {
+    return this.repository.findOne({
+      where: { id },
+    });
+  }
+
+  async findByTenantPaginated(params: {
+    tenantId: string;
+    page: number;
+    pageSize: number;
+  }): Promise<{ data: Alarm[]; totalElements: number }> {
+    const [data, totalElements] = await this.repository.findAndCount({
+      where: {
+        tenantId: params.tenantId,
+      },
+      order: {
+        updatedAt: 'DESC',
+      },
+      skip: params.page * params.pageSize,
+      take: params.pageSize,
+    });
+
+    return {
+      data,
+      totalElements,
+    };
+  }
 }

@@ -42,7 +42,9 @@ export class CreateMedplumTenantUseCase {
   }
 
   private get TB_SYSTEM_VALUE(): string {
-    const configured = this.configService.get<string>('TB_SYSTEM_VALUE')?.trim();
+    const configured = this.configService
+      .get<string>('TB_SYSTEM_VALUE')
+      ?.trim();
     return configured && configured.length > 0
       ? configured
       : 'thingsboard:device';

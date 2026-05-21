@@ -276,14 +276,19 @@ export class MedplumClientAdapter extends MedplumClientPort {
       client.search('Device', {
         identifier: normalizedDeviceId,
       }),
-    ])) as [{ entry?: Array<{ resource?: Device }> }, { entry?: Array<{ resource?: Device }> }];
+    ])) as [
+      { entry?: Array<{ resource?: Device }> },
+      { entry?: Array<{ resource?: Device }> },
+    ];
 
     const allDevices = [
       ...(bundleBySystemAndValue.entry ?? []),
       ...(bundleByValueOnly.entry ?? []),
     ]
       .map((entry) => entry.resource)
-      .filter((resource): resource is Device => resource?.resourceType === 'Device');
+      .filter(
+        (resource): resource is Device => resource?.resourceType === 'Device',
+      );
 
     const deduplicated = Array.from(
       new Map(allDevices.map((device) => [device.id, device])).values(),

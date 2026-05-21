@@ -58,4 +58,32 @@ export class OutboxRepositoryAdapter extends OutboxRepository {
   async findById(id: string): Promise<OutboxEvent | null> {
     return this.repository.findOne({ where: { id } });
   }
+
+  async findByAggregate(params: {
+    tenantId: string;
+    aggregateType: string;
+    aggregateId: string;
+    subscriberType?: string;
+    limit: number;
+  }): Promise<OutboxEvent[]> {
+    const query = this.repository
+      .createQueryBuilder('outbox')
+      .where('outbox.tenantId = :tenantId', { tenantId: params.tenantId })
+      .andWhere('outbox.aggregateType = :aggregateType', {
+        aggregateType: params.aggregateType,
+      })
+      .andWhere('outbox.aggregateId = :aggregateId', {
+        aggregateId: params.aggregateId,
+      })
+      .orderBy('outbox.createdAt', 'DESC')
+      .limit(params.limit);
+
+    if (params.subscriberType) {
+      query.andWhere('outbox.subscriberType = :subscriberType', {
+        subscriberType: params.subscriberType,
+      });
+    }
+
+    return query.getMany();
+  }
 }

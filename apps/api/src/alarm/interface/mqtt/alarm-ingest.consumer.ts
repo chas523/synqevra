@@ -112,20 +112,38 @@ export class AlarmIngestConsumer implements OnModuleInit, OnModuleDestroy {
   }
 
   private normalizePayload(raw: Record<string, unknown>): AbnormalEventDto {
+    const eventId = this.toStringValue(raw.eventId ?? raw.event_id);
+    const tenantId = this.toStringValue(raw.tenantId ?? raw.tenant_id);
+    const deviceId = this.toStringValue(raw.deviceId ?? raw.device_id);
+    const alarmType =
+      this.toStringValue(raw.alarmType ?? raw.alarm_type) ||
+      'abnormal_telemetry';
+    const ts = this.toStringValue(raw.ts);
+
     return {
-      eventId: String(raw.eventId ?? raw.event_id ?? ''),
-      tenantId: String(raw.tenantId ?? raw.tenant_id ?? ''),
-      deviceId: String(raw.deviceId ?? raw.device_id ?? ''),
-      alarmType: String(
-        raw.alarmType ?? raw.alarm_type ?? 'abnormal_telemetry',
-      ),
+      eventId,
+      tenantId,
+      deviceId,
+      alarmType,
       data: (raw.data as Record<string, unknown>) ?? {},
       thresholdSnapshot:
         (raw.thresholdSnapshot as Record<string, unknown>) ??
         (raw.threshold as Record<string, unknown>) ??
         {},
-      ts: raw.ts ? String(raw.ts) : undefined,
+      ts: ts || undefined,
       metadata: (raw.metadata as Record<string, unknown>) ?? {},
     };
+  }
+
+  private toStringValue(value: unknown): string {
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    if (typeof value === 'number' || typeof value === 'boolean') {
+      return String(value);
+    }
+
+    return '';
   }
 }

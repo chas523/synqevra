@@ -11,6 +11,7 @@ import { OutboxRepository } from '../../domain/repositories/outbox.repository';
 import { SubscriberType } from '../../domain/subscribers/subscriber-type.enum';
 import { OutboxEvent } from '../../infrastructure/persistence/outbox-event.entity';
 import { MedplumAlarmSubscriberAdapter } from '../../infrastructure/subscribers/medplum/medplum-alarm-subscriber.adapter';
+import { WebAppAlarmSubscriberAdapter } from '../../infrastructure/subscribers/web-app/web-app-alarm-subscriber.adapter';
 
 import { OUTBOX_SETTINGS } from '../constants/outbox.constants';
 
@@ -23,6 +24,7 @@ export class OutboxDispatcherService implements OnModuleInit, OnModuleDestroy {
     private readonly dataSource: DataSource,
     private readonly outboxRepository: OutboxRepository,
     private readonly medplumSubscriber: MedplumAlarmSubscriberAdapter,
+    private readonly webAppSubscriber: WebAppAlarmSubscriberAdapter,
   ) {}
 
   onModuleInit(): void {
@@ -117,9 +119,14 @@ export class OutboxDispatcherService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async dispatchToSubscriber(row: OutboxEvent): Promise<void> {
-    switch (row.subscriberType) {
+    const subscriberType = this.toSubscriberType(row.subscriberType);
+
+    switch (subscriberType) {
       case SubscriberType.MEDPLUM:
         await this.medplumSubscriber.deliver(row);
+        return;
+      case SubscriberType.WEB_APP:
+        await this.webAppSubscriber.deliver(row);
         return;
       default:
         throw new Error(`Unsupported subscriber type: ${row.subscriberType}`);
@@ -132,5 +139,15 @@ export class OutboxDispatcherService implements OnModuleInit, OnModuleDestroy {
     }
 
     return 'Unknown outbox subscriber error';
+  }
+
+  private toSubscriberType(value: string): SubscriberType {
+    const supportedTypes = new Set<string>(Object.values(SubscriberType));
+
+    if (supportedTypes.has(value)) {
+      return value as SubscriberType;
+    }
+
+    throw new Error(`Unsupported subscriber type: ${value}`);
   }
 }
