@@ -27,6 +27,13 @@ export class MedplumClientAdapter extends MedplumClientPort {
 
   private readonly logger = new Logger(MedplumClientAdapter.name);
 
+  private get TbIdentifierSystem(): string {
+    const configured = process.env.TB_SYSTEM_VALUE?.trim();
+    return configured && configured.length > 0
+      ? configured
+      : 'thingsboard:device';
+  }
+
   async createPatient(
     patient: Patient,
     userId?: number,
@@ -130,7 +137,7 @@ export class MedplumClientAdapter extends MedplumClientPort {
       id: deviceDto.identifier,
       identifier: [
         {
-          system: process.env.TB_URL as string,
+          system: this.TbIdentifierSystem,
           value: deviceDto.identifier,
         },
       ],
@@ -259,16 +266,71 @@ export class MedplumClientAdapter extends MedplumClientPort {
     deviceId: string,
     client: MedplumClient,
   ): Promise<Device> {
-    const tbUrl = process.env.TB_URL as string;
-    const device = (await client.searchOne('Device', {
-      identifier: `${tbUrl}|${deviceId}`,
-    })) as Device | null;
-    if (!device) {
-      this.logger.warn('Device not found:', deviceId, tbUrl);
+    const tbUrl = (process.env.TB_URL as string).trim();
+    const normalizedDeviceId = deviceId.trim();
+
+    const [bundleBySystemAndValue, bundleByValueOnly] = (await Promise.all([
+      client.search('Device', {
+        identifier: `${tbUrl}|${normalizedDeviceId}`,
+      }),
+      client.search('Device', {
+        identifier: normalizedDeviceId,
+      }),
+    ])) as [{ entry?: Array<{ resource?: Device }> }, { entry?: Array<{ resource?: Device }> }];
+
+    const allDevices = [
+      ...(bundleBySystemAndValue.entry ?? []),
+      ...(bundleByValueOnly.entry ?? []),
+    ]
+      .map((entry) => entry.resource)
+      .filter((resource): resource is Device => resource?.resourceType === 'Device');
+
+    const deduplicated = Array.from(
+      new Map(allDevices.map((device) => [device.id, device])).values(),
+    );
+
+    const matches = deduplicated.filter((device) =>
+      this.deviceMatchesThingsboardId(device, tbUrl, normalizedDeviceId),
+    );
+
+    if (matches.length === 0) {
+      this.logger.warn('Device not found:', normalizedDeviceId, tbUrl);
       throw new NotFoundException('Device not found');
     }
 
-    return device;
+    if (matches.length > 1) {
+      this.logger.error(
+        `Ambiguous Device match for ThingsBoard ID ${normalizedDeviceId}. Matched device resource IDs: ${matches
+          .map((d) => d.id)
+          .join(', ')}`,
+      );
+      throw new NotFoundException('Ambiguous device mapping');
+    }
+
+    return matches[0];
+  }
+
+  private deviceMatchesThingsboardId(
+    device: Device,
+    tbUrl: string,
+    thingsboardDeviceId: string,
+  ): boolean {
+    const identifiers = device.identifier ?? [];
+
+    return identifiers.some((identifier) => {
+      const system = identifier.system?.trim();
+      const value = identifier.value?.trim();
+
+      if (!value) {
+        return false;
+      }
+
+      if (system === tbUrl && value === thingsboardDeviceId) {
+        return true;
+      }
+
+      return value.endsWith(thingsboardDeviceId);
+    });
   }
 
   private handleHttpError(err: unknown): never {

@@ -160,7 +160,7 @@ export function RuleChainEditor({
             Rule Chain
           </span>
           <span className="text-slate-300 dark:text-slate-600">/</span>
-          <h1 className="text-sm font-semibold dark:text-white truncate max-w-[300px]">
+          <h1 className="text-sm font-semibold dark:text-white truncate max-w-75">
             {ruleChainName}
           </h1>
         </div>
@@ -214,7 +214,7 @@ export function RuleChainEditor({
       {/* ── Body: sidebar + canvas ───────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar – fixed width, scrollable */}
-        <div className="w-[200px] shrink-0 h-full overflow-hidden border-r border-border dark:border-slate-700">
+        <div className="w-50 shrink-0 h-full overflow-hidden border-r border-border dark:border-slate-700">
           <RuleNodeLibrary onNodeClick={handleNodeClick} />
         </div>
 

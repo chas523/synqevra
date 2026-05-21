@@ -19,6 +19,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { Hl7Module } from './hl7/hl7.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CqrsModule } from '@nestjs/cqrs';
+import { AlarmModule } from './alarm/alarm.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     MailerModule,
     PendingUserModule,
     Hl7Module,
+    AlarmModule,
   ],
   controllers: [AppController],
   providers: [

@@ -41,8 +41,11 @@ export class CreateMedplumTenantUseCase {
     );
   }
 
-  private get TB_URL(): string {
-    return this.configService.get<string>('TB_URL') ?? '';
+  private get TB_SYSTEM_VALUE(): string {
+    const configured = this.configService.get<string>('TB_SYSTEM_VALUE')?.trim();
+    return configured && configured.length > 0
+      ? configured
+      : 'thingsboard:device';
   }
 
   private normalizeMedplumProjectName(projectName: string): string {
@@ -127,7 +130,7 @@ export class CreateMedplumTenantUseCase {
         id: deviceId,
         identifier: [
           {
-            system: this.TB_URL,
+            system: this.TB_SYSTEM_VALUE,
             value: deviceId,
           },
         ],

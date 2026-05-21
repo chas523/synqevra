@@ -14,5 +14,6 @@ import { MedplumModule } from '../medplum/medplum.module';
   ],
   controllers: [ProxyController],
   providers: [PostTelemetryUseCase],
+  exports: [PostTelemetryUseCase],
 })
 export class ProxyModule {}
