@@ -8,7 +8,9 @@ import { DataSource } from 'typeorm';
 
 import { OutboxStatus } from '../../domain/enums/outbox-status.enum';
 import { OutboxRepository } from '../../domain/repositories/outbox.repository';
+import { SubscriberType } from '../../domain/subscribers/subscriber-type.enum';
 import { OutboxEvent } from '../../infrastructure/persistence/outbox-event.entity';
+import { MedplumAlarmSubscriberAdapter } from '../../infrastructure/subscribers/medplum/medplum-alarm-subscriber.adapter';
 
 import { OUTBOX_SETTINGS } from '../constants/outbox.constants';
 
@@ -20,6 +22,7 @@ export class OutboxDispatcherService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly dataSource: DataSource,
     private readonly outboxRepository: OutboxRepository,
+    private readonly medplumSubscriber: MedplumAlarmSubscriberAdapter,
   ) {}
 
   onModuleInit(): void {
@@ -62,28 +65,72 @@ export class OutboxDispatcherService implements OnModuleInit, OnModuleDestroy {
     outboxRepo: OutboxRepository,
     row: OutboxEvent,
   ): Promise<void> {
-    const attempts = row.attempts + 1;
-    const maxAttempts = OUTBOX_SETTINGS.MAX_RETRY_ATTEMPTS;
+    try {
+      await this.dispatchToSubscriber(row);
 
-    if (attempts >= maxAttempts) {
+      await outboxRepo.updateDispatchState({
+        id: row.id,
+        attempts: row.attempts,
+        status: OutboxStatus.DELIVERED,
+        deliveredAt: new Date(),
+      });
+
+      this.logger.log(
+        `Outbox delivery succeeded: outboxId=${row.id}, subscriberType=${row.subscriberType}, attempts=${row.attempts}`,
+      );
+
+      return;
+    } catch (error) {
+      const attempts = row.attempts + 1;
+      const maxAttempts = OUTBOX_SETTINGS.MAX_RETRY_ATTEMPTS;
+
+      if (attempts >= maxAttempts) {
+        await outboxRepo.updateDispatchState({
+          id: row.id,
+          attempts,
+          status: OutboxStatus.DEAD,
+          lastError: this.stringifyError(error),
+        });
+
+        this.logger.error(
+          `Outbox delivery moved to DEAD: outboxId=${row.id}, subscriberType=${row.subscriberType}, attempts=${attempts}`,
+          error,
+        );
+        return;
+      }
+
+      const delayMs = OUTBOX_SETTINGS.RETRY_BASE_DELAY_MS * 2 ** (attempts - 1);
+      const nextAttemptAt = new Date(Date.now() + delayMs);
+
       await outboxRepo.updateDispatchState({
         id: row.id,
         attempts,
-        status: OutboxStatus.DEAD,
-        lastError: 'NO_SUBSCRIBER_IMPLEMENTATION',
+        status: OutboxStatus.RETRY,
+        nextAttemptAt,
+        lastError: this.stringifyError(error),
       });
-      return;
+
+      this.logger.warn(
+        `Outbox delivery scheduled for retry: outboxId=${row.id}, subscriberType=${row.subscriberType}, attempts=${attempts}, nextAttemptAt=${nextAttemptAt.toISOString()}`,
+      );
+    }
+  }
+
+  private async dispatchToSubscriber(row: OutboxEvent): Promise<void> {
+    switch (row.subscriberType) {
+      case SubscriberType.MEDPLUM:
+        await this.medplumSubscriber.deliver(row);
+        return;
+      default:
+        throw new Error(`Unsupported subscriber type: ${row.subscriberType}`);
+    }
+  }
+
+  private stringifyError(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
     }
 
-    const delayMs = OUTBOX_SETTINGS.RETRY_BASE_DELAY_MS * 2 ** (attempts - 1);
-    const nextAttemptAt = new Date(Date.now() + delayMs);
-
-    await outboxRepo.updateDispatchState({
-      id: row.id,
-      attempts,
-      status: OutboxStatus.RETRY,
-      nextAttemptAt,
-      lastError: 'NO_SUBSCRIBER_IMPLEMENTATION',
-    });
+    return 'Unknown outbox subscriber error';
   }
 }

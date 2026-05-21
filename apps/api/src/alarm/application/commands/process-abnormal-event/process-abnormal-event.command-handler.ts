@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { IdempotencyRepository } from '../../../../idempotency/domain/repositories/idempotency.repository';
 import { OutboxStatus } from '../../../../outbox/domain/enums/outbox-status.enum';
 import { OutboxRepository } from '../../../../outbox/domain/repositories/outbox.repository';
+import { SubscriberType } from '../../../../outbox/domain/subscribers/subscriber-type.enum';
 import { OutboxEvent } from '../../../../outbox/infrastructure/persistence/outbox-event.entity';
 import { AlarmStatus } from '../../../domain/enums/alarm-status.enum';
 import { AlarmRepository } from '../../../domain/repositories/alarm.repository';
@@ -44,9 +45,10 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
 
     const normalizedAlarmType =
       command.event.alarmType?.trim() || 'abnormal_telemetry';
+    const normalizedTimestamp = this.normalizeEventTimestamp(command.event.ts);
     const normalizedEventId =
       command.event.eventId?.trim() ||
-      `${command.event.tenantId}:${command.event.deviceId}:${normalizedAlarmType}:${command.event.ts || ''}:${payloadHash.slice(0, 16)}`;
+      `${command.event.tenantId}:${command.event.deviceId}:${normalizedAlarmType}:${normalizedTimestamp}:${payloadHash.slice(0, 16)}`;
     const normalizedEvent = {
       eventId: normalizedEventId,
       tenantId: command.event.tenantId,
@@ -54,7 +56,7 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
       alarmType: normalizedAlarmType,
       data: command.event.data ?? {},
       thresholdSnapshot: command.event.thresholdSnapshot ?? {},
-      ts: command.event.ts?.trim() || new Date().toISOString(),
+      ts: normalizedTimestamp,
       metadata: command.event.metadata ?? {},
     };
 
@@ -112,7 +114,7 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
       outboxEvent.tenantId = command.event.tenantId;
       outboxEvent.aggregateType = 'alarm';
       outboxEvent.aggregateId = savedAlarm.id;
-      outboxEvent.subscriberType = 'UNASSIGNED';
+      outboxEvent.subscriberType = SubscriberType.MEDPLUM;
       outboxEvent.status = OutboxStatus.PENDING;
       outboxEvent.payload = {
         schemaVersion: 1,
@@ -139,5 +141,36 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
         alarmId: savedAlarm.id,
       };
     });
+  }
+
+  private normalizeEventTimestamp(input?: string): string {
+    const nowIso = new Date().toISOString();
+    const raw = input?.trim();
+
+    if (!raw) {
+      return nowIso;
+    }
+
+    if (/^\d+$/.test(raw)) {
+      const numericTs = Number(raw);
+      if (Number.isFinite(numericTs)) {
+        // ThingsBoard metadata.ts is commonly epoch milliseconds.
+        const asEpochMs = raw.length <= 10 ? numericTs * 1000 : numericTs;
+        const parsed = new Date(asEpochMs);
+        if (!Number.isNaN(parsed.getTime())) {
+          return parsed.toISOString();
+        }
+      }
+    }
+
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString();
+    }
+
+    this.logger.warn(
+      `Invalid alarm timestamp received: ts=${raw}. Falling back to server timestamp.`,
+    );
+    return nowIso;
   }
 }

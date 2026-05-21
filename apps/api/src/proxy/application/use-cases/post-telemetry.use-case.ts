@@ -26,21 +26,124 @@ export class PostTelemetryUseCase {
       undefined,
       tenantId,
     );
-    const tbUrl = process.env.TB_URL as string;
+    const identifierSystem = this.getTbIdentifierSystem();
+    const normalizedDeviceId = deviceId.trim();
 
-    const bundle = (await client.search('Device', {
-      identifier: `${tbUrl}|${deviceId}`,
-    })) as Bundle;
+    const [bundleBySystemAndValue, bundleByValueOnly] = (await Promise.all([
+      client.search('Device', {
+        identifier: `${identifierSystem}|${normalizedDeviceId}`,
+      }),
+      client.search('Device', {
+        identifier: normalizedDeviceId,
+      }),
+    ])) as [Bundle, Bundle];
 
-    const device = bundle.entry?.[0]?.resource as Device;
+    const allDevices = [
+      ...(bundleBySystemAndValue.entry ?? []),
+      ...(bundleByValueOnly.entry ?? []),
+    ]
+      .map((entry) => entry.resource as Device)
+      .filter((resource): resource is Device => resource?.resourceType === 'Device');
 
-    if (!device)
-      throw new NotFoundException(`Device with ID ${deviceId} not found`);
+    const deduplicated = Array.from(
+      new Map(allDevices.map((device) => [device.id, device])).values(),
+    );
+
+    this.logSystemMismatchIfAny(
+      deduplicated,
+      normalizedDeviceId,
+      identifierSystem,
+    );
+
+    const matches = deduplicated.filter((device) =>
+      this.deviceMatchesThingsboardId(device, identifierSystem, normalizedDeviceId),
+    );
+
+    if (matches.length === 0) {
+      throw new NotFoundException(
+        `Device with ThingsBoard ID ${deviceId} not found`,
+      );
+    }
+
+    if (matches.length > 1) {
+      this.logger.error(
+        `Ambiguous Device match for ThingsBoard ID ${deviceId}. Matched device resource IDs: ${matches
+          .map((d) => d.id)
+          .join(', ')}`,
+      );
+      throw new NotFoundException(
+        `Ambiguous device mapping for ThingsBoard ID ${deviceId}`,
+      );
+    }
+
+    const device = matches[0];
+
+    if (!device.patient?.reference) {
+      throw new NotFoundException(
+        `Device ${device.id} is not assigned to a patient`,
+      );
+    }
 
     return {
       deviceId: device.id as string,
       patientRef: device.patient?.reference as string,
     };
+  }
+
+  private deviceMatchesThingsboardId(
+    device: Device,
+    identifierSystem: string,
+    thingsboardDeviceId: string,
+  ): boolean {
+    const identifiers = device.identifier ?? [];
+
+    return identifiers.some((identifier) => {
+      const system = identifier.system?.trim();
+      const value = identifier.value?.trim();
+
+      if (!value) {
+        return false;
+      }
+
+      return system === identifierSystem && value === thingsboardDeviceId;
+    });
+  }
+
+  private getTbIdentifierSystem(): string {
+    const configured = process.env.TB_SYSTEM_VALUE?.trim();
+    return configured && configured.length > 0
+      ? configured
+      : 'thingsboard:device';
+  }
+
+  private logSystemMismatchIfAny(
+    devices: Device[],
+    thingsboardDeviceId: string,
+    expectedSystem: string,
+  ): void {
+    const mismatches = devices
+      .map((device) => {
+        const wrongSystems = (device.identifier ?? [])
+          .filter((identifier) => identifier.value?.trim() === thingsboardDeviceId)
+          .map((identifier) => identifier.system?.trim())
+          .filter((system): system is string => Boolean(system && system !== expectedSystem));
+
+        return {
+          deviceId: device.id,
+          wrongSystems,
+        };
+      })
+      .filter((entry) => entry.wrongSystems.length > 0);
+
+    if (mismatches.length > 0) {
+      const mismatchDetails = mismatches
+        .map((entry) => `device=${entry.deviceId}: actual=[${entry.wrongSystems.join(', ')}], expected=${expectedSystem}`)
+        .join(' | ');
+
+      this.logger.error(
+        `Invalid Medplum Device identifier system for TB device ${thingsboardDeviceId}. ${mismatchDetails}`,
+      );
+    }
   }
 
   async execute(body: PostTelemetryCommand): Promise<PostTelemetryResult> {
@@ -94,8 +197,15 @@ export class PostTelemetryUseCase {
         } else {
           failedCount++;
         }
-      } catch {
-        this.logger.error('Error while creating resource');
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : JSON.stringify(error ?? 'Unknown error');
+
+        this.logger.error(
+          `Error while creating Observation resource: tenantId=${body.tenantId}, tbDeviceId=${body.deviceId}, medplumDeviceId=${deviceId}, metric=${key}, ts=${body.timestamp ?? 'now'}, reason=${message}`,
+        );
         failedCount++;
       }
     }
