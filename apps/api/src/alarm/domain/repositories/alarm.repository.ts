@@ -12,4 +12,12 @@ export abstract class AlarmRepository {
   ): Promise<Alarm | null>;
 
   abstract save(alarm: Alarm): Promise<Alarm>;
+
+  abstract findById(id: string): Promise<Alarm | null>;
+
+  abstract findByTenantPaginated(params: {
+    tenantId: string;
+    page: number;
+    pageSize: number;
+  }): Promise<{ data: Alarm[]; totalElements: number }>;
 }

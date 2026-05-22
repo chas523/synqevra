@@ -20,6 +20,20 @@ export interface ProcessAbnormalEventResult {
   alarmId?: string;
 }
 
+interface AlarmSnapshotPayload {
+  alarmId: string;
+  tenantId: string;
+  deviceId: string;
+  alarmType: string;
+  status: AlarmStatus;
+  currentValue: Record<string, unknown>;
+  thresholdSnapshot: Record<string, unknown>;
+  suppressed: boolean;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  updatedAt?: string;
+}
+
 @Injectable()
 @CommandHandler(ProcessAbnormalEventCommand)
 export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
@@ -110,18 +124,39 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
 
       const savedAlarm = await alarmRepo.save(alarm);
 
-      const outboxEvent = new OutboxEvent();
-      outboxEvent.tenantId = command.event.tenantId;
-      outboxEvent.aggregateType = 'alarm';
-      outboxEvent.aggregateId = savedAlarm.id;
-      outboxEvent.subscriberType = SubscriberType.MEDPLUM;
-      outboxEvent.status = OutboxStatus.PENDING;
-      outboxEvent.payload = {
-        schemaVersion: 1,
-        event: normalizedEvent,
+      const alarmSnapshot: AlarmSnapshotPayload = {
+        alarmId: savedAlarm.id,
+        tenantId: savedAlarm.tenantId,
+        deviceId: savedAlarm.deviceId,
+        alarmType: savedAlarm.alarmType,
+        status: savedAlarm.status,
+        currentValue: savedAlarm.currentValue ?? {},
+        thresholdSnapshot: savedAlarm.thresholdSnapshot ?? {},
+        suppressed: savedAlarm.suppressed,
+        acknowledgedAt: savedAlarm.acknowledgedAt?.toISOString(),
+        resolvedAt: savedAlarm.resolvedAt?.toISOString(),
+        updatedAt: savedAlarm.updatedAt?.toISOString(),
       };
 
-      await outboxRepo.save(outboxEvent);
+      await outboxRepo.save(
+        this.createOutboxEvent(
+          command.event.tenantId,
+          savedAlarm.id,
+          SubscriberType.MEDPLUM,
+          normalizedEvent,
+          alarmSnapshot,
+        ),
+      );
+
+      await outboxRepo.save(
+        this.createOutboxEvent(
+          command.event.tenantId,
+          savedAlarm.id,
+          SubscriberType.WEB_APP,
+          normalizedEvent,
+          alarmSnapshot,
+        ),
+      );
 
       const idempotencyRow = await idempotencyRepo.findByTenantAndEvent(
         command.event.tenantId,
@@ -172,5 +207,36 @@ export class ProcessAbnormalEventCommandHandler implements ICommandHandler<
       `Invalid alarm timestamp received: ts=${raw}. Falling back to server timestamp.`,
     );
     return nowIso;
+  }
+
+  private createOutboxEvent(
+    tenantId: string,
+    aggregateId: string,
+    subscriberType: SubscriberType,
+    normalizedEvent: {
+      eventId: string;
+      tenantId: string;
+      deviceId: string;
+      alarmType: string;
+      data: Record<string, unknown>;
+      thresholdSnapshot: Record<string, unknown>;
+      ts: string;
+      metadata: Record<string, unknown>;
+    },
+    alarmSnapshot: AlarmSnapshotPayload,
+  ): OutboxEvent {
+    const outboxEvent = new OutboxEvent();
+    outboxEvent.tenantId = tenantId;
+    outboxEvent.aggregateType = 'alarm';
+    outboxEvent.aggregateId = aggregateId;
+    outboxEvent.subscriberType = subscriberType;
+    outboxEvent.status = OutboxStatus.PENDING;
+    outboxEvent.payload = {
+      schemaVersion: 1,
+      event: normalizedEvent,
+      alarm: alarmSnapshot,
+    };
+
+    return outboxEvent;
   }
 }

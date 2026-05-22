@@ -22,6 +22,10 @@ import {
 import { ThingsboardWsAuthGuard } from 'src/auth/guards/thingsboard-ws-auth/thingsboard-ws-auth.guard';
 import { WsTbAccessToken } from 'src/auth/decorators/ws-tb-access-token.decorator';
 
+const WS_ALLOWED_ORIGINS = process.env.CORS_ORIGIN?.split(',').map((item) =>
+  item.trim(),
+) || ['http://localhost:3000', 'http://localhost:8088'];
+
 /**
  * WebSocket Gateway - proxy between ThingsBoard and frontend.
  * Frontend sends simple events (topics), backend knows which commands to send.
@@ -29,11 +33,12 @@ import { WsTbAccessToken } from 'src/auth/decorators/ws-tb-access-token.decorato
 @WebSocketGateway({
   namespace: 'telemetry',
   cors: {
-    origin: '*',
+    origin: WS_ALLOWED_ORIGINS,
+    credentials: true,
   },
 })
 export class TelemetryGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
@@ -54,6 +59,12 @@ export class TelemetryGateway
     private readonly telemetryService: TelemetryService,
     private readonly parserService: TelemetryParserService,
   ) {}
+
+  afterInit(): void {
+    this.logger.log(
+      `Telemetry websocket gateway initialized. Allowed origins: ${WS_ALLOWED_ORIGINS.join(', ')}`,
+    );
+  }
 
   handleConnection(client: Socket) {
     this.logger.log(`client connected: ${client.id}`);

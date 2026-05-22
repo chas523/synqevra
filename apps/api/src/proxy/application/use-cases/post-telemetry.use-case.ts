@@ -43,7 +43,9 @@ export class PostTelemetryUseCase {
       ...(bundleByValueOnly.entry ?? []),
     ]
       .map((entry) => entry.resource as Device)
-      .filter((resource): resource is Device => resource?.resourceType === 'Device');
+      .filter(
+        (resource): resource is Device => resource?.resourceType === 'Device',
+      );
 
     const deduplicated = Array.from(
       new Map(allDevices.map((device) => [device.id, device])).values(),
@@ -56,7 +58,11 @@ export class PostTelemetryUseCase {
     );
 
     const matches = deduplicated.filter((device) =>
-      this.deviceMatchesThingsboardId(device, identifierSystem, normalizedDeviceId),
+      this.deviceMatchesThingsboardId(
+        device,
+        identifierSystem,
+        normalizedDeviceId,
+      ),
     );
 
     if (matches.length === 0) {
@@ -86,7 +92,7 @@ export class PostTelemetryUseCase {
 
     return {
       deviceId: device.id as string,
-      patientRef: device.patient?.reference as string,
+      patientRef: device.patient?.reference,
     };
   }
 
@@ -124,9 +130,13 @@ export class PostTelemetryUseCase {
     const mismatches = devices
       .map((device) => {
         const wrongSystems = (device.identifier ?? [])
-          .filter((identifier) => identifier.value?.trim() === thingsboardDeviceId)
+          .filter(
+            (identifier) => identifier.value?.trim() === thingsboardDeviceId,
+          )
           .map((identifier) => identifier.system?.trim())
-          .filter((system): system is string => Boolean(system && system !== expectedSystem));
+          .filter((system): system is string =>
+            Boolean(system && system !== expectedSystem),
+          );
 
         return {
           deviceId: device.id,
@@ -137,7 +147,10 @@ export class PostTelemetryUseCase {
 
     if (mismatches.length > 0) {
       const mismatchDetails = mismatches
-        .map((entry) => `device=${entry.deviceId}: actual=[${entry.wrongSystems.join(', ')}], expected=${expectedSystem}`)
+        .map(
+          (entry) =>
+            `device=${entry.deviceId}: actual=[${entry.wrongSystems.join(', ')}], expected=${expectedSystem}`,
+        )
         .join(' | ');
 
       this.logger.error(

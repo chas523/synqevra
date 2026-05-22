@@ -20,4 +20,12 @@ export abstract class OutboxRepository {
   }): Promise<void>;
 
   abstract findById(id: string): Promise<OutboxEvent | null>;
+
+  abstract findByAggregate(params: {
+    tenantId: string;
+    aggregateType: string;
+    aggregateId: string;
+    subscriberType?: string;
+    limit: number;
+  }): Promise<OutboxEvent[]>;
 }
