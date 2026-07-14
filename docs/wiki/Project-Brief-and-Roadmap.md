@@ -313,7 +313,7 @@ Stage 1 succeeds when:
 
 * [Synqevra GitHub Project](https://github.com/users/chas523/projects)
 * [Current Synqevra GitHub repository](<https://github.com/chas523/synqevra>)
-* [CE capability catalog — SYN-13](<https://linear.app/softteco-fd/issue/SYN-13/build-the-complete-thingsboard-community-edition-capability-parity>)
-* [Headless dependency map — SYN-12](<https://linear.app/softteco-fd/issue/SYN-12/map-the-current-headless-thingsboard-ce-dependencies-and-full>)
-* [Roadmap rebaseline — SYN-18](<https://linear.app/softteco-fd/issue/SYN-18/rebaseline-the-roadmap-for-full-thingsboard-ce-replacement-and>)
-* [Professional strategy — SYN-19](<https://linear.app/softteco-fd/issue/SYN-19/define-the-synqevra-professional-edition-product-and-commercial>)
+* [CE capability catalog — SYN-13 / #10](https://github.com/chas523/synqevra/issues/10)
+* [Headless dependency map — SYN-12 / #9](https://github.com/chas523/synqevra/issues/9)
+* [Roadmap rebaseline — SYN-18 / #14](https://github.com/chas523/synqevra/issues/14)
+* [Professional strategy — SYN-19 / #16](https://github.com/chas523/synqevra/issues/16)
