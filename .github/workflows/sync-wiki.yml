@@ -1,0 +1,41 @@
+name: Sync wiki
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "docs/wiki/**"
+      - ".github/workflows/sync-wiki.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish docs/wiki to GitHub Wiki
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          wiki_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          git clone "${wiki_url}" wiki
+          find wiki -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R docs/wiki/. wiki/
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          if git diff --cached --quiet; then
+            echo "Wiki is already up to date."
+            exit 0
+          fi
+          git commit -m "Sync wiki from main"
+          git push
