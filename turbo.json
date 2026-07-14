@@ -1,20 +1,40 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": ["tsconfig*.json"],
   "tasks": {
+    // === Build ===
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
-    "api#build": {
+    "backend#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "frontend#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+
+    // === Quality ===
     "lint": {
       "dependsOn": ["^lint"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"]
     },
+    "format": {
+      "dependsOn": ["^format"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+
+    // === Dev / Start (never cached, long-running) ===
     "dev": {
       "persistent": true,
       "cache": false

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80">
+
+  <defs>
+    <!-- Gradient dla linii EKG -->
+    <linearGradient id="ekgGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="cyan" />
+      <stop offset="100%" stop-color="#00008b" />
+    </linearGradient>
+
+    <!-- Mask do animacji "przesuwania" linii -->
+    <mask id="mask">
+      <rect x="0" y="0" width="160" height="80" fill="black" />
+      <rect x="0" y="0" width="50" height="80" fill="white">
+        <animate attributeName="x" from="-40" to="160" dur="2s" repeatCount="indefinite" />
+      </rect>
+    </mask>
+  </defs>
+
+  <!-- Statyczna linia tła -->
+  <path d="M0 40 L30 40 L35 30 L40 50 L45 40 L70 40 L75 10 L85 70 L95 40 L120 40 L125 35 L130 45 L135 40 L160 40" 
+        fill="none" stroke="#aaa" stroke-width="3" />
+
+  <!-- Animowana linia EKG z gradientem -->
+  <path d="M0 40 L30 40 L35 30 L40 50 L45 40 L70 40 L75 10 L85 70 L95 40 L120 40 L125 35 L130 45 L135 40 L160 40" 
+        fill="none" stroke="url(#ekgGradient)" stroke-width="4" mask="url(#mask)"  />
+</svg>

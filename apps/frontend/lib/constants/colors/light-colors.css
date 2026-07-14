@@ -1,0 +1,88 @@
+/**
+ * Light Mode Color Tokens
+ * ========================
+ * Centralized color definitions for light mode UI.
+ * These tokens are imported globally in apps/front/app/globals.css and serve as the single source of truth
+ * for light-mode color customization and white-labeling.
+ *
+ * Token Categories:
+ * - Surface: Background, card, popover surfaces
+ * - Text: Foreground colors for different text emphasis levels
+ * - Border & Input: Border colors and input field backgrounds
+ * - Semantic: Primary, secondary, destructive, accent colors with their foreground variants
+ * - Chart: Chart visualization colors (chart-1 through chart-5)
+ * - Sidebar: Sidebar-specific colors (sidebar, foreground, primary, accent, border, ring)
+ * - Utility: Ring (focus states), radius
+ *
+ * White-Labeling Guide:
+ * To customize the light mode theme, modify the oklch() color values below without changing token names.
+ * All changes will propagate automatically through the entire application.
+ * Avoid modifying token names to maintain compatibility.
+ */
+
+:root {
+  /* ===== SURFACE COLORS ===== */
+  --wl-light-background: oklch(1 0 0);
+  --wl-light-card: oklch(1 0 0);
+  --wl-light-popover: oklch(1 0 0);
+
+  /* ===== TEXT COLORS ===== */
+  --wl-light-foreground: oklch(0.145 0 0);
+  --wl-light-card-foreground: oklch(0.145 0 0);
+  --wl-light-popover-foreground: oklch(0.145 0 0);
+  --wl-light-muted-foreground: oklch(0.556 0 0);
+
+  /* ===== PRIMARY COLOR ===== */
+  --wl-light-primary: oklch(0.205 0 0);
+  --wl-light-primary-foreground: oklch(0.985 0 0);
+
+  /* ===== SECONDARY COLOR ===== */
+  --wl-light-secondary: oklch(0.97 0 0);
+  --wl-light-secondary-foreground: oklch(0.205 0 0);
+
+  /* ===== MUTED COLOR ===== */
+  --wl-light-muted: oklch(0.97 0 0);
+
+  /* ===== ACCENT COLOR ===== */
+  --wl-light-accent: oklch(0.97 0 0);
+  --wl-light-accent-foreground: oklch(0.205 0 0);
+
+  /* ===== DESTRUCTIVE COLOR ===== */
+  --wl-light-destructive: oklch(0.577 0.245 27.325);
+
+  /* ===== BORDER & INPUT ===== */
+  --wl-light-border: oklch(0.922 0 0);
+  --wl-light-input: oklch(0.922 0 0);
+
+  /* ===== FOCUS & RING ===== */
+  --wl-light-ring: oklch(0.708 0 0);
+
+  /* ===== CHART COLORS ===== */
+  --wl-light-chart-1: oklch(0.646 0.222 41.116);
+  --wl-light-chart-2: oklch(0.6 0.118 184.704);
+  --wl-light-chart-3: oklch(0.398 0.07 227.392);
+  --wl-light-chart-4: oklch(0.828 0.189 84.429);
+  --wl-light-chart-5: oklch(0.769 0.188 70.08);
+
+  /* ===== SIDEBAR COLORS ===== */
+  --wl-light-sidebar: oklch(97.034% 0.01038 248.179 / 0);
+  --wl-light-sidebar-foreground: oklch(0.25 0.02 250);
+  --wl-light-sidebar-primary: oklch(0.35 0.12 240);
+  --wl-light-sidebar-primary-foreground: oklch(0.98 0 0);
+  --wl-light-sidebar-accent: oklch(0.92 0.03 240 / 90%);
+  --wl-light-sidebar-accent-foreground: oklch(0.25 0.02 250);
+  --wl-light-sidebar-border: oklch(0.85 0.02 240);
+  --wl-light-sidebar-ring: oklch(0.35 0.12 240);
+
+  /* ===== DASHBOARD SHELL (LIGHT) ===== */
+  --wl-light-shell-from: #f8fafc;
+  --wl-light-shell-via: #eff6ff;
+  --wl-light-shell-to: #ecfeff;
+  --wl-light-shell-grid-rgb: 59, 130, 246;
+  --wl-light-shell-blob-1: rgba(191, 219, 254, 0.4);
+  --wl-light-shell-blob-2: rgba(165, 243, 252, 0.4);
+  --wl-light-shell-blob-3: rgba(153, 246, 228, 0.3);
+
+  /* ===== UTILITY ===== */
+  --wl-light-radius: 0.625rem;
+}

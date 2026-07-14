@@ -1,3 +1,6 @@
 packages:
+  # Application packages (all under apps/)
   - "apps/*"
+
+  # Shared libraries
   - "packages/*"
