@@ -14,6 +14,7 @@ Migration performed on 2026-07-14.
 - Parent/child and blocker relationships are preserved in issue bodies with GitHub links.
 - Original Linear ID, status, priority, estimate, source URL, and milestone are preserved in each issue body.
 - GitHub Project auto-add is enabled for repository issues.
+- Migrated comments: **25** across **12** issues.
 
 ## Issue mapping
 
@@ -95,5 +96,5 @@ Migration performed on 2026-07-14.
 
 - Create Project custom fields and views described in [GitHub Project Views](Project-Views).
 - Create/apply labels if label-based filtering is preferred; title prefixes already provide the authoritative work type.
-- Verify whether non-empty Linear comments need archival migration.
+- Migrated 25 non-empty Linear comments from 12 issues with author, date, and source comment ID.
 - After acceptance, freeze Linear as read-only; do not delete it, because it remains migration provenance.
