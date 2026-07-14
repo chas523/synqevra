@@ -2,21 +2,37 @@
   "name": "fpl_thingsboard",
   "version": "1.0.0",
   "private": true,
-  "scripts":  {
+  "description": "FPL ThingsBoard platform — custom frontend + NestJS backend (apps/backend) on top of ThingsBoard (headless) + Medplum",
+  "scripts": {
     "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=backend",
+    "dev:frontend": "turbo run dev --filter=frontend",
     "build": "turbo run build",
+    "build:backend": "turbo run build --filter=backend",
+    "build:frontend": "turbo run build --filter=frontend",
     "start": "turbo run start",
-    "lint": "turbo run lint",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "check-types": "turbo run check-types",
     "test": "turbo run test",
-    "dev:front": "turbo run dev --filter=front",
-    "dev:api": "turbo run dev --filter=api"
+    "clean": "turbo run clean --parallel || true && rm -rf node_modules apps/*/node_modules apps/*/dist .next .turbo",
+    "install:clean": "rm -rf node_modules apps/*/node_modules apps/*/dist .turbo pnpm-lock.yaml && pnpm install",
+    "prepare": "husky"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.26.0",
   "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "turbo": "^2.6.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json,css,md}": "biome check --write"
   }
 }

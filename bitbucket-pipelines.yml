@@ -1,7 +1,7 @@
-# This is an example Starter pipeline configuration
-# Use a skeleton to build, test and deploy using manual and parallel steps
-# -----
-# You can specify a custom docker image from Docker Hub as your build environment.
+# Bitbucket Pipelines - focused on building Docker images
+# Deployment to Kubernetes was removed (no longer used).
+# Local development: pnpm dev (apps/backend and apps/frontend).
+# No bundled Docker infra for TB/Medplum anymore.
 
 image: atlassian/default-image:3
 
@@ -14,93 +14,30 @@ pipelines:
   branches:
     dev:
       - step:
-          name: Build and Deploy Backend
+          name: Build backend image
           condition:
             changesets:
               includePaths:
-                - "apps/api/**"
+                - "apps/backend/**"
           services:
             - docker
           script:
-            # Set image TAG
-            # - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
-
-            # Build and push backend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/api/Dockerfile -t registry.digitalocean.com/medboard-registry/front:2.0.0 .
-            - docker push registry.digitalocean.com/medboard-registry/front:2.0.0
-
-            # Update API tag
-            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/api:\).*#\1$IMAGE_TAG#g" k8s/30-api.yaml
-
-            # Deploy backend
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'apply'
-                RESOURCE_PATH: 'k8s/30-api.yaml'
-
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'rollout'
-                KUBECTL_ARGS:
-                  - 'restart'
-                  - 'deployment/api'
-                  - '-n'
-                  - 'medboard'
+            - docker build -f apps/backend/Dockerfile -t registry.digitalocean.com/medboard-registry/api:latest .
+            - docker push registry.digitalocean.com/medboard-registry/api:latest
 
       - step:
           size: 2x
-          name: Build and Deploy Frontend
+          name: Build Frontend image
           condition:
             changesets:
               includePaths:
-                - "apps/front/**"
+                - "apps/frontend/**"
           services:
             - docker
           script:
-            # Set image TAG
-            # - IMAGE_TAG=$(echo $BITBUCKET_COMMIT | head -c7)
-
-            # Build and push frontend
             - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" registry.digitalocean.com
-            - docker build -f apps/front/Dockerfile -t registry.digitalocean.com/medboard-registry/front:1.0.0 .
-            - docker push registry.digitalocean.com/medboard-registry/front:1.0.0
+            - docker build -f apps/frontend/Dockerfile -t registry.digitalocean.com/medboard-registry/frontend:latest .
+            - docker push registry.digitalocean.com/medboard-registry/frontend:latest
 
-            # Update Frontend tag
-            # - sed -i "s#^\(\s*image:\s*registry\.digitalocean\.com/medboard-registry/front:\).*#\1$IMAGE_TAG#g" k8s/31-frontend.yaml
-            # - grep -n "image:" k8s/31-frontend.yaml
-
-            # Deploy frontend
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'apply'
-                RESOURCE_PATH: 'k8s/31-frontend.yaml'
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'rollout'
-                KUBECTL_ARGS:
-                  - 'restart'
-                  - 'deployment/frontend'
-                  - '-n'
-                  - 'medboard'
-      - step:
-          name: Deploy Kubernetes changes excluding frontend/api
-          condition:
-            changesets:
-              includePaths:
-                - "k8s/**"
-          script:
-            # Remove local job copies of frontend and api yaml files to avoid redeployment
-            - rm -f k8s/30-api.yaml
-            - rm -f k8s/31-frontend.yaml
-
-            # Deploy other k8s resources
-            - pipe: atlassian/kubectl-run:3.12.0
-              variables:
-                KUBE_CONFIG: $KUBE_CONFIG
-                KUBECTL_COMMAND: 'apply'
-                RESOURCE_PATH: 'k8s/'
+      # No deployment steps - project is currently local-only (Docker Compose)
