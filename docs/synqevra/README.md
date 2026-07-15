@@ -62,8 +62,9 @@ Synqevra — это кастомная IoT-платформа, которая з
 ## Ссылки
 
 - Основной репозиторий: `fpl_thingsboard`
+- **Local development (SYN-76):** [../../LOCAL_DEVELOPMENT.md](../../LOCAL_DEVELOPMENT.md) · root [README.md](../../README.md)
 - Документация по миграции: [migration-roadmap.md](./migration-roadmap.md)
-- Описание для Linear: см. ниже в этом репозитории
+- Описание для Linear: [linear-project-brief.md](./linear-project-brief.md)
 
 ---
 

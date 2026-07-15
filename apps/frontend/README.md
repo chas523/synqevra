@@ -1,6 +1,7 @@
 # Frontend (apps/frontend)
 
 > Part of the pnpm + Turborepo monorepo. Run commands from the **project root**.
+> Full local setup: **[LOCAL_DEVELOPMENT.md](../../LOCAL_DEVELOPMENT.md)** and root **[README.md](../../README.md)**.
 
 Frontend is a **Next.js 15** app (App Router, Turbopack) running on port `3000`. It uses **Tailwind v4**, **shadcn**, and **Redux** for global state. All backend communication goes through our API at port `3003` — the frontend never talks to ThingsBoard or Medplum directly.
 
