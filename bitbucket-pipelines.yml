@@ -1,7 +1,6 @@
-# Bitbucket Pipelines - focused on building Docker images
+# Bitbucket Pipelines - build images + security gates (SYN-7)
 # Deployment to Kubernetes was removed (no longer used).
 # Local development: pnpm dev (apps/backend and apps/frontend).
-# No bundled Docker infra for TB/Medplum anymore.
 
 image: atlassian/default-image:3
 
@@ -9,10 +8,30 @@ definitions:
   services:
     docker:
       memory: 2048
+  steps:
+    - step: &secret-scan
+        name: Secret scan (gitleaks — current tree)
+        image: zricethezav/gitleaks:v8.30.1
+        script:
+          # Full-history scan still fails until history rewrite (public-release gate).
+          # CI enforces no new secrets in the current working tree.
+          - gitleaks detect --source . --no-git --config .gitleaks.toml --redact --verbose --exit-code 1
 
 pipelines:
+  default:
+    - step: *secret-scan
+
+  pull-requests:
+    '**':
+      - step: *secret-scan
+
   branches:
+    main:
+      - step: *secret-scan
+    master:
+      - step: *secret-scan
     dev:
+      - step: *secret-scan
       - step:
           name: Build backend image
           condition:
@@ -40,4 +59,4 @@ pipelines:
             - docker build -f apps/frontend/Dockerfile -t registry.digitalocean.com/medboard-registry/frontend:latest .
             - docker push registry.digitalocean.com/medboard-registry/frontend:latest
 
-      # No deployment steps - project is currently local-only (Docker Compose)
+      # No deployment steps - project is currently local-only

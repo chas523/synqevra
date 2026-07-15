@@ -64,6 +64,10 @@ Synqevra — это кастомная IoT-платформа, которая з
 - Основной репозиторий: `fpl_thingsboard`
 - Документация по миграции: [migration-roadmap.md](./migration-roadmap.md)
 - Описание для Linear: см. ниже в этом репозитории
+- **Security audit (SYN-7):** [../security/SYN-7-audit-report.md](../security/SYN-7-audit-report.md)
+- Secret findings (no values): [../security/secret-findings-inventory.md](../security/secret-findings-inventory.md)
+- CE-derived material process: [../legal/ce-derived-material-process.md](../legal/ce-derived-material-process.md)
+- License: [`../../LICENSE`](../../LICENSE) · Notice: [`../../NOTICE`](../../NOTICE) · Security: [`../../SECURITY.md`](../../SECURITY.md)
 
 ---
 
