@@ -1,0 +1,37 @@
+# Gitleaks configuration for Synqevra / SoftTeco Sp. z o.o.
+# Used by local pre-commit hooks and CI (SYN-7).
+
+title = "Synqevra gitleaks config"
+
+[extend]
+# Use default gitleaks ruleset and only add path/allowlist policy here.
+useDefault = true
+
+[allowlist]
+description = "False positives and generated artifacts that are not credentials"
+
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+  '''(^|/)\.next/''',
+  '''(^|/)\.turbo/''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)yarn\.lock$''',
+  # Local developer env files (gitignored; still present on workstations)
+  '''(^|/)\.env$''',
+  '''(^|/)\.env\.local$''',
+  # Type name contains "AttributeKey" — not a secret
+  '''Lwm2mInstanceAttributesDialog\.tsx$''',
+  # Large dashboard export; base64 image/svg payloads trip generic rules
+  '''hospital_room_monitoring\.json$''',
+  # Documentation and audit reports intentionally discuss secret types without values
+  '''(^|/)docs/security/''',
+  '''(^|/)docs/legal/''',
+]
+
+regexes = [
+  # Explicit placeholder patterns used in .env.example files
+  '''(?i)(change[_-]?me|your[_-]?secret|clientsecret|cliendid|password123|bullmq)''',
+  '''sysadmin@thingsboard\.org''',
+]

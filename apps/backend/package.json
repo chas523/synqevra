@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "0.0.1",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "nest build",
     "format": "biome format --write .",

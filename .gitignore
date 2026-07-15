@@ -7,6 +7,23 @@
 node_modules/
 dist/
 
+# Secrets and local environment (never commit real credentials)
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+**/secrets/*.yaml
+**/secrets/*.yml
+**/*-secret.yaml
+**/*-secret.yml
+gitleaks-report*.json
+/tmp/syn-7-audit/
+
 # Compiled Java class files
 *.class
 

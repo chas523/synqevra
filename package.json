@@ -2,7 +2,7 @@
   "name": "fpl_thingsboard",
   "version": "1.0.0",
   "private": true,
-  "description": "FPL ThingsBoard platform — custom frontend + NestJS backend (apps/backend) on top of ThingsBoard (headless) + Medplum",
+  "description": "Synqevra — SoftTeco Sp. z o.o. IoT platform (NestJS backend + Next.js frontend) integrating headless ThingsBoard CE and Medplum",
   "scripts": {
     "dev": "turbo run dev",
     "dev:backend": "turbo run dev --filter=backend",
@@ -20,7 +20,7 @@
     "install:clean": "rm -rf node_modules apps/*/node_modules apps/*/dist .turbo pnpm-lock.yaml && pnpm install",
     "prepare": "husky"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "packageManager": "pnpm@10.26.0",
   "devDependencies": {
     "@biomejs/biome": "2.2.0",

@@ -2,17 +2,17 @@
   "token_type": "Bearer",
   "expires_in": 3600,
   "scope": "openid offline_access",
-  "id_token": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjUxMjYwNzhiLTJhNjgtNDJhNS1hZTE1LTE1OGIyNDg0MGY0MSIsInR5cCI6IkpXVCJ9.eyJsb2dpbl9pZCI6IjFmZDc4MzA5LWY3ZTEtNDhiNi04OWE0LTFmNjc5MDJmMmEwMiIsImZoaXJVc2VyIjoiUHJhY3RpdGlvbmVyL2Y0MjBkMGVlLTIwOWYtNGRlZC1iYzAxLWU0MTU5NWEwY2QxNCIsInN1YiI6IjdmZDRkOGE5LWI4YjEtNDE0YS1hYWUwLTQ2NzM0MDVhYzE2YSIsIm5vbmNlIjoiNWNjZmUxMTEtMTc1OC00NmJlLTlkODEtMWZmMzA2MTEzZDY0IiwiYXV0aF90aW1lIjoxNzU4Nzk4MjkzLjEzMywiaWF0IjoxNzU4Nzk4MzE4LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgxMDMvIiwiZXhwIjoxNzU4ODAxOTE4fQ.aqbTgREi2E_7XfLQqfnroEAlHiRCpWjkjYOvIq6KcuLekt5Yi_sqQIJXpjFvmn3B_DcHKod3zEYLdFIfk7TFaA",
-  "access_token": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjUxMjYwNzhiLTJhNjgtNDJhNS1hZTE1LTE1OGIyNDg0MGY0MSIsInR5cCI6IkpXVCJ9.eyJsb2dpbl9pZCI6IjFmZDc4MzA5LWY3ZTEtNDhiNi04OWE0LTFmNjc5MDJmMmEwMiIsInN1YiI6IjdmZDRkOGE5LWI4YjEtNDE0YS1hYWUwLTQ2NzM0MDVhYzE2YSIsInVzZXJuYW1lIjoiN2ZkNGQ4YTktYjhiMS00MTRhLWFhZTAtNDY3MzQwNWFjMTZhIiwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MiLCJwcm9maWxlIjoiUHJhY3RpdGlvbmVyL2Y0MjBkMGVlLTIwOWYtNGRlZC1iYzAxLWU0MTU5NWEwY2QxNCIsImlhdCI6MTc1ODc5ODMxOCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MTAzLyIsImV4cCI6MTc1ODgwMTkxOH0.0EYm0a-_rG567LL3l7z5x9nIp0u9nyrhdoIGt8g-eejl7sCdE_FH3M-Ywnb9gtytdtZKx-uQbjgKNtc0dnjQ5Q",
-  "refresh_token": "eyJhbGciOiJFUzI1NiIsImtpZCI6IjUxMjYwNzhiLTJhNjgtNDJhNS1hZTE1LTE1OGIyNDg0MGY0MSIsInR5cCI6IkpXVCJ9.eyJsb2dpbl9pZCI6IjFmZDc4MzA5LWY3ZTEtNDhiNi04OWE0LTFmNjc5MDJmMmEwMiIsInJlZnJlc2hfc2VjcmV0IjoiYWJjMDgzZjkxZDY0MDE0ZGIzMmYyYWRlZWNiMDg0MWIwMzZiY2Q4ZTY5OTUzOTgyYjNmMWEwMDRmMWVhZDE1NiIsImlhdCI6MTc1ODc5ODMxOCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MTAzLyIsImV4cCI6MTc2MDAwNzkxOH0.57ca06_oaMhbpK0BtRrphSdNt6mNcLDRQlBcUu3aN-wec2e8FGn8eCDYRx7FRehGxLxMfmq3QhTG4Knu-lFIcA",
+  "id_token": "example-id-token-not-a-real-credential",
+  "access_token": "example-access-token-not-a-real-credential",
+  "refresh_token": "example-refresh-token-not-a-real-credential",
   "project": {
-    "reference": "Project/e6f60cbf-aa95-4ec6-abc9-6c144a3be151",
-    "display": "Project"
+    "reference": "Project/00000000-0000-0000-0000-000000000000",
+    "display": "Example"
   },
   "profile": {
-    "reference": "Practitioner/f420d0ee-209f-4ded-bc01-e41595a0cd14",
-    "display": "Jakub J"
+    "reference": "Practitioner/00000000-0000-0000-0000-000000000000",
+    "display": "Example"
   },
-  "smart_style_url": "http://localhost:8103/fhir/R4/.well-known/smart-styles.json",
+  "smart_style_url": "http://localhost:8103/fhir/R4/.well-known/smart-style",
   "need_patient_banner": false
 }

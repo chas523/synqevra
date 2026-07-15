@@ -1,0 +1,50 @@
+Synqevra
+Copyright 2024-2026 SoftTeco Sp. z o.o.
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+SPDX-License-Identifier: Apache-2.0
+
+--------------------------------------------------------------------------------
+Third-party notices
+--------------------------------------------------------------------------------
+
+This product includes or depends on open-source software. Runtime and
+development dependencies are declared in:
+
+  - package.json
+  - apps/backend/package.json
+  - apps/frontend/package.json
+  - pnpm-lock.yaml
+
+A generated license inventory snapshot used for the SYN-7 audit is documented in:
+
+  - docs/security/SYN-7-audit-report.md
+  - docs/security/dependency-licenses.md
+
+Major third-party components used by this repository include (non-exhaustive):
+
+  NestJS (MIT) — https://github.com/nestjs/nest
+  Next.js (MIT) — https://github.com/vercel/next.js
+  React (MIT) — https://github.com/facebook/react
+  TypeORM (MIT) — https://github.com/typeorm/typeorm
+  Medplum (Apache-2.0) — https://github.com/medplum/medplum
+  Radix UI (MIT) — https://github.com/radix-ui/primitives
+  Biome (MIT / Apache-2.0 dual, package-dependent) — https://github.com/biomejs/biome
+  Turbo (MIT) — https://github.com/vercel/turborepo
+
+ThingsBoard Community Edition (Apache-2.0) is an external runtime dependency of
+the current architecture (headless IoT platform). This repository contains
+original SoftTeco adapter, UI, and integration code that speaks the ThingsBoard
+HTTP/WebSocket APIs. It does not ship ThingsBoard PE source.
+
+Where configuration or JSON exports (rule chains, dashboards, widgets) were
+exported from a ThingsBoard CE instance, they are treated as CE-origin
+configuration/data and must follow the provenance process in:
+
+  docs/legal/ce-derived-material-process.md
+
+If additional CE-derived source is introduced in the future, required NOTICE
+and attribution entries MUST be appended to this file with exact upstream
+repository, version, commit, and file references.
